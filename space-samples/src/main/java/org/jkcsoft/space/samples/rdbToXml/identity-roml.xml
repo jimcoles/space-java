@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Created by jcoles on August 7, 2002, 3:43 PM -->
+
+<!DOCTYPE model-defn SYSTEM "../../roml/lang/roml_dtd.dtd">
+
+<!-- roml:model xmlns:http="http://www.w3.org/TR/REC-html40" code-name="identity-system" -->
+
+<!-- model xmlns:roml="" xmlns:roml.dms="" code-name="identity-system"-->
+
+
+
+<model-defn code-name="identity-model">
+  <model-defn code-name="physical-identity-model">
+
+    <model-defn code-name="identity-rdb-model">
+      <domain-defn code-name="integer-id" primitive="integer"/>
+      <domain-defn code-name="person-name" primitive="char" size="24"/>
+      <domain-defn code-name="guid" primitive="byte" size="8"/>
+
+      <!-- define the person_identity table -->
+      <entity-defn code-name="person-identity">
+        <variable-defn code-name="id" type="integer-id" identifier="true"/>
+        <variable-defn code-name="first-name" type="person-name"/>
+        <variable-defn code-name="last-name" type="person-name"/>
+        <variable-defn code-name="full-name" type="char"/>
+        <variable-defn code-name="public-key" type="guid"/>
+
+        <!-- 'equations' defined in 'entity' context must reference only that 'entity's'
+             'variables'. To define a re-usable 'equation', define in a 'model' context
+             and define 'parameter's' to support a 'call'. -->
+      </entity-defn>
+      <equation-defn code-name="full-name-to-first-last">
+        <comment>Relate full name to first and last.</comment>
+        <equiv>
+          <sym-ref>full-name</sym-ref>
+          <char-add>
+            <sym-ref>first-name</sym-ref>
+            <char-literal><![CDATA[ ]]></char-literal>
+            <sym-ref>last-name</sym-ref>
+          </char-add>
+        </equiv>
+      </equation-defn>
+
+
+      <!-- Define behavior elements of rdb model. -->
+
+    </model-defn>
+
+    <model-defn code-name="identity-xml-model">
+    </model-defn>
+
+  </model-defn>
+
+
+  <action-defn code-name="do-xform-to-xml">
+    <params>
+    </params>
+  </action-defn>
+
+</model-defn>
+
+

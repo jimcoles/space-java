@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  ~ Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+  ~
+  ~ Licensed under the following license agreement:
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Also see the LICENSE file in the repository root directory.
+  -->
+
+<!-- Created by jcoles on September 4, 2002, 2:26 PM -->
+
+<!--
+  Defines general rules for mapping between rdb and xml.
+-->
+<model-defn code-name="rdb--roml" parent-model="com.roml.langs.rdb">
+    <equation-context>
+        <params>
+            <variable code-name="the-roml-model" type="../roml/roml"/>
+            <variable code-name="the-rdb-model" type="rdb"/>
+        </params>
+
+        <equation-defn code-name="rdb-table--roml-entity">
+            <comment>The following equation maps every RDB table to a ROML Entity.</comment>
+            <equiv>
+                <!-- rdb-data-model -->
+                <qpath>
+                    <sym-ref>the-rdb-model</sym-ref>
+                    <sym-ref>table</sym-ref>
+                    <sym-ref>table-name</sym-ref>
+                </qpath>
+                <qpath>
+                    <sym-ref>the-roml-model</sym-ref>
+                    <sym-ref>entity</sym-ref>
+                    <sym-ref>code-name</sym-ref>
+                </qpath>
+            </equiv>
+        </equation-defn>
+
+        <equation-defn code-name="rdb-column--roml-variable">
+            <comment>Maps every RDB column to a ROML Variable of the same name.</comment>
+            <equiv>
+                <qpath>
+                    <sym-ref>the-rdb-model</sym-ref>
+                    <sym-ref>column</sym-ref>
+                    <sym-ref>column-name</sym-ref>
+                </qpath>
+                <qpath>
+                    <sym-ref>the-roml-model</sym-ref>
+                    <sym-ref>variable</sym-ref>
+                    <sym-ref>code-name</sym-ref>
+                </qpath>
+            </equiv>
+        </equation-defn>
+
+        <equation-defn code-name="rdb-col-value--roml-var-value">
+            <comment>Maps every RDB column value to a ROML var value.</comment>
+            <equiv>
+                <!-- rdb-data-model -->
+                <qpath>
+                    <sym-ref>the-rdb-model</sym-ref>
+                    <sym-ref>column.value</sym-ref>
+                </qpath>
+                <qpath>
+                    <sym-ref>xml-data-model</sym-ref>
+                    <sym-ref>element</sym-ref>
+                    <sym-ref>element-name</sym-ref>
+                </qpath>
+            </equiv>
+        </equation-defn>
+
+        <!-- probably auto-generated in ROML -->
+
+        <transform-defn code-name="to-xml">
+            <transform-from-equation equation="rdb-table--xml-list">
+                <independent-var-list>
+                    <sym-ref>rdb-data-set</sym-ref>
+                </independent-var-list>
+            </transform-from-equation>
+        </transform-defn>
+
+    </equation-context>
+</model-defn>

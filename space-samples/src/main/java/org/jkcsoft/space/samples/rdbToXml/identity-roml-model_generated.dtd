@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+    Typical usage:
+
+    <?xml version="1.0"?>
+
+    <!DOCTYPE model SYSTEM "identity-roml-model_model.dtd">
+
+    <model>
+    ...
+    </model>
+-->
+
+  <!ELEMENT comment (#PCDATA)>
+
+  <!ELEMENT data-source EMPTY>
+  <!ATTLIST data-source
+    code-name CDATA #IMPLIED
+  >
+
+  <!ELEMENT param EMPTY>
+  <!ATTLIST param
+    code-name CDATA #IMPLIED
+    type CDATA #IMPLIED
+  >
+
+  <!ELEMENT symref (symref)*>
+  <!ATTLIST symref
+    ref-name CDATA #IMPLIED
+  >
+
+  <!ELEMENT variable EMPTY>
+  <!ATTLIST variable
+    code-name CDATA #IMPLIED
+  >
+
+  <!ELEMENT equation (comment|variable|equiv|params)*>
+  <!ATTLIST equation
+    code-name CDATA #IMPLIED
+  >
+
+  <!ELEMENT model (data-source|equation|vardecl)*>
+  <!ATTLIST model
+    code-name CDATA #IMPLIED
+  >
+
+  <!ELEMENT setexpr (symref)*>
+
+  <!ELEMENT equiv (setexpr)*>
+
+  <!ELEMENT params (param)*>
+
+  <!ELEMENT vardecl EMPTY>
+  <!ATTLIST vardecl
+    code-name CDATA #IMPLIED
+    type CDATA #IMPLIED
+  >

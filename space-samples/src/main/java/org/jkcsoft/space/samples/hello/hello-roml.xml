@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Created by jcoles on August 7, 2002, 3:43 PM -->
+
+<!-- DOCTYPE model-defn SYSTEM "../../roml/lang/roml_dtd.dtd" -->
+
+<model-defn code-name="hello">
+  <entity-defn code-name="entity-1">
+    <variable-defn code-name="var-1" type="char" size="*"/>
+  </entity-defn>
+
+  <action-defn code-name="main">
+    <call target="system.out.print">
+      <arg-list>
+        <arg>
+          <arg-value>
+            <call target="system.create-tuple" type="entity-1"/>
+          </arg-value>
+        </arg>
+      </arg-list>
+    </call>
+  </action-defn>
+</model-defn>

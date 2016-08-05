@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  ~ Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+  ~
+  ~ Licensed under the following license agreement:
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Also see the LICENSE file in the repository root directory.
+  -->
+
+<!-- Created by jcoles on September 4, 2002, 11:34 AM -->
+
+<!--
+  Maps XML 1.0 notions to ROML notions.
+-->
+
+<model-defn code-name="xml-1-0--roml" parent-model="">
+    <equation-context>
+        <params>
+            <variable code-name="the-roml-model" type="roml-model"/>
+            <variable code-name="the-xml-model" type="xml-1-0-model"/>
+        </params>
+
+        <equation-defn code-name="roml-entity--xml-list-element">
+            <comment>Maps every ROML Entity to an XML element named: [entity] + "-list".</comment>
+            <equiv>
+                <!-- rdb-data-model -->
+                <qpath>
+                    <sym-ref>the-roml-model</sym-ref>
+                    <sym-ref>entity</sym-ref>
+                    <sym-ref>code-name</sym-ref>
+                </qpath>
+                <union>
+                    <qpath>
+                        <sym-ref>the-xml-model</sym-ref>
+                        <sym-ref>element</sym-ref>
+                        <sym-ref>element-name</sym-ref>
+                    </qpath>
+                    <literal type="com.roml.lib.char.string"><![CDATA[-list]]></literal>
+                </union>
+            </equiv>
+        </equation-defn>
+
+        <equation-defn code-name="roml-variable--xml-element">
+            <comment>Maps every ROML Variable to an XML element of the same name.</comment>
+            <equiv>
+                <!-- rdb-data-model -->
+                <qpath>
+                    <sym-ref>the-roml-model</sym-ref>
+                    <sym-ref>variable</sym-ref>
+                    <sym-ref>code-name</sym-ref>
+                </qpath>
+                <qpath>
+                    <sym-ref>the-xml-model</sym-ref>
+                    <sym-ref>element</sym-ref>
+                    <sym-ref>element-name</sym-ref>
+                </qpath>
+            </equiv>
+        </equation-defn>
+
+        <equation-defn code-name="roml-var-value--xml-text-node">
+            <comment>Maps every RDB column to an XML element of the same name.</comment>
+            <equiv>
+                <!-- rdb-data-model -->
+                <qpath>
+                    <sym-ref>the-roml-model</sym-ref>
+                    <sym-ref>variable.value</sym-ref>
+                </qpath>
+                <qpath>
+                    <sym-ref>xml-data-model</sym-ref>
+                    <sym-ref>element=</sym-ref>
+                    <sym-ref>text-node.value</sym-ref>
+                </qpath>
+            </equiv>
+        </equation-defn>
+    </equation-context>
+</model-defn>

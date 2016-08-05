@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+  ~
+  ~ Licensed under the following license agreement:
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Also see the LICENSE file in the repository root directory.
+  -->
+
+<!-- Created by jcoles on August 7, 2002, 3:43 PM -->
+
+<!DOCTYPE model-defn SYSTEM
+        "/Users/jcoles/Source/jkc/space-java/space-core/src/main/java/org/jkcsoft/space/lang/roml_dtd.dtd">
+
+<!--
+  Define rdb notions on top of ROML.  This is the 'schema' to which any
+-->
+<model-defn code-name="generic-rdb-model">
+    <domain-defn code-name="code-name" type="char" size="64"/>
+
+    <entity-defn code-name="table">
+        <variable-defn code-name="table-name" type="code-name" identifier="true"/>
+    </entity-defn>
+
+    <entity-defn code-name="column">
+        <variable-defn code-name="column-name" type="code-name" identifier="true"/>
+    </entity-defn>
+
+    <entity-defn code-name="data-type">
+        <variable-defn code-name="type-name" type="code-name" identifier="true"/>
+        <variable-defn code-name="size" type="int"/>
+        <variable-defn code-name="precision" type="int"/>
+    </entity-defn>
+
+    <entity-defn code-name="constraint">
+    </entity-defn>
+
+    <association-defn code-name="table-to-column">
+        <comment>Define relationship between 'table' and 'column'.</comment>
+        <assoc-end code-name="table-name" multiplicity="one">
+            <sym-ref>table</sym-ref>
+        </assoc-end>
+        <assoc-end multiplicity="many">
+            <sym-ref>column</sym-ref>
+        </assoc-end>
+    </association-defn>
+
+</model-defn>

@@ -1,0 +1,21 @@
+<?xml encoding="UTF-8" ?>
+
+        <!--
+  ~ Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+  ~
+  ~ Licensed under the following license agreement:
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Also see the LICENSE file in the repository root directory.
+  -->
+
+        <!-- Created by jcoles on April 30, 2002, 7:56 PM -->
+
+        <!ELEMENT ssc-meta-model (ssc-meta-relation*)>
+        <!ELEMENT ssc-meta-class (ssc-meta-domain*)>
+        <!ELEMENT ssc-meta-domain EMPTY>
+        <!ENTITY % meta-domain.attributes
+                'name    CDATA    #REQUIRED
+        type    CDATA    #REQUIRED'>
+        <!ATTLIST ssc-meta-attribute %meta-attribute.attributes; >

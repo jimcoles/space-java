@@ -1,0 +1,47 @@
+<?xml encoding="UTF-8" version="1.0"?>
+
+<!-- Created by jcoles on June 24, 2002, 4:21 PM -->
+
+<!--  -->
+<!ENTITY % model-element.attrs
+       'code-name    CDATA    #REQUIRED
+        comment      CDATA    #IMPLIED'>
+        
+<!--   -->
+<!ELEMENT domain EMPTY>
+<!ATTLIST domain %model-element.attrs; >
+
+<!--  -->
+<!ELEMENT model-defn (model-defn*, data-source*, domain*, type-defn*, equation-defn*,
+                      transform-defn*, action-sequence-defn*, action-defn*, state-machine-defn*)>
+<!ATTLIST model-defn %model-element.attrs; >
+
+<!--  
+<!ELEMENT package (package*, data-source*, domain*, relation*, equation*,
+                      action-sequence*, action*, state-machine*)>
+<!ATTLIST package %model-element.attrs; >
+-->
+
+<!--  -->
+<!ELEMENT data-source EMPTY>
+<!ATTLIST data-source %model-element.attrs; >
+
+<!--  -->
+<!ENTITY % relation-defn.attrs
+       'name    CDATA    #REQUIRED
+        type    CDATA    #REQUIRED'>
+<!ELEMENT relation-defn (relation-defn-expr)>
+<!ATTLIST relation-defn %model-element.attrs; %relation-defn.attrs;>
+
+<!--  -->
+<!ELEMENT relation-defn-expr (variable)>
+<!ATTLIST relation-defn-expr %model-element.attrs; >
+
+<!--  -->
+<!ELEMENT equation EMPTY>
+<!ATTLIST equation %model-element.attrs; >
+
+<!--  -->
+<!ELEMENT variable (domain)>
+<!ATTLIST variable %model-element.attrs; >
+        

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  ~ Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+  ~
+  ~ Licensed under the following license agreement:
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Also see the LICENSE file in the repository root directory.
+  -->
+
+<!-- Created by jcoles on September 4, 2002, 10:44 AM -->
+
+<!--
+    Define XML notions on top of ROML.
+-->
+<model-defn code-name="xml-dtd-model">
+    <entity-defn code-name="element">
+        <variable-defn code-name="element-name" type="code-name" identifier="true"/>
+    </entity-defn>
+
+    <entity-defn code-name="attribute">
+        <variable-defn code-name="attribute-name" type="code-name" identifier="true"/>
+    </entity-defn>
+
+    <association-defn code-name="element-to-attribute">
+        <comment>Define relationship between element and attribute.</comment>
+        <assoc-end multiplicity="one">
+            <sym-ref>element</sym-ref>
+        </assoc-end>
+        <assoc-end multiplicity="many">
+            <sym-ref>attribute</sym-ref>
+        </assoc-end>
+    </association-defn>
+
+    <association-defn code-name="element-to-element">
+        <comment>Define relationship between element and attribute.</comment>
+        <assoc-end code-name="parent" multiplicity="one">
+            <sym-ref>element</sym-ref>
+        </assoc-end>
+        <assoc-end multiplicity="many">
+            <sym-ref>element</sym-ref>
+        </assoc-end>
+    </association-defn>
+</model-defn>

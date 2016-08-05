@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+  ~
+  ~ Licensed under the following license agreement:
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Also see the LICENSE file in the repository root directory.
+  -->
+
+<!-- Created by jcoles on August 7, 2002, 3:43 PM -->
+
+<!DOCTYPE model-defn SYSTEM
+        "/Users/jcoles/Source/jkc/space-java/space-core/src/main/java/org/jkcsoft/space/lang/roml_dtd.dtd">
+
+<!-- roml:model xmlns:http="http://www.w3.org/TR/REC-html40" code-name="identity-system" -->
+
+<!-- model xmlns:roml="" xmlns:roml.dms="" code-name="identity-system"-->
+
+<!-- Notes about ROML ML:
+
+  1. Use of elements of from xxxx-defn:
+  
+    <[xxxx]-defn code-name="abc">
+     [list expresssion]
+    </[xxxx]-defn>
+  
+  is equvalent to 
+   
+    <create type=[xxxx] code-name="abc">
+    <set "abc" [list-expression]>
+  
+  is similar to
+    
+    insert into [xxxx] (code-name, expression) values ("abc", list-expresssion]);
+  
+  
+  2. Use of child elements is a notational convenience in ROMLML:  Code of the form
+  
+     <parent code-name="p-name">
+         <child ...>
+       
+   could be written
+   
+     <parent code-name="p-name">
+     </parent>
+
+     ...
+
+     <child parent="p-name">
+     </child>
+   
+-->
+
+<model-defn code-name="primer-model">
+
+    <!--
+      Define ROML on top of ROML using only the following base notions:
+       - Entity
+       - Reference
+       - Equation
+       - Transform
+     This provides the basic internal model of ROML that will enable mapping
+     of other schemes, such as RDB and XML, to the ROML internal scheme.
+    -->
+
+    <model-defn code-name="roml">
+
+        <model-defn code-name="core">
+            <primitive-defn code-name="bit"/>
+            <primitive-defn code-name="byte" type="bit" size="8"/>
+            <primitive-defn code-name="int" type="byte" size="2"/>
+            <primitive-defn code-name="long" type="byte" size="4"/>
+            <primitive-defn code-name="char" type="byte" size="2"/>
+            <primitive-defn code-name="char1" type="byte" size="1"/>
+
+            <domain-defn code-name="code-name" type="char" size=""/>
+
+            <!-- ROML types. -->
+            <type-defn code-name="model-element">
+                <variable code-name="code-name" type="code-name"/>
+            </type-defn>
+
+            <!-- The primary first-class ROML entites. -->
+            <entity-defn code-name="type">
+            </entity-defn>
+
+            <entity-defn code-name="model">
+            </entity-defn>
+
+            <!-- The secondary first-class ROML entites. -->
+            <entity-defn code-name="entity">
+                <extends>
+                    <sym-ref>type</sym-ref>
+                </extends>
+            </entity-defn>
+
+            <entity-defn code-name="association">
+                <extends>
+                    <sym-ref></sym-ref>
+                </extends>
+            </entity-defn>
+
+            <entity-defn code-name="equation">
+                <extends>
+                    <sym-ref>relation</sym-ref>
+                </extends>
+            </entity-defn>
+
+            <!-- An equation-context defines the dimensions of the spaces that are being equated. -->
+            <entity-defn code-name="equation-context">
+            </entity-defn>
+
+            <entity-defn code-name="transform">
+            </entity-defn>
+
+            <entity-defn code-name="collection">
+            </entity-defn>
+
+            <entity-defn code-name="relation" extends="collection">
+            </entity-defn>
+
+            <!-- The relationships between entities -->
+            <association-defn code-name="">
+                <ref-end isNavigable="" multiplicity="one">
+                    <entity-ref>entity</entity-ref>
+                </ref-end>
+                <ref-end multiplicity="many">
+                    <entity-ref>variable</entity-ref>
+                </ref-end>
+            </association-defn>
+
+        </model-defn>
+
+        <model-defn code-name="lib">
+            <model-defn code-name="char">
+                <entity-defn code-name="utf-16-char-set">
+                </entity-defn>
+
+                <entity-defn code-name="char-string">
+                </entity-defn>
+            </model-defn>
+        </model-defn>
+
+    </model-defn>
+
+    <!--
+      Define rdb notions on top of ROML.  This is the 'schema' to which any
+    -->
+    <model-defn code-name="generic-rdb-model">
+        <domain-defn code-name="code-name" type="char" size="64"/>
+
+        <entity-defn code-name="table">
+            <variable-defn code-name="table-name" type="code-name" identifier="true"/>
+        </entity-defn>
+
+        <entity-defn code-name="column">
+            <variable-defn code-name="column-name" type="code-name" identifier="true"/>
+        </entity-defn>
+
+        <entity-defn code-name="data-type">
+            <variable-defn code-name="type-name" type="code-name" identifier="true"/>
+            <variable-defn code-name="size" type="int"/>
+            <variable-defn code-name="precision" type="int"/>
+        </entity-defn>
+
+        <entity-defn code-name="constraint">
+        </entity-defn>
+
+        <association-defn code-name="table-to-column">
+            <comment>Define relationship between 'table' and 'column'.</comment>
+            <assoc-end code-name="table-name" multiplicity="one">
+                <sym-ref>table</sym-ref>
+            </assoc-end>
+            <assoc-end multiplicity="many">
+                <sym-ref>column</sym-ref>
+            </assoc-end>
+        </association-defn>
+
+    </model-defn>
+
+    <!--
+      Define XML notions on top of ROML.
+    -->
+    <model-defn code-name="xml-dtd-model">
+        <entity-defn code-name="element">
+            <variable-defn code-name="element-name" type="code-name" identifier="true"/>
+        </entity-defn>
+
+        <entity-defn code-name="attribute">
+            <variable-defn code-name="attribute-name" type="code-name" identifier="true"/>
+        </entity-defn>
+
+        <association-defn code-name="element-to-attribute">
+            <comment>Define relationship between element and attribute.</comment>
+            <assoc-end multiplicity="one">
+                <sym-ref>element</sym-ref>
+            </assoc-end>
+            <assoc-end multiplicity="many">
+                <sym-ref>attribute</sym-ref>
+            </assoc-end>
+        </association-defn>
+
+        <association-defn code-name="element-to-element">
+            <comment>Define relationship between element and attribute.</comment>
+            <assoc-end code-name="parent" multiplicity="one">
+                <sym-ref>element</sym-ref>
+            </assoc-end>
+            <assoc-end multiplicity="many">
+                <sym-ref>element</sym-ref>
+            </assoc-end>
+        </association-defn>
+    </model-defn>
+
+    <!-- Define the equation between the rdb model and the xml model in general terms. 
+    
+      For each rdb table
+         create xml element "(table)-list"
+      For each rdb column
+         create xml element "(column)"
+      For each rdb column value
+         create xml text node 
+    -->
+
+    <!-- An equation-context defines the root types of the two models. -->
+
+    <equation-context>
+        <params>
+            <variable code-name="rdb-data-model" type="generic-rdb-model"/>
+            <variable code-name="xml-data-model" type="xml-dtd-model"/>
+        </params>
+
+        <equation-defn code-name="rdb-table--xml-list-element">
+            <comment>The following equation maps every RDB table to an XML element named: [table] + "-list".</comment>
+            <equiv>
+                <!-- rdb-data-model -->
+                <qpath>
+                    <sym-ref>rdb-data-model</sym-ref>
+                    <sym-ref>table</sym-ref>
+                    <sym-ref>table-name</sym-ref>
+                </qpath>
+                <union>
+                    <qpath>
+                        <sym-ref>xml-data-model</sym-ref>
+                        <sym-ref>element</sym-ref>
+                        <sym-ref>element-name</sym-ref>
+                    </qpath>
+                    <literal type="roml.lib.char.string"><![CDATA[-list]]></literal>
+                </union>
+            </equiv>
+        </equation-defn>
+
+        <equation-defn code-name="rdb-column--xml-element">
+            <comment>Maps every RDB column to an XML element of the same name.</comment>
+            <equiv>
+                <!-- rdb-data-model -->
+                <qpath>
+                    <sym-ref>rdb-data-model</sym-ref>
+                    <sym-ref>column</sym-ref>
+                    <sym-ref>code-name</sym-ref>
+                </qpath>
+                <qpath>
+                    <sym-ref>xml-data-model</sym-ref>
+                    <sym-ref>element</sym-ref>
+                    <sym-ref>element-name</sym-ref>
+                </qpath>
+            </equiv>
+        </equation-defn>
+
+        <equation-defn code-name="rdb-col-value--xml-text-node">
+            <comment>Maps every RDB column to an XML element of the same name.</comment>
+            <equiv>
+                <!-- rdb-data-model -->
+                <qpath>
+                    <sym-ref>rdb-data-model</sym-ref>
+                    <sym-ref>column</sym-ref>
+                    <sym-ref>code-name</sym-ref>
+                </qpath>
+                <qpath>
+                    <sym-ref>xml-data-model</sym-ref>
+                    <sym-ref>element</sym-ref>
+                    <sym-ref>element-name</sym-ref>
+                </qpath>
+            </equiv>
+        </equation-defn>
+        <!-- probably auto-generated in ROML -->
+        <transform-defn code-name="to-xml">
+            <transform-from-equation equation="rdb-table--xml-list">
+                <independent-var-list>
+                    <sym-ref>rdb-data-set</sym-ref>
+                </independent-var-list>
+            </transform-from-equation>
+        </transform-defn>
+
+    </equation-context>
+
+    <!-- -->
+    <model-defn code-name="identity-model">
+        <model-defn code-name="physical-identity-model">
+
+            <model-defn code-name="identity-rdb-model" extends="rdb-model">
+                <domain-defn code-name="integer-id" primitive="integer"/>
+                <domain-defn code-name="person-name" primitive="char" size="24"/>
+                <domain-defn code-name="guid" primitive="byte" size="8"/>
+
+                <!-- define the person_identity table -->
+                <entity-defn code-name="person_identity">
+                    <variable-defn code-name="id" type="integer-id" identifier="true"/>
+                    <variable-defn code-name="first-name" type="person-name"/>
+                    <variable-defn code-name="last-name" type="person-name"/>
+                    <variable-defn code-name="full-name" type="char"/>
+                    <variable-defn code-name="public-key" type="guid"/>
+
+                    <!-- 'equations' defined in 'entity' context must reference only that 'entity's'
+                         'variables'. To define a re-usable 'equation', define in a 'model' context
+                         and define 'parameter's' to support a 'call'. -->
+                    <equation-defn code-name="full-name-to-first-last">
+                        <comment>Relate full name to first and last.</comment>
+                        <equiv>
+                            <sym-ref>full-name</sym-ref>
+                            <char-add>
+                                <sym-ref>first-name</sym-ref>
+                                <char-literal><![CDATA[ ]]></char-literal>
+                                <sym-ref>last-name</sym-ref>
+                            </char-add>
+                        </equiv>
+                    </equation-defn>
+                </entity-defn>
+
+
+                <!-- Define behavior elements of rdb model. -->
+
+            </model-defn>
+
+            <model-defn code-name="identity-xml-model">
+            </model-defn>
+
+        </model-defn>
+
+
+        <action-defn code-name="do-xform-to-xml">
+            <params>
+            </params>
+        </action-defn>
+
+    </model-defn>
+
+</model-defn>
+
