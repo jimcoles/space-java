@@ -25,7 +25,7 @@ import com.jkc.roml.lang.RomlProgram;
  * <p>Loads the 'heap' of a ROML Program, which is a set of ModelElement
  * definitions.  After loading, the Executor executes the Program.
  *
- * <p>Analogous to a Java class Loader.
+ * <p>Analogous to a Java class XmlLoader.
  *
  * @author J. Coles
  * @version 1.0

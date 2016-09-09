@@ -9,17 +9,18 @@
  */
 package org.jkcsoft.space.lang.runtime;
 
-import org.jkcsoft.space.lang.ModelElement;
-import org.jkcsoft.space.lang.Relation;
-import org.jkcsoft.space.lang.RomlProgram;
+import org.jkcsoft.space.lang.ast.ModelElement;
+import org.jkcsoft.space.lang.instance.Relation;
+import org.jkcsoft.space.lang.ast.SpaceProgram;
+import org.jkcsoft.space.lang.runtime.loaders.xml.XmlLoader;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Map;
 
 /**
- * The top-level executive for ROML.  It manages interatction between second-level
- * elements including Loader, ExprProcessor, Querier.
+ * The top-level executive for Space.  It manages interatction between second-level
+ * elements including XmlLoader, ExprProcessor, Querier.
  *
  * @author J. Coles
  * @version 1.0
@@ -42,8 +43,8 @@ public class Executor extends ExprProcessor {
             if (!file.exists()) {
                 throw new Exception("Input file [" + stFilePath + "] does not exist.");
             }
-            Loader loader = new Loader(new FileInputStream(file));
-            RomlProgram program = loader.load();
+            XmlLoader loader = new XmlLoader(new FileInputStream(file));
+            SpaceProgram program = loader.load();
             Executor exec = new Executor();
             exec.eval(program);
 //      exec.eval();
@@ -52,9 +53,6 @@ public class Executor extends ExprProcessor {
         }
     }
 
-    //----------------------------------------------------------------------------
-    // Private instance vars
-    //----------------------------------------------------------------------------
 
     // The symbol tables for 'instance' objects associated with the running program.
     // This is added to as the program runs.
@@ -63,7 +61,7 @@ public class Executor extends ExprProcessor {
 
     /**
      * Mapping from expression type to expression handler. Some handlers will be
-     * ROML standard, some will be user-provided.
+     * Space standard, some will be user-provided.
      */
     private Map _exprProcessors = null;
 
@@ -71,9 +69,6 @@ public class Executor extends ExprProcessor {
     // Constructor(s)
     //----------------------------------------------------------------------------
 
-    /**
-     * Constructor...
-     */
     public Executor() {
 
     }
@@ -87,15 +82,12 @@ public class Executor extends ExprProcessor {
     }
 
     /**
-     * Evaluates a RomlProgram.
+     * Evaluates a SpaceProgram.
      */
-    public ModelElement eval(RomlProgram program) throws Exception {
+    public ModelElement eval(SpaceProgram program) throws Exception {
         return null;
     }
 
 
-    //----------------------------------------------------------------------------
-    // Private methods
-    //----------------------------------------------------------------------------
 
 }

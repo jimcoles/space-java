@@ -1,0 +1,27 @@
+(space
+    (name
+        (text NormSyntax)
+    )
+    (method main
+        (arguments
+            (argument
+                (name args)
+                (space relation
+                    (type string)
+                )
+            )
+        )
+        (body
+            (action-sequence
+                (new-inst NormSpace
+            )
+        )
+    )
+)
+
+space DenormSyntax {  // "space <name> ..." => "(space (name (text <name> ..."
+
+    main(args string[])  // "method <name> ..." => "(space (name (text <name> ..."
+
+    )
+)

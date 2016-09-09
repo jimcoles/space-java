@@ -1,0 +1,19 @@
+(space
+    (name
+        (text hellospace)
+    )
+    (method main
+        (arguments
+            (argument
+                (name args)
+                (space relation
+                    (type string)
+                )
+            )
+        )
+        (body
+            (action-sequence
+            )
+        )
+    )
+)

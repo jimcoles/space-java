@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * The top-level executive for ROML.  It manages interatction between second-level
- * elements including Loader, ExprProcessor, Querier.
+ * elements including XmlLoader, ExprProcessor, Querier.
  *
  * @author J. Coles
  * @version 1.0

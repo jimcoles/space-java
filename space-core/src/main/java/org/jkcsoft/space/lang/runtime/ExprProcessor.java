@@ -10,25 +10,15 @@
 package org.jkcsoft.space.lang.runtime;
 
 /**
- * In pattern terms, the command processor.  Knows how to run a RomlProgram
+ * In pattern terms, the command processor.  Knows how to run a SpaceProgram
  * including executing Queries.
  *
  * @author J. Coles
  * @version 1.0
  */
 public abstract class ExprProcessor {
-    //----------------------------------------------------------------------------
-    // Private instance vars
-    //----------------------------------------------------------------------------
-
-    //----------------------------------------------------------------------------
-    // Constructor(s) (private, package, protected, public)
-    //----------------------------------------------------------------------------
 
 
-    //----------------------------------------------------------------------------
-    // Public methods - accessors, mutators, other
-    //----------------------------------------------------------------------------
 
     /**
      * The starting point for doing something. The eval method works iteratively
@@ -38,8 +28,5 @@ public abstract class ExprProcessor {
      */
 //  abstract public ModelElement eval(ModelElement action) throws RuntimeException;
 
-    //----------------------------------------------------------------------------
-    // Private methods
-    //----------------------------------------------------------------------------
 
 }

@@ -1,0 +1,53 @@
+
+(comment
+    (textquote
+        "The highly normalized variant of the language.
+        I.e., not the most succinct variant."
+    )
+)
+
+(space
+    (name
+        (text MySpace)
+    )
+    (method main
+        (arguments
+            (argument
+                (name args)
+                (space relation
+                    (type string)
+                )
+            )
+        )
+        (body
+            (set
+                my-sum
+                (+ 1 2)
+            (get some)
+            return
+        )
+    )
+)
+
+(space
+    (name
+        (text YourSpace)
+    )
+    (method doYourThing
+        (arguments
+            (argument
+                (name args)
+                (space relation
+                    (type string)
+                )
+            )
+        )
+        (body
+            (set
+                my-sum
+                (+ 1 2)
+            (get some)
+            return
+        )
+    )
+)

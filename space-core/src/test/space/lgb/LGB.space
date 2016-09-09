@@ -1,0 +1,25 @@
+
+// Let's Get Busy space
+
+(space LetsGetBusy
+    (dims
+        (
+    )
+    (method main
+        (arguments
+            (argument
+                (name args)
+                (space relation
+                    (type string)
+                )
+            )
+        )
+        (body
+            (set
+                my-sum
+                (+ 1 2)
+            (get some)
+            return
+        )
+    )
+)

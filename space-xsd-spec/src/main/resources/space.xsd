@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+  ~
+  ~ Licensed under the following license agreement:
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Also see the LICENSE file in the repository root directory.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+           targetNamespace="http://jkcsoft.org/2016/space" >
+
+    <!--
+        Types: Roughly in order of fundamentalness.
+     -->
+
+    <xs:complexType name="set">
+        <xs:annotation><xs:documentation>Foundational notion of a Set that attempts to model
+            the pure mathematical notion.</xs:documentation></xs:annotation>
+    </xs:complexType>
+
+    <xs:complexType name="relation">
+        <xs:annotation><xs:documentation>"Everything is a Relation ... almost".
+            The central notion of this language -- a set of tuples in
+            the strict set-theoretic sense.</xs:documentation></xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="set">
+
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="sequence">
+        <xs:annotation><xs:documentation>Encapsulates the common notion of sequence or list.
+            Used for action sequences and for data types that are intrinsically sequence-oriented
+            such as streams, strings, or prioritized lists.  One note is that with
+            sequences, the ordinal of an element is not part of the space
+        </xs:documentation></xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="relation">
+
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="object-type">
+        <xs:annotation><xs:documentation>Polymorphic common type of Tuples.
+        </xs:documentation></xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="object-type">
+
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!--
+        Elements.
+     -->
+
+    <xs:element name="space" type="relation">
+        <xs:annotation>
+            <xs:documentation>A Space is a zero to many dimensional thing that is the subject
+                of computational reasoning.  A Space is an object and a space has
+                member objects (identifiable tuples).
+                Roughly equivalent to a Class in conventional OOP.
+                A Space can contain other spaces and so
+            </xs:documentation>
+        </xs:annotation>
+        <xs:
+
+    </xs:element>
+
+    <xs:element name="view" type="relation">
+        <xs:annotation>
+            <xs:documentation>A cartesian product of one or more normalized
+                Spaces.</xs:documentation>
+        </xs:annotation>
+
+    </xs:element>
+
+    <xs:element name="dimension" type="relation">
+
+    </xs:element>
+
+    <xs:element name="scalar-dim">
+
+    </xs:element>
+
+    <xs:element name="space-dim">
+
+    </xs:element>
+
+    <xs:element name="function">
+        <xs:annotation><xs:documentation>A special kind of relation</xs:documentation></xs:annotation>
+
+    </xs:element>
+
+    <!--
+        Literals
+    -->
+    <xs:element name="tuple">
+        <xs:annotation><xs:documentation>In Space, all data are held in tuples.</xs:documentation></xs:annotation>
+
+    </xs:element>
+
+    <xs:element name="object" type="relation">
+        <xs:annotation><xs:documentation>An identifiable tuple associated
+            with a Space or a View.</xs:documentation></xs:annotation>
+
+    </xs:element>
+
+
+</xs:schema>
