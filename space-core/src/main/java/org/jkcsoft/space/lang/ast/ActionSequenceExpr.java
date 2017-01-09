@@ -10,11 +10,11 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
+ *
  * @author J. Coles
  * @version 1.0
  */
-public class ActionSequenceExpr {
-
+public abstract class ActionSequenceExpr {
 
     public ActionSequenceExpr() {
     }

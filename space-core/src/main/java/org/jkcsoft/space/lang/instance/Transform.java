@@ -37,7 +37,7 @@ public class Transform extends ActionSequenceExpr {
      * All Transforms will implement this, eventually all through model-driven
      * approach, but in the mean time, directly.
      */
-    public void transform(Relation r1, Relation r2)
+    public void transform(Space r1, Space r2)
             throws Exception {
     }
 

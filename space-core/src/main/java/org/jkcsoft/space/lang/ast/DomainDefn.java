@@ -13,11 +13,9 @@ package org.jkcsoft.space.lang.ast;
  * @author J. Coles
  * @version 1.0
  */
-public class DomainDefn extends RelationDefn {
-
+public class DomainDefn extends SpaceDefn {
 
     public DomainDefn() {
     }
-
 
 }

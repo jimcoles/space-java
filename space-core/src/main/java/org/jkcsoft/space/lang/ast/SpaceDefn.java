@@ -12,16 +12,14 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * Definition-level element of a Property.
+ * Abstract base for EntityDefn and ViewDefn.
  *
  * @author Jim Coles
  * @version 1.0
  */
-public class PropertyDefn {
+public abstract class SpaceDefn extends ModelElement {
 
-
-    public PropertyDefn() {
+    public SpaceDefn() {
     }
-
 
 }

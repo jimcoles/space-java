@@ -15,7 +15,7 @@ package org.jkcsoft.space.lang.ast;
  * @author J. Coles
  * @version 1.0
  */
-public class EquationDefn {
+public class EquationDefn extends EquationExpr {
 
 
     public EquationDefn() {

@@ -19,7 +19,7 @@ package org.jkcsoft.space.lang.instance;
  * @author Jim Coles
  * @version 1.0
  */
-public class List extends Relation {
+public class List extends Space {
 
 
     public List() {

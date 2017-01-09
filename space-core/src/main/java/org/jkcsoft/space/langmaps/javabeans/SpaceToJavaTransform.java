@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.langmaps.javabeans;
 
-import org.jkcsoft.space.lang.instance.Relation;
+import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.instance.Transform;
 
 /**
@@ -26,7 +26,7 @@ public class SpaceToJavaTransform extends Transform {
 
 
 
-    public void transform(Relation r1, Relation r2)
+    public void transform(Space r1, Space r2)
             throws Exception {
     }
 

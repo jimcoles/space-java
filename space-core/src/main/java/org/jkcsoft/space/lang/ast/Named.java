@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
  *
  * Licensed under the following license agreement:
  *
@@ -8,20 +8,15 @@
  * Also see the LICENSE file in the repository root directory.
  */
 
-
 package org.jkcsoft.space.lang.ast;
 
 /**
- * Abstract base for EntityDefn and ViewDefn.
- *
  * @author Jim Coles
- * @version 1.0
  */
-public abstract class RelationDefn {
+public interface Named {
 
-
-    public RelationDefn() {
-    }
-
+    String getName();
+    boolean hasName();
+    boolean isNamed();
 
 }

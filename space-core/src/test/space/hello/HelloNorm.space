@@ -1,0 +1,21 @@
+(space-defn
+    (name HelloSpaceNorm)
+    (method main
+        (arguments
+            (argument
+                (name args)
+                (space relation
+                    (type string)
+                )
+            )
+        )
+        (body
+            (action-sequence
+                (sys-print "Hello, Space ~!@#$%^&*()-+!")
+                (sys-print "\"")
+                (sys-barf)
+                (tri-guy one two three four)
+            )
+        )
+    )
+)

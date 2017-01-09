@@ -9,107 +9,51 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.java.beans.BeanDispatcher;
-import org.jkcsoft.space.lang.instance.Identifier;
-import org.jkcsoft.space.lang.instance.Namespace;
+import java.util.List;
 
 /**
- * UML Analogy: core.ModelElement.
- * <p>
- * Base class for all DataModel elements such as Class, Attr, etc.
- * <p>
- * By declaring ModelElement to implement IObjectRecord we are stating that
- * all SSC metamodel elements are instances of Class, even the Class itself.
+ * Base class for all things defined in source code.
  *
  * @author Jim Coles
  * @version 1.0
  */
-public abstract class ModelElement extends SpaceExpr implements Namespace {
+public abstract class ModelElement extends SpaceExpr implements Named {
 
-    // delegate object(s)
-    private static BeanDispatcher _beaner;
-
-    // primitive state properties
-//  private Guid    _guid;
-//  private Oid     _oid;
-    private String _friendlyName;
-    private String _codeName;
-    private String _description;
-
-    // associations
-    private Namespace _namespace;
-//  private DataModel _dataModel;
+    private String name;
+    private String description;
+    private List<ModelElement>  children;
 
     public ModelElement() {
         super();
     }
 
-
-    //  public Guid getGuid() { return _guid; }
-//  public Oid getOid() { return _oid; }
-    public String getFriendlyName() {
-        return _friendlyName;
+    public String getName() {
+        return name;
     }
 
-    public String getCodeName() {
-        return _codeName;
+    @Override
+    public boolean hasName() {
+        return false;
+    }
+
+    @Override
+    public boolean isNamed() {
+        return false;
     }
 
     public String getDescription() {
-        return _description;
+        return description;
     }
 
-    //  public void setGuid(Guid guid) { _guid = guid;}
-//  public void setOid(Oid oid) throws Exception  { _oid = oid;}
-    public void setFriendlyName(String friendlyName) {
-        _friendlyName = friendlyName;
-    }
-
-    public void setCodeName(String codeName) {
-        _codeName = codeName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setDescription(String description) {
-        _description = description;
+        this.description = description;
     }
 
-    /**
-     * Sets AttributeValue associated with attrCodeName.
-     */
-    public void set(String attrCodeName, Object value)
-            throws Exception {
-        _beaner.set(this, attrCodeName, value);
+    public List<ModelElement> getChildren() {
+        return children;
     }
-
-    /**
-     * Gets AttributeValue associated with attrCodeName.
-     */
-    public Object get(String attrCodeName)
-            throws Exception {
-        return _beaner.get(this, attrCodeName);
-    }
-
-    /**
-     * Non-primitive attributes will be retrieved by id.  Consuming object
-     * can dereference into an object.
-     */
-    public Identifier getAssocRef(java.lang.String str)
-            throws Exception {
-        return null;
-    }
-
-//  public void setParentObject(IObjectRecord parent)
-//    throws Exception
-//  {
-//    if(!(parent instanceof DataModel)) throw new Exception("Wrong data type in setParentObject().  Requires " +
-// DataModel.class.getName ());
-//    _dataModel = (DataModel) parent;
-//  }
-//
-//  public IObjectRecord getParentObject()
-//  {
-//    return _dataModel;
-//  }
-
-
 }

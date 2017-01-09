@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.Relation;
+import org.jkcsoft.space.lang.instance.Space;
 
 /**
  * Encapsulates an entire executable system as defined by Space definition elements
@@ -19,9 +19,9 @@ import org.jkcsoft.space.lang.instance.Relation;
  * @version 1.0
  */
 public class SpaceProgram extends ModelElement {
-    Relation _relationDefns;
-    Relation _assocDefns;
-    Relation _actionSequenceDefns;
+    Space _relationDefns;
+    Space _assocDefns;
+    Space _actionSequenceDefns;
 
     // TODO: indexes for fast lookup
 

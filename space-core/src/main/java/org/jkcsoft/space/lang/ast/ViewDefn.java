@@ -18,11 +18,9 @@ package org.jkcsoft.space.lang.ast;
  * @author Jim Coles
  * @version 1.0
  */
-public class ViewDefn extends RelationDefn {
-
+public class ViewDefn extends SpaceDefn {
 
     public ViewDefn() {
     }
-
 
 }

@@ -12,10 +12,16 @@
     <artifactId>space-core</artifactId>
 
     <dependencies>
+
         <dependency>
             <groupId>org.jkcsoft</groupId>
             <artifactId>java-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

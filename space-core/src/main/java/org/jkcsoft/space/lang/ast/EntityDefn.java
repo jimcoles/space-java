@@ -18,10 +18,9 @@ package org.jkcsoft.space.lang.ast;
  * @author Jim Coles
  * @version 1.0
  */
-public class EntityDefn extends RelationDefn {
+public class EntityDefn extends SpaceDefn {
 
     public EntityDefn() {
     }
-
 
 }

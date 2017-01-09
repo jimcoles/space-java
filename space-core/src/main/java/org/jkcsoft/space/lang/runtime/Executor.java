@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.jkcsoft.space.lang.ast.ModelElement;
-import org.jkcsoft.space.lang.instance.Relation;
+import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.ast.SpaceProgram;
 import org.jkcsoft.space.lang.runtime.loaders.xml.XmlLoader;
 
@@ -19,22 +19,16 @@ import java.io.FileInputStream;
 import java.util.Map;
 
 /**
- * The top-level executive for Space.  It manages interatction between second-level
+ * The top-level executive for Space.  It manages interatctions between second-level
  * elements including XmlLoader, ExprProcessor, Querier.
  *
  * @author J. Coles
  * @version 1.0
  */
 public class Executor extends ExprProcessor {
-    //----------------------------------------------------------------------------
-    // Class-level members
-    //----------------------------------------------------------------------------
-
 
     /**
-     * .Executor roml-file-path
      *
-     * @param args
      */
     public void main(String[] args) {
         try {
@@ -47,7 +41,6 @@ public class Executor extends ExprProcessor {
             SpaceProgram program = loader.load();
             Executor exec = new Executor();
             exec.eval(program);
-//      exec.eval();
         } catch (Throwable th) {
             th.printStackTrace();
         }
@@ -57,7 +50,7 @@ public class Executor extends ExprProcessor {
     // The symbol tables for 'instance' objects associated with the running program.
     // This is added to as the program runs.
     // Properties:
-    private Relation _programObjects;
+    private Space _programObjects;
 
     /**
      * Mapping from expression type to expression handler. Some handlers will be
@@ -85,6 +78,7 @@ public class Executor extends ExprProcessor {
      * Evaluates a SpaceProgram.
      */
     public ModelElement eval(SpaceProgram program) throws Exception {
+
         return null;
     }
 

@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.RelationDefn;
+import org.jkcsoft.space.lang.ast.SpaceDefn;
 
 /**
  * Conceptually, an element of a Relation. Much like a row in a JDBC recordset.<br><br>
@@ -18,17 +18,17 @@ import org.jkcsoft.space.lang.ast.RelationDefn;
  * @version 1.0
  */
 public class Tuple {
-    Relation _relation;
-    RelationDefn _relationDefn;
+    Space _relation;
+    SpaceDefn _relationDefn;
     Object[] _values;
 
 
-    public Tuple(Relation relation) {
+    public Tuple(Space relation) {
         _relation = relation;
     }
 
 
-    public Relation getRelation() {
+    public Space getRelation() {
         return _relation;
     }
 

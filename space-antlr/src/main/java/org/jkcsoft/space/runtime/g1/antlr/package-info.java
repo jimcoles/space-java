@@ -8,14 +8,10 @@
  * Also see the LICENSE file in the repository root directory.
  */
 
-package org.jkcsoft.space.lang.runtime.loaders.g1;
-
 /**
- * Syntax analyzer.
- *
- * Accepts tokens and builds the first parse tree.
+ * First generation (G1) bootstrap scanner / parser written here in Java.
+ * Future generations will hopefully be written in Space itself.
  *
  * @author Jim Coles
  */
-public class G1P2Parser {
-}
+package org.jkcsoft.space.runtime.g1.antlr;

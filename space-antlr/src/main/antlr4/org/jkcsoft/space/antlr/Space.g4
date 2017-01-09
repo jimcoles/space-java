@@ -1,9 +1,14 @@
 // The Antlr grammar for Space if I can get it to work
 grammar Space;
 
+
+// -------------------------------- Rules section ------------------------------------
+
 //space : spaceDecl;
 
-space : '(' atoms ')';
+//space : '(' atoms ')';
+
+space : list;
 
 //spaceDecl
 //    : '(' 'space' '(';
@@ -29,6 +34,7 @@ space : '(' atoms ')';
 //    ;
 
 atom : IDENTIFIER
+     | string
      | list
      ;
 
@@ -36,9 +42,19 @@ atoms : (atom)* ;
 
 list : '(' atoms ')';
 
+string : STRING;
+
+// -------------------------------- Token section ------------------------------------
+
 IDENTIFIER
     : ID_HEAD_CHAR ID_TAIL_CHAR*
     ;
+
+// interpret the following as: A double-quote ('"') followed by any number of (*)
+// other characters
+// (except double-quotes, unless it's an escaped double-quote)
+// followed by closing double-quote
+STRING : '"' ( ~'"' | '\\' '"' )* '"' ;
 
 //fragment
 //IDENTIFIER

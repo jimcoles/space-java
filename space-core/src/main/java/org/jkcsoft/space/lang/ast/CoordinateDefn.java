@@ -7,20 +7,19 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
+
+
 package org.jkcsoft.space.lang.ast;
 
 /**
- * A unit of data and computation.  A System has a corresponding set of data
- * and behavior definitions.
+ * Definition-level element of a Property.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
-public class ModelDefn {
+public class CoordinateDefn {
 
-
-    public ModelDefn() {
+    public CoordinateDefn() {
     }
-
 
 }
