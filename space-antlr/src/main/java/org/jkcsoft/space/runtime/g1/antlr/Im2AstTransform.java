@@ -10,8 +10,18 @@
 
 package org.jkcsoft.space.runtime.g1.antlr;
 
+import org.jkcsoft.space.lang.ast.AstBuilder;
+
 /**
  * @author Jim Coles
  */
-public class TreeToAstTransform {
+public class Im2AstTransform {
+
+    private AstBuilder astBuilder = new AstBuilder();
+
+    public void transform(ImTreeNode imRoot) {
+        if (astBuilder.getAstRoot() == null) {
+            // TODO much ...
+        }
+    }
 }

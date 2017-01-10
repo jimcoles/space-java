@@ -10,8 +10,17 @@
 
 package org.jkcsoft.space.runtime.g1.antlr;
 
+import org.antlr.v4.runtime.tree.Tree;
+
+import java.util.List;
+
 /**
  * @author Jim Coles
  */
-public interface TreeListener {
+public interface RaTreeListener {
+
+    void startNode(Tree treeContext, List<String> ruleNameIndex, int level);
+
+    void endNode(Tree treeContext, List<String> ruleNameIndex, int level);
+
 }

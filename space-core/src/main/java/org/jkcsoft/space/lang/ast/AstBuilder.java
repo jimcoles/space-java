@@ -23,10 +23,19 @@ import org.jkcsoft.space.lang.instance.Space;
 public class AstBuilder {
 
     // holds things (mostly named things) defined in the source code
-    private SpaceProgram program;
+    private SpaceProgram astRoot;
+    private ModelElement currentAstNode;
 
     public void addMetaObject(ModelElement object) {
         // metaObjects;
+    }
+
+    public SpaceProgram getAstRoot() {
+        return astRoot;
+    }
+
+    public ModelElement getCurrentAstNode() {
+        return currentAstNode;
     }
 
     public boolean validate() {

@@ -35,12 +35,9 @@ space : list;
 
 atom : IDENTIFIER
      | string
-     | list
      ;
 
-atoms : (atom)* ;
-
-list : '(' atoms ')';
+list : '(' (atom | list)* ')';
 
 string : STRING;
 
