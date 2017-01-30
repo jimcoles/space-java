@@ -18,17 +18,14 @@ import org.jkcsoft.space.lang.instance.Transform;
  * @author J. Coles
  * @version 1.0
  */
-public class SpaceToJavaTransform extends Transform {
-
+public class SpaceToJavaTransform implements Transform {
 
     public SpaceToJavaTransform() {
+
     }
 
+    public void transform(Space r1, Space r2) throws Exception {
 
-
-    public void transform(Space r1, Space r2)
-            throws Exception {
     }
-
 
 }

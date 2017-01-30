@@ -10,12 +10,17 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
+ * A Transform is an action sequence that is bound by an Equation.
+ *
+ * Similar to Operator.
+ *
  * @author J. Coles
  * @version 1.0
  */
-public class TransformDefn extends ModelElement {
+public class TransformDefn extends SpaceActionDefn {
 
-    public TransformDefn() {
+    public TransformDefn(SpaceDefn contextSpaceDefn, String name) {
+        super(contextSpaceDefn, name, null);
     }
 
 }

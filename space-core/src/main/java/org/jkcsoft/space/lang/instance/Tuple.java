@@ -9,35 +9,49 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.SpaceDefn;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Conceptually, an element of a Relation. Much like a row in a JDBC recordset.<br><br>
+ * Conceptually, a Tuple is an element of a Relation (which is a Set). Much like a row in a JDBC recordset.
+ * Values in a Tuple can be retrieved in order or by the name of the coordinate.  A Tuple
+ * may contain only Scalar values but those values may be Oid-based references to other
+ * Entities.
  *
  * @author Jim Coles
  * @version 1.0
  */
 public class Tuple {
-    Space _relation;
-    SpaceDefn _relationDefn;
-    Object[] _values;
 
+    private Space space;
+    private ScalarValue[] values;
+    //
+    private Map<String, ScalarValue> indexValuesByName = new HashMap<>();
 
-    public Tuple(Space relation) {
-        _relation = relation;
+    Tuple(Space space, ScalarValue ... values) {
+        this.space = space;
+        this.values = values;
+        for (ScalarValue value: values) {
+            indexValuesByName.put(value.getType().getName(), value);
+        }
     }
 
-
-    public Space getRelation() {
-        return _relation;
+    public Space getSpace() {
+        return space;
     }
 
     /**
      * Return value of Tuple variable with <code>name</code>
      */
-    public Object get(String name) {
-        return null;
+    public ScalarValue getValue(String name) {
+        return indexValuesByName.get(name);
     }
 
+    public ScalarValue getValueAt(int index) {
+        return values[index];
+    }
 
+    public void setSpace(Space space) {
+        this.space = space;
+    }
 }

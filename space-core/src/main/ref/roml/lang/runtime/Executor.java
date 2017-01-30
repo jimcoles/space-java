@@ -43,7 +43,7 @@ public class Executor extends ExprProcessor
       RomlProgram program = loader.load();
       Executor exec = new Executor();
       exec.eval(program);
-//      exec.eval();
+//      exec.exec();
     }
     catch (Throwable th) {
       th.printStackTrace();

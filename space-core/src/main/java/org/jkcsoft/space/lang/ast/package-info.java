@@ -9,8 +9,11 @@
  */
 
 /**
- * <p>Contains all the original hard-coded language elements for Space including
- * non-terminals and terminals.</p>
+ * <p>This package defines the Abstract Syntax Tree (AST) for the Space language and
+ * is the heart of the Java implementation of Space.  The package contains classes
+ * representing all language notions for Space including
+ * non-terminals and terminals.  These are the types of things one sees in
+ * a given Space source code file.</p>
  * <h2>Package Specification</h2>
  * Eventually we will have a version of this package that is itself generated
  * from a Space model.

@@ -13,9 +13,13 @@ package org.jkcsoft.space.lang.runtime;
  * @author Jim Coles
  * @version 1.0
  */
-public class RuntimeException extends java.lang.Exception {
+public class RuntimeException extends java.lang.RuntimeException {
 
+    public RuntimeException(String message) {
+        super(message);
+    }
 
-
-
+    public RuntimeException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

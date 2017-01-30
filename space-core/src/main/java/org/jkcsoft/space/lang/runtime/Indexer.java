@@ -10,6 +10,9 @@
 package org.jkcsoft.space.lang.runtime;
 
 /**
+ * Encapsulates logic for building physical indexes to models that are somewhat
+ * independent of the objects being indexed.
+ *
  * @author J. Coles
  * @version 1.0
  */

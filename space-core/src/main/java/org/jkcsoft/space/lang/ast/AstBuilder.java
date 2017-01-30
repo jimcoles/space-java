@@ -10,7 +10,13 @@
 
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.Space;
+import org.jkcsoft.space.lang.instance.ObjectBuilder;
+import org.jkcsoft.space.lang.instance.SpaceObject;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The AST is built by calling adder methods on this object.
@@ -23,8 +29,13 @@ import org.jkcsoft.space.lang.instance.Space;
 public class AstBuilder {
 
     // holds things (mostly named things) defined in the source code
-    private SpaceProgram astRoot;
+    private Map<String, Class<ModelElement>> metaTypeMap = new HashMap<>();
+    public SpaceProgram astRoot;
     private ModelElement currentAstNode;
+
+    private ObjectBuilder getObjectBuilder() {
+        return ObjectBuilder.getInstance();
+    }
 
     public void addMetaObject(ModelElement object) {
         // metaObjects;
@@ -38,8 +49,14 @@ public class AstBuilder {
         return currentAstNode;
     }
 
+    public SpaceProgram addRoot() {
+        astRoot = new SpaceProgram();
+        return  astRoot;
+    }
+
     public boolean validate() {
         return true;
     }
+
 
 }

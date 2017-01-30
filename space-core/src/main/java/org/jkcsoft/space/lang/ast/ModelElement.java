@@ -24,7 +24,12 @@ public abstract class ModelElement extends SpaceExpr implements Named {
     private List<ModelElement>  children;
 
     public ModelElement() {
+        this(null);
+    }
+
+    public ModelElement(String name) {
         super();
+        this.name = name;
     }
 
     public String getName() {
@@ -41,12 +46,13 @@ public abstract class ModelElement extends SpaceExpr implements Named {
         return false;
     }
 
-    public String getDescription() {
-        return description;
+    public ModelElement setName(String name) {
+        this.name = name;
+        return this;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getDescription() {
+        return description;
     }
 
     public void setDescription(String description) {

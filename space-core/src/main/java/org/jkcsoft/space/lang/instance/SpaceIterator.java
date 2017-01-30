@@ -7,27 +7,24 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-
-
 package org.jkcsoft.space.lang.instance;
 
 /**
- * Instance-level holder of sequence/list of items at the same meta level.
- * A List is a Relation that implicitly maintains a sequence number from
- * 1 to n for all Tuples.
+ * Wraps a Java Iterator.
+ * Not sure we need this wrapper layer.
  *
  * @author Jim Coles
  * @version 1.0
  */
-public class List extends Space {
+public class SpaceIterator {
 
+//    private java.util.Iterator
 
-    public List() {
+    public SpaceIterator() {
     }
 
-    public Iterator iterator() {
+    public Tuple getNext() {
         return null;
     }
-
 
 }

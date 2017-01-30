@@ -11,25 +11,25 @@ package org.jkcsoft.space.lang.ast;
 
 /**
  * Captures a wide range of relationships such as one-to-many, recursive.
+ * Analogous to a foreign key relationship in RDB world or a simple
+ * object reference in Java.
  *
  * @author J. Coles
  * @version 1.0
  */
 public class AssociationDefn {
-    private TypeDefn _child;
-    private TypeDefn _parent;
 
+    private TypeDefn from;
+    private TypeDefn to;
 
     public AssociationDefn() {
     }
-
 
     /**
      * In Space, this expression would go in an Equation expression.
      */
     public boolean isRecursive() {
-        return _child == _parent;
+        return from == to;
     }
-
 
 }

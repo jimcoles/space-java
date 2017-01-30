@@ -1,9 +1,13 @@
+/*
+  The Hello, World for Space is Hello, Space!
+*/
 (space-defn
-    (name HelloSpaceNorm)
+    (set name HelloSpaceNorm) // set space name
+    (access public)
     (method main
         (arguments
             (argument
-                (name args)
+                (name args)  // name or arg
                 (space relation
                     (type string)
                 )
@@ -15,6 +19,7 @@
                 (sys-print "\"")
                 (sys-barf)
                 (tri-guy one two three four)
+                (add 1 2 3.0)
             )
         )
     )

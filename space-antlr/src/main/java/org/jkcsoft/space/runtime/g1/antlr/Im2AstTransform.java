@@ -11,6 +11,10 @@
 package org.jkcsoft.space.runtime.g1.antlr;
 
 import org.jkcsoft.space.lang.ast.AstBuilder;
+import org.jkcsoft.space.lang.ast.SpaceProgram;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Jim Coles
@@ -18,10 +22,15 @@ import org.jkcsoft.space.lang.ast.AstBuilder;
 public class Im2AstTransform {
 
     private AstBuilder astBuilder = new AstBuilder();
+    private List<AstLoadError> errors = new LinkedList<>();
 
     public void transform(ImTreeNode imRoot) {
         if (astBuilder.getAstRoot() == null) {
-            // TODO much ...
+            if (!ImTrees.first(imRoot).getText().equals("space-defn"))
+                errors.add(new AstLoadError("first ID must be 'space-defn'"));
+            astBuilder.addMetaObject(new SpaceProgram());
+            astBuilder.getAstRoot();
         }
     }
+
 }

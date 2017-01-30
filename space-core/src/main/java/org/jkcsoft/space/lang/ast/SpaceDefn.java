@@ -11,6 +11,11 @@
 
 package org.jkcsoft.space.lang.ast;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Abstract base for EntityDefn and ViewDefn.
  *
@@ -19,7 +24,55 @@ package org.jkcsoft.space.lang.ast;
  */
 public abstract class SpaceDefn extends ModelElement {
 
-    public SpaceDefn() {
+    private SpaceDefn               contextSpaceDefn;
+    private List<CoordinateDefn>    coordinateList;
+    private List<EquationDefn>      equations;
+    private List<TransformDefn>     transformDefns;
+    private List<AbstractActionDefn>        functionDefns = new LinkedList<>();
+
+    // redundant
+    private Map<String, CoordinateDefn>     indexCoordinatesByName = new HashMap<>();
+    private Map<String, AbstractActionDefn> indexFunctionsByName = new HashMap<>();
+
+    public SpaceDefn(SpaceDefn contextSpaceDefn, String name) {
+        super(name);
+        this.contextSpaceDefn = contextSpaceDefn;
     }
 
+    public SpaceDefn getContextSpaceDefn() {
+        return contextSpaceDefn;
+    }
+
+    public List<CoordinateDefn> getCoordinateList() {
+        return coordinateList;
+    }
+
+    public CoordinateDefn addDimension(CoordinateDefn coordinateDefn) {
+        if (coordinateList == null)
+            coordinateList = new LinkedList<>();
+        coordinateList.add(coordinateDefn);
+        //
+        indexCoordinatesByName.put(coordinateDefn.getName(), coordinateDefn);
+        return coordinateDefn;
+    }
+
+    public AbstractActionDefn getFunction(String name) {
+        return indexFunctionsByName.get(name);
+    }
+
+    public AbstractActionDefn addActionDefn(AbstractActionDefn actionDefn) {
+        functionDefns.add(actionDefn);
+        //
+        indexFunctionsByName.put(actionDefn.getName(), actionDefn);
+        return actionDefn;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("SpaceDefn {" + getName() + ": ");
+        for (AbstractActionDefn functionDefn: functionDefns) {
+            sb.append(functionDefn.getName()+"(),");
+        }
+        return sb.toString();
+    }
 }

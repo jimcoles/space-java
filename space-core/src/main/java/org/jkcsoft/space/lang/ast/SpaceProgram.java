@@ -10,6 +10,10 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.Space;
+import org.jkcsoft.space.lang.instance.SpaceObject;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Encapsulates an entire executable system as defined by Space definition elements
@@ -19,15 +23,36 @@ import org.jkcsoft.space.lang.instance.Space;
  * @version 1.0
  */
 public class SpaceProgram extends ModelElement {
-    Space _relationDefns;
-    Space _assocDefns;
-    Space _actionSequenceDefns;
+
+    // The following "Space" types if we want to back our 'definition' model with our
+    // own notions.  The problem is that it will take time to build a
+    // "Space model of Space" itself.
+
+//    private Space relationDefns;
+//    private Space assocDefns;
+//    private Space actionSequenceDefns;
 
     // TODO: indexes for fast lookup
-
+    private List<SpaceDefn> spaceDefns = new LinkedList<>();
+    private List<SpaceObject> objectHeap = new LinkedList<>();
 
     public SpaceProgram() {
     }
 
+    public <T extends SpaceDefn> T addSpace(T spaceDefn) {
+        spaceDefns.add(spaceDefn);
+        return spaceDefn;
+    }
 
+    public SpaceDefn getFirstSpace() {
+        return spaceDefns.get(0);
+    }
+
+    public void addObjectInstance(SpaceObject spaceObject, AstBuilder astBuilder) {
+        objectHeap.add(spaceObject);
+    }
+
+    public List<SpaceObject> getObjectHeap() {
+        return objectHeap;
+    }
 }

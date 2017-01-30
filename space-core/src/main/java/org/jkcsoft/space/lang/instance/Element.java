@@ -15,10 +15,9 @@ package org.jkcsoft.space.lang.instance;
  */
 public class Element {
 
+    /** Limit constructor access to package-only. */
+    Element() {
 
-    public Element() {
     }
-
-
 
 }

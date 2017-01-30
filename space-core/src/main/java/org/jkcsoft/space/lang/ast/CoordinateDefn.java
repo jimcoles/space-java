@@ -17,9 +17,20 @@ package org.jkcsoft.space.lang.ast;
  * @author Jim Coles
  * @version 1.0
  */
-public class CoordinateDefn {
+public class CoordinateDefn extends ModelElement {
 
-    public CoordinateDefn() {
+    private PrimitiveType type;
+
+    public CoordinateDefn(String name, PrimitiveType type) {
+        super(name);
+        this.type = type;
     }
 
+    public void setType(PrimitiveType type) {
+        this.type = type;
+    }
+
+    public PrimitiveType getType() {
+        return type;
+    }
 }

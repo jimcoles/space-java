@@ -16,9 +16,9 @@ package org.jkcsoft.space.lang.instance;
 public class Association {
 
 
-    public Association() {
+    /** Limit constructor access to package-only. */
+    Association() {
+
     }
-
-
 
 }

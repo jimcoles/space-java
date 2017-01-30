@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.runtime;
 
+import org.jkcsoft.space.lang.instance.SpaceOid;
+
 /**
  * In pattern terms, the command processor.  Knows how to run a SpaceProgram
  * including executing Queries.
@@ -18,15 +20,13 @@ package org.jkcsoft.space.lang.runtime;
  */
 public abstract class ExprProcessor {
 
-
-
     /**
-     * The starting point for doing something. The eval method works iteratively
+     * The starting point for doing something. The exec method works iteratively
      * upon an ActionSequence.
      *
      * TODO: This is an excellent point to do some trace logging.
      */
-//  abstract public ModelElement eval(ModelElement action) throws RuntimeException;
+//  abstract public ModelElement exec(ModelElement action) throws RuntimeException;
 
 
 }

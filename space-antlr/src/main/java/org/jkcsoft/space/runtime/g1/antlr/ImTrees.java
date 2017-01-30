@@ -17,8 +17,10 @@ import java.util.List;
  */
 public class ImTrees {
 
-    public static ImTreeNode first(List<ImTreeNode> list) {
-        return list.get(0);
+    public static ImTreeNode first(ImTreeNode listNode) {
+        if (!listNode.getType().isList())
+            throw new IllegalArgumentException("node is not a list");
+        return listNode.getChild(0);
     }
 
 }

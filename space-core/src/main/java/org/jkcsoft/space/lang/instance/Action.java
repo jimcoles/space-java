@@ -9,22 +9,36 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.SpaceActionDefn;
+
 /**
+ * The instance level state for the invocation of an Action Definition.  Might be
+ * a top-level function call or just part of an action tree within a function.
+ *
  * @author J. Coles
  * @version 1.0
  */
 public class Action {
-    private boolean _isAtomic = false;
 
+    private SpaceActionDefn actionDefn;
+    //
+    private Space context;
+    private Space returnSpace;
 
-    public Action() {
+    /**
+     * @param spcContext Could be a local function space or the argument space
+     *                   for a function call.
+     */
+    Action(Space spcContext, SpaceActionDefn actionDefn) {
+        this.actionDefn = actionDefn;
+        this.context = spcContext;
     }
 
-
-
-    public void doAction()
-            throws Exception {
+    public void setReturnSpace(Space returnSpace) {
+        this.returnSpace = returnSpace;
     }
 
-
+    public Space getReturnSpace() {
+        return returnSpace;
+    }
 }

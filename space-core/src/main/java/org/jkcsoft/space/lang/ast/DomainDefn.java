@@ -15,7 +15,8 @@ package org.jkcsoft.space.lang.ast;
  */
 public class DomainDefn extends SpaceDefn {
 
-    public DomainDefn() {
+    public DomainDefn(SpaceDefn contextSpaceDefn, String name) {
+        super(contextSpaceDefn, name);
     }
 
 }

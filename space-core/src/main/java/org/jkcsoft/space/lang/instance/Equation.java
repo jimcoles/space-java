@@ -15,10 +15,8 @@ package org.jkcsoft.space.lang.instance;
  */
 public class Equation {
 
+    Equation() {
 
-    public Equation() {
     }
-
-
 
 }

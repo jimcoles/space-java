@@ -77,11 +77,11 @@ public class G1AntlrParser {
             // tokens buffer
             SpaceParser spaceParser = new SpaceParser(tokens);
             spaceParser.addErrorListener(errorListener);
-            ParseTree tree = spaceParser.space(); // begin parsing at init rule
+            ParseTree tree = spaceParser.list(); // begin parsing at init rule
 
             // debug / print
             String stringTree = tree.toStringTree(spaceParser);
-            System.out.println("Antlr Util parse dump:" + "\n" + stringTree); // print LISP-style tree
+            System.out.println("ANRLR Util parse dump:" + "\n" + stringTree); // print LISP-style tree
 
             //
             String[] ruleNames = spaceParser.getRuleNames();
@@ -95,13 +95,18 @@ public class G1AntlrParser {
             RaTreePrinter printer = new RaTreePrinter();
             walker.addListener(printer);
             walker.visitAll(tree, spaceParser);
-            System.out.println("Formatted parse dump:" + "\n" + printer.getSb());
+            System.out.println("Formatted ANTLR parse dump:" + "\n" + printer.getSb());
             //
             walker = new RaTreeWalker();
-            Ra2ImTransform astTransform = new Ra2ImTransform();
-            walker.addListener(astTransform);
+            Ra2ImTransform ra2ImTransform = new Ra2ImTransform();
+            walker.addListener(ra2ImTransform);
             walker.visitAll(tree, spaceParser);
             //
+            ImTreePrinter imPrinter = new ImTreePrinter();
+            ImTreeWalker imWalker = new ImTreeWalker();
+            imWalker.addListener(imPrinter);
+            imWalker.visitAll(ra2ImTransform.getRootNode());
+            System.out.println("Formatted IM parse dump:" + "\n" + imPrinter.getSb());
         } catch (Exception e) {
             e.printStackTrace();
         }

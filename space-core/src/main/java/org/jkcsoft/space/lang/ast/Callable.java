@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
  *
  * Licensed under the following license agreement:
  *
@@ -7,18 +7,13 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.instance;
+
+package org.jkcsoft.space.lang.ast;
 
 /**
  * @author Jim Coles
- * @version 1.0
  */
-public class Identifier {
+public interface Callable {
 
-
-    public Identifier() {
-    }
-
-
-
+    SpaceDefn getArgSpaceDefn();
 }

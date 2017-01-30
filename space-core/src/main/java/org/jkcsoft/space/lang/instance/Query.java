@@ -10,15 +10,14 @@
 package org.jkcsoft.space.lang.instance;
 
 /**
+ *
  * @author Jim Coles
  * @version 1.0
  */
-public class Query {
-
+public class Query extends Equation {
 
     public Query() {
+
     }
-
-
 
 }

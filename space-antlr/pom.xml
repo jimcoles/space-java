@@ -64,6 +64,12 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
+                <configuration>
+                    <!--<sourceDirectory>./src/main/antlr4/org/jkcsoft/space/antlr</sourceDirectory>-->
+                    <!--<grammars>SpaceParser.g4</grammars>-->
+                    <visitor>true</visitor>
+                    <listener>true</listener>
+                </configuration>
                 <executions>
                     <execution>
                         <id>antlr</id>

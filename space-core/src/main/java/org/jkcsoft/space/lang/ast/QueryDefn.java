@@ -13,11 +13,10 @@ package org.jkcsoft.space.lang.ast;
  * @author Jim Coles
  * @version 1.0
  */
-public class QueryDefn {
+public class QueryDefn extends EquationDefn {
 
+    public QueryDefn(SpaceDefn contextSpaceDefn, String name) {
 
-    public QueryDefn() {
     }
-
 
 }

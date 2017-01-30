@@ -18,9 +18,10 @@ package org.jkcsoft.space.lang.ast;
  * @author Jim Coles
  * @version 1.0
  */
-public class ViewDefn extends SpaceDefn {
+public class ViewDefn extends QueryDefn {
 
-    public ViewDefn() {
+    public ViewDefn(SpaceDefn contextSpaceDefn, String name) {
+        super(contextSpaceDefn, name);
     }
 
 }

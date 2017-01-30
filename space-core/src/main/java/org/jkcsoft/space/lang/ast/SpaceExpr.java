@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.List;
+import org.jkcsoft.space.lang.instance.SpaceList;
 
 /**
  * The base notion of an expression.  The subtypes are DefnExpr and ActionExpr.
@@ -20,11 +20,11 @@ import org.jkcsoft.space.lang.instance.List;
  * @version 1.0
  */
 public class SpaceExpr {
-    private List _exprList;
 
+    private SpaceList exprList;
 
     public SpaceExpr() {
-    }
 
+    }
 
 }

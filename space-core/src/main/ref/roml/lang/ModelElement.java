@@ -57,7 +57,7 @@ public abstract class ModelElement extends RomlExpr implements Namespace
   //---- <Accessors and Mutators> ----------------------------------------------
 
 //  public Guid getGuid() { return _guid; }
-//  public Oid getOid() { return _oid; }
+//  public Oid getLongOid() { return _oid; }
   public String getFriendlyName() { return _friendlyName; }
   public String getCodeName() { return _codeName; }
   public String getDescription() { return _description; }

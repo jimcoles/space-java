@@ -21,25 +21,14 @@ import org.jkcsoft.space.lang.ast.ActionSequenceExpr;
  * @author J. Coles
  * @version 1.0
  */
-public class Transform extends ActionSequenceExpr {
-    private Equation _parentEquation;
+public interface Transform {
 
-
-    public Transform() {
-    }
-
-
-
-
-    //---- </Accessors and Mutators> ---------------------------------------------
+//    private Equation parentEquation;
 
     /**
      * All Transforms will implement this, eventually all through model-driven
      * approach, but in the mean time, directly.
      */
-    public void transform(Space r1, Space r2)
-            throws Exception {
-    }
-
+    public void transform(Space r1, Space r2) throws Exception;
 
 }

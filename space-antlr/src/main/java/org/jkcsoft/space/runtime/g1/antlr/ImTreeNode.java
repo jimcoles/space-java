@@ -10,6 +10,8 @@
 
 package org.jkcsoft.space.runtime.g1.antlr;
 
+import org.jkcsoft.space.antlr.SpaceParser;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,6 +19,27 @@ import java.util.List;
  * @author Jim Coles
  */
 public class ImTreeNode {
+
+    public static NodeType toNodeType(String ruleName) {
+        NodeType nt = null;
+        NodeType[] enumConstants = NodeType.class.getEnumConstants();
+
+        for (NodeType nodeType: enumConstants) {
+            if (nodeType.getAntrlRuleName() != null
+                    && nodeType.getAntrlRuleName().equals(ruleName))
+            {
+                nt = nodeType;
+                break;
+            }
+        }
+        if (nt == null)
+            throw new IllegalArgumentException(
+                    "ANTLR rule name [" + ruleName + "] does not map to enumerated values.");
+
+        return nt;
+    }
+
+    // -------------------------------------------------------------------------
 
     private boolean complete = false;
     private NodeType type = NodeType.UNKNOWN;
@@ -28,6 +51,7 @@ public class ImTreeNode {
         this.type = nodeType;
         this.text = text;
     }
+
 
     public void setText(String text) {
         this.text = text;
@@ -90,23 +114,49 @@ public class ImTreeNode {
                 + getText();
     }
 
+    public ImTreeNode getChild(int idxChild) {
+        return children.get(idxChild);
+    }
+
+    public int getLevel() {
+        return (parent != null) ? parent.getLevel() + 1 : 0;
+    }
+
     enum NodeType {
-        UNKNOWN(null),
-        SPACE_DEF("space"), // RULE
-        LIST("list"),   // RULE
-        ATOM("atom"),   // RULE
-        STRING_LITERAL("string"),   // RULE
-        IDENTIFIER(null),      // TERMINAL
-        DELIMETER(null);       // TERMINAL/leaf symbol
+        UNKNOWN(-1),
+//        SPACE_DEF(decodeRuleName(SpaceParser.RULE_list), true), // RULE
+        LIST(SpaceParser.RULE_list, true),   // RULE
+        ATOM(SpaceParser.RULE_atom),   // RULE
+        STRING_LITERAL(SpaceParser.RULE_string),   // RULE
+        IDENTIFIER(SpaceParser.RULE_identifier),      // RULE
+        TERMINAL(-1),       // TERMINAL/leaf symbol
+//        COMMENT(SpaceParser.RULE_comment)
+        ;
 
+        private int ruleIndex;
         private String antrlRuleName;
+        private boolean isList = false;
 
-        NodeType(String antlrRuleName) {
-            this.antrlRuleName = antlrRuleName;
+        NodeType(int ruleIndex) {
+            this(ruleIndex, false);
+        }
+        NodeType(int ruleIndex, boolean isList) {
+            this.ruleIndex = ruleIndex;
+            if (ruleIndex != -1)
+                this.antrlRuleName = decodeRuleName(ruleIndex);
+            this.isList = isList;
         }
 
         public String getAntrlRuleName() {
             return antrlRuleName;
         }
+
+        public boolean isList() {
+            return isList;
+        }
+    }
+
+    private static String decodeRuleName(int idxRule) {
+        return SpaceParser.ruleNames[idxRule];
     }
 }

@@ -10,16 +10,19 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * A named EquationExpr.
+ * An EquationDefn is a symbolic expression that expresses a
+ * relation between two otherwise independent things (Spaces).
+ * An Equation is, notionally, very similar to a Rule or a
+ * grammar Production.  An Equation must at all times evaluate
+ * to true if the system is to be deemed in a valid state.
  *
  * @author J. Coles
  * @version 1.0
  */
-public class EquationDefn extends EquationExpr {
-
+public class EquationDefn extends ModelElement {
 
     public EquationDefn() {
+        super();
     }
-
 
 }

@@ -37,8 +37,8 @@ public class Ra2ImTransform implements RaTreeListener {
     @Override
     public void startNode(Tree raTreeNode, List<String> ruleNameIndex, int level) {
         ImTreeNode thisImNode = getImNode(raTreeNode, ruleNameIndex);
-        if (thisImNode.getType() == ImTreeNode.NodeType.DELIMETER) {
-            log.debug("ignoring delimeter start");
+        if (thisImNode.getType() == ImTreeNode.NodeType.TERMINAL) {
+            log.debug("ignoring delimiter start");
             return;
         }
 
@@ -63,7 +63,7 @@ public class Ra2ImTransform implements RaTreeListener {
             }
 
             if (imRoot == null) {
-                if (pending.getType() == ImTreeNode.NodeType.SPACE_DEF) {
+                if (pending.getType() == ImTreeNode.NodeType.LIST) {
                     imRoot = pending;
                     activeParent = imRoot;
                     log.debug("starting IM space root node");
@@ -103,7 +103,7 @@ public class Ra2ImTransform implements RaTreeListener {
                 RuleContext ruleContext = (RuleContext) raTreeContext;
                 int ruleIndex = ruleContext.getRuleIndex();
                 String ruleName = ruleNameIndex.get(ruleIndex);
-                tni = new ImTreeNode(toNodeType(ruleName), ruleName);
+                tni = new ImTreeNode(ImTreeNode.toNodeType(ruleName), ruleName);
                 if (tni.getType() != ImTreeNode.NodeType.ATOM)
                     tni.setComplete(true);
             }
@@ -111,13 +111,13 @@ public class Ra2ImTransform implements RaTreeListener {
                 TerminalNode terminalNode = (TerminalNode) raTreeContext;
                 Token symbol = terminalNode.getSymbol();
                 if (DELIMETERS.contains(symbol.getText()))
-                    tni = new ImTreeNode(ImTreeNode.NodeType.DELIMETER, symbol.getText());
+                    tni = new ImTreeNode(ImTreeNode.NodeType.TERMINAL, symbol.getText());
                 else
                     tni = new ImTreeNode(ImTreeNode.NodeType.IDENTIFIER, symbol.getText());
 
             }
             else if (raTreeContext instanceof ErrorNode) {
-                System.err.println("ANTLR error node found in tree eval: " + raTreeContext.toString());
+                System.err.println("ANTLR error node found in tree exec: " + raTreeContext.toString());
             }
         }
         else {
@@ -126,38 +126,29 @@ public class Ra2ImTransform implements RaTreeListener {
         return tni;
     }
 
+
+    /**
+     * Collapses right node into left node.  Sets values of the left node
+     * based on contents of the right node.
+     *
+     * ATOM <- STRING_LITERAL <- TERMINAL => STRING_LITERAL
+     * ATOM <- TERMINAL => IDENTIFIER
+     *
+     * @param leftNode Existing node
+     * @param rightNode New node
+     */
     private void coalesceImNodes(ImTreeNode leftNode, ImTreeNode rightNode) {
-        if (leftNode.getType() == ImTreeNode.NodeType.ATOM
-                || leftNode.getType() == ImTreeNode.NodeType.STRING_LITERAL)
-        {
-            if (rightNode.getType() == ImTreeNode.NodeType.STRING_LITERAL) {
-                leftNode.setType(ImTreeNode.NodeType.STRING_LITERAL);
-            }
-            else if (rightNode.getType() == ImTreeNode.NodeType.IDENTIFIER) {
-                leftNode.setText(rightNode.getText());
-                leftNode.setComplete(true);
-            }
+        if (leftNode.getType() == ImTreeNode.NodeType.ATOM) {
+            leftNode.setType(rightNode.getType());
+        }
+        else {
+            leftNode.setText(rightNode.getText());
+            leftNode.setComplete(true);
         }
     }
 
 
-    private ImTreeNode.NodeType toNodeType(String ruleName) {
-        ImTreeNode.NodeType nt = null;
-        ImTreeNode.NodeType[] enumConstants = ImTreeNode.NodeType.class.getEnumConstants();
-
-        for (ImTreeNode.NodeType nodeType: enumConstants) {
-            if (nodeType.getAntrlRuleName() != null
-                && nodeType.getAntrlRuleName().equals(ruleName))
-            {
-                nt = nodeType;
-                break;
-            }
-        }
-        if (nt == null)
-            throw new IllegalArgumentException(
-                    "ANTLR rule name [" + ruleName + "] does not map to enumerated values.");
-
-        return nt;
+    public ImTreeNode getRootNode() {
+        return imRoot;
     }
-
 }

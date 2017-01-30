@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
  *
  * Licensed under the following license agreement:
  *
@@ -7,17 +7,15 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
+
 package org.jkcsoft.space.lang.ast;
 
 /**
- * @author J. Coles
- * @version 1.0
+ * @author Jim Coles
  */
-public class ActionDefn extends ModelElement {
-
-
-    public ActionDefn() {
-    }
-
-
+public enum PrimitiveType {
+    BOOLEAN,
+    CHAR,
+    INT,
+    REAL;
 }
