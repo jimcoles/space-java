@@ -1,6 +1,6 @@
 /* Space Lexer Grammar */
 
-lexer grammar SpaceLexer;
+lexer grammar Space2Lexer;
 
 //
 // -------------------------------- Lexer Rules Section ------------------------------------
@@ -18,9 +18,39 @@ lexer grammar SpaceLexer;
 ListStart : '(';
 ListEnd : ')';
 
-Identifier
-    : IdStartChars IdTailChars*
+SetStart : '{';
+SetEnd : '}';
+
+SpaceStart : '|';
+SpaceEnd : '|';
+
+TupleStart : '[';
+TupleEnd : ']';
+
+StatementEnd : ';' ;
+
+AccessKeyword :
+    PublicKeyword
     ;
+
+SpaceKeyword : 'space-def';
+BooleanKeyword : 'boolean';
+OrdinalKeyword : 'ord';
+CardinalKeyword : 'card';
+RealKeyword : 'real';
+VoidKeyword : 'void';
+
+PublicKeyword : 'public';
+
+ExtendsKeyword : 'extends';
+
+SpaceDefnType :
+    'abstract'
+    ;
+
+AssignOper : '=';
+
+NavOper : '.';
 
 /*
     Interpret the following definition of "StringLiteral" as:
@@ -32,15 +62,21 @@ Identifier
 
 StringLiteral : '"' ( ~'"' | '\\' '"' )* '"' ;
 
-Integer : INT;
+IntegerLiteral : INT;
 
-Float
+FloatLiteral
     :   '-'? INT '.' INT Exp?   // 1.35, 1.35E-9, 0.3, -4.5
     |   '-'? INT Exp            // 1e10 -3e4
     |   '-'? INT                // -3, 45
     ;
 
-WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
+Identifier
+    : IdStartChars IdTailChars*
+    ;
+
+//IdentifierRef : (Identifier '.' )* Identifier;
+
+Whitespace : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
 
 
 //SLC_START : '//' -> pushMode(QUOTED);

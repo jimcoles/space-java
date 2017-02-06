@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package org.jkcsoft.space;
+
+message SpaceProgramDefn {
+    repeated SpaceDefn spaces = 1;
+}
+
+message SpaceDefn {
+    string name = 1;
+    repeated CoordinateDefn coordinates = 2;
+    repeated ActionDefn functions = 3;
+}
+
+message CoordinateDefn {
+    ScalarType type = 1;
+    string name = 2;
+}
+
+enum ScalarType {
+    BOOLEAN = 0;
+    CHAR = 1;
+    INT = 2;
+    REAL = 3;
+}
+
+message ActionDefn {
+    string name = 1;
+    repeated ActionDefn subActions = 2;
+    repeated CallActionDefn subCallActions = 3;
+}
+
+message CallActionDefn {
+    string refFunctionName = 1;
+}

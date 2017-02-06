@@ -137,7 +137,7 @@ public class Executor extends ExprProcessor {
         catch (RuntimeException ex) {
             log.error("error executing", ex);
         }
-
+        log.info("exiting Space program execution");
         return null;
     }
 
@@ -174,6 +174,8 @@ public class Executor extends ExprProcessor {
         for (AbstractActionDefn childAction: childActions) {
             delegateExec(spcContext, childAction);
         }
+        callStack.pop();
+        log.debug("popped call stack. size ["+callStack.size()+"]");
     }
 
     /** Invokes a Java native method all via Java reflection.  Native actions

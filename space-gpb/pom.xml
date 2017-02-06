@@ -21,8 +21,34 @@
 
     <artifactId>space-gpb</artifactId>
 
-    <dependencies>
+    <properties>
+        <protobuf.version>3.2.0</protobuf.version>
+    </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.os72</groupId>
+                <artifactId>protoc-jar-maven-plugin</artifactId>
+                <version>3.1.0.5</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

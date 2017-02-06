@@ -47,6 +47,15 @@ public class TestAst {
                    )
             )
         );
+        CharacterSequence arg12 = objBuilder.newCharacterSequence("Hello, yourself.");
+        astBuilder.astRoot.addObjectInstance(arg12, astBuilder);
+        mainMethod.addAction(
+            new CallActionDefn(spaceDefn, "JnOpSys.println",
+                               new AssignmentDefn(null,
+                                                  new ObjectReference(new CoordinateDefn(null, PrimitiveType.CHAR),  arg12.getOid())
+                               )
+            )
+        );
 //        spaceDefn.
 //            .setContextSpaceDefn(new SpaceDefn() {
 //                @Override

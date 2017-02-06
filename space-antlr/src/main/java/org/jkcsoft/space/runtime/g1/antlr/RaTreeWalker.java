@@ -26,9 +26,9 @@ import java.util.List;
  */
 public class RaTreeWalker {
 
-    private List<RaTreeListener> listeners = new LinkedList<>();
+    private List<AntlrTreeNodeListener> listeners = new LinkedList<>();
 
-    public void addListener(RaTreeListener listener) {
+    public void addListener(AntlrTreeNodeListener listener) {
         listeners.add(listener);
     }
 
@@ -39,7 +39,7 @@ public class RaTreeWalker {
     }
 
     private void visit(Tree treeContext, List<String> ruleNameIndex, int level) {
-        for (RaTreeListener listener: listeners) {
+        for (AntlrTreeNodeListener listener: listeners) {
             listener.startNode(treeContext, ruleNameIndex, level);
         }
 
@@ -48,7 +48,7 @@ public class RaTreeWalker {
             visit(treeContext.getChild(idxChild), ruleNameIndex, childLevel);
         }
 
-        for (RaTreeListener listener: listeners) {
+        for (AntlrTreeNodeListener listener: listeners) {
             listener.endNode(treeContext, ruleNameIndex, level);
         }
         return;

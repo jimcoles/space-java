@@ -24,6 +24,7 @@
         <module>space-xsd-spec</module>
         <module>space-modello-spec</module>
         <module>space-gpb</module>
+        <module>space-jflex</module>
     </modules>
 
     <dependencyManagement>

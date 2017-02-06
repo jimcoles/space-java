@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
  *
  * Licensed under the following license agreement:
  *
@@ -8,21 +8,21 @@
  * Also see the LICENSE file in the repository root directory.
  */
 
-package org.jkcsoft.space.runtime.g1.antlr;
+package org.jkcsoft.space.runtime.g2.antlr;
 
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.ATN;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.Strings;
-import org.jkcsoft.space.antlr.SpaceLexer;
-import org.jkcsoft.space.antlr.SpaceParser;
+import org.jkcsoft.space.antlr.Space2Lexer;
+import org.jkcsoft.space.antlr.Space2Parser;
 import org.jkcsoft.space.runtime.AntlrTreeNodePrinter;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +34,7 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public class G1AntlrParser {
+public class G2AntlrParser {
 
     private static Logger log = Logger.getRootLogger();
 
@@ -70,44 +70,25 @@ public class G1AntlrParser {
                 }
             };
 
-            print(parseErrors);
-
-            SpaceLexer spaceLexer = new SpaceLexer(input); // create a buffer of tokens pulled from the lexer
+            Space2Lexer spaceLexer = new Space2Lexer(input); // create a buffer of tokens pulled from the lexer
             spaceLexer.addErrorListener(errorListener);
-            CommonTokenStream tokens = new CommonTokenStream(spaceLexer); // create a parser that feeds off the
+            CommonTokenStream tokenStream = new CommonTokenStream(spaceLexer); // create a parser that feeds off the
             // tokens buffer
-            SpaceParser spaceParser = new SpaceParser(tokens);
+            Space2Parser spaceParser = new Space2Parser(tokenStream);
+            //
             spaceParser.addErrorListener(errorListener);
-            ParseTree tree = spaceParser.list(); // begin parsing at init rule
+            // dump using our customer printer ...
+            String[] ruleNames = spaceParser.getRuleNames();
+            List<String> ruleNamesList = ruleNames != null ? Arrays.asList(ruleNames) : null;
+            AntlrTreeNodePrinter printer = new AntlrTreeNodePrinter(ruleNamesList);
+            spaceParser.addParseListener(printer);
+            // begin parsing at top-level rule
+            ParseTree tree = spaceParser.parseUnit();
 
             // debug / print
-            String stringTree = tree.toStringTree(spaceParser);
-            System.out.println("ANRLR Util parse dump:" + "\n" + stringTree); // print LISP-style tree
+            log.info("ANTLR Util parse dump:" + "\n" + tree.toStringTree(spaceParser));
+            log.info("ANTLR custom print/dump: " + "\n" + printer.getSb());
 
-            //
-            String[] ruleNames = spaceParser.getRuleNames();
-            ATN atn = spaceParser.getATN();
-            Token currentToken = spaceParser.getCurrentToken();
-            ParserRuleContext context = spaceParser.getContext();
-            List<String> dfaStrings = spaceParser.getDFAStrings();
-
-            // walk the raw parse tree to build our AST ...
-            RaTreeWalker walker = new RaTreeWalker();
-//            AntlrTreeNodePrinter printer = new AntlrTreeNodePrinter();
-//            walker.addListener(printer);
-//            walker.visitAll(tree, spaceParser);
-//            System.out.println("Formatted ANTLR parse dump:" + "\n" + printer.getSb());
-            //
-//            walker = new RaTreeWalker();
-            Ra2ImTransform ra2ImTransform = new Ra2ImTransform();
-            walker.addListener(ra2ImTransform);
-            walker.visitAll(tree, spaceParser);
-            //
-            ImTreePrinter imPrinter = new ImTreePrinter();
-            ImTreeWalker imWalker = new ImTreeWalker();
-            imWalker.addListener(imPrinter);
-            imWalker.visitAll(ra2ImTransform.getRootNode());
-            System.out.println("Formatted IM parse dump:" + "\n" + imPrinter.getSb());
         } catch (Exception e) {
             e.printStackTrace();
         }

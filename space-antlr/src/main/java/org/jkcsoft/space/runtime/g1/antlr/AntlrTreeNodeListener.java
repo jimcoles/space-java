@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public interface RaTreeListener {
+public interface AntlrTreeNodeListener {
 
     void startNode(Tree treeContext, List<String> ruleNameIndex, int level);
 

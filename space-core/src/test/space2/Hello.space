@@ -1,0 +1,13 @@
+
+public space-def MySpace
+/*
+ This is my space.
+*/
+(
+    card myIntDim = 1;
+    boolean myBoolDim = true;
+
+    void main(CharSequence args;) (
+        opsys.println["Hello, Space!"];
+    )
+)

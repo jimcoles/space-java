@@ -22,7 +22,7 @@ import java.util.*;
 /**
  * @author Jim Coles
  */
-public class Ra2ImTransform implements RaTreeListener {
+public class Ra2ImTransform implements AntlrTreeNodeListener {
 
     private static Logger log = Logger.getRootLogger();
 

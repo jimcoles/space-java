@@ -42,12 +42,12 @@ options {
 //    |   'var'
 //    ;
 
-list : comment? LIST_START (atom | list | comment)* LIST_END comment?;
+list : comment? ListStart (atom | list | comment)* ListEnd comment?;
 
 atom : identifier
      | string
      | integer
-     | float
+     | float1
      ;
 
 comment
@@ -56,11 +56,10 @@ comment
     ;
 
 //
-singleLineComment : SingleLineComment ;
-//multiLineComment : MLC_START MLC_BODY MLC_END;
+singleLineComment : SingleLineComment;
 multiLineComment : BlockComment;
 
 string : StringLiteral;
 identifier : Identifier;
 integer : Integer;
-float : Float;
+float1 : Float;
