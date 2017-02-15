@@ -20,7 +20,7 @@ public class Identifier {
 
     private String name;
 
-    public Identifier(String name) {
+    Identifier(String name) {
         this.name = name;
     }
 

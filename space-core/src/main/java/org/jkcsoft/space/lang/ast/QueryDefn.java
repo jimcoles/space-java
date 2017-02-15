@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
  *
  * Licensed under the following license agreement:
  *
@@ -15,7 +15,7 @@ package org.jkcsoft.space.lang.ast;
  */
 public class QueryDefn extends EquationDefn {
 
-    public QueryDefn(SpaceDefn contextSpaceDefn, String name) {
+    QueryDefn(SpaceDefn contextSpaceDefn, String name) {
 
     }
 

@@ -1,0 +1,7 @@
+public native space-def Socket
+/*
+  Provides a Space API to a native socket
+*/
+(
+
+)

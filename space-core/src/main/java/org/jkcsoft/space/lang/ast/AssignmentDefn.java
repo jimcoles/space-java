@@ -24,12 +24,12 @@ public class AssignmentDefn {
     private String      rightIdentifier;
     private ScalarValue rightSideValue;
 
-    public AssignmentDefn(String leftIdentifier, String rightIdentifier) {
+    AssignmentDefn(String leftIdentifier, String rightIdentifier) {
         this.leftIdentifier = leftIdentifier;
         this.rightIdentifier = rightIdentifier;
     }
 
-    public AssignmentDefn(String leftIdentifier, ScalarValue literalValue) {
+    AssignmentDefn(String leftIdentifier, ScalarValue literalValue) {
         this.leftIdentifier = leftIdentifier;
         this.rightSideValue = literalValue;
     }

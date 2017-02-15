@@ -30,9 +30,13 @@ public class SpaceActionDefn extends AbstractActionDefn implements Callable {
     private SpaceDefn argSpaceDefn;
     private List<AbstractActionDefn> nestedActions = new LinkedList<>();  // child nestedActions
 
-    public SpaceActionDefn(SpaceDefn contextSpaceDefn, String name, SpaceDefn argSpaceDefn) {
-        super(contextSpaceDefn, name);
+    SpaceActionDefn(String name) {
+        super(name);
+    }
+
+    public void setArgSpaceDefn(SpaceDefn argSpaceDefn) {
         this.argSpaceDefn = argSpaceDefn;
+        argSpaceDefn.setContextSpaceDefn(this.getContextSpaceDefn());
     }
 
     @Override
@@ -40,7 +44,7 @@ public class SpaceActionDefn extends AbstractActionDefn implements Callable {
         return argSpaceDefn;
     }
 
-    public <T extends AbstractActionDefn> T addAction(T nestedActionDefn) {
+    public AbstractActionDefn addAction(AbstractActionDefn nestedActionDefn) {
         nestedActions.add(nestedActionDefn);
         return nestedActionDefn;
     }

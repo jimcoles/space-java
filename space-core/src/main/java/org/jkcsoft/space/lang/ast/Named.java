@@ -16,7 +16,6 @@ package org.jkcsoft.space.lang.ast;
 public interface Named {
 
     String getName();
-    boolean hasName();
     boolean isNamed();
 
 }

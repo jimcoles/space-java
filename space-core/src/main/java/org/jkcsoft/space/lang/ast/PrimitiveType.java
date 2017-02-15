@@ -17,5 +17,6 @@ public enum PrimitiveType {
     BOOLEAN,
     CHAR,
     INT,
-    REAL;
+    REAL,
+    RATIONAL;
 }

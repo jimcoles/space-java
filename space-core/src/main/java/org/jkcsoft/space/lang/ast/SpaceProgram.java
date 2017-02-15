@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
  *
  * Licensed under the following license agreement:
  *
@@ -9,7 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.instance.SpaceObject;
 
 import java.util.LinkedList;
@@ -36,10 +35,11 @@ public class SpaceProgram extends ModelElement {
     private List<SpaceDefn> spaceDefns = new LinkedList<>();
     private List<SpaceObject> objectHeap = new LinkedList<>();
 
-    public SpaceProgram() {
+    SpaceProgram() {
+
     }
 
-    public <T extends SpaceDefn> T addSpace(T spaceDefn) {
+    public SpaceDefn addSpaceDefn(SpaceDefn spaceDefn) {
         spaceDefns.add(spaceDefn);
         return spaceDefn;
     }

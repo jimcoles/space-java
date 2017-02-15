@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
  *
  * Licensed under the following license agreement:
  *
@@ -22,25 +22,32 @@ import java.util.Map;
  * @author Jim Coles
  * @version 1.0
  */
-public abstract class SpaceDefn extends ModelElement {
+public class SpaceDefn extends ModelElement {
 
     private SpaceDefn               contextSpaceDefn;
     private List<CoordinateDefn>    coordinateList;
     private List<EquationDefn>      equations;
     private List<TransformDefn>     transformDefns;
-    private List<AbstractActionDefn>        functionDefns = new LinkedList<>();
+    private List<AbstractActionDefn>    functionDefns = new LinkedList<>();
 
     // redundant
     private Map<String, CoordinateDefn>     indexCoordinatesByName = new HashMap<>();
     private Map<String, AbstractActionDefn> indexFunctionsByName = new HashMap<>();
 
-    public SpaceDefn(SpaceDefn contextSpaceDefn, String name) {
+    SpaceDefn(String name) {
         super(name);
+    }
+
+    void setContextSpaceDefn(SpaceDefn contextSpaceDefn) {
         this.contextSpaceDefn = contextSpaceDefn;
     }
 
     public SpaceDefn getContextSpaceDefn() {
         return contextSpaceDefn;
+    }
+
+    public boolean hasContextSpaceDefn() {
+        return contextSpaceDefn != null;
     }
 
     public List<CoordinateDefn> getCoordinateList() {
@@ -62,6 +69,7 @@ public abstract class SpaceDefn extends ModelElement {
 
     public AbstractActionDefn addActionDefn(AbstractActionDefn actionDefn) {
         functionDefns.add(actionDefn);
+        actionDefn.setContextSpaceDefn(this);
         //
         indexFunctionsByName.put(actionDefn.getName(), actionDefn);
         return actionDefn;

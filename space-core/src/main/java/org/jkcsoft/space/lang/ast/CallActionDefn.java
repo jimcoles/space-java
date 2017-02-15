@@ -22,8 +22,8 @@ public class CallActionDefn extends AbstractActionDefn {
     private String              functionRefId;
     private AssignmentDefn[]    assignmentDefns;
 
-    public CallActionDefn(SpaceDefn contextSpaceDefn, String functionRefId, AssignmentDefn ... assignmentDefns) {
-        super(contextSpaceDefn, null);
+    CallActionDefn(String functionRefId, AssignmentDefn ... assignmentDefns) {
+        super(null);
         this.functionRefId = functionRefId;
         this.assignmentDefns = assignmentDefns;
     }

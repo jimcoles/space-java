@@ -17,11 +17,22 @@ package org.jkcsoft.space.lang.instance;
  */
 public class View {
 
+    View() {
 
-    public View() {
     }
 
+    /** The computed normalization.  Basis Spaces are
+     * 3rd normal form.  Computed Views are general something
+     * else. */
+    public int getNormalForm() {
+        return -1;
+    }
 
-
+    /** The computed Degrees of Freedom (DOF) of this
+     * view, which is determined based on the joins from the
+     * base Space Definition. */
+    public int getDof() {
+        return -1;
+    }
 
 }

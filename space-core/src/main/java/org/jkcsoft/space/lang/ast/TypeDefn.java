@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
  *
  * Licensed under the following license agreement:
  *
@@ -19,8 +19,8 @@ public class TypeDefn extends ModelElement {
     private boolean _isEntity;
 
 
-    public TypeDefn() {
-    }
+    TypeDefn() {
 
+    }
 
 }

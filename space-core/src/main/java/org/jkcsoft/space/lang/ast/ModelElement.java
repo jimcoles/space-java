@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
  *
  * Licensed under the following license agreement:
  *
@@ -23,11 +23,11 @@ public abstract class ModelElement extends SpaceExpr implements Named {
     private String description;
     private List<ModelElement>  children;
 
-    public ModelElement() {
+    ModelElement() {
         this(null);
     }
 
-    public ModelElement(String name) {
+    ModelElement(String name) {
         super();
         this.name = name;
     }
@@ -37,13 +37,8 @@ public abstract class ModelElement extends SpaceExpr implements Named {
     }
 
     @Override
-    public boolean hasName() {
-        return false;
-    }
-
-    @Override
     public boolean isNamed() {
-        return false;
+        return name != null;
     }
 
     public ModelElement setName(String name) {

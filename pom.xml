@@ -20,11 +20,15 @@
         <module>space-samples</module>
         <module>space-sprocket</module>
         <module>space-ship</module>
-        <module>space-antlr</module>
         <module>space-xsd-spec</module>
         <module>space-modello-spec</module>
         <module>space-gpb</module>
         <module>space-jflex</module>
+        <module>space-lang-lib</module>
+        <!-- Providers -->
+        <module>space-antlr</module>
+        <!-- Aggregators -->
+        <module>space-assembly</module>
     </modules>
 
     <dependencyManagement>
@@ -57,15 +61,27 @@
             </dependency>
 
             <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>1.2.17</version>
+            </dependency>
+
+            <!-- Our sub-modules -->
+
+            <dependency>
                 <groupId>org.jkcsoft</groupId>
                 <artifactId>java-core</artifactId>
                 <version>1.0-SNAPSHOT</version>
             </dependency>
-
             <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>1.2.17</version>
+                <groupId>org.jkcsoft</groupId>
+                <artifactId>space-core</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jkcsoft</groupId>
+                <artifactId>space-antlr</artifactId>
+                <version>1.0-SNAPSHOT</version>
             </dependency>
 
         </dependencies>
@@ -73,13 +89,32 @@
 
     <build>
         <pluginManagement>
+
             <plugins>
                 <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
                     <version>4.5</version>
                 </plugin>
+
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.0.0</version>
+<!--
+                    <configuration>
+                        <descriptors>
+                            <descriptor>src/assembly/bin.xml</descriptor>
+                        </descriptors>
+                    </configuration>
+-->
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>appassembler-maven-plugin</artifactId>
+                    <version>1.10</version>
+                </plugin>
             </plugins>
+
         </pluginManagement>
     </build>
 </project>

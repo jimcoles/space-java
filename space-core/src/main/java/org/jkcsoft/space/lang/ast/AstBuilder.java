@@ -11,11 +11,10 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.ObjectBuilder;
-import org.jkcsoft.space.lang.instance.SpaceObject;
+import org.jkcsoft.space.lang.instance.ObjectReference;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,12 +29,8 @@ public class AstBuilder {
 
     // holds things (mostly named things) defined in the source code
     private Map<String, Class<ModelElement>> metaTypeMap = new HashMap<>();
-    public SpaceProgram astRoot;
+    private SpaceProgram astRoot;
     private ModelElement currentAstNode;
-
-    private ObjectBuilder getObjectBuilder() {
-        return ObjectBuilder.getInstance();
-    }
 
     public void addMetaObject(ModelElement object) {
         // metaObjects;
@@ -49,14 +44,41 @@ public class AstBuilder {
         return currentAstNode;
     }
 
-    public SpaceProgram addRoot() {
+    public SpaceProgram initProgram() {
         astRoot = new SpaceProgram();
         return  astRoot;
+    }
+
+    public SpaceDefn newSpaceDefn(String name) {
+        SpaceDefn spaceDefn = new SpaceDefn(name);
+        return spaceDefn;
+    }
+
+    public SpaceActionDefn newSpaceActionDefn(String name) {
+        return new SpaceActionDefn(name);
     }
 
     public boolean validate() {
         return true;
     }
 
+    private ObjectBuilder getObjectBuilder() {
+        return ObjectBuilder.getInstance();
+    }
 
+    public CoordinateDefn newCoordinateDefn(String name, PrimitiveType type) {
+        return new CoordinateDefn(name, type);
+    }
+
+    public AbstractActionDefn newNativeActionDefn(String name, Method jMethod, SpaceDefn nativeArgSpaceDefn) {
+        return new NativeActionDefn(name, jMethod, nativeArgSpaceDefn);
+    }
+
+    public AssignmentDefn newAssignmentDefn(String leftIdRef, ObjectReference objectReference) {
+        return new AssignmentDefn(leftIdRef, objectReference);
+    }
+
+    public AbstractActionDefn newCallActionDefn(String functionRefId, AssignmentDefn assignmentDefn) {
+        return new CallActionDefn(functionRefId, assignmentDefn);
+    }
 }

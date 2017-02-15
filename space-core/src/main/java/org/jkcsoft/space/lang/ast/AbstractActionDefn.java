@@ -17,9 +17,8 @@ public abstract class AbstractActionDefn extends ModelElement {
 
     private SpaceDefn   contextSpaceDefn;  // the calling space defn
 
-    public AbstractActionDefn(SpaceDefn contextSpaceDefn, String name) {
+    AbstractActionDefn(String name) {
         super(name);
-        this.contextSpaceDefn = contextSpaceDefn;
     }
 
     public SpaceDefn getContextSpaceDefn() {

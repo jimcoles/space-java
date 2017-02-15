@@ -23,6 +23,10 @@ public class Namespace {
         this.paths = fullPath.split("\\.");
     }
 
+    public Namespace(String[] paths) {
+        this.paths = paths;
+    }
+
     public String[] getPaths() {
         return paths;
     }

@@ -16,11 +16,10 @@ import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.runtime.impl.CastTransforms;
 import org.jkcsoft.space.lang.runtime.jnative.math.JnMath;
 import org.jkcsoft.space.lang.runtime.jnative.opsys.JnOpSys;
-import org.jkcsoft.space.lang.runtime.loaders.xml.XmlLoader;
+import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.util.Namespace;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -44,19 +43,23 @@ public class Executor extends ExprProcessor {
     /**
      *
      */
-    public void main(String[] args) {
+    public static void main(String[] args) {
         try {
             String stFilePath = args[0];
             File file = new File(stFilePath);
             if (!file.exists()) {
                 throw new Exception("Input file [" + stFilePath + "] does not exist.");
             }
-            XmlLoader loader = new XmlLoader(new FileInputStream(file));
-            SpaceProgram program = loader.load();
+//            XmlLoader loader = new XmlLoader(new FileInputStream(file));
+//            SpaceProgram program = loader.load();
+
+            Class<?> aClass = Class.forName("org.jkcsoft.space.lang.runtime.loaders.antlr.g2.G2AntlrParser");
+            AstLoader astLoader = (AstLoader) aClass.newInstance();
+            AstBuilder astBuilder = astLoader.load(file);
             Executor exec = new Executor();
-            exec.exec(program);
+            exec.exec(astBuilder.getAstRoot());
         } catch (Throwable th) {
-            th.printStackTrace();
+            log.error("error loading source file", th);
         }
     }
 
@@ -64,10 +67,11 @@ public class Executor extends ExprProcessor {
     /** Definition objects are loaded as we parse the source code.  Some objects are loaded
      *  with static logic.  These are the intrinsic, native objects.
      */
-    private Set<SpaceDefn> tableDefnObjects = new HashSet<>();
+    private AstBuilder      rootDefnBuilder = new AstBuilder();
+    private Set<SpaceDefn>  tableDefnObjects = new HashSet<>();
     private Map<String, SpaceDefn> indexDefnObjectsByFullPath = new TreeMap<>();
 
-    private Stack<Action> callStack = new Stack<>();
+    private Stack<Action>   callStack = new Stack<>();
 
     /** The 'object' tables for 'instance' objects associated with the running program.
      *  This map is added to as the program runs.
@@ -98,19 +102,19 @@ public class Executor extends ExprProcessor {
     }
 
     private void loadNativeClass(Class jnClass) {
-        EntityDefn spaceDefn = new EntityDefn(null, jnClass.getSimpleName());
+        SpaceDefn spaceDefn = rootDefnBuilder.newSpaceDefn(jnClass.getSimpleName());
 //        spaceDefn.setName(jnClass.getSimpleName());
         Method[] methods = jnClass.getMethods();
         for (Method jMethod: methods) {
-            EntityDefn nativeArgSpaceDefn = new EntityDefn(spaceDefn, null);
-            jMethod.getParameters();
-            nativeArgSpaceDefn.addDimension(new CoordinateDefn("arg1", null));
-            spaceDefn.addActionDefn(new NativeActionDefn(spaceDefn, jMethod.getName(), jMethod, nativeArgSpaceDefn));
+            SpaceDefn nativeArgSpaceDefn = rootDefnBuilder.newSpaceDefn(null);
+            jMethod.getParameters();    // TODO build dynamic arg space
+            nativeArgSpaceDefn.addDimension(rootDefnBuilder.newCoordinateDefn("arg1", null));
+            spaceDefn.addActionDefn(rootDefnBuilder.newNativeActionDefn(jMethod.getName(), jMethod, nativeArgSpaceDefn));
         }
-        addDefnObject(spaceDefn);
+        tabulateDefnObject(spaceDefn);
     }
 
-    private void addDefnObject(EntityDefn spaceDefn) {
+    private void tabulateDefnObject(SpaceDefn spaceDefn) {
         tableDefnObjects.add(spaceDefn);
         indexDefnObjectsByFullPath.put(spaceDefn.getName(), spaceDefn);
     }

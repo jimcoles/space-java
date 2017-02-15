@@ -25,35 +25,47 @@ public class TestAst {
     @Test
     public void testBuildAndRunProgram() {
         AstBuilder astBuilder = new AstBuilder();
+        astBuilder.initProgram();
+        //
         ObjectBuilder objBuilder = ObjectBuilder.getInstance();
 
-        astBuilder.addRoot();
-        EntityDefn spaceDefn = new EntityDefn(null, "MyHelloSpace");
+        astBuilder.initProgram();
+        SpaceDefn spaceDefn = astBuilder.newSpaceDefn("MyHelloSpace");
         astBuilder.getAstRoot()
-            .addSpace(spaceDefn)
-                .addDimension(new CoordinateDefn("myIntDim", PrimitiveType.INT))
+            .addSpaceDefn(spaceDefn)
+                .addDimension(astBuilder.newCoordinateDefn("myIntDim", PrimitiveType.INT))
                     .setType(PrimitiveType.CHAR);
         spaceDefn
-            .addDimension(new CoordinateDefn("myCharDim", PrimitiveType.CHAR))
+            .addDimension(astBuilder.newCoordinateDefn("myCharDim", PrimitiveType.CHAR))
             ;
-        SpaceActionDefn mainMethod = new SpaceActionDefn(spaceDefn, "main", null);
+        SpaceActionDefn mainMethod = astBuilder.newSpaceActionDefn("main");
         spaceDefn.addActionDefn(mainMethod);
         CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
-        astBuilder.astRoot.addObjectInstance(arg1, astBuilder);
+        astBuilder.getAstRoot().addObjectInstance(arg1, astBuilder);
         mainMethod.addAction(
-            new CallActionDefn(spaceDefn, "JnOpSys.println",
-                   new AssignmentDefn(null,
-                          new ObjectReference(new CoordinateDefn(null, PrimitiveType.CHAR),  arg1.getOid())
-                   )
+            astBuilder.newCallActionDefn(
+                "JnOpSys.println",
+                astBuilder.newAssignmentDefn(
+                    null,
+                    new ObjectReference(
+                        astBuilder.newCoordinateDefn(null, PrimitiveType.CHAR),
+                        arg1.getOid()
+                    )
+                )
             )
         );
         CharacterSequence arg12 = objBuilder.newCharacterSequence("Hello, yourself.");
-        astBuilder.astRoot.addObjectInstance(arg12, astBuilder);
+        astBuilder.getAstRoot().addObjectInstance(arg12, astBuilder);
         mainMethod.addAction(
-            new CallActionDefn(spaceDefn, "JnOpSys.println",
-                               new AssignmentDefn(null,
-                                                  new ObjectReference(new CoordinateDefn(null, PrimitiveType.CHAR),  arg12.getOid())
-                               )
+            astBuilder.newCallActionDefn(
+                "JnOpSys.println",
+                astBuilder.newAssignmentDefn(
+                    null,
+                    new ObjectReference(
+                        astBuilder.newCoordinateDefn(null, PrimitiveType.CHAR),
+                        arg12.getOid()
+                    )
+                )
             )
         );
 //        spaceDefn.
