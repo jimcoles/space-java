@@ -17,5 +17,5 @@
         <!ELEMENT ssc-meta-domain EMPTY>
         <!ENTITY % meta-domain.attributes
                 'name    CDATA    #REQUIRED
-        type    CDATA    #REQUIRED'>
+        defn    CDATA    #REQUIRED'>
         <!ATTLIST ssc-meta-attribute %meta-attribute.attributes; >

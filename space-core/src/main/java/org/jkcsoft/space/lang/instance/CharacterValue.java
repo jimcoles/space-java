@@ -15,11 +15,11 @@ import org.jkcsoft.space.lang.ast.CoordinateDefn;
 /**
  * @author Jim Coles
  */
-public class CharacterValue extends ScalarValue {
+public class CharacterValue extends ScalarValue<Character> {
 
     /** Limit constructor access to package-only. */
-    CharacterValue(CoordinateDefn type, char c) {
-        super(type);
+    CharacterValue(SpaceOid oid, CoordinateDefn type, char c) {
+        super(oid, type);
     }
 
     @Override

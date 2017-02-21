@@ -11,6 +11,13 @@
 package org.jkcsoft.space.lang.instance;
 
 /**
+ * There are only five kinds of SpaceObjects:
+ * {@link ScalarValue}
+ * {@link Tuple}
+ * {@link Space}
+ * {@link BinarySequence}
+ * {@link BinaryStream}
+ *
  * @author Jim Coles
  */
 public class SpaceObject {

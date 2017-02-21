@@ -10,6 +10,8 @@
 package org.jkcsoft.space.lang.instance;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,18 +23,37 @@ import java.util.Map;
  * @author Jim Coles
  * @version 1.0
  */
-public class Tuple {
+public class Tuple extends SpaceObject {
 
+    /** May be anonymous. */
     private Space space;
-    private ScalarValue[] values;
+
+    private Assignable[]        assignables;
+    private List<ScalarValue>   values = new LinkedList<>();
+    private List<Association>   associations = new LinkedList<>();
     //
     private Map<String, ScalarValue> indexValuesByName = new HashMap<>();
+    private Map<String, Association> indexAssociationsByName = new HashMap<>();
 
-    Tuple(Space space, ScalarValue ... values) {
+
+    Tuple(SpaceOid oid, Space space, Assignable ... assignables) {
+        super(oid);
         this.space = space;
-        this.values = values;
+        this.assignables = assignables;
+        for (Assignable assignable : assignables) {
+            if (assignable instanceof ScalarValue) {
+                values.add((ScalarValue) assignable);
+            }
+            else if (assignable instanceof Association) {
+                associations.add((Association) assignable);
+            }
+        }
         for (ScalarValue value: values) {
             indexValuesByName.put(value.getType().getName(), value);
+        }
+        for (Association association : associations) {
+            if (association.getDefn() != null)
+                indexAssociationsByName.put(association.getDefn().getName(), association);
         }
     }
 
@@ -48,7 +69,11 @@ public class Tuple {
     }
 
     public ScalarValue getValueAt(int index) {
-        return values[index];
+        return values.get(index);
+    }
+
+    public Assignable getAssignableAt(int index) {
+        return assignables[index];
     }
 
     public void setSpace(Space space) {

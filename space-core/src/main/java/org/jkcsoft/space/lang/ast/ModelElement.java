@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -19,9 +20,9 @@ import java.util.List;
  */
 public abstract class ModelElement extends SpaceExpr implements Named {
 
-    private String name;
-    private String description;
-    private List<ModelElement>  children;
+    private String              name;
+    private String              description;
+    private List<ModelElement>  children = new LinkedList<>();
 
     ModelElement() {
         this(null);
@@ -52,6 +53,11 @@ public abstract class ModelElement extends SpaceExpr implements Named {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public ModelElement addChild(ModelElement child) {
+        children.add(child);
+        return child;
     }
 
     public List<ModelElement> getChildren() {

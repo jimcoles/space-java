@@ -20,11 +20,11 @@
 
       <!-- define the person_identity table -->
       <entity-defn code-name="person-identity">
-        <variable-defn code-name="id" type="integer-id" identifier="true"/>
-        <variable-defn code-name="first-name" type="person-name"/>
-        <variable-defn code-name="last-name" type="person-name"/>
-        <variable-defn code-name="full-name" type="char"/>
-        <variable-defn code-name="public-key" type="guid"/>
+        <variable-defn code-name="id" defn="integer-id" identifier="true"/>
+        <variable-defn code-name="first-name" defn="person-name"/>
+        <variable-defn code-name="last-name" defn="person-name"/>
+        <variable-defn code-name="full-name" defn="char"/>
+        <variable-defn code-name="public-key" defn="guid"/>
 
         <!-- 'equations' defined in 'entity' context must reference only that 'entity's'
              'variables'. To define a re-usable 'equation', define in a 'model' context

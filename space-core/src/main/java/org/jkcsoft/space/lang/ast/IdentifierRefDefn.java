@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.util.Namespace;
+
 /**
  * A character-based identifier for source code definable things such as
  * Spaces, Coordinates, and Functions.
@@ -16,15 +18,15 @@ package org.jkcsoft.space.lang.ast;
  * @author Jim Coles
  * @version 1.0
  */
-public class Identifier {
+public class IdentifierRefDefn implements AssignableDefn {
 
-    private String name;
+    private Namespace path;
 
-    Identifier(String name) {
-        this.name = name;
+    IdentifierRefDefn(Namespace path) {
+        this.path = path;
     }
 
-    public String getName() {
-        return name;
+    public Namespace getPath() {
+        return path;
     }
 }

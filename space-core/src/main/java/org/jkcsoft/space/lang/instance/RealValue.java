@@ -19,8 +19,8 @@ public class RealValue extends ScalarValue {
 
     private double jFloatDouble = Double.NaN;
 
-    public RealValue(CoordinateDefn type) {
-        super(type);
+    public RealValue(SpaceOid oid, CoordinateDefn type) {
+        super(oid, type);
     }
 
     @Override

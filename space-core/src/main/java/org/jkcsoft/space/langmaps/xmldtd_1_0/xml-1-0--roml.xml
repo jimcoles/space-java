@@ -19,8 +19,8 @@
 <model-defn code-name="xml-1-0--roml" parent-model="">
     <equation-context>
         <params>
-            <variable code-name="the-roml-model" type="roml-model"/>
-            <variable code-name="the-xml-model" type="xml-1-0-model"/>
+            <variable code-name="the-roml-model" defn="roml-model"/>
+            <variable code-name="the-xml-model" defn="xml-1-0-model"/>
         </params>
 
         <equation-defn code-name="roml-entity--xml-list-element">
@@ -38,7 +38,7 @@
                         <sym-ref>element</sym-ref>
                         <sym-ref>element-name</sym-ref>
                     </qpath>
-                    <literal type="com.roml.lib.char.string"><![CDATA[-list]]></literal>
+                    <literal defn="com.roml.lib.char.string"><![CDATA[-list]]></literal>
                 </union>
             </equiv>
         </equation-defn>

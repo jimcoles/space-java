@@ -19,7 +19,7 @@ import org.jkcsoft.space.lang.instance.SpaceList;
  * @author J. Coles
  * @version 1.0
  */
-public class SpaceExpr {
+public abstract class SpaceExpr {
 
     private SpaceList exprList;
 

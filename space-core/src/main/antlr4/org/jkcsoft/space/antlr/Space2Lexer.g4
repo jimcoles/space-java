@@ -34,6 +34,7 @@ AccessKeyword :
     ;
 
 SpaceKeyword    : 'space-def';
+EquationKeyword : 'equation-def';
 BooleanKeyword  : 'boolean';
 OrdinalKeyword  : 'ord';
 CardinalKeyword : 'card';

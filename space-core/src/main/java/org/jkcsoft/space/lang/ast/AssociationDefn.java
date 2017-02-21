@@ -17,12 +17,23 @@ package org.jkcsoft.space.lang.ast;
  * @author J. Coles
  * @version 1.0
  */
-public class AssociationDefn {
+public class AssociationDefn extends ModelElement {
 
-    private TypeDefn from;
-    private TypeDefn to;
+    private SpaceDefn from;
+    private SpaceDefn to;
 
-    AssociationDefn() {
+    AssociationDefn(String name, SpaceDefn from, SpaceDefn to) {
+        super(name);
+        this.from = from;
+        this.to = to;
+    }
+
+    public SpaceDefn getFrom() {
+        return from;
+    }
+
+    public SpaceDefn getTo() {
+        return to;
     }
 
     /**

@@ -17,11 +17,11 @@
 -->
 <model-defn code-name="xml-dtd-model">
     <entity-defn code-name="element">
-        <variable-defn code-name="element-name" type="code-name" identifier="true"/>
+        <variable-defn code-name="element-name" defn="code-name" identifier="true"/>
     </entity-defn>
 
     <entity-defn code-name="attribute">
-        <variable-defn code-name="attribute-name" type="code-name" identifier="true"/>
+        <variable-defn code-name="attribute-name" defn="code-name" identifier="true"/>
     </entity-defn>
 
     <association-defn code-name="element-to-attribute">

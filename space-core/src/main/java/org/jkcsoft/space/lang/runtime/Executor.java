@@ -57,9 +57,18 @@ public class Executor extends ExprProcessor {
             AstLoader astLoader = (AstLoader) aClass.newInstance();
             AstBuilder astBuilder = astLoader.load(file);
             Executor exec = new Executor();
+            exec.linkRefs(astBuilder.getAstRoot());
             exec.exec(astBuilder.getAstRoot());
         } catch (Throwable th) {
-            log.error("error loading source file", th);
+            log.error("error running", th);
+        }
+    }
+
+    private void linkRefs(ModelElement astRoot) {
+        log.debug(astRoot.getName());
+        List<ModelElement> children = astRoot.getChildren();
+        for (ModelElement child : children) {
+            linkRefs(child);
         }
     }
 
@@ -77,6 +86,11 @@ public class Executor extends ExprProcessor {
      *  This map is added to as the program runs.
      */
     private Map<SpaceOid, SpaceObject> indexObjectsByOid = new TreeMap<>();
+    /**
+     * Key=the referenced object.
+     * Value=the set of object Oids holding reference to the key Oid.
+     */
+    private Map<SpaceOid, Set<SpaceOid>> objectReferenceMap = new TreeMap<>();
 
     /**
      * Mapping from expression type to expression handler. Some handlers will be
@@ -127,8 +141,9 @@ public class Executor extends ExprProcessor {
      * Evaluates a SpaceProgram.
      */
     public ModelElement exec(SpaceProgram program) throws Exception {
+        log.info("enter program exec for " + program.getName());
         SpaceDefn firstSpace = program.getFirstSpace();
-        Space rootContext = new Space(null, firstSpace);
+        Space rootContext = getObjBuilder().newSpace(null, firstSpace);
         SpaceActionDefn spMainActionDefn = (SpaceActionDefn) firstSpace.getFunction("main");
         List<SpaceObject> objectHeap = program.getObjectHeap();
         for (SpaceObject spaceObj:objectHeap) {
@@ -162,7 +177,7 @@ public class Executor extends ExprProcessor {
 
     /**
      * Execution of SpaceActionDefn's is the core work of the executor.
-     * The executor must recurse into a depth-first evaluaton of nested actions,
+     * The executor must recurse into a depth-first evaluation of nested actions,
      * resolve all coordinate references, resolve operator calls, push and pop the call stack,
      * and move values (spaces) from action execution into the proper space for
      * parent actions.
@@ -188,11 +203,11 @@ public class Executor extends ExprProcessor {
     private void exec(Space spcContext, NativeActionDefn nativeActionDefn) {
         try {
             log.debug("native Java call: " + nativeActionDefn);
-            ScalarValue arg1 = spcContext.iterator().next().getValueAt(0);
+            Assignable arg1 = spcContext.iterator().next().getAssignableAt(0);
             Object jArg1 = "?";
-            if (arg1 instanceof ObjectReference)
+            if (arg1 instanceof Association)
                 //
-                jArg1 = dereference( ((ObjectReference) arg1).getReferenceOid()).toString();
+                jArg1 = dereference( ((Association) arg1).getReferenceOid()).toString();
             else {
                 jArg1 = arg1.toString();
             }
@@ -225,9 +240,11 @@ public class Executor extends ExprProcessor {
             throw new RuntimeException("Space defn [" + spacePath + "] not found");
         AbstractActionDefn targetFunctionDefn = targetSpaceDefn.getFunction(functionName);
         if (targetFunctionDefn == null)
-            throw new RuntimeException("Function defn [" + functionName + "] not found in Space Defn [" + spacePath + "]");
+            throw new RuntimeException("Function defn [" + functionName + "] " +
+                                           "not found in Space Defn [" + spacePath + "]");
         if (! (targetFunctionDefn instanceof Callable) )
-            throw new RuntimeException("Function defn [" + functionName + "] does not implement the ["+Callable.class.getName()+"] interface.");
+            throw new RuntimeException("Function defn [" + functionName + "] " +
+                                           "does not implement the ["+Callable.class.getName()+"] interface.");
 
 //        SpaceActionDefn spcActionFunctionDefn = (SpaceActionDefn) spcFunctionDefn;
 
@@ -235,10 +252,34 @@ public class Executor extends ExprProcessor {
         // represent the call stack
         Space argSpace = getObjBuilder().newSpace(spcContext, ((Callable) targetFunctionDefn).getArgSpaceDefn());
         // assignments may be by name or by order (like a SQL update statement)
-        Tuple argTuple = getObjBuilder().newTuple(argSpace, spcCallDefn.getAssignmentDefns()[0].getRightSideValue());
-        argSpace.addTuple(argTuple);
+        Assignable rightSideValue = null;
+        AssignableDefn rightSide = spcCallDefn.getAssignmentDefns()[0].getRightSide();
+        if (rightSide instanceof LiteralDecl) {
+            LiteralDecl rightSideLiteral = (LiteralDecl) rightSide;
+            if (rightSideLiteral.isString()) {
+                CharacterSequence arg1 = newCharacterSequence(rightSideLiteral.getAsString());
+                rightSideValue = getObjBuilder().newObjectReference(null, arg1.getOid());
+            }
+            else {
+                throw new RuntimeException("Can not yet handle literals other than Java Strings");
+            }
+        }
+        else if (rightSide instanceof IdentifierRefDefn) {
+
+        }
+        else if (rightSide instanceof CallActionDefn) {
+
+        }
+        getObjBuilder().newTuple(argSpace, rightSideValue);
+//        argSpace.addTuple(argTuple);
         //
         delegateExec(argSpace, targetFunctionDefn);
+    }
+
+    private CharacterSequence newCharacterSequence(String stringValue) {
+        CharacterSequence newCs = getObjBuilder().newCharacterSequence(stringValue);
+        indexObjectsByOid.put(newCs.getOid(), newCs);
+        return newCs;
     }
 
     private ObjectBuilder getObjBuilder() {

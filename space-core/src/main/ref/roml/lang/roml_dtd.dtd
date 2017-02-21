@@ -12,7 +12,7 @@
 <!ATTLIST domain %model-element.attrs; >
 
 <!--  -->
-<!ELEMENT model-defn (model-defn*, data-source*, domain*, type-defn*, equation-defn*,
+<!ELEMENT model-defn (model-defn*, data-source*, domain*, defn-defn*, equation-defn*,
                       transform-defn*, action-sequence-defn*, action-defn*, state-machine-defn*)>
 <!ATTLIST model-defn %model-element.attrs; >
 
@@ -29,7 +29,7 @@
 <!--  -->
 <!ENTITY % relation-defn.attrs
        'name    CDATA    #REQUIRED
-        type    CDATA    #REQUIRED'>
+        defn    CDATA    #REQUIRED'>
 <!ELEMENT relation-defn (relation-defn-expr)>
 <!ATTLIST relation-defn %model-element.attrs; %relation-defn.attrs;>
 

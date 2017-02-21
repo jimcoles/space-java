@@ -23,6 +23,7 @@ import org.jkcsoft.space.lang.runtime.loaders.antlr.AntlrTreeNodePrinter;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.LinkedList;
@@ -37,15 +38,18 @@ import java.util.List;
  */
 public class G2AntlrParser implements AstLoader {
 
-    private static Logger log = Logger.getRootLogger();
+    private static final Logger log = Logger.getRootLogger();
 
     @Override
     public AstBuilder load(File file) throws Exception {
-        AstBuilder astBuilder = null;
         log.info("Parsing file: " + file.getAbsolutePath());
-        ANTLRInputStream input = new ANTLRInputStream(new FileInputStream(file));
+        InputStream fileInputStream = new FileInputStream(file);
+        ANTLRInputStream input = new ANTLRInputStream(fileInputStream);
+        return load(input);
+    }
 
-        List<String> parseErrors = new LinkedList<>();
+    private AstBuilder load(ANTLRInputStream input) {
+        AstBuilder astBuilder;List<String> parseErrors = new LinkedList<>();
         ANTLRErrorListener errorListener = new ANTLRErrorListener() {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int
@@ -86,6 +90,7 @@ public class G2AntlrParser implements AstLoader {
         spaceParser.addParseListener(printer);
         // begin parsing at top-level rule
         Space2Parser.ParseUnitContext parseUnitContext = spaceParser.parseUnit();
+        log.info("Parse errors from ANTLR: " + Strings.buildCommaDelList(parseErrors));
 
         // debug / print
         log.info("ANTLR Util parse dump:" + "\n" + parseUnitContext.toStringTree(spaceParser));
@@ -97,13 +102,9 @@ public class G2AntlrParser implements AstLoader {
 //            Void accept = parseUnitContext.accept(astTransVisitor);
 
         Ra2AstTransform ra2AstTransform = new Ra2AstTransform();
-        ra2AstTransform.toAst(parseUnitContext);
+        astBuilder = ra2AstTransform.toAst(parseUnitContext);
 
         return astBuilder;
-    }
-
-    private void print(List<String> parseErrors) {
-        System.err.append("Parse Errors: " + Strings.buildCommaDelList(parseErrors));
     }
 
 }

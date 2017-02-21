@@ -10,19 +10,12 @@
 
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.CoordinateDefn;
-
 /**
- * The common notion of a Integer.  Users can set Cardinal numbers but not Ordinal
- * numbers.
- *
  * @author Jim Coles
  */
-public class Cardinal extends IntegerValue {
+public class BinaryStream extends SpaceObject {
 
-    /** Limit constructor access to package-only. */
-    Cardinal(SpaceOid oid, CoordinateDefn type) {
-        super(oid, type);
+    public BinaryStream(SpaceOid oid) {
+        super(oid);
     }
-
 }

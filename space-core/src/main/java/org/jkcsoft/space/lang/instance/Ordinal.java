@@ -20,8 +20,8 @@ import org.jkcsoft.space.lang.ast.CoordinateDefn;
  */
 public class Ordinal extends IntegerValue {
 
-    public Ordinal(CoordinateDefn type) {
-        super(type);
+    public Ordinal(SpaceOid oid, CoordinateDefn type) {
+        super(oid, type);
     }
 
 }

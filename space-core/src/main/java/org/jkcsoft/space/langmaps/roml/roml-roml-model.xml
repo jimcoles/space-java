@@ -28,7 +28,7 @@
   
   is equvalent to 
    
-    <create type=[xxxx] code-name="abc">
+    <create defn=[xxxx] code-name="abc">
     <set "abc" [list-expression]>
   
   is similar to
@@ -69,21 +69,21 @@
 
         <model-defn code-name="core">
             <primitive-defn code-name="bit"/>
-            <primitive-defn code-name="byte" type="bit" size="8"/>
-            <primitive-defn code-name="int" type="byte" size="2"/>
-            <primitive-defn code-name="long" type="byte" size="4"/>
-            <primitive-defn code-name="char" type="byte" size="2"/>
-            <primitive-defn code-name="char1" type="byte" size="1"/>
+            <primitive-defn code-name="byte" defn="bit" size="8"/>
+            <primitive-defn code-name="int" defn="byte" size="2"/>
+            <primitive-defn code-name="long" defn="byte" size="4"/>
+            <primitive-defn code-name="char" defn="byte" size="2"/>
+            <primitive-defn code-name="char1" defn="byte" size="1"/>
 
-            <domain-defn code-name="code-name" type="char" size=""/>
+            <domain-defn code-name="code-name" defn="char" size=""/>
 
             <!-- ROML types. -->
-            <type-defn code-name="model-element">
-                <variable code-name="code-name" type="code-name"/>
-            </type-defn>
+            <defn-defn code-name="model-element">
+                <variable code-name="code-name" defn="code-name"/>
+            </defn-defn>
 
             <!-- The primary first-class ROML entites. -->
-            <entity-defn code-name="type">
+            <entity-defn code-name="defn">
             </entity-defn>
 
             <entity-defn code-name="model">
@@ -92,7 +92,7 @@
             <!-- The secondary first-class ROML entites. -->
             <entity-defn code-name="entity">
                 <extends>
-                    <sym-ref>type</sym-ref>
+                    <sym-ref>defn</sym-ref>
                 </extends>
             </entity-defn>
 
@@ -148,20 +148,20 @@
       Define rdb notions on top of ROML.  This is the 'schema' to which any
     -->
     <model-defn code-name="generic-rdb-model">
-        <domain-defn code-name="code-name" type="char" size="64"/>
+        <domain-defn code-name="code-name" defn="char" size="64"/>
 
         <entity-defn code-name="table">
-            <variable-defn code-name="table-name" type="code-name" identifier="true"/>
+            <variable-defn code-name="table-name" defn="code-name" identifier="true"/>
         </entity-defn>
 
         <entity-defn code-name="column">
-            <variable-defn code-name="column-name" type="code-name" identifier="true"/>
+            <variable-defn code-name="column-name" defn="code-name" identifier="true"/>
         </entity-defn>
 
-        <entity-defn code-name="data-type">
-            <variable-defn code-name="type-name" type="code-name" identifier="true"/>
-            <variable-defn code-name="size" type="int"/>
-            <variable-defn code-name="precision" type="int"/>
+        <entity-defn code-name="data-defn">
+            <variable-defn code-name="defn-name" defn="code-name" identifier="true"/>
+            <variable-defn code-name="size" defn="int"/>
+            <variable-defn code-name="precision" defn="int"/>
         </entity-defn>
 
         <entity-defn code-name="constraint">
@@ -184,11 +184,11 @@
     -->
     <model-defn code-name="xml-dtd-model">
         <entity-defn code-name="element">
-            <variable-defn code-name="element-name" type="code-name" identifier="true"/>
+            <variable-defn code-name="element-name" defn="code-name" identifier="true"/>
         </entity-defn>
 
         <entity-defn code-name="attribute">
-            <variable-defn code-name="attribute-name" type="code-name" identifier="true"/>
+            <variable-defn code-name="attribute-name" defn="code-name" identifier="true"/>
         </entity-defn>
 
         <association-defn code-name="element-to-attribute">
@@ -226,8 +226,8 @@
 
     <equation-context>
         <params>
-            <variable code-name="rdb-data-model" type="generic-rdb-model"/>
-            <variable code-name="xml-data-model" type="xml-dtd-model"/>
+            <variable code-name="rdb-data-model" defn="generic-rdb-model"/>
+            <variable code-name="xml-data-model" defn="xml-dtd-model"/>
         </params>
 
         <equation-defn code-name="rdb-table--xml-list-element">
@@ -245,7 +245,7 @@
                         <sym-ref>element</sym-ref>
                         <sym-ref>element-name</sym-ref>
                     </qpath>
-                    <literal type="roml.lib.char.string"><![CDATA[-list]]></literal>
+                    <literal defn="roml.lib.char.string"><![CDATA[-list]]></literal>
                 </union>
             </equiv>
         </equation-defn>
@@ -305,11 +305,11 @@
 
                 <!-- define the person_identity table -->
                 <entity-defn code-name="person_identity">
-                    <variable-defn code-name="id" type="integer-id" identifier="true"/>
-                    <variable-defn code-name="first-name" type="person-name"/>
-                    <variable-defn code-name="last-name" type="person-name"/>
-                    <variable-defn code-name="full-name" type="char"/>
-                    <variable-defn code-name="public-key" type="guid"/>
+                    <variable-defn code-name="id" defn="integer-id" identifier="true"/>
+                    <variable-defn code-name="first-name" defn="person-name"/>
+                    <variable-defn code-name="last-name" defn="person-name"/>
+                    <variable-defn code-name="full-name" defn="char"/>
+                    <variable-defn code-name="public-key" defn="guid"/>
 
                     <!-- 'equations' defined in 'entity' context must reference only that 'entity's'
                          'variables'. To define a re-usable 'equation', define in a 'model' context

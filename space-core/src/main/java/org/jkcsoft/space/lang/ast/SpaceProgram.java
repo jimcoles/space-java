@@ -9,7 +9,10 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.ObjectBuilder;
+import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.instance.SpaceObject;
+import org.jkcsoft.space.lang.runtime.loaders.antlr.g2.G2AntlrParser;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -31,9 +34,25 @@ public class SpaceProgram extends ModelElement {
 //    private Space assocDefns;
 //    private Space actionSequenceDefns;
 
-    // TODO: indexes for fast lookup
-    private List<SpaceDefn> spaceDefns = new LinkedList<>();
-    private List<SpaceObject> objectHeap = new LinkedList<>();
+    private List<SpaceDefn>     spaceDefns = new LinkedList<>();
+    private List<SpaceObject>   objectHeap = new LinkedList<>();
+
+    // ================== The starting point for using Space to execute Space programs
+
+    // Uses Space constructs to hold a table (space) of SpaceOids to
+    private ObjectBuilder spaceBuilder = ObjectBuilder.getInstance();
+    private G2AntlrParser spaceInSpace = new G2AntlrParser();
+    {
+        try {
+//            spaceInSpace.load(null);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private Space namespace = spaceBuilder.newSpace(null, null);
+
+    // ==================
 
     SpaceProgram() {
 
@@ -41,6 +60,8 @@ public class SpaceProgram extends ModelElement {
 
     public SpaceDefn addSpaceDefn(SpaceDefn spaceDefn) {
         spaceDefns.add(spaceDefn);
+        // redundant
+        addChild(spaceDefn);
         return spaceDefn;
     }
 

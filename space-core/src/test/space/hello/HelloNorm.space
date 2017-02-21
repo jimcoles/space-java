@@ -9,7 +9,7 @@
             (argument
                 (name args)  // name or arg
                 (space relation
-                    (type string)
+                    (defn string)
                 )
             )
         )

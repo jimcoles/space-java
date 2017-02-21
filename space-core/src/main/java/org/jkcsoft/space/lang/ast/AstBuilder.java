@@ -11,7 +11,7 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.ObjectBuilder;
-import org.jkcsoft.space.lang.instance.ObjectReference;
+import org.jkcsoft.space.util.Namespace;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -74,11 +74,23 @@ public class AstBuilder {
         return new NativeActionDefn(name, jMethod, nativeArgSpaceDefn);
     }
 
-    public AssignmentDefn newAssignmentDefn(String leftIdRef, ObjectReference objectReference) {
-        return new AssignmentDefn(leftIdRef, objectReference);
+    public AssignmentDefn newAssignmentDefn(String leftIdRef, AssignableDefn assignableDefn) {
+        return new AssignmentDefn(leftIdRef, assignableDefn);
     }
 
-    public AbstractActionDefn newCallActionDefn(String functionRefId, AssignmentDefn assignmentDefn) {
+    public CallActionDefn newCallActionDefn(String functionRefId, AssignmentDefn ... assignmentDefn) {
         return new CallActionDefn(functionRefId, assignmentDefn);
+    }
+
+    public AssociationDefn newAssociationDefn(String name, SpaceDefn from, SpaceDefn to) {
+        return new AssociationDefn(name, from, to);
+    }
+
+    public AssignableDefn newLiteralHolder(String text) {
+        return new LiteralDecl(text);
+    }
+
+    public AssignableDefn newIdentifierRefDefn(String[] names) {
+        return new IdentifierRefDefn(new Namespace(names));
     }
 }

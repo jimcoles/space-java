@@ -11,6 +11,8 @@
 
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.runtime.RuntimeException;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,11 +62,17 @@ public class SpaceDefn extends ModelElement {
         coordinateList.add(coordinateDefn);
         //
         indexCoordinatesByName.put(coordinateDefn.getName(), coordinateDefn);
+        //
+        addChild(coordinateDefn);
         return coordinateDefn;
     }
 
     public AbstractActionDefn getFunction(String name) {
-        return indexFunctionsByName.get(name);
+        AbstractActionDefn abstractActionDefn = indexFunctionsByName.get(name);
+        if (abstractActionDefn == null) {
+            throw new RuntimeException("function ["+name+"] not found in " + this);
+        }
+        return abstractActionDefn;
     }
 
     public AbstractActionDefn addActionDefn(AbstractActionDefn actionDefn) {
@@ -72,6 +80,8 @@ public class SpaceDefn extends ModelElement {
         actionDefn.setContextSpaceDefn(this);
         //
         indexFunctionsByName.put(actionDefn.getName(), actionDefn);
+        //
+        addChild(actionDefn);
         return actionDefn;
     }
 

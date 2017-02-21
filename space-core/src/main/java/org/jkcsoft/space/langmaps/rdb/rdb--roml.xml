@@ -18,8 +18,8 @@
 <model-defn code-name="rdb--roml" parent-model="com.roml.langs.rdb">
     <equation-context>
         <params>
-            <variable code-name="the-roml-model" type="../roml/roml"/>
-            <variable code-name="the-rdb-model" type="rdb"/>
+            <variable code-name="the-roml-model" defn="../roml/roml"/>
+            <variable code-name="the-rdb-model" defn="rdb"/>
         </params>
 
         <equation-defn code-name="rdb-table--roml-entity">

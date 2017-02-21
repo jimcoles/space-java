@@ -10,6 +10,7 @@
 
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.AssociationDefn;
 import org.jkcsoft.space.lang.ast.SpaceActionDefn;
 import org.jkcsoft.space.lang.ast.SpaceDefn;
 
@@ -41,11 +42,11 @@ public class ObjectBuilder {
     }
 
     public Space newSpace(Space spcContext, SpaceDefn spaceDefn) {
-        return new Space(spcContext, spaceDefn);
+        return new Space(newOid(), spcContext, spaceDefn);
     }
 
-    public Tuple newTuple(Space space, ScalarValue ... values) {
-        Tuple tuple = new Tuple(space, values);
+    public Tuple newTuple(Space space, Assignable ... values) {
+        Tuple tuple = new Tuple(newOid(), space, values);
         space.addTuple(tuple);
         return tuple;
     }
@@ -58,5 +59,9 @@ public class ObjectBuilder {
     public Action newAction(Space spcContext, SpaceActionDefn spcActionDefn) {
         Action action = new Action(spcContext, spcActionDefn);
         return action;
+    }
+
+    public Association newObjectReference(AssociationDefn associationDefn, SpaceOid oid) {
+        return new Association(associationDefn, oid);
     }
 }

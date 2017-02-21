@@ -82,16 +82,6 @@ public class Ra2AstParserListener extends Space2ParserBaseListener {
     }
 
     @Override
-    public void enterAnyCoordinateOrActionDefn(Space2Parser.AnyCoordinateOrActionDefnContext ctx) {
-        super.enterAnyCoordinateOrActionDefn(ctx);
-    }
-
-    @Override
-    public void exitAnyCoordinateOrActionDefn(Space2Parser.AnyCoordinateOrActionDefnContext ctx) {
-        super.exitAnyCoordinateOrActionDefn(ctx);
-    }
-
-    @Override
     public void enterCoordinateDefn(Space2Parser.CoordinateDefnContext ctx) {
         super.enterCoordinateDefn(ctx);
     }
@@ -199,36 +189,6 @@ public class Ra2AstParserListener extends Space2ParserBaseListener {
     @Override
     public void exitLiteral(Space2Parser.LiteralContext ctx) {
         super.exitLiteral(ctx);
-    }
-
-    @Override
-    public void enterString(Space2Parser.StringContext ctx) {
-        super.enterString(ctx);
-    }
-
-    @Override
-    public void exitString(Space2Parser.StringContext ctx) {
-        super.exitString(ctx);
-    }
-
-    @Override
-    public void enterInteger(Space2Parser.IntegerContext ctx) {
-        super.enterInteger(ctx);
-    }
-
-    @Override
-    public void exitInteger(Space2Parser.IntegerContext ctx) {
-        super.exitInteger(ctx);
-    }
-
-    @Override
-    public void enterFloatLit(Space2Parser.FloatLitContext ctx) {
-        super.enterFloatLit(ctx);
-    }
-
-    @Override
-    public void exitFloatLit(Space2Parser.FloatLitContext ctx) {
-        super.exitFloatLit(ctx);
     }
 
     @Override

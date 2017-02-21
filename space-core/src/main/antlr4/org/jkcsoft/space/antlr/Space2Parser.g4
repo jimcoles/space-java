@@ -70,7 +70,7 @@ index MyIndex (
 // NOTE: Parse Rule names must start with a lowercase letter.
 
 parseUnit :
-    spaceDefn
+    spaceDefn | equationDefn | actionDefn
     ;
 
 spaceDefn :
@@ -79,6 +79,10 @@ spaceDefn :
     (ExtendsKeyword identifierRefList)?
     elementDefnHeader?
     spaceDefnBody
+    ;
+
+equationDefn :
+    EquationKeyword
     ;
 
 accessModifier :
@@ -93,17 +97,17 @@ elementDefnHeader : comment
     ;
 
 spaceDefnBody :
-    ListStart anyCoordinateOrActionDefn* ListEnd
+    ListStart anySpaceElementDefn* ListEnd
     ;
 
-anyCoordinateOrActionDefn :
+anySpaceElementDefn :
     coordinateDefn
     | associationDefn
     | actionDefn
     ;
 
 coordinateDefn :
-    elementDefnHeader? typeRef identifier assignment? StatementEnd
+    elementDefnHeader? primitiveTypeName identifier assignment? StatementEnd
     ;
 
 associationDefn :
@@ -111,23 +115,23 @@ associationDefn :
     ;
 
 actionDefn :
-    accessModifier? typeRef identifier ListStart coordinateDefn* ListEnd
+    accessModifier? anyTypeRef identifier ListStart anySpaceElementDefn* ListEnd
+    elementDefnHeader?
+    actionDefnBody
+    ;
+
+actionDefnBody :
     ListStart actionCallDefn* ListEnd
     ;
 
 actionCallDefn :
-    identifierRef TupleStart valueExpr TupleEnd StatementEnd
+    identifierRef TupleStart valueExpr* TupleEnd StatementEnd
     ;
-
 
 valueExpr :
     literal
+    | identifierRef
     | actionCallDefn
-    | variableRef
-    ;
-
-variableRef :
-
     ;
 
 setDecl : SetStart SetEnd;
@@ -144,7 +148,7 @@ singleLineComment : SingleLineComment;
 //multiLineComment : MLC_START MLC_BODY MLC_END;
 multiLineComment : BlockComment;
 
-typeRef :
+anyTypeRef :
     primitiveTypeName
     | identifierRef;
 
@@ -165,19 +169,24 @@ rightSide :
     ;
 
 literal :
-    string
-    | integer
-    | floatLit
+    scalarLiteral
+    | stringLiteral
     ;
 
-string : StringLiteral;
-integer : IntegerLiteral;
-floatLit : FloatLiteral;
+scalarLiteral :
+    integerLiteral
+    | floatLiteral;
+
+stringLiteral : StringLiteral;
+integerLiteral : IntegerLiteral;
+floatLiteral : FloatLiteral;
+
 identifier : Identifier;
+
 identifierRef :
-    identifier
-    | identifierRef NavOper Identifier
+    identifier (NavOper identifier)*
     ;
+
 identifierRefList :
     identifierRef*
     ;

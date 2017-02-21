@@ -13,7 +13,6 @@ package org.jkcsoft.space.test;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.CharacterSequence;
 import org.jkcsoft.space.lang.instance.ObjectBuilder;
-import org.jkcsoft.space.lang.instance.ObjectReference;
 import org.jkcsoft.space.lang.runtime.Executor;
 import org.junit.Test;
 
@@ -33,38 +32,21 @@ public class TestAst {
         SpaceDefn spaceDefn = astBuilder.newSpaceDefn("MyHelloSpace");
         astBuilder.getAstRoot()
             .addSpaceDefn(spaceDefn)
-                .addDimension(astBuilder.newCoordinateDefn("myIntDim", PrimitiveType.INT))
+                .addDimension(astBuilder.newCoordinateDefn("myIntDim", PrimitiveType.CARD))
                     .setType(PrimitiveType.CHAR);
         spaceDefn
             .addDimension(astBuilder.newCoordinateDefn("myCharDim", PrimitiveType.CHAR))
             ;
         SpaceActionDefn mainMethod = astBuilder.newSpaceActionDefn("main");
         spaceDefn.addActionDefn(mainMethod);
-        CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
-        astBuilder.getAstRoot().addObjectInstance(arg1, astBuilder);
+//        CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
+//        astBuilder.getAstRoot().addObjectInstance(arg1, astBuilder);
         mainMethod.addAction(
             astBuilder.newCallActionDefn(
                 "JnOpSys.println",
                 astBuilder.newAssignmentDefn(
                     null,
-                    new ObjectReference(
-                        astBuilder.newCoordinateDefn(null, PrimitiveType.CHAR),
-                        arg1.getOid()
-                    )
-                )
-            )
-        );
-        CharacterSequence arg12 = objBuilder.newCharacterSequence("Hello, yourself.");
-        astBuilder.getAstRoot().addObjectInstance(arg12, astBuilder);
-        mainMethod.addAction(
-            astBuilder.newCallActionDefn(
-                "JnOpSys.println",
-                astBuilder.newAssignmentDefn(
-                    null,
-                    new ObjectReference(
-                        astBuilder.newCoordinateDefn(null, PrimitiveType.CHAR),
-                        arg12.getOid()
-                    )
+                    astBuilder.newLiteralHolder("Hello, Space!")
                 )
             )
         );

@@ -19,20 +19,20 @@
   Define rdb notions on top of ROML.  This is the 'schema' to which any
 -->
 <model-defn code-name="generic-rdb-model">
-    <domain-defn code-name="code-name" type="char" size="64"/>
+    <domain-defn code-name="code-name" defn="char" size="64"/>
 
     <entity-defn code-name="table">
-        <variable-defn code-name="table-name" type="code-name" identifier="true"/>
+        <variable-defn code-name="table-name" defn="code-name" identifier="true"/>
     </entity-defn>
 
     <entity-defn code-name="column">
-        <variable-defn code-name="column-name" type="code-name" identifier="true"/>
+        <variable-defn code-name="column-name" defn="code-name" identifier="true"/>
     </entity-defn>
 
-    <entity-defn code-name="data-type">
-        <variable-defn code-name="type-name" type="code-name" identifier="true"/>
-        <variable-defn code-name="size" type="int"/>
-        <variable-defn code-name="precision" type="int"/>
+    <entity-defn code-name="data-defn">
+        <variable-defn code-name="defn-name" defn="code-name" identifier="true"/>
+        <variable-defn code-name="size" defn="int"/>
+        <variable-defn code-name="precision" defn="int"/>
     </entity-defn>
 
     <entity-defn code-name="constraint">

@@ -7,7 +7,7 @@
             (argument
                 (name args)
                 (space relation
-                    (type string)
+                    (defn string)
                 )
             )
         )

@@ -22,7 +22,7 @@
   <!ELEMENT param EMPTY>
   <!ATTLIST param
     code-name CDATA #IMPLIED
-    type CDATA #IMPLIED
+    defn CDATA #IMPLIED
   >
 
   <!ELEMENT symref (symref)*>
@@ -54,5 +54,5 @@
   <!ELEMENT vardecl EMPTY>
   <!ATTLIST vardecl
     code-name CDATA #IMPLIED
-    type CDATA #IMPLIED
+    defn CDATA #IMPLIED
   >

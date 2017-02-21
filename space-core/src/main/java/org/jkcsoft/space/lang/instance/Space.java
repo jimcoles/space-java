@@ -28,7 +28,7 @@ import java.util.function.Consumer;
  * @author J. Coles
  * @version 1.0
  */
-public class Space implements Iterable<Tuple> {
+public class Space extends SpaceObject implements Iterable<Tuple> {
 
     /** Can be an EntityDefn or a ViewDefn */
     private SpaceDefn definition;
@@ -37,7 +37,8 @@ public class Space implements Iterable<Tuple> {
     /** The backing list maintains the sequence of tuples as they are added */
     private List<Tuple> tuples = new LinkedList<>();
 
-    public Space(Space contextSpace, SpaceDefn definition) {
+    Space(SpaceOid oid, Space contextSpace, SpaceDefn definition) {
+        super(oid);
         this.contextSpace = contextSpace;
         this.definition = definition;
     }

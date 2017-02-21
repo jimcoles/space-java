@@ -15,7 +15,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class CallActionDefn extends AbstractActionDefn {
+public class CallActionDefn extends AbstractActionDefn implements AssignableDefn {
 
     /** The name of some other named design-time thing such as a function.
      */

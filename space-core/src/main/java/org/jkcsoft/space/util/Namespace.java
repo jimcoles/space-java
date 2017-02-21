@@ -15,8 +15,9 @@ package org.jkcsoft.space.util;
  */
 public class Namespace {
 
-    private String fullPath;
+    private String fullPath = "";
     private String[] paths;
+    private char PATH_DELIM = '.';
 
     public Namespace(String fullPath) {
         this.fullPath = fullPath;
@@ -25,6 +26,14 @@ public class Namespace {
 
     public Namespace(String[] paths) {
         this.paths = paths;
+        StringBuilder sb = new StringBuilder();
+        for (int idxPath = 0; idxPath < paths.length; idxPath++) {
+            if (idxPath != 0) {
+                sb.append(PATH_DELIM);
+            }
+            sb.append(paths[idxPath]);
+        }
+        fullPath = sb.toString();
     }
 
     public String[] getPaths() {
@@ -45,5 +54,9 @@ public class Namespace {
                 sb.append(".");
         }
         return sb.toString();
+    }
+
+    public String getAbsolutePath() {
+        return fullPath;
     }
 }

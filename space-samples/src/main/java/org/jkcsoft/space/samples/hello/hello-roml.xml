@@ -6,7 +6,7 @@
 
 <model-defn code-name="hello">
   <entity-defn code-name="entity-1">
-    <variable-defn code-name="var-1" type="char" size="*"/>
+    <variable-defn code-name="var-1" defn="char" size="*"/>
   </entity-defn>
 
   <action-defn code-name="main">
@@ -14,7 +14,7 @@
       <arg-list>
         <arg>
           <arg-value>
-            <call target="system.create-tuple" type="entity-1"/>
+            <call target="system.create-tuple" defn="entity-1"/>
           </arg-value>
         </arg>
       </arg-list>

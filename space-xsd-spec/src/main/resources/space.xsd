@@ -45,11 +45,11 @@
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="object-type">
-        <xs:annotation><xs:documentation>Polymorphic common type of Tuples.
+    <xs:complexType name="object-defn">
+        <xs:annotation><xs:documentation>Polymorphic common defn of Tuples.
         </xs:documentation></xs:annotation>
         <xs:complexContent>
-            <xs:extension base="object-type">
+            <xs:extension base="object-defn">
 
             </xs:extension>
         </xs:complexContent>
@@ -59,7 +59,7 @@
         Elements.
      -->
 
-    <xs:element name="space" type="relation">
+    <xs:element name="space" defn="relation">
         <xs:annotation>
             <xs:documentation>A Space is a zero to many dimensional thing that is the subject
                 of computational reasoning.  A Space is an object and a space has
@@ -72,7 +72,7 @@
 
     </xs:element>
 
-    <xs:element name="view" type="relation">
+    <xs:element name="view" defn="relation">
         <xs:annotation>
             <xs:documentation>A cartesian product of one or more normalized
                 Spaces.</xs:documentation>
@@ -80,7 +80,7 @@
 
     </xs:element>
 
-    <xs:element name="dimension" type="relation">
+    <xs:element name="dimension" defn="relation">
 
     </xs:element>
 
@@ -105,7 +105,7 @@
 
     </xs:element>
 
-    <xs:element name="object" type="relation">
+    <xs:element name="object" defn="relation">
         <xs:annotation><xs:documentation>An identifiable tuple associated
             with a Space or a View.</xs:documentation></xs:annotation>
 

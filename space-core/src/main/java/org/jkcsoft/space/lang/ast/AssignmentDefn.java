@@ -10,7 +10,6 @@
 
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.ScalarValue;
 
 /**
  * Represents the assignment of one variable to another, either as part of
@@ -20,29 +19,21 @@ import org.jkcsoft.space.lang.instance.ScalarValue;
  */
 public class AssignmentDefn {
 
-    private String      leftIdentifier;
-    private String      rightIdentifier;
-    private ScalarValue rightSideValue;
+    private String          leftIdentifier;
 
-    AssignmentDefn(String leftIdentifier, String rightIdentifier) {
-        this.leftIdentifier = leftIdentifier;
-        this.rightIdentifier = rightIdentifier;
-    }
+    private AssignableDefn  rightSide;  // the relative path of object to be looked up during execution
 
-    AssignmentDefn(String leftIdentifier, ScalarValue literalValue) {
+    AssignmentDefn(String leftIdentifier, AssignableDefn rightSide) {
         this.leftIdentifier = leftIdentifier;
-        this.rightSideValue = literalValue;
+        this.rightSide = rightSide;
     }
 
     public String getLeftIdentifier() {
         return leftIdentifier;
     }
 
-    public String getRightIdentifier() {
-        return rightIdentifier;
+    public AssignableDefn getRightSide() {
+        return rightSide;
     }
 
-    public ScalarValue getRightSideValue() {
-        return rightSideValue;
-    }
 }

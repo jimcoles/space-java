@@ -15,10 +15,10 @@ import org.jkcsoft.space.lang.ast.CoordinateDefn;
 /**
  * @author Jim Coles
  */
-public abstract class IntegerValue extends ScalarValue {
+public abstract class IntegerValue extends ScalarValue<Integer> {
 
-    public IntegerValue(CoordinateDefn type) {
-        super(type);
+    public IntegerValue(SpaceOid oid, CoordinateDefn type) {
+        super(oid, type);
     }
 
     @Override

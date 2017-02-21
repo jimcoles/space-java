@@ -9,6 +9,7 @@ public space-def MySpace
     boolean myBoolDim = true;
 
     void main(CharSequence args;) (
-        opsys.println["Hello, Space!"];
+        JnOpSys.println["Hello, Space!"];
+        JnOpSys.println["Hello, Dingo Whopper!"];
     )
 )

@@ -13,10 +13,5 @@ package org.jkcsoft.space.lang.ast;
 /**
  * @author Jim Coles
  */
-public enum PrimitiveType {
-    BOOLEAN,
-    CHAR,
-    CARD,
-    REAL,
-    RATIONAL;
+public interface AssignableDefn {
 }

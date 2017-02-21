@@ -36,8 +36,8 @@ options {
 //metaNotion
 //    :   'space'
 //    |   'object'
-//    |   'scalar-dim'    // dim type is int, float, string?
-//    |   'space-dim'    // dim type is a space
+//    |   'scalar-dim'    // dim defn is int, float, string?
+//    |   'space-dim'    // dim defn is a space
 //    |   'const'
 //    |   'var'
 //    ;
