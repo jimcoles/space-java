@@ -10,7 +10,7 @@
 
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.CoordinateDefn;
+import org.jkcsoft.space.lang.ast.VariableDefn;
 
 /**
  * Ordinal numbers are read-only to the User and can be obtained, for instance, as
@@ -20,7 +20,7 @@ import org.jkcsoft.space.lang.ast.CoordinateDefn;
  */
 public class Ordinal extends IntegerValue {
 
-    public Ordinal(SpaceOid oid, CoordinateDefn type) {
+    public Ordinal(SpaceOid oid, VariableDefn type) {
         super(oid, type);
     }
 

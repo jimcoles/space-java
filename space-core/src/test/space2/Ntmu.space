@@ -1,0 +1,51 @@
+
+public space-def NtmuSpace
+/*
+ This is a smart annotation comment for
+  my awesome space.
+*/
+(
+    card myIntVar = 1;
+    boolean myBoolVar = true;
+    CharSequence greeting = "Hello from this reference to a CharSequence.";
+
+    void main(CharSequence args;) (
+        JnOpSys.println["Hello, Space!"];
+        JnOpSys.println[greeting];
+    )
+)
+
+space-def Person
+(
+    CharSequence first;
+    CharSequence last;
+    CharSequence fullName;
+
+    equation-def FL2Full (Person person) {
+        fullname - (first + last);
+    }
+
+    function-def A solves FL2Full for (fullname) given (first,last)
+    (
+
+    )
+)
+
+
+space-def Task
+(
+    Person assignee;
+
+)
+
+// Equations within a space type
+space-def Triangle (
+    real side1;
+    real side2;
+    real size3;
+    real angle12;
+
+    equation-def() (
+
+    )
+)

@@ -32,6 +32,14 @@ public class AstBuilder {
     private SpaceProgram astRoot;
     private ModelElement currentAstNode;
 
+    private ObjectBuilder getObjectBuilder() {
+        return ObjectBuilder.getInstance();
+    }
+
+    public boolean validate() {
+        return true;
+    }
+
     public void addMetaObject(ModelElement object) {
         // metaObjects;
     }
@@ -58,39 +66,40 @@ public class AstBuilder {
         return new SpaceActionDefn(name);
     }
 
-    public boolean validate() {
-        return true;
-    }
-
-    private ObjectBuilder getObjectBuilder() {
-        return ObjectBuilder.getInstance();
-    }
-
-    public CoordinateDefn newCoordinateDefn(String name, PrimitiveType type) {
-        return new CoordinateDefn(name, type);
+    public VariableDefn newCoordinateDefn(String name, PrimitiveType type) {
+        return new VariableDefn(name, type);
     }
 
     public AbstractActionDefn newNativeActionDefn(String name, Method jMethod, SpaceDefn nativeArgSpaceDefn) {
         return new NativeActionDefn(name, jMethod, nativeArgSpaceDefn);
     }
 
-    public AssignmentDefn newAssignmentDefn(String leftIdRef, AssignableDefn assignableDefn) {
-        return new AssignmentDefn(leftIdRef, assignableDefn);
-    }
-
-    public CallActionDefn newCallActionDefn(String functionRefId, AssignmentDefn ... assignmentDefn) {
-        return new CallActionDefn(functionRefId, assignmentDefn);
+    public ActionCallExpr newActionCallExpr(String name, ValueExpr functionPathExpr, ValueExpr ... argValueExprs) {
+        return new ActionCallExpr(name, functionPathExpr, argValueExprs);
     }
 
     public AssociationDefn newAssociationDefn(String name, SpaceDefn from, SpaceDefn to) {
         return new AssociationDefn(name, from, to);
     }
 
-    public AssignableDefn newLiteralHolder(String text) {
-        return new LiteralDecl(text);
+    public LiteralExpr newLiteralHolder(String text) {
+        return new LiteralExpr(text);
     }
 
-    public AssignableDefn newIdentifierRefDefn(String[] names) {
-        return new IdentifierRefDefn(new Namespace(names));
+    public MetaObjectRefLiteral newMetaObjectRefLiteral(ModelElement spaceMetaObject) {
+        return new MetaObjectRefLiteral(spaceMetaObject);
     }
+
+    public OperLookupExpr newOperLookupExpr(OperEnum operEnum) {
+        return new OperLookupExpr(operEnum);
+    }
+
+    public SpacePathExpr newSpacePathExpr() {
+        return new SpacePathExpr();
+    }
+
+    public ThisExpr newThis() {
+        return new ThisExpr();
+    }
+
 }

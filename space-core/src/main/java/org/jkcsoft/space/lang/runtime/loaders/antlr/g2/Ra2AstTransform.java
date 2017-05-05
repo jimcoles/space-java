@@ -15,9 +15,7 @@ import org.jkcsoft.space.antlr.Space2Parser;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.runtime.ExecState;
-import org.jkcsoft.space.util.Namespace;
 
-import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,6 +30,12 @@ import java.util.List;
 public class Ra2AstTransform {
 
     private static final Logger log = Logger.getRootLogger();
+
+    public static final ActionCallExpr NAV_OPER = asCall("space", "nav");
+
+    private static ActionCallExpr asCall(String ... paths) {
+        return null;
+    }
 
     private ExecState state = ExecState.INITIALIZATION;
     private List<AstLoadError> errors = new LinkedList();
@@ -57,7 +61,7 @@ public class Ra2AstTransform {
         spaceDefnContext.defnTypeModifier();
         spaceDefnContext.elementDefnHeader();
         if (spaceDefnContext.ExtendsKeyword() != null) {
-            spaceDefnContext.identifierRefList();
+            spaceDefnContext.spacePathList();
         }
         List<Space2Parser.AnySpaceElementDefnContext> bodyElements
             = spaceDefnContext.spaceDefnBody().anySpaceElementDefn();
@@ -67,8 +71,8 @@ public class Ra2AstTransform {
 
     private void addToAst(SpaceDefn spaceDefn, List<Space2Parser.AnySpaceElementDefnContext> bodyElements) {
         for (Space2Parser.AnySpaceElementDefnContext bodyElement : bodyElements) {
-            if (bodyElement.coordinateDefn() != null) {
-                spaceDefn.addDimension(toAst(bodyElement.coordinateDefn()));
+            if (bodyElement.variableDefn() != null) {
+                spaceDefn.addVariable(toAst(bodyElement.variableDefn()));
             }
             else if (bodyElement.associationDefn() != null) {
 //                spaceDefn.addAssociationDefn(toAst(bodyElement.associationDefn()));
@@ -90,54 +94,61 @@ public class Ra2AstTransform {
         SpaceActionDefn actionDefn
             = astBuilder.newSpaceActionDefn(toText(actionDefnContext.identifier()));
         actionDefn.setArgSpaceDefn(toAst(actionDefnContext.anySpaceElementDefn()));
-        List<Space2Parser.ActionCallDefnContext> actionCallDefnContexts
-            = actionDefnContext.actionDefnBody().actionCallDefn();
-        for (Space2Parser.ActionCallDefnContext actionCallDefnContext : actionCallDefnContexts) {
-            actionDefn.addAction(toAst(actionCallDefnContext));
+        List<Space2Parser.ActionCallExprContext> actionCallExprContexts
+            = actionDefnContext.actionDefnBody().actionCallExpr();
+        for (Space2Parser.ActionCallExprContext actionCallExprContext : actionCallExprContexts) {
+            actionDefn.addAction(toAst(actionCallExprContext));
         }
-        actionDefnContext.identifier();
-        actionDefnContext.anyTypeRef();
+//        actionDefnContext.anyTypeRef();
         return actionDefn;
     }
 
-    private CallActionDefn toAst(Space2Parser.ActionCallDefnContext actionCallDefnContext) {
-        // TODO: 2/15/17 Resolve FQN of called function against imports.
-        Namespace ns = new Namespace(toNsArray(collapseList(actionCallDefnContext.identifierRef())));
+    private ActionCallExpr toAst(Space2Parser.ActionCallExprContext actionCallExprContext) {
+        ActionCallExpr spacePathExpr = toAst(actionCallExprContext.spacePathExpr());
 
-        String fragileFuncName = ns.getAbsolutePath();
-
-        List<Space2Parser.ValueExprContext> callArgContexts = actionCallDefnContext.valueExpr();
-        AssignmentDefn[] thisCallArgs = new AssignmentDefn[callArgContexts.size()];
+        List<Space2Parser.ValueExprContext> callArgContexts = actionCallExprContext.valueExpr();
+        ValueExpr[] thisCallArgs = new ValueExpr[callArgContexts.size()];
         int idxArg = 0;
         for (Space2Parser.ValueExprContext callArgContext : callArgContexts) {
-            AssignableDefn rightSide = null;
-            if (callArgContext.literal() != null &  callArgContext.literal().scalarLiteral() != null)
-                rightSide = toAst(callArgContext.literal().scalarLiteral());
-            else if (callArgContext.literal() != null && callArgContext.literal().stringLiteral() != null)
-                rightSide = toAst(callArgContext.literal().stringLiteral());
-            else if (callArgContext.identifierRef() != null)
-                rightSide = toAst(callArgContext.identifierRef());
-            else if (callArgContext.actionCallDefn() != null)
+            ValueExpr rightSide = null;
+            if (callArgContext.literalExpr() != null && callArgContext.literalExpr().scalarLiteral() != null)
+                rightSide = toAst(callArgContext.literalExpr().scalarLiteral());
+            else if (callArgContext.literalExpr() != null && callArgContext.literalExpr().stringLiteral() != null)
+                rightSide = toAst(callArgContext.literalExpr().stringLiteral());
+            else if (callArgContext.spacePathExpr() != null)
+                rightSide = toAst(callArgContext.spacePathExpr());
+            else if (callArgContext.actionCallExpr() != null)
                 // nested
-                rightSide = toAst(callArgContext.actionCallDefn());
+                rightSide = toAst(callArgContext.actionCallExpr());
 
-            thisCallArgs[idxArg] = astBuilder.newAssignmentDefn(null, rightSide);
+            thisCallArgs[idxArg] = rightSide;
 
             idxArg++;
         }
 
-        return astBuilder.newCallActionDefn(fragileFuncName, thisCallArgs);
+        return astBuilder.newActionCallExpr("callPoint", spacePathExpr, thisCallArgs);
     }
 
-    private AssignableDefn toAst(Space2Parser.IdentifierRefContext identifierRefContext) {
-        return astBuilder.newIdentifierRefDefn(toNsArray(collapseList(identifierRefContext)));
+    /** Transforms parse tree Space Path Expr to a nested list of nav operations. */
+    private ActionCallExpr toAst(Space2Parser.SpacePathExprContext spacePathExprContext) {
+        spacePathExprContext.spacePathExpr();
+        spacePathExprContext.identifier();
+        spacePathExprContext.SPathNavAssocToOper();
+        ActionCallExpr nextCallExpr = toAst(spacePathExprContext.spacePathExpr());
+        ActionCallExpr actionCallExpr =
+            astBuilder.newActionCallExpr("callPoint",
+                                         NAV_OPER,
+                                         nextCallExpr
+                                         );
+            nextCallExpr.addChild(actionCallExpr);
+        return actionCallExpr;
     }
 
     /**
      * Character string literals (CharactersSequences) produce, in effect, a 'new CharacterSequence("")'
      * call. */
-    private AssignableDefn toAst(Space2Parser.StringLiteralContext stringLiteralContext) {
-        AssignableDefn rightSide = null;
+    private ValueExpr toAst(Space2Parser.StringLiteralContext stringLiteralContext) {
+        ValueExpr rightSide = null;
 
 //        CharacterSequence arg1 = objBuilder.newCharacterSequence(
 //            stringLiteralContext.StringLiteral().getText()
@@ -153,29 +164,29 @@ public class Ra2AstTransform {
         return rightSide;
     }
 
-    private AssignableDefn toAst(Space2Parser.ScalarLiteralContext scalarLiteralContext) {
+    private ValueExpr toAst(Space2Parser.ScalarLiteralContext scalarLiteralContext) {
         return astBuilder.newLiteralHolder(scalarLiteralContext.integerLiteral().getText());
     }
 
-    private List<Space2Parser.IdentifierContext> collapseList(Space2Parser.IdentifierRefContext identifierRefContext) {
+    private List<Space2Parser.IdentifierContext> collapseList(Space2Parser.SpacePathExprContext identifierRefContext) {
         List<Space2Parser.IdentifierContext> listOfIds = new LinkedList<>();
-        listOfIds.addAll(identifierRefContext.identifier());
+        listOfIds.add(identifierRefContext.identifier());
         return listOfIds;
     }
 
-    private SpaceDefn toAst(List<Space2Parser.AnySpaceElementDefnContext> coordinateDefnContexts) {
+    private SpaceDefn toAst(List<Space2Parser.AnySpaceElementDefnContext> anySpaceElementDefnContexts) {
         log.info("transforming list of " + Space2Parser.AnySpaceElementDefnContext.class.getSimpleName());
 
         SpaceDefn spaceDefn = astBuilder.newSpaceDefn(null) ;
-        addToAst(spaceDefn, coordinateDefnContexts);
+        addToAst(spaceDefn, anySpaceElementDefnContexts);
         return spaceDefn;
     }
 
-    private CoordinateDefn toAst(Space2Parser.CoordinateDefnContext coordinateDefnContext) {
-        log.info("transforming " + Space2Parser.CoordinateDefnContext.class.getSimpleName());
+    private VariableDefn toAst(Space2Parser.VariableDefnContext variableDefnContext) {
+        log.info("transforming " + Space2Parser.VariableDefnContext.class.getSimpleName());
 
-        return astBuilder.newCoordinateDefn(toText(coordinateDefnContext.identifier()),
-                                            toAst(coordinateDefnContext.primitiveTypeName()));
+        return astBuilder.newCoordinateDefn(toText(variableDefnContext.identifier()),
+                                            toAst(variableDefnContext.primitiveTypeName()));
     }
 
     private PrimitiveType toAst(Space2Parser.PrimitiveTypeNameContext primitiveTypeNameContext) {

@@ -203,7 +203,7 @@
          create xml element "(table)-list"
       For each rdb column
          create xml element "(column)"
-      For each rdb column value
+      For each rdb column valueExpr
          create xml text node 
     -->
 
@@ -252,7 +252,7 @@
         </equiv>
       </equation-defn>
 
-      <equation-defn code-name="rdb-col-value--xml-text-node">
+      <equation-defn code-name="rdb-col-valueExpr--xml-text-node">
         <comment>Maps every RDB column to an XML element of the same name.</comment>
         <equiv>
           <!-- rdb-data-model -->

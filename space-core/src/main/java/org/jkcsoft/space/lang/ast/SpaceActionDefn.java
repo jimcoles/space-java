@@ -28,7 +28,7 @@ import java.util.List;
 public class SpaceActionDefn extends AbstractActionDefn implements Callable {
 
     private SpaceDefn argSpaceDefn;
-    private List<AbstractActionDefn> nestedActions = new LinkedList<>();  // child nestedActions
+    private List<ActionCallExpr> nestedActions = new LinkedList<>();  // child nestedActions
 
     SpaceActionDefn(String name) {
         super(name);
@@ -44,12 +44,12 @@ public class SpaceActionDefn extends AbstractActionDefn implements Callable {
         return argSpaceDefn;
     }
 
-    public AbstractActionDefn addAction(AbstractActionDefn nestedActionDefn) {
+    public ActionCallExpr addAction(ActionCallExpr nestedActionDefn) {
         nestedActions.add(nestedActionDefn);
         return nestedActionDefn;
     }
 
-    public List<AbstractActionDefn> getNestedActions() {
+    public List<ActionCallExpr> getNestedActions() {
         return nestedActions;
     }
 }

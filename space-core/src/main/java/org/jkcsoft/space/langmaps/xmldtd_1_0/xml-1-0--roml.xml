@@ -60,18 +60,18 @@
             </equiv>
         </equation-defn>
 
-        <equation-defn code-name="roml-var-value--xml-text-node">
+        <equation-defn code-name="roml-var-valueExpr--xml-text-node">
             <comment>Maps every RDB column to an XML element of the same name.</comment>
             <equiv>
                 <!-- rdb-data-model -->
                 <qpath>
                     <sym-ref>the-roml-model</sym-ref>
-                    <sym-ref>variable.value</sym-ref>
+                    <sym-ref>variable.valueExpr</sym-ref>
                 </qpath>
                 <qpath>
                     <sym-ref>xml-data-model</sym-ref>
                     <sym-ref>element=</sym-ref>
-                    <sym-ref>text-node.value</sym-ref>
+                    <sym-ref>text-node.valueExpr</sym-ref>
                 </qpath>
             </equiv>
         </equation-defn>

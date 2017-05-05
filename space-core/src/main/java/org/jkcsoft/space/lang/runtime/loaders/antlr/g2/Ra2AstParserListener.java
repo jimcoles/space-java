@@ -82,16 +82,6 @@ public class Ra2AstParserListener extends Space2ParserBaseListener {
     }
 
     @Override
-    public void enterCoordinateDefn(Space2Parser.CoordinateDefnContext ctx) {
-        super.enterCoordinateDefn(ctx);
-    }
-
-    @Override
-    public void exitCoordinateDefn(Space2Parser.CoordinateDefnContext ctx) {
-        super.exitCoordinateDefn(ctx);
-    }
-
-    @Override
     public void enterAssociationDefn(Space2Parser.AssociationDefnContext ctx) {
         super.enterAssociationDefn(ctx);
     }
@@ -111,15 +101,6 @@ public class Ra2AstParserListener extends Space2ParserBaseListener {
         super.exitActionDefn(ctx);
     }
 
-    @Override
-    public void enterSetDecl(Space2Parser.SetDeclContext ctx) {
-        super.enterSetDecl(ctx);
-    }
-
-    @Override
-    public void exitSetDecl(Space2Parser.SetDeclContext ctx) {
-        super.exitSetDecl(ctx);
-    }
 
     @Override
     public void enterSpaceDecl(Space2Parser.SpaceDeclContext ctx) {
@@ -169,26 +150,6 @@ public class Ra2AstParserListener extends Space2ParserBaseListener {
     @Override
     public void exitPrimitiveTypeName(Space2Parser.PrimitiveTypeNameContext ctx) {
         super.exitPrimitiveTypeName(ctx);
-    }
-
-    @Override
-    public void enterAssignment(Space2Parser.AssignmentContext ctx) {
-        super.enterAssignment(ctx);
-    }
-
-    @Override
-    public void exitAssignment(Space2Parser.AssignmentContext ctx) {
-        super.exitAssignment(ctx);
-    }
-
-    @Override
-    public void enterLiteral(Space2Parser.LiteralContext ctx) {
-        super.enterLiteral(ctx);
-    }
-
-    @Override
-    public void exitLiteral(Space2Parser.LiteralContext ctx) {
-        super.exitLiteral(ctx);
     }
 
     @Override

@@ -7,7 +7,7 @@ lexer grammar Space2Lexer;
 //
 // Lexer rules match character sequences (the small things) to generate Tokens.
 // Parser Rules then match patterns amongst the Tokens.
-// These will generate 'Terminal' nodes with the value of the matched string
+// These will generate 'Terminal' nodes with the valueExpr of the matched string
 // (Token) available in the node object. These should be low-level notions.
 //
 // NOTE: Lexer rules begin with an uppercase letter.
@@ -35,11 +35,13 @@ AccessKeyword :
 
 SpaceKeyword    : 'space-def';
 EquationKeyword : 'equation-def';
+//
 BooleanKeyword  : 'boolean';
 OrdinalKeyword  : 'ord';
 CardinalKeyword : 'card';
 RealKeyword     : 'real';
 VoidKeyword     : 'void';
+//
 PublicKeyword   : 'public';
 ExtendsKeyword  : 'extends';
 
@@ -51,7 +53,9 @@ SpaceDefnType
     ;
 
 AssignOper  : '=';
-NavOper     : '.';
+
+// Space Path Expressions - reduced syntax
+SPathNavAssocToOper     : '/';
 
 /*
     Interpret the following definition of "StringLiteral" as:

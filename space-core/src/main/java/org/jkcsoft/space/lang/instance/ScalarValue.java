@@ -10,7 +10,7 @@
 
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.CoordinateDefn;
+import org.jkcsoft.space.lang.ast.VariableDefn;
 
 /**
  * Holds one-dimensional values for primitive types: Ints, Real, Chars
@@ -18,15 +18,15 @@ import org.jkcsoft.space.lang.ast.CoordinateDefn;
  */
 public abstract class ScalarValue<T> extends SpaceObject implements Assignable {
 
-    private CoordinateDefn type;
+    private VariableDefn type;
     private T value;
 
-    ScalarValue(SpaceOid oid, CoordinateDefn type) {
+    ScalarValue(SpaceOid oid, VariableDefn type) {
         super(oid);
         this.type = type;
     }
 
-    public CoordinateDefn getType() {
+    public VariableDefn getType() {
         return type;
     }
 
@@ -36,6 +36,11 @@ public abstract class ScalarValue<T> extends SpaceObject implements Assignable {
 
     public T getValue() {
         return value;
+    }
+
+    public ScalarValue<T> setValue(T value) {
+        this.value = value;
+        return this;
     }
 
     public abstract String asString();

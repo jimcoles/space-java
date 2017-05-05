@@ -11,7 +11,6 @@
 package org.jkcsoft.space.test;
 
 import org.jkcsoft.space.lang.ast.*;
-import org.jkcsoft.space.lang.instance.CharacterSequence;
 import org.jkcsoft.space.lang.instance.ObjectBuilder;
 import org.jkcsoft.space.lang.runtime.Executor;
 import org.junit.Test;
@@ -32,29 +31,35 @@ public class TestAst {
         SpaceDefn spaceDefn = astBuilder.newSpaceDefn("MyHelloSpace");
         astBuilder.getAstRoot()
             .addSpaceDefn(spaceDefn)
-                .addDimension(astBuilder.newCoordinateDefn("myIntDim", PrimitiveType.CARD))
+                .addVariable(astBuilder.newCoordinateDefn("myIntDim", PrimitiveType.CARD))
                     .setType(PrimitiveType.CHAR);
         spaceDefn
-            .addDimension(astBuilder.newCoordinateDefn("myCharDim", PrimitiveType.CHAR))
+            .addVariable(astBuilder.newCoordinateDefn("myCharDim", PrimitiveType.CHAR))
             ;
         SpaceActionDefn mainMethod = astBuilder.newSpaceActionDefn("main");
         spaceDefn.addActionDefn(mainMethod);
 //        CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
 //        astBuilder.getAstRoot().addObjectInstance(arg1, astBuilder);
+
+        ThisExpr thisTupleExpr = astBuilder.newThis();
+
         mainMethod.addAction(
-            astBuilder.newCallActionDefn(
-                "JnOpSys.println",
-                astBuilder.newAssignmentDefn(
-                    null,
-                    astBuilder.newLiteralHolder("Hello, Space!")
-                )
+            astBuilder.newActionCallExpr(
+                "callPoint",
+                astBuilder.newActionCallExpr(
+                    "",
+                    astBuilder.newOperLookupExpr(OperEnum.ASSOC_NAV),
+                    astBuilder.
+                ),
+                astBuilder.newMetaObjectRefLiteral(null),
+                astBuilder.newLiteralHolder("Hello, Space!")
             )
         );
 //        spaceDefn.
 //            .setContextSpaceDefn(new SpaceDefn() {
 //                @Override
-//                public CoordinateDefn addDimension(CoordinateDefn coordinateDefn) {
-//                    return super.addDimension(coordinateDefn);
+//                public VariableDefn addVariable(VariableDefn coordinateDefn) {
+//                    return super.addVariable(coordinateDefn);
 //                }
 //            })
 

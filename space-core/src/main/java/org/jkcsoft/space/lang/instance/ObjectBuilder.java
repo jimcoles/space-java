@@ -56,12 +56,13 @@ public class ObjectBuilder {
         return characterSequence;
     }
 
-    public Action newAction(Space spcContext, SpaceActionDefn spcActionDefn) {
-        Action action = new Action(spcContext, spcActionDefn);
-        return action;
+    public ActionCall newAction(Space spcContext, SpaceActionDefn spcActionDefn) {
+        ActionCall actionCall = new ActionCall(spcContext, spcActionDefn);
+        return actionCall;
     }
 
-    public Association newObjectReference(AssociationDefn associationDefn, SpaceOid oid) {
-        return new Association(associationDefn, oid);
+    public Association newObjectReference(AssociationDefn associationDefn, SpaceOid refToOid) {
+        Association association = new Association(newOid(), associationDefn, refToOid);
+        return association;
     }
 }

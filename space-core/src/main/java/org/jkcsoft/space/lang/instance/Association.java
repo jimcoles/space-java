@@ -18,14 +18,19 @@ import org.jkcsoft.space.lang.ast.AssociationDefn;
  *
  * @author Jim Coles
  */
-public class Association implements Assignable {
+public class Association extends SpaceObject implements Assignable {
 
     /** Oid of the referenced 'to' object */
     private SpaceOid referenceOid;
     private AssociationDefn defn;
 
-    Association(AssociationDefn defn, SpaceOid referenceOid) {
+    Association(SpaceOid oid, AssociationDefn defn, SpaceOid referenceOid) {
+        super(oid);
         this.defn = defn;
+        this.referenceOid = referenceOid;
+    }
+
+    public void setReferenceOid(SpaceOid referenceOid) {
         this.referenceOid = referenceOid;
     }
 

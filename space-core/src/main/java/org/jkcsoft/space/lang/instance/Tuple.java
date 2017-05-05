@@ -9,16 +9,14 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
- * Conceptually, a Tuple is an element of a Relation (which is a Set). Much like a row in a JDBC recordset.
- * Values in a Tuple can be retrieved in order or by the name of the coordinate.  A Tuple
- * may contain only Scalar values but those values may be Oid-based references to other
- * Entities.
+ * Conceptually, a Tuple is an element of a Relation (which is a Set of Tuples).
+ * A Tuple is much like a row in a JDBC recordset.
+ * Values in a Tuple can be retrieved in order or by the name of the variable.  A Tuple
+ * may contain only Scalar values and Oid-based references to Tuples in other
+ * Spaces.
  *
  * @author Jim Coles
  * @version 1.0
@@ -28,18 +26,17 @@ public class Tuple extends SpaceObject {
     /** May be anonymous. */
     private Space space;
 
-    private Assignable[]        assignables;
+    private List<Assignable>    assignables = new LinkedList<>();
     private List<ScalarValue>   values = new LinkedList<>();
     private List<Association>   associations = new LinkedList<>();
     //
     private Map<String, ScalarValue> indexValuesByName = new HashMap<>();
     private Map<String, Association> indexAssociationsByName = new HashMap<>();
 
-
     Tuple(SpaceOid oid, Space space, Assignable ... assignables) {
         super(oid);
         this.space = space;
-        this.assignables = assignables;
+        this.assignables.addAll(Arrays.asList(assignables));
         for (Assignable assignable : assignables) {
             if (assignable instanceof ScalarValue) {
                 values.add((ScalarValue) assignable);
@@ -57,8 +54,29 @@ public class Tuple extends SpaceObject {
         }
     }
 
+    public void setSpace(Space space) {
+        this.space = space;
+    }
+
     public Space getSpace() {
         return space;
+    }
+
+    public Tuple addValue(ScalarValue scalarValue) {
+        values.add(scalarValue);
+        assignables.add(scalarValue);
+        indexValuesByName.put(
+            getSpace().getDefinition().getVariableDefnAt(values.size()).getName(),
+            scalarValue
+        );
+        return this;
+    }
+
+    public Tuple addReference(Association reference) {
+        associations.add(reference);
+        assignables.add(reference);
+        indexAssociationsByName.put(reference.getDefn().getName(), reference);
+        return this;
     }
 
     /**
@@ -73,10 +91,21 @@ public class Tuple extends SpaceObject {
     }
 
     public Assignable getAssignableAt(int index) {
-        return assignables[index];
+        return assignables.get(index);
     }
 
-    public void setSpace(Space space) {
-        this.space = space;
+    public List<Assignable> getAssignables() {
+        return assignables;
+    }
+
+    public List<ScalarValue> getValues() {
+        return values;
+    }
+
+    public SpaceOid getReferenceOid(String name) {
+        return indexAssociationsByName.get(name).getReferenceOid();
+    }
+    public List<Association> getAssociations() {
+        return associations;
     }
 }

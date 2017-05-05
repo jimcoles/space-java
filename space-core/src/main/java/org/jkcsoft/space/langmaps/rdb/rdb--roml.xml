@@ -55,13 +55,13 @@
             </equiv>
         </equation-defn>
 
-        <equation-defn code-name="rdb-col-value--roml-var-value">
-            <comment>Maps every RDB column value to a ROML var value.</comment>
+        <equation-defn code-name="rdb-col-valueExpr--roml-var-valueExpr">
+            <comment>Maps every RDB column valueExpr to a ROML var valueExpr.</comment>
             <equiv>
                 <!-- rdb-data-model -->
                 <qpath>
                     <sym-ref>the-rdb-model</sym-ref>
-                    <sym-ref>column.value</sym-ref>
+                    <sym-ref>column.valueExpr</sym-ref>
                 </qpath>
                 <qpath>
                     <sym-ref>xml-data-model</sym-ref>

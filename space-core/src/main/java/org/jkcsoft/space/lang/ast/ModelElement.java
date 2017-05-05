@@ -9,16 +9,21 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.ObjectBuilder;
+import org.jkcsoft.space.lang.instance.SpaceObject;
+import org.jkcsoft.space.lang.instance.SpaceOid;
+
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Base class for all things defined in source code.
+ * Base class for all things defined in source code, structures/type defs, callables
+ * etc..
  *
  * @author Jim Coles
  * @version 1.0
  */
-public abstract class ModelElement extends SpaceExpr implements Named {
+public abstract class ModelElement extends SpaceObject implements Named {
 
     private String              name;
     private String              description;
@@ -29,7 +34,7 @@ public abstract class ModelElement extends SpaceExpr implements Named {
     }
 
     ModelElement(String name) {
-        super();
+        super(ObjectBuilder.getInstance().newOid());
         this.name = name;
     }
 

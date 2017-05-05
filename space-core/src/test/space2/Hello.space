@@ -5,11 +5,12 @@ public space-def MySpace
   my awesome space.
 */
 (
-    card myIntDim = 1;
-    boolean myBoolDim = true;
+    card myIntVar = 1;
+    boolean myBoolVar = true;
+    CharSequence greeting = "Hello from this reference to a CharSequence.";
 
     void main(CharSequence args;) (
         JnOpSys.println["Hello, Space!"];
-        JnOpSys.println["Hello, Dingo Whopper!"];
+        JnOpSys.println[greeting];
     )
 )

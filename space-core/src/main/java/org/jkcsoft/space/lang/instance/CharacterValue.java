@@ -10,7 +10,7 @@
 
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.CoordinateDefn;
+import org.jkcsoft.space.lang.ast.VariableDefn;
 
 /**
  * @author Jim Coles
@@ -18,7 +18,7 @@ import org.jkcsoft.space.lang.ast.CoordinateDefn;
 public class CharacterValue extends ScalarValue<Character> {
 
     /** Limit constructor access to package-only. */
-    CharacterValue(SpaceOid oid, CoordinateDefn type, char c) {
+    CharacterValue(SpaceOid oid, VariableDefn type, char c) {
         super(oid, type);
     }
 

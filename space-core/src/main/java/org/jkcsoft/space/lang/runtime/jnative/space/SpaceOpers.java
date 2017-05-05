@@ -10,13 +10,33 @@
 
 package org.jkcsoft.space.lang.runtime.jnative.space;
 
+import org.jkcsoft.space.antlr.Space2Lexer;
 import org.jkcsoft.space.lang.ast.SpaceDefn;
 import org.jkcsoft.space.lang.instance.*;
+import org.jkcsoft.space.lang.runtime.Executor;
+
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Jim Coles
  */
 public class SpaceOpers {
+
+    private static Map<String, String> tokenToMethod = new TreeMap<>();
+
+//    static {
+//        Space2Lexer.ruleNames[Space2Lexer.AssignOper];
+//    }
+
+    public static SpaceObject nav(Tuple current, String assocName) {
+        SpaceObject next = null;
+        next = ((Tuple) current).getValue(assocName);
+        if (next == null) {
+            next = Executor.getInstance().dereference(((Tuple) current).getReferenceOid(assocName));
+        }
+        return next;
+    }
 
     public static Space newSpace(ObjectBuilder objectBuilder, Space context, SpaceDefn defn) {
         return objectBuilder.newSpace(context, defn);
@@ -34,12 +54,21 @@ public class SpaceOpers {
         return objectBuilder.newCharacterSequence(chars);
     }
 
-    public static SpaceOid assignment(SpaceOid leftOid, SpaceObject rightObject) {
+    /**
+     * Could get more complex if we auto-box and auto-unbox.
+     * */
+    public static SpaceOid assign(Executor exec, ObjectBuilder objectBuilder, SpaceOid leftOid, SpaceObject rightObject) {
+        SpaceObject leftSpaceObject = exec.dereference(leftOid);
         if (rightObject instanceof ScalarValue) {
-
+            assert (leftSpaceObject instanceof ScalarValue);
+            Object newValueObject = ((ScalarValue) rightObject).getValue();
+            ((ScalarValue) leftSpaceObject).setValue(newValueObject);
         }
         else if (rightObject instanceof Tuple) {
+            if (leftSpaceObject instanceof Space) {
+//                ((Space) leftSpaceObject);
 
+            }
         }
         else if (rightObject instanceof Space) {
 

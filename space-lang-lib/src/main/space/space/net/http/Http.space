@@ -1,0 +1,6 @@
+public space-def Http
+/*
+  A Space model of the HTTP protocol.
+*/
+(
+)

@@ -13,9 +13,9 @@
     <call target="system.out.print">
       <arg-list>
         <arg>
-          <arg-value>
+          <arg-valueExpr>
             <call target="system.create-tuple" defn="entity-1"/>
-          </arg-value>
+          </arg-valueExpr>
         </arg>
       </arg-list>
     </call>

@@ -65,7 +65,7 @@ public class SpaceProgram extends ModelElement {
         return spaceDefn;
     }
 
-    public SpaceDefn getFirstSpace() {
+    public SpaceDefn getFirstSpaceDefn() {
         return spaceDefns.get(0);
     }
 

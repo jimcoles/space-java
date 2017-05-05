@@ -9,8 +9,6 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.ActionSequenceExpr;
-
 /**
  * The base class (abstract?) for all Transforms.  Each Transform represents
  * an instance of a TransformDefn.  In Space, Transforms are associated with

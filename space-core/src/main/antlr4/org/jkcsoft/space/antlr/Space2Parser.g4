@@ -8,23 +8,28 @@ options {
 /*
 Examples to prime the pump:
 
-
 space-def MySpaceDef [equates-to OtherSpaceDef YetAnotherSpaceDef ...] (
     // Scalars
-    int myIntDim [=<int>];  // dim-def
-    boolean myBoolDim [=];  // dim-defn
+    int myIntVar [=<int>];  // var-defn
+    boolean myBoolVar [=];  // var-defn
 
     // These define Associations (ala Foreign Key Relationships)
-    My
-)
-
-function myFunction[int arg1, boolean arg2] (
+    MyOtherSpaceDef ref;
 
 )
 
-// Equations are a kind of Relation.  They are just predicates in normal form analogous to
+function myFunction solves <MyEquation> for [<var1>, <var2>] given [<var3>, <var4>] (
+
+)
+
+function myFunction solves <MyEquation> for [<var3>, <var4>] given [<var1>, <var2>] (
+
+)
+
+// Equations are Relations expressed symbolically, i.e., symbolic expressions.
+// They are just predicates in normal form analogous to
 // ax + by + cz = 0
-// Equations reduce the number of degrees of freedom (DOF) of a system by one.
+// Every (orthogonal) Equation reduces the number of degrees of freedom (DOF) of a system by one.
 equality-constraint MyEquation (
 
 )
@@ -36,7 +41,6 @@ constraint MyConstraint (
 )
 
 // An Enumerated Relation is just a set of tuples aligned to some Space definition
-// (Base or
 enum-relation MyRelation [] (
     []
 )
@@ -46,10 +50,17 @@ index MyIndex (
 
 )
 
-// Operators
+// Operators produce a new thing from existing thing(s)
 
+// Navigation opers = Query opers
+. - LEFT nav.  Do we need a RIGHT nav operator to tell engine that reference is in the right space?
+
+
+// integer and real opers
 +
-=
+==
+
+// Boolean opers
 &&
 ||
 
@@ -59,8 +70,10 @@ index MyIndex (
   (<annonymoust constraint definition> or <constraintRef>)
 )
 
+// Regex opers?  In effect, make regexes part of the language
 
 */
+
 // -------------------------------- Parse Rules Section ------------------------------------
 
 // If matched by the ANTLR recognizer, these will generate Rule Context nodes
@@ -73,10 +86,27 @@ parseUnit :
     spaceDefn | equationDefn | actionDefn
     ;
 
+/*
+  [  // a tuple
+    space-type = "SpaceDef",
+    name = "MySpace",
+    sp
+*/
+
+parseUnitRelational :
+    anyThing*
+    ;
+
+anyThing :
+    spaceDefn
+    | equationDefn
+    | associationDefn
+    ;
+
 spaceDefn :
     accessModifier? defnTypeModifier?
     SpaceKeyword identifier
-    (ExtendsKeyword identifierRefList)?
+    (ExtendsKeyword spacePathList)?
     elementDefnHeader?
     spaceDefnBody
     ;
@@ -101,17 +131,17 @@ spaceDefnBody :
     ;
 
 anySpaceElementDefn :
-    coordinateDefn
+    variableDefn
     | associationDefn
     | actionDefn
     ;
 
-coordinateDefn :
-    elementDefnHeader? primitiveTypeName identifier assignment? StatementEnd
+variableDefn :
+    elementDefnHeader? primitiveTypeName identifier assignmentExpr? StatementEnd
     ;
 
 associationDefn :
-    elementDefnHeader? identifierRef identifier assignment? StatementEnd
+    elementDefnHeader? spacePathExpr identifier assignmentExpr? StatementEnd
     ;
 
 actionDefn :
@@ -121,20 +151,20 @@ actionDefn :
     ;
 
 actionDefnBody :
-    ListStart actionCallDefn* ListEnd
+    ListStart actionCallExpr* ListEnd
     ;
 
-actionCallDefn :
-    identifierRef TupleStart valueExpr* TupleEnd StatementEnd
+actionCallExpr :
+    spacePathExpr TupleStart valueExpr* TupleEnd StatementEnd
     ;
 
 valueExpr :
-    literal
-    | identifierRef
-    | actionCallDefn
+    literalExpr
+    | spacePathExpr
+    | actionCallExpr
     ;
 
-setDecl : SetStart SetEnd;
+setLiteral : SetStart SetEnd;
 
 spaceDecl : SpaceStart SpaceEnd;
 
@@ -150,7 +180,7 @@ multiLineComment : BlockComment;
 
 anyTypeRef :
     primitiveTypeName
-    | identifierRef;
+    | spacePathExpr;
 
 primitiveTypeName :
     BooleanKeyword
@@ -160,15 +190,15 @@ primitiveTypeName :
     | VoidKeyword
     ;
 
-assignment :
-    AssignOper rightSide;
+assignmentExpr :
+    spacePathExpr AssignOper valueExpr;
 
-rightSide :
-    literal
-    | identifierRef
-    ;
+//rightSide :
+//    literal
+//    | spacePathExpr
+//    ;
 
-literal :
+literalExpr :
     scalarLiteral
     | stringLiteral
     ;
@@ -183,10 +213,14 @@ floatLiteral : FloatLiteral;
 
 identifier : Identifier;
 
-identifierRef :
-    identifier (NavOper identifier)*
+spacePathExpr :
+    identifier (SPathNavAssocToOper spacePathExpr?)?
     ;
 
-identifierRefList :
-    identifierRef*
+spacePathList :
+    spacePathExpr*
+    ;
+
+regularExpr :
+    // TODO Develop grammar for regular expression notation
     ;

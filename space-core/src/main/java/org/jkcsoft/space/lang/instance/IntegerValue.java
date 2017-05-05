@@ -10,14 +10,14 @@
 
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.CoordinateDefn;
+import org.jkcsoft.space.lang.ast.VariableDefn;
 
 /**
  * @author Jim Coles
  */
 public abstract class IntegerValue extends ScalarValue<Integer> {
 
-    public IntegerValue(SpaceOid oid, CoordinateDefn type) {
+    public IntegerValue(SpaceOid oid, VariableDefn type) {
         super(oid, type);
     }
 

@@ -18,7 +18,6 @@ package org.jkcsoft.space.lang.ast;
 public class TypeDefn extends ModelElement {
     private boolean _isEntity;
 
-
     TypeDefn() {
 
     }

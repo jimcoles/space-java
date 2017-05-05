@@ -1,0 +1,3 @@
+[submodule "space-intellij-plugin/antlr-adapter"]
+	path = space-intellij-plugin/antlr-adapter
+	url = https://github.com/antlr/jetbrains.git

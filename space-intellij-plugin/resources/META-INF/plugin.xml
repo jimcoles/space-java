@@ -9,23 +9,22 @@
   -->
 
 <idea-plugin version="2">
-  <id>com.your.company.unique.plugin.id</id>
-  <name>Plugin display name here</name>
+  <id>org.jkcsoft.space.spaceplugin</id>
+  <name>James K Coles</name>
   <version>1.0</version>
-  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+  <vendor email="JamesKColes@gmail.com" url="http://www.yourcompany.com">James K Coles</vendor>
 
   <description><![CDATA[
-      Enable smart Space editor within Intellij.<br>
-      <em>.spd</em>
+      Enable smart Space editor within Intellij.
     ]]></description>
 
   <change-notes><![CDATA[
-      Changes:  The world of computing has now changed.
+      Changes:  Initial beta version.
     ]]>
   </change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="141.0"/>
+  <idea-version since-build="107.105"/>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
@@ -34,7 +33,26 @@
   -->
 
   <extensions defaultExtensionNs="com.intellij">
-    <!-- Add your extensions here -->
+    <fileTypeFactory implementation="org.jkcsoft.space.intellij.plugin.SpaceFileTypeFactory"/>
+    <lang.parserDefinition language="Space" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceParserDefinition"/>
+    <lang.syntaxHighlighterFactory key="Space"
+                                   language="Space"
+                                   implementationClass="org.jkcsoft.space.intellij.plugin.SpaceSyntaxHighlighterFactory"/>
+    <colorSettingsPage implementation="org.jkcsoft.space.intellij.plugin.SpaceColorSettingsPage"/>
+    <annotator language="JAVA" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceAnnotator"/>
+    <codeInsight.lineMarkerProvider language="JAVA" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceLineMarkerProvider"/>
+    <completion.contributor language="Space" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceCompletionContributor"/>
+    <psi.referenceContributor implementation="org.jkcsoft.space.intellij.plugin.SpaceReferenceContributor"/>
+    <lang.findUsagesProvider language="Space" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceFindUsagesProvider"/>
+    <lang.refactoringSupport language="Space" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceRefactoringSupportProvider"/>
+    <lang.foldingBuilder language="JAVA" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceFoldingBuilder"/>
+    <gotoSymbolContributor implementation="org.jkcsoft.space.intellij.plugin.SpaceChooseByNameContributor"/>
+    <lang.psiStructureViewFactory language="Space" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceStructureViewFactory"/>
+    <lang.formatter language="Space" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceFormattingModelBuilder"/>
+    <codeStyleSettingsProvider implementation="org.jkcsoft.space.intellij.plugin.SpaceCodeStyleSettingsProvider"/>
+    <langCodeStyleSettingsProvider implementation="org.jkcsoft.space.intellij.plugin.SpaceLanguageCodeStyleSettingsProvider"/>
+    <lang.commenter language="Space" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceCommenter"/>
+    <todoIndexer filetype="Space file" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceTodoIndexer"/>
   </extensions>
 
   <actions>

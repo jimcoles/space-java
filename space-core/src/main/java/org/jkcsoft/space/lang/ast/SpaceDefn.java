@@ -27,17 +27,27 @@ import java.util.Map;
 public class SpaceDefn extends ModelElement {
 
     private SpaceDefn               contextSpaceDefn;
-    private List<CoordinateDefn>    coordinateList;
+    private List<VariableDefn>      variableDefnList;
+    private List<AssociationDefn>   associationDefnList;
     private List<EquationDefn>      equations;
     private List<TransformDefn>     transformDefns;
     private List<AbstractActionDefn>    functionDefns = new LinkedList<>();
 
     // redundant
-    private Map<String, CoordinateDefn>     indexCoordinatesByName = new HashMap<>();
+    private Map<String, VariableDefn>     indexCoordinatesByName = new HashMap<>();
+    private Map<String, AssociationDefn>     indexAssociationsByName = new HashMap<>();
     private Map<String, AbstractActionDefn> indexFunctionsByName = new HashMap<>();
 
     SpaceDefn(String name) {
         super(name);
+    }
+
+    public boolean isComputed() {
+        return false;
+    }
+
+    public boolean isEnumerated() {
+        return true;
     }
 
     void setContextSpaceDefn(SpaceDefn contextSpaceDefn) {
@@ -52,19 +62,38 @@ public class SpaceDefn extends ModelElement {
         return contextSpaceDefn != null;
     }
 
-    public List<CoordinateDefn> getCoordinateList() {
-        return coordinateList;
+    public List<VariableDefn> getVariableDefnList() {
+        return variableDefnList;
     }
 
-    public CoordinateDefn addDimension(CoordinateDefn coordinateDefn) {
-        if (coordinateList == null)
-            coordinateList = new LinkedList<>();
-        coordinateList.add(coordinateDefn);
+    public VariableDefn addVariable(VariableDefn variableDefn) {
+        if (variableDefnList == null)
+            variableDefnList = new LinkedList<>();
+        variableDefnList.add(variableDefn);
         //
-        indexCoordinatesByName.put(coordinateDefn.getName(), coordinateDefn);
+        indexCoordinatesByName.put(variableDefn.getName(), variableDefn);
         //
-        addChild(coordinateDefn);
-        return coordinateDefn;
+        addChild(variableDefn);
+        return variableDefn;
+    }
+
+    public VariableDefn getVariableDefnAt(int index) {
+        return variableDefnList.get(index);
+    }
+
+    public AssociationDefn addAssociation(AssociationDefn associationDefn) {
+        if (associationDefnList == null)
+            associationDefnList = new LinkedList<>();
+        associationDefnList.add(associationDefn);
+        //
+        indexAssociationsByName.put(associationDefn.getName(), associationDefn);
+        //
+        addChild(associationDefn);
+        return associationDefn;
+    }
+
+    public AssociationDefn getAssocDefnAt(int index) {
+        return associationDefnList.get(index);
     }
 
     public AbstractActionDefn getFunction(String name) {
