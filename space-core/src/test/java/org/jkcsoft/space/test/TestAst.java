@@ -49,7 +49,7 @@ public class TestAst {
                 astBuilder.newActionCallExpr(
                     "",
                     astBuilder.newOperLookupExpr(OperEnum.ASSOC_NAV),
-                    astBuilder.
+                    null
                 ),
                 astBuilder.newMetaObjectRefLiteral(null),
                 astBuilder.newLiteralHolder("Hello, Space!")

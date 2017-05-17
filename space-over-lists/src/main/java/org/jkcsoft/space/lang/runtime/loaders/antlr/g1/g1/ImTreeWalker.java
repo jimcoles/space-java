@@ -8,7 +8,7 @@
  * Also see the LICENSE file in the repository root directory.
  */
 
-package org.jkcsoft.space.lang.runtime.loaders.antlr.g1;
+package org.jkcsoft.space.lang.runtime.loaders.antlr.g1.g1;
 
 import java.util.LinkedList;
 import java.util.List;

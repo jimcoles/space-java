@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>space-parent</artifactId>
+        <groupId>org.jkcsoft</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>space-over-lists</artifactId>
+    <description>(DEFUNCT) ANTLR spec for basic list structures upon which we could define
+    Space constructs if we want to go that way.</description>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <configuration>
+                    <!--<sourceDirectory>./src/main/antlr4/org/jkcsoft/space/antlr</sourceDirectory>-->
+                    <!--<grammars>SpaceParser.g4</grammars>-->
+                    <visitor>true</visitor>
+                    <listener>true</listener>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>antlr</id>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jkcsoft</groupId>
+            <artifactId>java-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+        </dependency>
+
+        <!-- The dep here for temporary relief of compile problem.  Really need to pull a
+         'parser-plugin' API out of space-core but that adds runtime assembly burden I don't
+         want right now. -->
+        <dependency>
+            <groupId>org.jkcsoft</groupId>
+            <artifactId>space-core</artifactId>
+        </dependency>
+
+    </dependencies>
+
+</project>

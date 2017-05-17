@@ -8,10 +8,21 @@
  * Also see the LICENSE file in the repository root directory.
  */
 
+package org.jkcsoft.space.lang.runtime.loaders.antlr.g1.g1;
+
 /**
- * First generation (G1) bootstrap scanner / parser written here in Java.
- * Future generations will hopefully be written in Space itself.
- *
  * @author Jim Coles
  */
-package org.jkcsoft.space.lang.runtime.loaders.antlr.g1;
+public class AstLoadError {
+
+    private String message;
+
+    public AstLoadError(String message) {
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+}

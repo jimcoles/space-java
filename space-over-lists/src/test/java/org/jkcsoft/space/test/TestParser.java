@@ -11,7 +11,7 @@
 package org.jkcsoft.space.test;
 
 import org.apache.commons.io.FileUtils;
-import org.jkcsoft.space.lang.runtime.loaders.antlr.g1.G1AntlrParser;
+import org.jkcsoft.space.lang.runtime.loaders.antlr.g1.g1.G1AntlrParser;
 import org.junit.Test;
 
 /**
