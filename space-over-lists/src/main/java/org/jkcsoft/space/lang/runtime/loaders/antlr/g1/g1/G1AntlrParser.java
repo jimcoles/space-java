@@ -17,8 +17,8 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.Strings;
-import org.jkcsoft.space.antlr.SpaceLexer;
-import org.jkcsoft.space.antlr.SpaceParser;
+import org.jkcsoft.space.antlr.SpaceListsLexer;
+import org.jkcsoft.space.antlr.SpaceListsParser;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -71,11 +71,11 @@ public class G1AntlrParser {
 
             print(parseErrors);
 
-            SpaceLexer spaceLexer = new SpaceLexer(input); // create a buffer of tokens pulled from the lexer
+            SpaceListsLexer spaceLexer = new SpaceListsLexer(input); // create a buffer of tokens pulled from the lexer
             spaceLexer.addErrorListener(errorListener);
             CommonTokenStream tokens = new CommonTokenStream(spaceLexer); // create a parser that feeds off the
             // tokens buffer
-            SpaceParser spaceParser = new SpaceParser(tokens);
+            SpaceListsParser spaceParser = new SpaceListsParser(tokens);
             spaceParser.addErrorListener(errorListener);
             ParseTree tree = spaceParser.list(); // begin parsing at init rule
 

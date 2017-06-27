@@ -10,6 +10,7 @@
 
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.PrimitiveType;
 import org.jkcsoft.space.lang.ast.VariableDefn;
 
 /**
@@ -18,10 +19,10 @@ import org.jkcsoft.space.lang.ast.VariableDefn;
  *
  * @author Jim Coles
  */
-public class Ordinal extends IntegerValue {
+public class OrdinalValue extends IntegerValue {
 
-    public Ordinal(SpaceOid oid, VariableDefn type) {
-        super(oid, type);
+    public OrdinalValue(PrimitiveType type, Integer value) {
+        super(type, value);
     }
 
 }

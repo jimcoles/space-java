@@ -10,6 +10,7 @@
 
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.PrimitiveType;
 import org.jkcsoft.space.lang.ast.VariableDefn;
 
 /**
@@ -17,8 +18,8 @@ import org.jkcsoft.space.lang.ast.VariableDefn;
  */
 public abstract class IntegerValue extends ScalarValue<Integer> {
 
-    public IntegerValue(SpaceOid oid, VariableDefn type) {
-        super(oid, type);
+    public IntegerValue(PrimitiveType primitiveType, Integer value) {
+        super(primitiveType, value);
     }
 
     @Override

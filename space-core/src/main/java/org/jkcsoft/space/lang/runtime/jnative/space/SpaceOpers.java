@@ -10,11 +10,12 @@
 
 package org.jkcsoft.space.lang.runtime.jnative.space;
 
-import org.jkcsoft.space.antlr.Space2Lexer;
 import org.jkcsoft.space.lang.ast.SpaceDefn;
 import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.runtime.Executor;
+import org.jkcsoft.space.lang.runtime.RuntimeException;
 
+import java.text.MessageFormat;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -31,7 +32,7 @@ public class SpaceOpers {
 
     public static SpaceObject nav(Tuple current, String assocName) {
         SpaceObject next = null;
-        next = ((Tuple) current).getValue(assocName);
+        next = ((Tuple) current).getAssoc(assocName);
         if (next == null) {
             next = Executor.getInstance().dereference(((Tuple) current).getReferenceOid(assocName));
         }
@@ -56,23 +57,44 @@ public class SpaceOpers {
 
     /**
      * Could get more complex if we auto-box and auto-unbox.
-     * */
-    public static SpaceOid assign(Executor exec, ObjectBuilder objectBuilder, SpaceOid leftOid, SpaceObject rightObject) {
-        SpaceObject leftSpaceObject = exec.dereference(leftOid);
-        if (rightObject instanceof ScalarValue) {
-            assert (leftSpaceObject instanceof ScalarValue);
-            Object newValueObject = ((ScalarValue) rightObject).getValue();
-            ((ScalarValue) leftSpaceObject).setValue(newValueObject);
-        }
-        else if (rightObject instanceof Tuple) {
-            if (leftSpaceObject instanceof Space) {
-//                ((Space) leftSpaceObject);
-
+     * Valid left/right:
+     *
+     * Left         Right
+     * ------------------------
+     * Variable     Variable
+     * Association  Oid
+     * Association  Association
+     * Association  Tuple
+     *
+     */
+    public static void assign(Executor exec, ObjectBuilder objectBuilder, Assignable leftAss, Assignable rightAss) {
+//        SpaceObject leftSpaceObject = exec.dereference(leftOid);
+//        if (rightObject instanceof ScalarValue) {
+//            assert (leftSpaceObject instanceof ScalarValue);
+//            Object newValueObject = ((ScalarValue) rightObject).getValue();
+//            ((ScalarValue) leftSpaceObject).setValue(newValueObject);
+//        }
+//        else if (rightObject instanceof Tuple) {
+//            if (leftSpaceObject instanceof Space) {
+////                ((Space) leftSpaceObject);
+//
+//            }
+//        }
+//        else if (rightObject instanceof Space) {
+//
+//        }
+        if (leftAss instanceof Variable) {
+            if (rightAss instanceof Variable) {
+                Variable leftVar = (Variable) leftAss;
+                Variable rightVar = (Variable) rightAss;
+                if (leftVar.getDefinition().getType() != rightVar.getDefinition().getType()) {
+                    String msg = MessageFormat.format("Variable types incompatible. ${0} cannot be assigned to ${1}.",
+                            rightVar.getDefinition().getType(), leftVar.getDefinition().getType());
+                    throw new RuntimeException(msg);}
+                leftVar.setScalarValue(rightVar.getScalarValue());
             }
         }
-        else if (rightObject instanceof Space) {
 
-        }
-        return leftOid;
+        return;
     }
 }

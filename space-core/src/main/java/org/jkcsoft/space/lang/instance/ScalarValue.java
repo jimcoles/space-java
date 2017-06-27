@@ -10,23 +10,25 @@
 
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.PrimitiveType;
 import org.jkcsoft.space.lang.ast.VariableDefn;
 
 /**
  * Holds one-dimensional values for primitive types: Ints, Real, Chars
  * @author Jim Coles
  */
-public abstract class ScalarValue<T> extends SpaceObject implements Assignable {
+public abstract class ScalarValue<T> implements Assignable {
 
-    private VariableDefn type;
+    private PrimitiveType type;
     private T value;
 
-    ScalarValue(SpaceOid oid, VariableDefn type) {
-        super(oid);
+    ScalarValue(PrimitiveType type, T value) {
+//        super(oid);
         this.type = type;
+        this.value = value;
     }
 
-    public VariableDefn getType() {
+    public PrimitiveType getType() {
         return type;
     }
 

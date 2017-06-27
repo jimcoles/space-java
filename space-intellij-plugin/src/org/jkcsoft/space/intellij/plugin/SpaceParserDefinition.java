@@ -15,58 +15,164 @@ import com.intellij.lexer.Lexer;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.tree.*;
-import org.jkcsoft.space.intellij.plugin.parser.SimpleParser;
-import org.jkcsoft.space.intellij.plugin.psi.*;
+import org.antlr.jetbrains.adaptor.lexer.ANTLRLexerAdaptor;
+import org.antlr.jetbrains.adaptor.lexer.PSIElementTypeFactory;
+import org.antlr.jetbrains.adaptor.lexer.RuleIElementType;
+import org.antlr.jetbrains.adaptor.lexer.TokenIElementType;
+import org.antlr.jetbrains.adaptor.parser.ANTLRParserAdaptor;
+import org.antlr.jetbrains.adaptor.psi.ANTLRPsiNode;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.jetbrains.annotations.NotNull;
+import org.jkcsoft.space.antlr.SpaceLexer;
+import org.jkcsoft.space.antlr.SpaceParser;
+import org.jkcsoft.space.intellij.plugin.psi.SpaceFile;
+
+import java.util.List;
 
 public class SpaceParserDefinition implements ParserDefinition {
-  public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
-  public static final TokenSet COMMENTS = TokenSet.create(SimpleTypes.COMMENT);
 
-  public static final IFileElementType FILE =
-      new IFileElementType(Language.<SpaceLanguage>findInstance(SpaceLanguage.class));
+    public static final IFileElementType FILE =
+            new IFileElementType(SpaceLanguage.INSTANCE);
 
-  @NotNull
-  @Override
-  public Lexer createLexer(Project project) {
-    return new SpaceLexerAdapter();
-  }
+    public static TokenIElementType ID;
 
-  @NotNull
-  public TokenSet getWhitespaceTokens() {
-    return WHITE_SPACES;
-  }
+    static {
+        PSIElementTypeFactory.defineLanguageIElementTypes(SpaceLanguage.INSTANCE,
+                SpaceParser.tokenNames,
+                SpaceParser.ruleNames);
+        List<TokenIElementType> tokenIElementTypes =
+                PSIElementTypeFactory.getTokenIElementTypes(SpaceLanguage.INSTANCE);
+        ID = tokenIElementTypes.get(SpaceLexer.Identifier);
+    }
 
-  @NotNull
-  public TokenSet getCommentTokens() {
-    return COMMENTS;
-  }
+    public static final TokenSet COMMENTS =
+            PSIElementTypeFactory.createTokenSet(
+                    SpaceLanguage.INSTANCE,
+                    SpaceLexer.BlockComment,
+                    SpaceLexer.SingleLineComment);
 
-  @NotNull
-  public TokenSet getStringLiteralElements() {
-    return TokenSet.EMPTY;
-  }
+    public static final TokenSet WHITESPACE =
+            PSIElementTypeFactory.createTokenSet(
+                    SpaceLanguage.INSTANCE,
+                    SpaceLexer.Whitespace);
 
-  @NotNull
-  public PsiParser createParser(final Project project) {
-    return new SimpleParser();
-  }
+    public static final TokenSet STRING =
+            PSIElementTypeFactory.createTokenSet(
+                    SpaceLanguage.INSTANCE,
+                    SpaceLexer.StringLiteral);
 
-  @Override
-  public IFileElementType getFileNodeType() {
-    return FILE;
-  }
+    @NotNull
+    @Override
+    public Lexer createLexer(Project project) {
+        SpaceLexer lexer = new SpaceLexer(null);
+        return new ANTLRLexerAdaptor(SpaceLanguage.INSTANCE, lexer);
+    }
 
-  public PsiFile createFile(FileViewProvider viewProvider) {
-    return new SpaceFile(viewProvider);
-  }
+    @NotNull
+    public PsiParser createParser(final Project project) {
+        final SpaceParser parser = new SpaceParser(null);
+        return new ANTLRParserAdaptor(SpaceLanguage.INSTANCE, parser) {
+            @Override
+            protected ParseTree parse(Parser parser, IElementType root) {
+                // start rule depends on root passed in; sometimes we want to create an ID node etc...
+                return ((SpaceParser) parser).parseUnit();
+            }
+        };
+    }
 
-  public SpaceRequirements spaceExistanceTypeBetweenTokens(ASTNode left, ASTNode right) {
-    return SpaceRequirements.MAY;
-  }
+    /**
+     * "Tokens of those types are automatically skipped by PsiBuilder."
+     */
+    @NotNull
+    public TokenSet getWhitespaceTokens() {
+        return WHITESPACE;
+    }
 
-  @NotNull
-  public PsiElement createElement(ASTNode node) {
-    return SimpleTypes.Factory.createElement(node);
-  }
+    @NotNull
+    public TokenSet getCommentTokens() {
+        return COMMENTS;
+    }
+
+    @NotNull
+    public TokenSet getStringLiteralElements() {
+        return STRING;
+    }
+
+    public SpaceRequirements spaceExistanceTypeBetweenTokens(ASTNode left, ASTNode right) {
+        return SpaceRequirements.MAY;
+    }
+
+    /**
+     * What is the IFileElementType of the root parse tree node? It
+     * is called from {@link #createFile(FileViewProvider)} at least.
+     */
+    @Override
+    public IFileElementType getFileNodeType() {
+        return FILE;
+    }
+
+    /**
+     * Create the root of your PSI tree (a PsiFile).
+     * <p>
+     * From IntelliJ IDEA Architectural Overview:
+     * "A PSI (Program Structure Interface) file is the root of a structure
+     * representing the contents of a file as a hierarchy of elements
+     * in a particular programming language."
+     * <p>
+     * PsiFile is to be distinguished from a FileASTNode, which is a parse
+     * tree node that eventually becomes a PsiFile. From PsiFile, we can get
+     * it back via: {@link PsiFile#getNode}.
+     */
+    @Override
+    public PsiFile createFile(FileViewProvider viewProvider) {
+        return new SpaceFile(viewProvider);
+    }
+
+    /**
+     * Convert from *NON-LEAF* parse node (AST they call it)
+     * to PSI node. Leaves are created in the AST factory.
+     * Rename re-factoring can cause this to be
+     * called on a TokenIElementType since we want to rename ID nodes.
+     * In that case, this method is called to create the root node
+     * but with ID type. Kind of strange, but we can simply create a
+     * ASTWrapperPsiElement to make everything work correctly.
+     * <p>
+     * RuleIElementType.  Ah! It's that ID is the root
+     * IElementType requested to parse, which means that the root
+     * node returned from parsetree->PSI conversion.  But, it
+     * must be a CompositeElement! The adaptor calls
+     * rootMarker.done(root) to finish off the PSI conversion.
+     * See {@link ANTLRParserAdaptor#parse(IElementType root,
+     * PsiBuilder)}
+     * <p>
+     * If you don't care to distinguish PSI nodes by type, it is
+     * sufficient to create a {@link ANTLRPsiNode} around
+     * the parse tree node
+     */
+    @NotNull
+    public PsiElement createElement(ASTNode node) {
+        IElementType elType = node.getElementType();
+        if (elType instanceof TokenIElementType) {
+            return new ANTLRPsiNode(node);
+        }
+        if (!(elType instanceof RuleIElementType)) {
+            return new ANTLRPsiNode(node);
+        }
+        RuleIElementType ruleElType = (RuleIElementType) elType;
+        switch (ruleElType.getRuleIndex()) {
+            case SpaceParser.RULE_actionDefn:
+                return new FunctionSubtree(node);
+            case SpaceParser.RULE_vardef:
+                return new VardefSubtree(node);
+            case SpaceParser.RULE_formal_arg:
+                return new ArgdefSubtree(node);
+            case SpaceParser.RULE_block:
+                return new BlockSubtree(node);
+            case SpaceParser.RULE_call_expr:
+                return new CallSubtree(node);
+            default:
+                return new ANTLRPsiNode(node);
+        }
+    }
 }

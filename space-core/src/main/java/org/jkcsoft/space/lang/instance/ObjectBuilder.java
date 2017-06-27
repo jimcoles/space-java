@@ -65,4 +65,12 @@ public class ObjectBuilder {
         Association association = new Association(newOid(), associationDefn, refToOid);
         return association;
     }
+
+    public CardinalValue newCardinalValue(int i) {
+        return new CardinalValue(i);
+    }
+
+    public TextValue newTextValue(String value) {
+        return new TextValue(value);
+    }
 }

@@ -1,0 +1,15 @@
+space-def Person
+(
+    CharSequence first;
+    CharSequence last;
+    CharSequence fullName;
+
+    equation-def FL2Full (Person person) {
+        fullname - (first + last);
+    }
+
+    function-def A solves FL2Full for (fullname) given (first,last)
+    (
+
+    )
+)

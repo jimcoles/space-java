@@ -10,7 +10,7 @@
 
 package org.jkcsoft.space.lang.runtime.loaders.antlr.g1.g1;
 
-import org.jkcsoft.space.antlr.SpaceParser;
+import org.jkcsoft.space.antlr.SpaceListsParser;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -125,10 +125,10 @@ public class ImTreeNode {
     enum NodeType {
         UNKNOWN(-1),
 //        SPACE_DEF(decodeRuleName(SpaceParser.RULE_list), true), // RULE
-        LIST(SpaceParser.RULE_list, true),   // RULE
-        ATOM(SpaceParser.RULE_atom),   // RULE
-        STRING_LITERAL(SpaceParser.RULE_string),   // RULE
-        IDENTIFIER(SpaceParser.RULE_identifier),      // RULE
+        LIST(SpaceListsParser.RULE_list, true),   // RULE
+        ATOM(SpaceListsParser.RULE_atom),   // RULE
+        STRING_LITERAL(SpaceListsParser.RULE_string),   // RULE
+        IDENTIFIER(SpaceListsParser.RULE_identifier),      // RULE
         TERMINAL(-1),       // TERMINAL/leaf symbol
 //        COMMENT(SpaceParser.RULE_comment)
         ;
@@ -157,6 +157,6 @@ public class ImTreeNode {
     }
 
     private static String decodeRuleName(int idxRule) {
-        return SpaceParser.ruleNames[idxRule];
+        return SpaceListsParser.ruleNames[idxRule];
     }
 }

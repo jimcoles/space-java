@@ -15,8 +15,8 @@ import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.Strings;
-import org.jkcsoft.space.antlr.Space2Lexer;
-import org.jkcsoft.space.antlr.Space2Parser;
+import org.jkcsoft.space.antlr.SpaceLexer;
+import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.AstBuilder;
 import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.lang.runtime.loaders.antlr.AntlrTreeNodePrinter;
@@ -76,11 +76,11 @@ public class G2AntlrParser implements AstLoader {
             }
         };
 
-        Space2Lexer spaceLexer = new Space2Lexer(input); // create a buffer of tokens pulled from the lexer
+        SpaceLexer spaceLexer = new SpaceLexer(input); // create a buffer of tokens pulled from the lexer
         spaceLexer.addErrorListener(errorListener);
         CommonTokenStream tokenStream = new CommonTokenStream(spaceLexer); // create a parser that feeds off the
         // tokens buffer
-        Space2Parser spaceParser = new Space2Parser(tokenStream);
+        SpaceParser spaceParser = new SpaceParser(tokenStream);
         //
         spaceParser.addErrorListener(errorListener);
         // dump using our customer printer ...
@@ -89,7 +89,7 @@ public class G2AntlrParser implements AstLoader {
         AntlrTreeNodePrinter printer = new AntlrTreeNodePrinter(ruleNamesList);
         spaceParser.addParseListener(printer);
         // begin parsing at top-level rule
-        Space2Parser.ParseUnitContext parseUnitContext = spaceParser.parseUnit();
+        SpaceParser.ParseUnitContext parseUnitContext = spaceParser.parseUnit();
         log.info("Parse errors from ANTLR: " + Strings.buildCommaDelList(parseErrors));
 
         // debug / print

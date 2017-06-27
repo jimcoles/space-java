@@ -16,13 +16,16 @@ import org.jkcsoft.space.lang.ast.AssociationDefn;
  * Holds a reference to an "object", which might be an Entity Tuple or a member of a
  * Tuple.
  *
+ * Might just as well be named "(Object) Reference".
+ *
  * @author Jim Coles
  */
 public class Association extends SpaceObject implements Assignable {
 
-    /** Oid of the referenced 'to' object */
-    private SpaceOid referenceOid;
+    private Tuple           parentTuple;
     private AssociationDefn defn;
+    /** Oid of the referenced 'to' object */
+    private SpaceOid        referenceOid;
 
     Association(SpaceOid oid, AssociationDefn defn, SpaceOid referenceOid) {
         super(oid);

@@ -31,10 +31,10 @@ public class TestAst {
         SpaceDefn spaceDefn = astBuilder.newSpaceDefn("MyHelloSpace");
         astBuilder.getAstRoot()
             .addSpaceDefn(spaceDefn)
-                .addVariable(astBuilder.newCoordinateDefn("myIntDim", PrimitiveType.CARD))
+                .addVariable(astBuilder.newVariableDefn("myIntDim", PrimitiveType.CARD))
                     .setType(PrimitiveType.CHAR);
         spaceDefn
-            .addVariable(astBuilder.newCoordinateDefn("myCharDim", PrimitiveType.CHAR))
+            .addVariable(astBuilder.newVariableDefn("myCharDim", PrimitiveType.CHAR))
             ;
         SpaceActionDefn mainMethod = astBuilder.newSpaceActionDefn("main");
         spaceDefn.addActionDefn(mainMethod);

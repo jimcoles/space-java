@@ -25,19 +25,19 @@ public class SpaceFileType extends LanguageFileType {
   @NotNull
   @Override
   public String getName() {
-    return "Simple file";
+    return "Space source file";
   }
 
   @NotNull
   @Override
   public String getDescription() {
-    return "Simple language file";
+    return "Space language file";
   }
 
   @NotNull
   @Override
   public String getDefaultExtension() {
-    return "simple";
+    return "space";
   }
 
   @Nullable

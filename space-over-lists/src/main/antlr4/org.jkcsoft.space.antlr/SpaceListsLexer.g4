@@ -1,6 +1,6 @@
 /* Space Lexer Grammar */
 
-lexer grammar SpaceLexer;
+lexer grammar SpaceListsLexer;
 
 //
 // -------------------------------- Lexer Rules Section ------------------------------------

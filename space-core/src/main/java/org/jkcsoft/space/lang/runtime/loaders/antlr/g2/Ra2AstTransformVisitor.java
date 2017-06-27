@@ -10,17 +10,17 @@
 
 package org.jkcsoft.space.lang.runtime.loaders.antlr.g2;
 
-import org.jkcsoft.space.antlr.Space2Parser;
-import org.jkcsoft.space.antlr.Space2ParserBaseVisitor;
+import org.jkcsoft.space.antlr.SpaceParser;
+import org.jkcsoft.space.antlr.SpaceParserBaseVisitor;
 
 /**
  *
  * @author Jim Coles
  */
-public class Ra2AstTransformVisitor extends Space2ParserBaseVisitor<Void> {
+public class Ra2AstTransformVisitor extends SpaceParserBaseVisitor<Void> {
     @Override
-    public Void visitParseUnit(Space2Parser.ParseUnitContext ctx) {
-        Space2Parser.SpaceDefnContext spaceDefnContext = ctx.spaceDefn();
+    public Void visitParseUnit(SpaceParser.ParseUnitContext ctx) {
+        SpaceParser.SpaceDefnContext spaceDefnContext = ctx.spaceDefn();
 
         return super.visitParseUnit(ctx);
     }

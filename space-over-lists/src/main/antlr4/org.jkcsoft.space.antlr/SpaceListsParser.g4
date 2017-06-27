@@ -1,8 +1,8 @@
 // The Antlr grammar for Space if I can get it to work
-parser grammar SpaceParser;
+parser grammar SpaceListsParser;
 
 options {
-    tokenVocab = SpaceLexer;
+    tokenVocab = SpaceListsLexer;
 }
 
 // -------------------------------- Parse Rules Section ------------------------------------

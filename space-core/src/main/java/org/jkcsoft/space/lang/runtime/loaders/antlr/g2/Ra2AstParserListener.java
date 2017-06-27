@@ -13,8 +13,8 @@ package org.jkcsoft.space.lang.runtime.loaders.antlr.g2;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.jkcsoft.space.antlr.Space2Parser;
-import org.jkcsoft.space.antlr.Space2ParserBaseListener;
+import org.jkcsoft.space.antlr.SpaceParser;
+import org.jkcsoft.space.antlr.SpaceParserBaseListener;
 import org.jkcsoft.space.lang.ast.AstBuilder;
 
 /**
@@ -25,140 +25,140 @@ import org.jkcsoft.space.lang.ast.AstBuilder;
  *
  * @author Jim Coles
  */
-public class Ra2AstParserListener extends Space2ParserBaseListener {
+public class Ra2AstParserListener extends SpaceParserBaseListener {
 
     private AstBuilder astBuilder = new AstBuilder();
 
     @Override
-    public void enterSpaceDefn(Space2Parser.SpaceDefnContext ctx) {
+    public void enterSpaceDefn(SpaceParser.SpaceDefnContext ctx) {
         astBuilder.initProgram();
 //        astBuilder.getAstRoot().addSpaceDefn(new EntityDefn(null, ctx.ge))
         super.enterSpaceDefn(ctx);
     }
 
     @Override
-    public void exitSpaceDefn(Space2Parser.SpaceDefnContext ctx) {
+    public void exitSpaceDefn(SpaceParser.SpaceDefnContext ctx) {
         super.exitSpaceDefn(ctx);
     }
 
     @Override
-    public void enterAccessModifier(Space2Parser.AccessModifierContext ctx) {
+    public void enterAccessModifier(SpaceParser.AccessModifierContext ctx) {
         super.enterAccessModifier(ctx);
     }
 
     @Override
-    public void exitAccessModifier(Space2Parser.AccessModifierContext ctx) {
+    public void exitAccessModifier(SpaceParser.AccessModifierContext ctx) {
         super.exitAccessModifier(ctx);
     }
 
     @Override
-    public void enterDefnTypeModifier(Space2Parser.DefnTypeModifierContext ctx) {
+    public void enterDefnTypeModifier(SpaceParser.DefnTypeModifierContext ctx) {
         super.enterDefnTypeModifier(ctx);
     }
 
     @Override
-    public void exitDefnTypeModifier(Space2Parser.DefnTypeModifierContext ctx) {
+    public void exitDefnTypeModifier(SpaceParser.DefnTypeModifierContext ctx) {
         super.exitDefnTypeModifier(ctx);
     }
 
     @Override
-    public void enterElementDefnHeader(Space2Parser.ElementDefnHeaderContext ctx) {
+    public void enterElementDefnHeader(SpaceParser.ElementDefnHeaderContext ctx) {
         super.enterElementDefnHeader(ctx);
     }
 
     @Override
-    public void exitElementDefnHeader(Space2Parser.ElementDefnHeaderContext ctx) {
+    public void exitElementDefnHeader(SpaceParser.ElementDefnHeaderContext ctx) {
         super.exitElementDefnHeader(ctx);
     }
 
     @Override
-    public void enterSpaceDefnBody(Space2Parser.SpaceDefnBodyContext ctx) {
+    public void enterSpaceDefnBody(SpaceParser.SpaceDefnBodyContext ctx) {
         super.enterSpaceDefnBody(ctx);
     }
 
     @Override
-    public void exitSpaceDefnBody(Space2Parser.SpaceDefnBodyContext ctx) {
+    public void exitSpaceDefnBody(SpaceParser.SpaceDefnBodyContext ctx) {
         super.exitSpaceDefnBody(ctx);
     }
 
     @Override
-    public void enterAssociationDefn(Space2Parser.AssociationDefnContext ctx) {
+    public void enterAssociationDefn(SpaceParser.AssociationDefnContext ctx) {
         super.enterAssociationDefn(ctx);
     }
 
     @Override
-    public void exitAssociationDefn(Space2Parser.AssociationDefnContext ctx) {
+    public void exitAssociationDefn(SpaceParser.AssociationDefnContext ctx) {
         super.exitAssociationDefn(ctx);
     }
 
     @Override
-    public void enterActionDefn(Space2Parser.ActionDefnContext ctx) {
+    public void enterActionDefn(SpaceParser.ActionDefnContext ctx) {
         super.enterActionDefn(ctx);
     }
 
     @Override
-    public void exitActionDefn(Space2Parser.ActionDefnContext ctx) {
+    public void exitActionDefn(SpaceParser.ActionDefnContext ctx) {
         super.exitActionDefn(ctx);
     }
 
 
     @Override
-    public void enterSpaceDecl(Space2Parser.SpaceDeclContext ctx) {
+    public void enterSpaceDecl(SpaceParser.SpaceDeclContext ctx) {
         super.enterSpaceDecl(ctx);
     }
 
     @Override
-    public void exitSpaceDecl(Space2Parser.SpaceDeclContext ctx) {
+    public void exitSpaceDecl(SpaceParser.SpaceDeclContext ctx) {
         super.exitSpaceDecl(ctx);
     }
 
     @Override
-    public void enterComment(Space2Parser.CommentContext ctx) {
+    public void enterComment(SpaceParser.CommentContext ctx) {
         super.enterComment(ctx);
     }
 
     @Override
-    public void exitComment(Space2Parser.CommentContext ctx) {
+    public void exitComment(SpaceParser.CommentContext ctx) {
         super.exitComment(ctx);
     }
 
     @Override
-    public void enterSingleLineComment(Space2Parser.SingleLineCommentContext ctx) {
+    public void enterSingleLineComment(SpaceParser.SingleLineCommentContext ctx) {
         super.enterSingleLineComment(ctx);
     }
 
     @Override
-    public void exitSingleLineComment(Space2Parser.SingleLineCommentContext ctx) {
+    public void exitSingleLineComment(SpaceParser.SingleLineCommentContext ctx) {
         super.exitSingleLineComment(ctx);
     }
 
     @Override
-    public void enterMultiLineComment(Space2Parser.MultiLineCommentContext ctx) {
+    public void enterMultiLineComment(SpaceParser.MultiLineCommentContext ctx) {
         super.enterMultiLineComment(ctx);
     }
 
     @Override
-    public void exitMultiLineComment(Space2Parser.MultiLineCommentContext ctx) {
+    public void exitMultiLineComment(SpaceParser.MultiLineCommentContext ctx) {
         super.exitMultiLineComment(ctx);
     }
 
     @Override
-    public void enterPrimitiveTypeName(Space2Parser.PrimitiveTypeNameContext ctx) {
+    public void enterPrimitiveTypeName(SpaceParser.PrimitiveTypeNameContext ctx) {
         super.enterPrimitiveTypeName(ctx);
     }
 
     @Override
-    public void exitPrimitiveTypeName(Space2Parser.PrimitiveTypeNameContext ctx) {
+    public void exitPrimitiveTypeName(SpaceParser.PrimitiveTypeNameContext ctx) {
         super.exitPrimitiveTypeName(ctx);
     }
 
     @Override
-    public void enterIdentifier(Space2Parser.IdentifierContext ctx) {
+    public void enterIdentifier(SpaceParser.IdentifierContext ctx) {
         super.enterIdentifier(ctx);
     }
 
     @Override
-    public void exitIdentifier(Space2Parser.IdentifierContext ctx) {
+    public void exitIdentifier(SpaceParser.IdentifierContext ctx) {
         super.exitIdentifier(ctx);
     }
 

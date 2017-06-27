@@ -15,7 +15,7 @@ import org.junit.Test;
 /**
  * @author Jim Coles
  */
-public class QueryCodeModel {
+public class TestQueryCodeModel {
 
     /**
      * Test ability to query a Space program itself for things like

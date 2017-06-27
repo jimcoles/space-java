@@ -66,7 +66,7 @@ public class AstBuilder {
         return new SpaceActionDefn(name);
     }
 
-    public VariableDefn newCoordinateDefn(String name, PrimitiveType type) {
+    public VariableDefn newVariableDefn(String name, PrimitiveType type) {
         return new VariableDefn(name, type);
     }
 

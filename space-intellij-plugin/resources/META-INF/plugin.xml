@@ -1,30 +1,22 @@
-<!--
-  ~ Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
-  ~
-  ~ Licensed under the following license agreement:
-  ~
-  ~   http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Also see the LICENSE file in the repository root directory.
-  -->
-
-<idea-plugin version="2">
-  <id>org.jkcsoft.space.spaceplugin</id>
-  <name>James K Coles</name>
+<idea-plugin>
+  <id>com.your.company.unique.plugin.id</id>
+  <name>Plugin display name here</name>
   <version>1.0</version>
-  <vendor email="JamesKColes@gmail.com" url="http://www.yourcompany.com">James K Coles</vendor>
+  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
 
   <description><![CDATA[
-      Enable smart Space editor within Intellij.
+      Enter short description for your plugin here.<br>
+      <em>most HTML tags may be used</em>
     ]]></description>
 
   <change-notes><![CDATA[
-      Changes:  Initial beta version.
+      Add change notes here.<br>
+      <em>most HTML tags may be used</em>
     ]]>
   </change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="107.105"/>
+  <idea-version since-build="145.0"/>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
@@ -33,6 +25,8 @@
   -->
 
   <extensions defaultExtensionNs="com.intellij">
+    <!-- Add your extensions here -->
+    <!-- Add your extensions here -->
     <fileTypeFactory implementation="org.jkcsoft.space.intellij.plugin.SpaceFileTypeFactory"/>
     <lang.parserDefinition language="Space" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceParserDefinition"/>
     <lang.syntaxHighlighterFactory key="Space"
@@ -52,7 +46,7 @@
     <codeStyleSettingsProvider implementation="org.jkcsoft.space.intellij.plugin.SpaceCodeStyleSettingsProvider"/>
     <langCodeStyleSettingsProvider implementation="org.jkcsoft.space.intellij.plugin.SpaceLanguageCodeStyleSettingsProvider"/>
     <lang.commenter language="Space" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceCommenter"/>
-    <todoIndexer filetype="Space file" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceTodoIndexer"/>
+    <todoIndexer filetype="Simple file" implementationClass="org.jkcsoft.space.intellij.plugin.SpaceTodoIndexer"/>
   </extensions>
 
   <actions>

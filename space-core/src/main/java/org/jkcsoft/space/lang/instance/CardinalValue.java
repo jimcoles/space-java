@@ -10,6 +10,7 @@
 
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.PrimitiveType;
 import org.jkcsoft.space.lang.ast.VariableDefn;
 
 /**
@@ -18,11 +19,11 @@ import org.jkcsoft.space.lang.ast.VariableDefn;
  *
  * @author Jim Coles
  */
-public class Cardinal extends IntegerValue {
+public class CardinalValue extends IntegerValue {
 
     /** Limit constructor access to package-only. */
-    Cardinal(SpaceOid oid, VariableDefn type) {
-        super(oid, type);
+    CardinalValue(Integer value) {
+        super(PrimitiveType.CARD, value);
     }
 
 }

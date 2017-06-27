@@ -16,7 +16,8 @@ package org.jkcsoft.space.lang.ast;
 public enum PrimitiveType {
     BOOLEAN,
     CHAR,
+    TEXT,
     CARD,
     REAL,
-    RATIONAL;
+    RATIONAL
 }

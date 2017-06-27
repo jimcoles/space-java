@@ -9,7 +9,12 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.SpaceDefn;
+import org.jkcsoft.space.lang.ast.VariableDefn;
+import org.jkcsoft.space.lang.runtime.RuntimeException;
+
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Conceptually, a Tuple is an element of a Relation (which is a Set of Tuples).
@@ -21,36 +26,40 @@ import java.util.*;
  * @author Jim Coles
  * @version 1.0
  */
-public class Tuple extends SpaceObject {
+public class Tuple extends SpaceObject implements Assignable {
 
-    /** May be anonymous. */
+    /** The Space to which this Tuple belongs. The Space may be anonymous. */
     private Space space;
 
-    private List<Assignable>    assignables = new LinkedList<>();
-    private List<ScalarValue>   values = new LinkedList<>();
-    private List<Association>   associations = new LinkedList<>();
-    //
+//    private List<Assignable>    assignables = new LinkedList<>();
+//    private List<ScalarValue>   values = new LinkedList<>();
+//    private List<Association>   associations = new LinkedList<>();
+
+    // variables in definition order
+    private List<Variable> variables = new LinkedList<>();
+    // seminal map
+    private Map<String, Assignable> indexAllByName = new HashMap<>();
+    // redundant
     private Map<String, ScalarValue> indexValuesByName = new HashMap<>();
     private Map<String, Association> indexAssociationsByName = new HashMap<>();
 
-    Tuple(SpaceOid oid, Space space, Assignable ... assignables) {
+    Tuple(SpaceOid oid, Space space) {
         super(oid);
         this.space = space;
-        this.assignables.addAll(Arrays.asList(assignables));
-        for (Assignable assignable : assignables) {
-            if (assignable instanceof ScalarValue) {
-                values.add((ScalarValue) assignable);
-            }
-            else if (assignable instanceof Association) {
-                associations.add((Association) assignable);
-            }
+        List<VariableDefn> varDefnList = getVarDefnList();
+        for (VariableDefn variableDefn : varDefnList) {
+            variables.add(new Variable(this, variableDefn, null));
         }
-        for (ScalarValue value: values) {
-            indexValuesByName.put(value.getType().getName(), value);
-        }
-        for (Association association : associations) {
-            if (association.getDefn() != null)
-                indexAssociationsByName.put(association.getDefn().getName(), association);
+    }
+
+    Tuple(SpaceOid oid, Space space, Assignable ... assignables) {
+        this(oid, space);
+//        this.assignables.addAll(Arrays.asList(assignables));
+        // set values based on order of variable and assoc in space type definition
+        if (assignables.length > getVarDefnList().size())
+            throw new RuntimeException("Too many variables for this Space.");
+        for (int idxVar = 0; idxVar < assignables.length; idxVar++) {
+            setValue(getVarNameAt(idxVar), assignables[idxVar]);
         }
     }
 
@@ -62,22 +71,17 @@ public class Tuple extends SpaceObject {
         return space;
     }
 
-    public Tuple addValue(ScalarValue scalarValue) {
-        values.add(scalarValue);
-        assignables.add(scalarValue);
-        indexValuesByName.put(
-            getSpace().getDefinition().getVariableDefnAt(values.size()).getName(),
-            scalarValue
-        );
+    public Tuple setValue(String name, Assignable value) {
+        indexAllByName.put(name, value);
         return this;
     }
 
-    public Tuple addReference(Association reference) {
-        associations.add(reference);
-        assignables.add(reference);
-        indexAssociationsByName.put(reference.getDefn().getName(), reference);
+    public Tuple setValue(int idx, Assignable value) {
+        indexAllByName.put(getVarNameAt(idx), value);
         return this;
     }
+
+//    private Tuple addValue(ScalarValue scalarValue) {
 
     /**
      * Return value of Tuple variable with <code>name</code>
@@ -87,25 +91,44 @@ public class Tuple extends SpaceObject {
     }
 
     public ScalarValue getValueAt(int index) {
-        return values.get(index);
+        return indexValuesByName.get(getVarNameAt(index));
     }
 
     public Assignable getAssignableAt(int index) {
-        return assignables.get(index);
+        return indexAllByName.get(getVarNameAt(index));
     }
 
-    public List<Assignable> getAssignables() {
-        return assignables;
-    }
+//    public List<Assignable> getAssignables() {
+//        return assignables;
+//    }
 
     public List<ScalarValue> getValues() {
+        List<VariableDefn> varDefnList = getVarDefnList();
+        List<ScalarValue> values = new ArrayList<>(varDefnList.size());
+        varDefnList.forEach(variableDefn -> {
+            values.add(getValue(variableDefn.getName()));
+        });
         return values;
     }
 
     public SpaceOid getReferenceOid(String name) {
         return indexAssociationsByName.get(name).getReferenceOid();
     }
-    public List<Association> getAssociations() {
-        return associations;
+
+    public Association getAssoc(String name) {
+        return indexAssociationsByName.get(name);
+    }
+
+//    public List<Association> getAssociations() {
+//        return associations;
+//    }
+
+    private String getVarNameAt(int idxVar) {
+        List<VariableDefn> variableDefnList = getVarDefnList();
+        return variableDefnList.get(idxVar).getName();
+    }
+
+    private List<VariableDefn> getVarDefnList() {
+        return space.getDefinition().getVariableDefnList();
     }
 }

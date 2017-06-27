@@ -10,17 +10,18 @@
 
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.PrimitiveType;
 import org.jkcsoft.space.lang.ast.VariableDefn;
 
 /**
  * @author Jim Coles
  */
-public class RealValue extends ScalarValue {
+public class RealValue extends ScalarValue<Double> {
 
     private double jFloatDouble = Double.NaN;
 
-    public RealValue(SpaceOid oid, VariableDefn type) {
-        super(oid, type);
+    public RealValue(PrimitiveType type, double value) {
+        super(type, value);
     }
 
     @Override

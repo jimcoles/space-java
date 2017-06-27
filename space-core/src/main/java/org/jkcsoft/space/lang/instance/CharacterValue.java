@@ -10,6 +10,7 @@
 
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.PrimitiveType;
 import org.jkcsoft.space.lang.ast.VariableDefn;
 
 /**
@@ -18,8 +19,8 @@ import org.jkcsoft.space.lang.ast.VariableDefn;
 public class CharacterValue extends ScalarValue<Character> {
 
     /** Limit constructor access to package-only. */
-    CharacterValue(SpaceOid oid, VariableDefn type, char c) {
-        super(oid, type);
+    CharacterValue(PrimitiveType type, char value) {
+        super(type, value);
     }
 
     @Override

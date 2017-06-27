@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.runtime.loaders.antlr.g1.g1;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.Tree;
-import org.jkcsoft.space.antlr.SpaceParser;
+import org.jkcsoft.space.antlr.SpaceListsParser;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -32,7 +32,7 @@ public class RaTreeWalker {
         listeners.add(listener);
     }
 
-    public void visitAll(ParseTree tree, SpaceParser spaceParser) {
+    public void visitAll(ParseTree tree, SpaceListsParser spaceParser) {
         String[] ruleNames = spaceParser != null ? spaceParser.getRuleNames() : null;
         List<String> ruleNamesList = ruleNames != null ? Arrays.asList(ruleNames) : null;
         visit(tree, ruleNamesList, 0);

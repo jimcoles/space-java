@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Abstract base for EntityDefn and ViewDefn.
+ * The central declarative meta notion of Space.  A
  *
  * @author Jim Coles
  * @version 1.0

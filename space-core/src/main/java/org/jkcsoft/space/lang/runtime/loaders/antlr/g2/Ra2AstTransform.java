@@ -11,7 +11,7 @@
 package org.jkcsoft.space.lang.runtime.loaders.antlr.g2;
 
 import org.apache.log4j.Logger;
-import org.jkcsoft.space.antlr.Space2Parser;
+import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.runtime.ExecState;
@@ -42,8 +42,8 @@ public class Ra2AstTransform {
     private AstBuilder astBuilder;
 //    private ObjectBuilder objBuilder = ObjectBuilder.getInstance();
 
-    public AstBuilder toAst(Space2Parser.ParseUnitContext spaceParseUnit) {
-        log.info("transforming " + Space2Parser.ParseUnitContext.class.getSimpleName());
+    public AstBuilder toAst(SpaceParser.ParseUnitContext spaceParseUnit) {
+        log.info("transforming " + SpaceParser.ParseUnitContext.class.getSimpleName());
 
         astBuilder = new AstBuilder();
         astBuilder.initProgram();
@@ -51,8 +51,8 @@ public class Ra2AstTransform {
         return astBuilder;
     }
 
-    private SpaceDefn toAst(Space2Parser.SpaceDefnContext spaceDefnContext) {
-        log.info("transforming " + Space2Parser.SpaceDefnContext.class.getSimpleName());
+    private SpaceDefn toAst(SpaceParser.SpaceDefnContext spaceDefnContext) {
+        log.info("transforming " + SpaceParser.SpaceDefnContext.class.getSimpleName());
 
         SpaceDefn spaceDefn = null;
         // TODO: 2/8/17 Not all spaces are Entities?
@@ -63,14 +63,14 @@ public class Ra2AstTransform {
         if (spaceDefnContext.ExtendsKeyword() != null) {
             spaceDefnContext.spacePathList();
         }
-        List<Space2Parser.AnySpaceElementDefnContext> bodyElements
+        List<SpaceParser.AnySpaceElementDefnContext> bodyElements
             = spaceDefnContext.spaceDefnBody().anySpaceElementDefn();
         addToAst(spaceDefn, bodyElements);
         return spaceDefn;
     }
 
-    private void addToAst(SpaceDefn spaceDefn, List<Space2Parser.AnySpaceElementDefnContext> bodyElements) {
-        for (Space2Parser.AnySpaceElementDefnContext bodyElement : bodyElements) {
+    private void addToAst(SpaceDefn spaceDefn, List<SpaceParser.AnySpaceElementDefnContext> bodyElements) {
+        for (SpaceParser.AnySpaceElementDefnContext bodyElement : bodyElements) {
             if (bodyElement.variableDefn() != null) {
                 spaceDefn.addVariable(toAst(bodyElement.variableDefn()));
             }
@@ -88,28 +88,28 @@ public class Ra2AstTransform {
         }
     }
 
-    private AbstractActionDefn toAst(Space2Parser.ActionDefnContext actionDefnContext) {
-        log.info("transforming " + Space2Parser.ActionDefnContext.class.getSimpleName());
+    private AbstractActionDefn toAst(SpaceParser.ActionDefnContext actionDefnContext) {
+        log.info("transforming " + SpaceParser.ActionDefnContext.class.getSimpleName());
 
         SpaceActionDefn actionDefn
             = astBuilder.newSpaceActionDefn(toText(actionDefnContext.identifier()));
         actionDefn.setArgSpaceDefn(toAst(actionDefnContext.anySpaceElementDefn()));
-        List<Space2Parser.ActionCallExprContext> actionCallExprContexts
+        List<SpaceParser.ActionCallExprContext> actionCallExprContexts
             = actionDefnContext.actionDefnBody().actionCallExpr();
-        for (Space2Parser.ActionCallExprContext actionCallExprContext : actionCallExprContexts) {
+        for (SpaceParser.ActionCallExprContext actionCallExprContext : actionCallExprContexts) {
             actionDefn.addAction(toAst(actionCallExprContext));
         }
 //        actionDefnContext.anyTypeRef();
         return actionDefn;
     }
 
-    private ActionCallExpr toAst(Space2Parser.ActionCallExprContext actionCallExprContext) {
+    private ActionCallExpr toAst(SpaceParser.ActionCallExprContext actionCallExprContext) {
         ActionCallExpr spacePathExpr = toAst(actionCallExprContext.spacePathExpr());
 
-        List<Space2Parser.ValueExprContext> callArgContexts = actionCallExprContext.valueExpr();
+        List<SpaceParser.ValueExprContext> callArgContexts = actionCallExprContext.valueExpr();
         ValueExpr[] thisCallArgs = new ValueExpr[callArgContexts.size()];
         int idxArg = 0;
-        for (Space2Parser.ValueExprContext callArgContext : callArgContexts) {
+        for (SpaceParser.ValueExprContext callArgContext : callArgContexts) {
             ValueExpr rightSide = null;
             if (callArgContext.literalExpr() != null && callArgContext.literalExpr().scalarLiteral() != null)
                 rightSide = toAst(callArgContext.literalExpr().scalarLiteral());
@@ -130,7 +130,7 @@ public class Ra2AstTransform {
     }
 
     /** Transforms parse tree Space Path Expr to a nested list of nav operations. */
-    private ActionCallExpr toAst(Space2Parser.SpacePathExprContext spacePathExprContext) {
+    private ActionCallExpr toAst(SpaceParser.SpacePathExprContext spacePathExprContext) {
         spacePathExprContext.spacePathExpr();
         spacePathExprContext.identifier();
         spacePathExprContext.SPathNavAssocToOper();
@@ -147,7 +147,7 @@ public class Ra2AstTransform {
     /**
      * Character string literals (CharactersSequences) produce, in effect, a 'new CharacterSequence("")'
      * call. */
-    private ValueExpr toAst(Space2Parser.StringLiteralContext stringLiteralContext) {
+    private ValueExpr toAst(SpaceParser.StringLiteralContext stringLiteralContext) {
         ValueExpr rightSide = null;
 
 //        CharacterSequence arg1 = objBuilder.newCharacterSequence(
@@ -164,39 +164,39 @@ public class Ra2AstTransform {
         return rightSide;
     }
 
-    private ValueExpr toAst(Space2Parser.ScalarLiteralContext scalarLiteralContext) {
+    private ValueExpr toAst(SpaceParser.ScalarLiteralContext scalarLiteralContext) {
         return astBuilder.newLiteralHolder(scalarLiteralContext.integerLiteral().getText());
     }
 
-    private List<Space2Parser.IdentifierContext> collapseList(Space2Parser.SpacePathExprContext identifierRefContext) {
-        List<Space2Parser.IdentifierContext> listOfIds = new LinkedList<>();
+    private List<SpaceParser.IdentifierContext> collapseList(SpaceParser.SpacePathExprContext identifierRefContext) {
+        List<SpaceParser.IdentifierContext> listOfIds = new LinkedList<>();
         listOfIds.add(identifierRefContext.identifier());
         return listOfIds;
     }
 
-    private SpaceDefn toAst(List<Space2Parser.AnySpaceElementDefnContext> anySpaceElementDefnContexts) {
-        log.info("transforming list of " + Space2Parser.AnySpaceElementDefnContext.class.getSimpleName());
+    private SpaceDefn toAst(List<SpaceParser.AnySpaceElementDefnContext> anySpaceElementDefnContexts) {
+        log.info("transforming list of " + SpaceParser.AnySpaceElementDefnContext.class.getSimpleName());
 
         SpaceDefn spaceDefn = astBuilder.newSpaceDefn(null) ;
         addToAst(spaceDefn, anySpaceElementDefnContexts);
         return spaceDefn;
     }
 
-    private VariableDefn toAst(Space2Parser.VariableDefnContext variableDefnContext) {
-        log.info("transforming " + Space2Parser.VariableDefnContext.class.getSimpleName());
+    private VariableDefn toAst(SpaceParser.VariableDefnContext variableDefnContext) {
+        log.info("transforming " + SpaceParser.VariableDefnContext.class.getSimpleName());
 
-        return astBuilder.newCoordinateDefn(toText(variableDefnContext.identifier()),
+        return astBuilder.newVariableDefn(toText(variableDefnContext.identifier()),
                                             toAst(variableDefnContext.primitiveTypeName()));
     }
 
-    private PrimitiveType toAst(Space2Parser.PrimitiveTypeNameContext primitiveTypeNameContext) {
-        log.info("transforming " + Space2Parser.PrimitiveTypeNameContext.class.getSimpleName()
+    private PrimitiveType toAst(SpaceParser.PrimitiveTypeNameContext primitiveTypeNameContext) {
+        log.info("transforming " + SpaceParser.PrimitiveTypeNameContext.class.getSimpleName()
         + "=" + primitiveTypeNameContext.getText());
 
         return PrimitiveType.valueOf(primitiveTypeNameContext.getText().toUpperCase());
     }
 
-    private String[] toNsArray(List<Space2Parser.IdentifierContext> fqNsIds) {
+    private String[] toNsArray(List<SpaceParser.IdentifierContext> fqNsIds) {
         String[] nsArray = new String[fqNsIds.size()];
         for (int idxId = 0; idxId < fqNsIds.size(); idxId++) {
             nsArray[idxId] = toText(fqNsIds.get(idxId));
@@ -204,7 +204,7 @@ public class Ra2AstTransform {
         return nsArray;
     }
 
-    private String toText(Space2Parser.IdentifierContext identifierContext) {
+    private String toText(SpaceParser.IdentifierContext identifierContext) {
         return identifierContext.Identifier().getSymbol().getText();
     }
 }
