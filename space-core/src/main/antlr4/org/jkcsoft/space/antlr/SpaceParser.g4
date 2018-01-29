@@ -6,6 +6,18 @@ options {
 }
 
 /*
+Meta-Naming Conventions:
+
+  __Defn : A construct that defines the structure of a type (generalization)
+           or meta notion.
+  __Expr : A construct that references declared elements and expresses
+           some sequence of actions possibly resulting in a value at
+           runtime.  Might express a mix of operations and truths
+           (predicates).
+           ?? Do we need ActionExpr vs EquationExpr.
+  __Stmnt : Expresses a thing to be executed such as a function call,
+            not a structure;
+
 Examples to prime the pump:
 
 space-def MySpaceDef [equates-to OtherSpaceDef YetAnotherSpaceDef ...] (
@@ -46,7 +58,33 @@ enum-relation MyRelation [] (
 )
 
 // Physical
+
 index MyIndex (
+)
+
+// specifies vars of root and associated types with filter criteria
+query-def <queryName> (
+
+    '/' <rootObject> // may be a type
+
+    [joins
+        ./<assocName> [as <alias>]
+        {  // nested associations
+            ./<assocName> [as <alias>]
+        }
+    ]
+
+    vars
+        <assocName|alias>.var1 [, ...]
+
+    filter
+
+        // Should/May not contain object refs, only variable refs ??
+
+        [ ( <assocName|alias>.var <boolOper> <valueExpr> )
+          <boolOper> [<...> ]
+
+        | <namedEquation>
 
 )
 
@@ -77,13 +115,13 @@ index MyIndex (
 // -------------------------------- Parse Rules Section ------------------------------------
 
 // If matched by the ANTLR recognizer, these will generate Rule Context nodes
-// in the parse tree with the rule name specified.  These rules should reflect
+// in the parse tree with the rule name specified.  Parse rules should reflect
 // high-level concepts of the language.
 //
 // NOTE: Parse Rule names must start with a lowercase letter.
 
 parseUnit :
-    spaceDefn | equationDefn | actionDefn
+    spaceTypeDefn | equationDefn | actionDefn
     ;
 
 /*
@@ -98,21 +136,23 @@ parseUnitRelational :
     ;
 
 anyThing :
-    spaceDefn
+    spaceTypeDefn
     | equationDefn
     | associationDefn
+    | queryDefn
+    | regularExpr
     ;
 
-spaceDefn :
+spaceTypeDefn :
     accessModifier? defnTypeModifier?
-    SpaceKeyword identifier
+    TypeDefKeyword identifier
     (ExtendsKeyword spacePathList)?
     elementDefnHeader?
-    spaceDefnBody
+    spaceTypeDefnBody
     ;
 
 equationDefn :
-    EquationKeyword
+    EquationDefKeyword
     ;
 
 accessModifier :
@@ -123,48 +163,120 @@ defnTypeModifier :
     SpaceDefnType
     ;
 
-elementDefnHeader : comment
+elementDefnHeader :
+    comment
     ;
 
-spaceDefnBody :
-    ListStart anySpaceElementDefn* ListEnd
+/*
+   Enforce structure:
+    1. vars, then assocs, then actions.
+    2. decl/defn before any initializaiton.
+*/
+spaceTypeDefnBody :
+    BlockStart
+    variableDefnStmnt*
+    associationDefnStmnt*
+    actionDefn*
+    spaceTypeDefn*
+    BlockEnd
     ;
 
-anySpaceElementDefn :
-    variableDefn
-    | associationDefn
-    | actionDefn
+/* Var seq only important for order-based initialization. */
+//variableDefnList :
+//    SeqStart variableDefn (',' variableDefn)* SeqEnd
+//    ;
+
+variableDefnStmnt :
+    variableDefn ';'
     ;
 
 variableDefn :
-    elementDefnHeader? primitiveTypeName identifier assignmentExpr? StatementEnd
+    variableDecl rightAssignmentExpr?
+    ;
+
+variableDecl :
+    elementDefnHeader? primitiveTypeName identifier
+    ;
+
+//associationDefnList :
+//    SeqStart associationDefn (',' associationDefn)* SeqEnd
+//    ;
+
+associationDefnStmnt :
+    associationDefn ';'
     ;
 
 associationDefn :
-    elementDefnHeader? spacePathExpr identifier assignmentExpr? StatementEnd
+    associationDecl rightAssignmentExpr?
     ;
 
+associationDecl :
+    elementDefnHeader? spacePathExpr identifier
+    ;
+
+parameterDecl :
+    variableDecl |
+    associationDecl
+    ;
+
+//actionDefnList :
+//    SeqStart actionDefn (',' actionDefn) SeqEnd
+//    ;
+
 actionDefn :
-    accessModifier? anyTypeRef identifier ListStart anySpaceElementDefn* ListEnd
+    'function-def' accessModifier? anyTypeRef identifier '(' (parameterDecl (',' parameterDecl)*)? ')'
     elementDefnHeader?
     actionDefnBody
     ;
 
 actionDefnBody :
-    ListStart actionCallExpr* ListEnd
+    BlockStart
+    statement*
+    BlockEnd
     ;
 
+statement :
+    expression ';'
+    ;
+
+expression :
+    variableDefn |
+    associationDefn |
+    actionCallExpr |
+    assignmentExpr
+    ;
+
+// Important that an action call may be a list of params or a single tuple
+// object holding parameters.  The language runtime knows the names/paths of
+// all elements in a Tuple.
 actionCallExpr :
-    spacePathExpr TupleStart valueExpr* TupleEnd StatementEnd
+    spacePathExpr TupleStart valueOrAssignmentExprList? TupleEnd
+    ;
+
+// ===============================================================================
+//
+// ===============================================================================
+
+objectExpr :
+    'new' spacePathExpr TupleStart valueOrAssignmentExprList? TupleEnd
     ;
 
 valueExpr :
     literalExpr
     | spacePathExpr
     | actionCallExpr
+    | objectExpr
     ;
 
-setLiteral : SetStart SetEnd;
+valueOrAssignmentExprList :
+    valueOrAssignmentExpr (',' valueOrAssignmentExpr)*
+    ;
+
+valueOrAssignmentExpr :
+    valueExpr | assignmentExpr
+    ;
+
+setLiteral : UserSetStart UserSetEnd;
 
 spaceDecl : SpaceStart SpaceEnd;
 
@@ -190,8 +302,13 @@ primitiveTypeName :
     | VoidKeyword
     ;
 
+rightAssignmentExpr :
+    '=' valueExpr
+    ;
+
 assignmentExpr :
-    spacePathExpr AssignOper valueExpr;
+    spacePathExpr rightAssignmentExpr
+    ;
 
 //rightSide :
 //    literal
@@ -213,14 +330,34 @@ floatLiteral : FloatLiteral;
 
 identifier : Identifier;
 
+// ------------ QUERY EXPRESSIONS --------------
+
+queryDefn :
+    'query-def'
+    ;
+
+// ------------ SPACE PATH EXPRESSIONS -----------
 spacePathExpr :
-    identifier (SPathNavAssocToOper spacePathExpr?)?
+    identifier
+    | identifier SPathNavAssocToOper spacePathExpr
+    | identifier SPathNavAssocToOper2 spacePathExpr
     ;
 
 spacePathList :
-    spacePathExpr*
+    spacePathExpr (',' spacePathExpr)*
     ;
 
+// ------------ GRAMMAR EXPRESSIONS ---------------
+
+// TODO Develop grammar grammar that will help Space coders map
+//      complex strings to Spaces
+grammarExpression :
+
+    ;
+
+// ------------ REGULAR EXPRESSIONS ---------------
+
+// TODO Develop grammar for regular expression notation
 regularExpr :
-    // TODO Develop grammar for regular expression notation
+    'regex-def'
     ;

@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.AssociationDefn;
 import org.jkcsoft.space.lang.ast.SpaceActionDefn;
-import org.jkcsoft.space.lang.ast.SpaceDefn;
+import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -41,8 +41,8 @@ public class ObjectBuilder {
         return new SpaceOid(latestOid.incrementAndGet());
     }
 
-    public Space newSpace(Space spcContext, SpaceDefn spaceDefn) {
-        return new Space(newOid(), spcContext, spaceDefn);
+    public Space newSpace(Space spcContext, SpaceTypeDefn spaceTypeDefn) {
+        return new Space(newOid(), spcContext, spaceTypeDefn);
     }
 
     public Tuple newTuple(Space space, Assignable ... values) {

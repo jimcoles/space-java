@@ -18,12 +18,12 @@ import java.lang.reflect.Method;
 public class NativeActionDefn extends AbstractActionDefn implements Callable {
 
     private final Method jMethod;
-    private final SpaceDefn argSpaceDefn;
+    private final SpaceTypeDefn argSpaceTypeDefn;
 
-    NativeActionDefn(String name, Method jMethod, SpaceDefn argSpaceDefn) {
+    NativeActionDefn(String name, Method jMethod, SpaceTypeDefn argSpaceTypeDefn) {
         super(name);
         this.jMethod = jMethod;
-        this.argSpaceDefn = argSpaceDefn;
+        this.argSpaceTypeDefn = argSpaceTypeDefn;
     }
 
     public Method getjMethod() {
@@ -31,7 +31,7 @@ public class NativeActionDefn extends AbstractActionDefn implements Callable {
     }
 
     @Override
-    public SpaceDefn getArgSpaceDefn() {
-        return argSpaceDefn;
+    public SpaceTypeDefn getArgSpaceTypeDefn() {
+        return argSpaceTypeDefn;
     }
 }

@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.runtime;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
@@ -46,18 +47,21 @@ public class Executor extends ExprProcessor {
     public static void main(String[] args) {
         try {
             Executor exec = new Executor();
-            exec.run(args[0], exec);
+            exec.run(args[0]);
         } catch (Throwable th) {
             log.error("error running", th);
         }
     }
 
-    public void run(String filePath, Executor exec) throws RuntimeException {
-        String stFilePath = filePath;
-        File file = new File(stFilePath);
+    public void run(String ... filePath) throws RuntimeException {
+        File file = FileUtils.getFile(filePath);
         if (!file.exists()) {
-            throw new RuntimeException("Input file [" + stFilePath + "] does not exist.");
+            throw new RuntimeException("Input file [" + filePath + "] does not exist.");
         }
+        run(file);
+    }
+
+    public void run(File file) {
         AstLoader astLoader;
         try {
             String parserImplClassName = "org.jkcsoft.space.lang.runtime.loaders.antlr.g2.G2AntlrParser";
@@ -68,8 +72,8 @@ public class Executor extends ExprProcessor {
         }
         try {
             AstBuilder astBuilder = astLoader.load(file);
-            exec.linkRefs(astBuilder.getAstRoot());
-            exec.exec(astBuilder.getAstRoot());
+            linkRefs(astBuilder.getAstRoot());
+            exec(astBuilder.getAstRoot());
         }
         catch (Exception ex) {
             throw new RuntimeException("Failed running program", ex);
@@ -145,18 +149,18 @@ public class Executor extends ExprProcessor {
     }
 
     private void loadNativeClass(Class jnClass) {
-        SpaceDefn spaceDefn = rootModelBuilder.newSpaceDefn(jnClass.getSimpleName());
+        SpaceTypeDefn spaceTypeDefn = rootModelBuilder.newSpaceTypeDefn(jnClass.getSimpleName());
 //        spaceDefn.setName(jnClass.getSimpleName());
         Method[] methods = jnClass.getMethods();
         for (Method jMethod: methods) {
-            SpaceDefn nativeArgSpaceDefn = rootModelBuilder.newSpaceDefn(null);
+            SpaceTypeDefn nativeArgSpaceTypeDefn = rootModelBuilder.newSpaceTypeDefn(null);
             jMethod.getParameters();    // TODO build dynamic arg space
-            nativeArgSpaceDefn.addVariable(rootModelBuilder.newVariableDefn("arg1", null));
-            AbstractActionDefn actionDefn = spaceDefn.addActionDefn(rootModelBuilder.newNativeActionDefn
-                (jMethod.getName(), jMethod, nativeArgSpaceDefn));
+            nativeArgSpaceTypeDefn.addVariable(rootModelBuilder.newVariableDefn("arg1", null));
+            AbstractActionDefn actionDefn = spaceTypeDefn.addActionDefn(rootModelBuilder.newNativeActionDefn
+                (jMethod.getName(), jMethod, nativeArgSpaceTypeDefn));
             trackMetaObject(actionDefn);;
         }
-        trackMetaObject(spaceDefn);
+        trackMetaObject(spaceTypeDefn);
     }
 
     private AbstractActionDefn findOper(String functionPath) {
@@ -201,9 +205,9 @@ public class Executor extends ExprProcessor {
      */
     public ModelElement exec(SpaceProgram program) throws Exception {
         log.info("enter program exec for " + program.getName());
-        SpaceDefn firstSpaceDefn = program.getFirstSpaceDefn();
-        Space rootSpace = newSpace(null, firstSpaceDefn);
-        SpaceActionDefn spMainActionDefn = (SpaceActionDefn) firstSpaceDefn.getFunction("main");
+        SpaceTypeDefn firstSpaceTypeDefn = program.getFirstSpaceDefn();
+        Space rootSpace = newSpace(null, firstSpaceTypeDefn);
+        SpaceActionDefn spMainActionDefn = (SpaceActionDefn) firstSpaceTypeDefn.getFunction("main");
         List<SpaceObject> objectHeap = program.getObjectHeap();
         for (SpaceObject spaceObj:objectHeap) {
             trackSpaceObject(spaceObj);
@@ -303,7 +307,7 @@ public class Executor extends ExprProcessor {
 
         // must add a nested Space context beneath the incoming context space to
         // represent the call stack
-        Space argSpace = newSpace(spcContext, ((Callable) targetFunctionDefn).getArgSpaceDefn());
+        Space argSpace = newSpace(spcContext, ((Callable) targetFunctionDefn).getArgSpaceTypeDefn());
         Tuple argTuple = newTuple(argSpace);
         argSpace.addTuple(argTuple);
 
@@ -361,8 +365,8 @@ public class Executor extends ExprProcessor {
 
     // ---------------------------- New Space Objects ------------------------
 
-    private Space newSpace(Space spaceContext, SpaceDefn firstSpaceDefn) {
-        Space rootSpace = getObjBuilder().newSpace(spaceContext, firstSpaceDefn);
+    private Space newSpace(Space spaceContext, SpaceTypeDefn firstSpaceTypeDefn) {
+        Space rootSpace = getObjBuilder().newSpace(spaceContext, firstSpaceTypeDefn);
         trackSpaceObject(rootSpace);
         return rootSpace;
     }

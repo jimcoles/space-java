@@ -24,9 +24,9 @@ import java.util.Map;
  * @author Jim Coles
  * @version 1.0
  */
-public class SpaceDefn extends ModelElement {
+public class SpaceTypeDefn extends ModelElement {
 
-    private SpaceDefn               contextSpaceDefn;
+    private SpaceTypeDefn contextSpaceTypeDefn;
     private List<VariableDefn>      variableDefnList;
     private List<AssociationDefn>   associationDefnList;
     private List<EquationDefn>      equations;
@@ -38,7 +38,7 @@ public class SpaceDefn extends ModelElement {
     private Map<String, AssociationDefn>     indexAssociationsByName = new HashMap<>();
     private Map<String, AbstractActionDefn> indexFunctionsByName = new HashMap<>();
 
-    SpaceDefn(String name) {
+    SpaceTypeDefn(String name) {
         super(name);
     }
 
@@ -50,16 +50,16 @@ public class SpaceDefn extends ModelElement {
         return true;
     }
 
-    void setContextSpaceDefn(SpaceDefn contextSpaceDefn) {
-        this.contextSpaceDefn = contextSpaceDefn;
+    void setContextSpaceTypeDefn(SpaceTypeDefn contextSpaceTypeDefn) {
+        this.contextSpaceTypeDefn = contextSpaceTypeDefn;
     }
 
-    public SpaceDefn getContextSpaceDefn() {
-        return contextSpaceDefn;
+    public SpaceTypeDefn getContextSpaceTypeDefn() {
+        return contextSpaceTypeDefn;
     }
 
     public boolean hasContextSpaceDefn() {
-        return contextSpaceDefn != null;
+        return contextSpaceTypeDefn != null;
     }
 
     public List<VariableDefn> getVariableDefnList() {
@@ -106,7 +106,7 @@ public class SpaceDefn extends ModelElement {
 
     public AbstractActionDefn addActionDefn(AbstractActionDefn actionDefn) {
         functionDefns.add(actionDefn);
-        actionDefn.setContextSpaceDefn(this);
+        actionDefn.setContextSpaceTypeDefn(this);
         //
         indexFunctionsByName.put(actionDefn.getName(), actionDefn);
         //
@@ -116,7 +116,7 @@ public class SpaceDefn extends ModelElement {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("SpaceDefn {" + getName() + ": ");
+        StringBuilder sb = new StringBuilder("SpaceTypeDefn {" + getName() + ": ");
         for (AbstractActionDefn functionDefn: functionDefns) {
             sb.append(functionDefn.getName()+"(),");
         }

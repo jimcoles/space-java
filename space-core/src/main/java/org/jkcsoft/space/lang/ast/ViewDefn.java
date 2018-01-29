@@ -20,8 +20,8 @@ package org.jkcsoft.space.lang.ast;
  */
 public class ViewDefn extends QueryDefn {
 
-    ViewDefn(SpaceDefn contextSpaceDefn, String name) {
-        super(contextSpaceDefn, name);
+    ViewDefn(SpaceTypeDefn contextSpaceTypeDefn, String name) {
+        super(contextSpaceTypeDefn, name);
     }
 
 }

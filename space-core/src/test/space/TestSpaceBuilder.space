@@ -1,15 +1,91 @@
-space-def Person
-(
-    CharSequence first;
+// Syntax: Type definition
+type-def Person {
+    // Variables
+    CharSequence first = "Jim";
     CharSequence last;
     CharSequence fullName;
 
-    equation-def FL2Full (Person person) {
-        fullname - (first + last);
+    // Associations
+
+    // Syntax: Function definition
+    function-def void main(CharSequence args) {
+
+        // Syntax: Object creation with ordered variables
+        Person jimTuple1 = new Person ["Jim", "Coles"];
+
+        // Syntax: Object creation with named variables
+        Person jimTuple2 = new Person [firstName = "Jim", lastName = "Coles"];
+
+        // Syntax: Function calls with tuple variables
+        JnOpSys/println jimTuple;
+
+        JnOpSys.println jimTuple2;
+
+        // Syntax: Function call with anonymous tuple
+        JnOpSys.println ["Elvis", "Presley"];
+
     }
 
-    function-def A solves FL2Full for (fullname) given (first,last)
-    (
+}
+
+type-def Address {
+
+    // Variables
+    CharSequence streetAddr;
+    CharSequence cityAddr;
+    //
+    CharSequence streetNumber;
+    CharSequence streetRoad;
+    card unitNumber;
+
+    // Syntax: Equation Definition
+    equation-def streetAddrFormatUSCommon {
+        // Syntax: Equality Constraint as Grammar expression
+        streetAddr == { gramex streetNumber streetRoad unitNumber? }
+    }
+
+    // Syntax: Function Definition
+    function-def streetFromParts solves streetAddrFormatUSCommon for
+    (streetAddr)
+    from
+    (streetNumber, streetRoad, unitNumber?) {
+        // Assignment, not equivalence
+        streetAddr = streetNumber.append(streetRoad).append(unitNumber);
+    }
+
+}
+
+type-def = City {
+    string cityKey;
+    string cityDefaultName;
+}
+
+assoc-def PersonAddresses = {
+
+    leftEnd = {
+        type = Person,
+        // nav = true;
+    }
+
+    rightEnd = {
+        type = Address,
+        multiplicity : many,
+        isList : true
+    }
+
+}
+
+type-def Triangle (
+    real a;
+    real b;
+    real c;
+    //
+    real abAngle;
+    real bcAngle;
+    real caAngle;
+
+    equation-def sidesAngleAngles (
 
     )
+
 )

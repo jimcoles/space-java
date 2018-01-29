@@ -10,7 +10,7 @@
 
 package org.jkcsoft.space.lang.runtime.jnative.space;
 
-import org.jkcsoft.space.lang.ast.SpaceDefn;
+import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
 import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.runtime.Executor;
 import org.jkcsoft.space.lang.runtime.RuntimeException;
@@ -39,7 +39,7 @@ public class SpaceOpers {
         return next;
     }
 
-    public static Space newSpace(ObjectBuilder objectBuilder, Space context, SpaceDefn defn) {
+    public static Space newSpace(ObjectBuilder objectBuilder, Space context, SpaceTypeDefn defn) {
         return objectBuilder.newSpace(context, defn);
     }
 

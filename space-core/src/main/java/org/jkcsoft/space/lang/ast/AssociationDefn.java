@@ -19,23 +19,23 @@ package org.jkcsoft.space.lang.ast;
  */
 public class AssociationDefn extends ModelElement {
 
-    private SpaceDefn from;
+    private SpaceTypeDefn from;
     private int fromMult;   // Defaults to "many" if assoc is declared within a Space Type Defn.
 
-    private SpaceDefn to;
+    private SpaceTypeDefn to;
     private int toMult;     // Defaults to 1 if assoc is declared within a Space Type Defn.
 
-    AssociationDefn(String name, SpaceDefn from, SpaceDefn to) {
+    AssociationDefn(String name, SpaceTypeDefn from, SpaceTypeDefn to) {
         super(name);
         this.from = from;
         this.to = to;
     }
 
-    public SpaceDefn getFrom() {
+    public SpaceTypeDefn getFrom() {
         return from;
     }
 
-    public SpaceDefn getTo() {
+    public SpaceTypeDefn getTo() {
         return to;
     }
 

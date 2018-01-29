@@ -10,6 +10,7 @@
 
 package org.jkcsoft.space.lang.runtime.loaders.antlr.g2;
 
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.log4j.Logger;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.*;
@@ -39,53 +40,68 @@ public class Ra2AstTransform {
 
     private ExecState state = ExecState.INITIALIZATION;
     private List<AstLoadError> errors = new LinkedList();
+
     private AstBuilder astBuilder;
 //    private ObjectBuilder objBuilder = ObjectBuilder.getInstance();
 
     public AstBuilder toAst(SpaceParser.ParseUnitContext spaceParseUnit) {
+        List<ParseTree> children = spaceParseUnit.children;
         log.info("transforming " + SpaceParser.ParseUnitContext.class.getSimpleName());
 
         astBuilder = new AstBuilder();
         astBuilder.initProgram();
-        astBuilder.getAstRoot().addSpaceDefn(toAst(spaceParseUnit.spaceDefn()));
+        astBuilder.getAstRoot().addSpaceDefn(toAst(spaceParseUnit.spaceTypeDefn()));
         return astBuilder;
     }
 
-    private SpaceDefn toAst(SpaceParser.SpaceDefnContext spaceDefnContext) {
-        log.info("transforming " + SpaceParser.SpaceDefnContext.class.getSimpleName());
+    private SpaceTypeDefn toAst(SpaceParser.SpaceTypeDefnContext spaceTypeDefnContext) {
+        log.info("transforming " + SpaceParser.SpaceTypeDefnContext.class.getSimpleName());
 
-        SpaceDefn spaceDefn = null;
+        SpaceTypeDefn spaceTypeDefn = null;
         // TODO: 2/8/17 Not all spaces are Entities?
-        spaceDefn = astBuilder.newSpaceDefn(toText(spaceDefnContext.identifier()));
-        spaceDefnContext.accessModifier();
-        spaceDefnContext.defnTypeModifier();
-        spaceDefnContext.elementDefnHeader();
-        if (spaceDefnContext.ExtendsKeyword() != null) {
-            spaceDefnContext.spacePathList();
+        spaceTypeDefn = astBuilder.newSpaceTypeDefn(toText(spaceTypeDefnContext.identifier()));
+        spaceTypeDefnContext.accessModifier();
+        spaceTypeDefnContext.defnTypeModifier();
+        spaceTypeDefnContext.elementDefnHeader();
+        if (spaceTypeDefnContext.ExtendsKeyword() != null) {
+            //            spaceTypeDefnContext.spacePathList();
         }
-        List<SpaceParser.AnySpaceElementDefnContext> bodyElements
-            = spaceDefnContext.spaceDefnBody().anySpaceElementDefn();
-        addToAst(spaceDefn, bodyElements);
-        return spaceDefn;
+        SpaceParser.SpaceTypeDefnBodyContext spaceTypeDefnBodyContext = spaceTypeDefnContext.spaceTypeDefnBody();
+
+        List<SpaceParser.VariableDefnStmntContext> varDefCtxts = spaceTypeDefnBodyContext.variableDefnStmnt();
+        if (varDefCtxts != null && !varDefCtxts.isEmpty()) {
+            for (SpaceParser.VariableDefnStmntContext variableDefnStmntContext : varDefCtxts) {
+                spaceTypeDefn.addVariable(toAst(variableDefnStmntContext.variableDefn()));
+            }
+        }
+
+        List<SpaceParser.AssociationDefnStmntContext> assocDefCtxts = spaceTypeDefnBodyContext.associationDefnStmnt();
+        if (assocDefCtxts != null && !assocDefCtxts.isEmpty()) {
+            for (SpaceParser.AssociationDefnStmntContext assocDefCtx : assocDefCtxts) {
+                spaceTypeDefn.addAssociation(toAst(assocDefCtx.associationDefn()));
+            }
+        }
+
+        List<SpaceParser.ActionDefnContext> actionDefCtxts = spaceTypeDefnBodyContext.actionDefn();
+        if (actionDefCtxts != null && !actionDefCtxts.isEmpty()) {
+            for (SpaceParser.ActionDefnContext actionDefnCtx : actionDefCtxts) {
+                spaceTypeDefn.addActionDefn(toAst(actionDefnCtx));
+            }
+        }
+
+        List<SpaceParser.SpaceTypeDefnContext> childSpaceTypeDefnCtxts = spaceTypeDefnBodyContext.spaceTypeDefn();
+        // TODO Handle sub-space defn
+
+//        errors.add(new AstLoadError("Space body element was not one of the three kinds expected.",
+//                bodyElement.getStart().getLine(),
+//                bodyElement.getStart().getCharPositionInLine()));
+
+        return spaceTypeDefn;
     }
 
-    private void addToAst(SpaceDefn spaceDefn, List<SpaceParser.AnySpaceElementDefnContext> bodyElements) {
-        for (SpaceParser.AnySpaceElementDefnContext bodyElement : bodyElements) {
-            if (bodyElement.variableDefn() != null) {
-                spaceDefn.addVariable(toAst(bodyElement.variableDefn()));
-            }
-            else if (bodyElement.associationDefn() != null) {
-//                spaceDefn.addAssociationDefn(toAst(bodyElement.associationDefn()));
-            }
-            else if (bodyElement.actionDefn() != null) {
-                spaceDefn.addActionDefn(toAst(bodyElement.actionDefn()));
-            }
-            else {
-                errors.add(new AstLoadError("Space body element was not one of the three kinds expected.",
-                                            bodyElement.getStart().getLine(),
-                                            bodyElement.getStart().getCharPositionInLine()));
-            }
-        }
+    private AssociationDefn toAst(SpaceParser.AssociationDefnContext assocDefCtx) {
+        // TODO Impl
+        return null;
     }
 
     private AbstractActionDefn toAst(SpaceParser.ActionDefnContext actionDefnContext) {
@@ -93,47 +109,79 @@ public class Ra2AstTransform {
 
         SpaceActionDefn actionDefn
             = astBuilder.newSpaceActionDefn(toText(actionDefnContext.identifier()));
-        actionDefn.setArgSpaceDefn(toAst(actionDefnContext.anySpaceElementDefn()));
-        List<SpaceParser.ActionCallExprContext> actionCallExprContexts
-            = actionDefnContext.actionDefnBody().actionCallExpr();
-        for (SpaceParser.ActionCallExprContext actionCallExprContext : actionCallExprContexts) {
-            actionDefn.addAction(toAst(actionCallExprContext));
+
+        List<SpaceParser.StatementContext> statements = actionDefnContext.actionDefnBody().statement();
+        for (SpaceParser.StatementContext statement : statements) {
+            if (statement.expression().actionCallExpr() != null) {
+                actionDefn.addAction(toAst(statement.expression().actionCallExpr()));
+            }
+            else if (statement.expression().assignmentExpr() != null) {
+                actionDefn.addAssignment(toAst(statement.expression().assignmentExpr()));
+            }
         }
+
 //        actionDefnContext.anyTypeRef();
         return actionDefn;
+    }
+
+    /** Transforms an assignment expression to a special kind of {@link ActionCallExpr}. */
+    private ActionCallExpr toAst(SpaceParser.AssignmentExprContext assignmentExprContext) {
+        return null;  // TODO impl
     }
 
     private ActionCallExpr toAst(SpaceParser.ActionCallExprContext actionCallExprContext) {
         ActionCallExpr spacePathExpr = toAst(actionCallExprContext.spacePathExpr());
 
-        List<SpaceParser.ValueExprContext> callArgContexts = actionCallExprContext.valueExpr();
-        ValueExpr[] thisCallArgs = new ValueExpr[callArgContexts.size()];
+        SpaceParser.ValueOrAssignmentExprListContext callArgExprCtxts =
+                actionCallExprContext.valueOrAssignmentExprList();
+        ValueExpr[] thisCallArgs = new ValueExpr[callArgExprCtxts.valueOrAssignmentExpr().size()];
         int idxArg = 0;
-        for (SpaceParser.ValueExprContext callArgContext : callArgContexts) {
-            ValueExpr rightSide = null;
-            if (callArgContext.literalExpr() != null && callArgContext.literalExpr().scalarLiteral() != null)
-                rightSide = toAst(callArgContext.literalExpr().scalarLiteral());
-            else if (callArgContext.literalExpr() != null && callArgContext.literalExpr().stringLiteral() != null)
-                rightSide = toAst(callArgContext.literalExpr().stringLiteral());
-            else if (callArgContext.spacePathExpr() != null)
-                rightSide = toAst(callArgContext.spacePathExpr());
-            else if (callArgContext.actionCallExpr() != null)
-                // nested
-                rightSide = toAst(callArgContext.actionCallExpr());
-
+        for (SpaceParser.ValueOrAssignmentExprContext callArgContext : callArgExprCtxts.valueOrAssignmentExpr()) {
+            ValueExpr rightSide = toAstValueExpr(callArgContext);
             thisCallArgs[idxArg] = rightSide;
-
             idxArg++;
         }
 
         return astBuilder.newActionCallExpr("callPoint", spacePathExpr, thisCallArgs);
     }
 
+    /** Then general translator from ANTLR expression to AST expression.
+     *  A bit complex since ANTRL trees provide no polymorphism, per se.
+     */
+    private ValueExpr toAstValueExpr(SpaceParser.ValueOrAssignmentExprContext exprContext) {
+        ValueExpr rightSide = null;
+        SpaceParser.ValueExprContext valueExprContext = exprContext.valueExpr();
+        if (valueExprContext != null) {
+            SpaceParser.LiteralExprContext literalExprContext = valueExprContext.literalExpr();
+            SpaceParser.ActionCallExprContext actionCallExprContext = valueExprContext.actionCallExpr();
+            SpaceParser.ObjectExprContext objectExprContext = valueExprContext.objectExpr();
+            SpaceParser.SpacePathExprContext spacePathExprContext = valueExprContext.spacePathExpr();
+            if (literalExprContext != null) {
+                if (literalExprContext.scalarLiteral() != null)
+                    rightSide = toAst(literalExprContext.scalarLiteral());
+                else if (literalExprContext.stringLiteral() != null)
+                    rightSide = toAst(literalExprContext.stringLiteral());
+            }
+            else if (objectExprContext != null)
+                rightSide = toAst(objectExprContext);
+            else if (actionCallExprContext != null)
+                // nested
+                rightSide = toAst(actionCallExprContext);
+            else if (spacePathExprContext != null) {
+                rightSide = toAst(spacePathExprContext);
+            }
+        }
+        return rightSide;
+    }
+
+    private ValueExpr toAst(SpaceParser.ObjectExprContext objectExprContext) {
+        return null;
+    }
+
     /** Transforms parse tree Space Path Expr to a nested list of nav operations. */
     private ActionCallExpr toAst(SpaceParser.SpacePathExprContext spacePathExprContext) {
         spacePathExprContext.spacePathExpr();
         spacePathExprContext.identifier();
-        spacePathExprContext.SPathNavAssocToOper();
         ActionCallExpr nextCallExpr = toAst(spacePathExprContext.spacePathExpr());
         ActionCallExpr actionCallExpr =
             astBuilder.newActionCallExpr("callPoint",
@@ -142,6 +190,10 @@ public class Ra2AstTransform {
                                          );
             nextCallExpr.addChild(actionCallExpr);
         return actionCallExpr;
+    }
+
+    private ActionCallExpr toAst(List<SpaceParser.SpacePathExprContext> spacePathExprContexts) {
+        return null;
     }
 
     /**
@@ -174,19 +226,11 @@ public class Ra2AstTransform {
         return listOfIds;
     }
 
-    private SpaceDefn toAst(List<SpaceParser.AnySpaceElementDefnContext> anySpaceElementDefnContexts) {
-        log.info("transforming list of " + SpaceParser.AnySpaceElementDefnContext.class.getSimpleName());
-
-        SpaceDefn spaceDefn = astBuilder.newSpaceDefn(null) ;
-        addToAst(spaceDefn, anySpaceElementDefnContexts);
-        return spaceDefn;
-    }
-
     private VariableDefn toAst(SpaceParser.VariableDefnContext variableDefnContext) {
         log.info("transforming " + SpaceParser.VariableDefnContext.class.getSimpleName());
 
-        return astBuilder.newVariableDefn(toText(variableDefnContext.identifier()),
-                                            toAst(variableDefnContext.primitiveTypeName()));
+        return astBuilder.newVariableDefn(toText(variableDefnContext.variableDecl().identifier()),
+                                            toAst(variableDefnContext.variableDecl().primitiveTypeName()));
     }
 
     private PrimitiveType toAst(SpaceParser.PrimitiveTypeNameContext primitiveTypeNameContext) {

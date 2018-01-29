@@ -34,7 +34,7 @@ public class SpaceProgram extends ModelElement {
 //    private Space assocDefns;
 //    private Space actionSequenceDefns;
 
-    private List<SpaceDefn>     spaceDefns = new LinkedList<>();
+    private List<SpaceTypeDefn> spaceTypeDefns = new LinkedList<>();
     private List<SpaceObject>   objectHeap = new LinkedList<>();
 
     // ================== The starting point for using Space to execute Space programs
@@ -58,15 +58,15 @@ public class SpaceProgram extends ModelElement {
 
     }
 
-    public SpaceDefn addSpaceDefn(SpaceDefn spaceDefn) {
-        spaceDefns.add(spaceDefn);
+    public SpaceTypeDefn addSpaceDefn(SpaceTypeDefn spaceTypeDefn) {
+        spaceTypeDefns.add(spaceTypeDefn);
         // redundant
-        addChild(spaceDefn);
-        return spaceDefn;
+        addChild(spaceTypeDefn);
+        return spaceTypeDefn;
     }
 
-    public SpaceDefn getFirstSpaceDefn() {
-        return spaceDefns.get(0);
+    public SpaceTypeDefn getFirstSpaceDefn() {
+        return spaceTypeDefns.get(0);
     }
 
     public void addObjectInstance(SpaceObject spaceObject, AstBuilder astBuilder) {

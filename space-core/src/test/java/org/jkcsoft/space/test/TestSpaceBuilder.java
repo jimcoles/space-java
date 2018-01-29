@@ -2,7 +2,7 @@ package org.jkcsoft.space.test;
 
 import org.jkcsoft.space.lang.ast.AstBuilder;
 import org.jkcsoft.space.lang.ast.PrimitiveType;
-import org.jkcsoft.space.lang.ast.SpaceDefn;
+import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
 import org.jkcsoft.space.lang.instance.ObjectBuilder;
 import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.instance.TextValue;
@@ -18,7 +18,7 @@ import org.junit.Test;
  *
  * Also see the LICENSE file in the repository root directory.
  */
-public class TestSpaceBuilder {
+public class TestSpaceBuilder extends TestSourceStub {
 
     /*
     1. Create space defn.
@@ -27,12 +27,11 @@ public class TestSpaceBuilder {
     4. Retrieve tuples.
      */
 
-    @Test
-    public void testSpaceBuilder() {
+    public void testSpaceBuilderAPI() {
         AstBuilder ast = new AstBuilder();
         ObjectBuilder objs = ObjectBuilder.getInstance();
         //
-        SpaceDefn testPersonTypeDefn = ast.newSpaceDefn("PersonType");
+        SpaceTypeDefn testPersonTypeDefn = ast.newSpaceTypeDefn("PersonType");
         testPersonTypeDefn.addVariable(ast.newVariableDefn("firstName", PrimitiveType.TEXT));
         testPersonTypeDefn.addVariable(ast.newVariableDefn("lastName", PrimitiveType.TEXT));
         Space space = objs.newSpace(null, testPersonTypeDefn);
@@ -43,7 +42,11 @@ public class TestSpaceBuilder {
         testObjectTuple.setValue("lastName", objs.newTextValue("Coles"));
         space.addTuple(testObjectTuple);
         //
+    }
 
+    @Test
+    public void testSpaceBuilder() {
+        this.runTestSource("TestSpaceBuilder.space");
     }
 
 }

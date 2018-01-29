@@ -20,7 +20,7 @@ import org.jkcsoft.space.antlr.SpaceParserBaseVisitor;
 public class Ra2AstTransformVisitor extends SpaceParserBaseVisitor<Void> {
     @Override
     public Void visitParseUnit(SpaceParser.ParseUnitContext ctx) {
-        SpaceParser.SpaceDefnContext spaceDefnContext = ctx.spaceDefn();
+        SpaceParser.SpaceTypeDefnContext spaceDefnContext = ctx.spaceTypeDefn();
 
         return super.visitParseUnit(ctx);
     }

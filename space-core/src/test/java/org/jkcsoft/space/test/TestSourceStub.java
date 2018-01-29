@@ -9,6 +9,32 @@ package org.jkcsoft.space.test;
  * Also see the LICENSE file in the repository root directory.
  */
 
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import org.jkcsoft.space.lang.runtime.Executor;
+
+import java.io.File;
+
 public class TestSourceStub {
+
+    private static final Logger log = Logger.getRootLogger();
+
+    private Executor getExecutor() {
+        Executor exec = null;
+        try {
+            exec = new Executor();
+        } catch (Throwable th) {
+            log.error("error running", th);
+        }
+        return exec;
+    }
+
+    public void runTestSource(String spaceSourcePath) {
+        getExecutor().run(FileUtils.getFile(getRootSrcDir(), spaceSourcePath));
+    }
+
+    private File getRootSrcDir() {
+        return FileUtils.getFile("src", "test", "space");
+    }
 
 }

@@ -15,23 +15,23 @@ package org.jkcsoft.space.lang.ast;
  */
 public abstract class AbstractActionDefn extends ModelElement {
 
-    private SpaceDefn   contextSpaceDefn;  // the calling space defn
+    private SpaceTypeDefn contextSpaceTypeDefn;  // the calling space defn
 
     AbstractActionDefn(String name) {
         super(name);
     }
 
-    public SpaceDefn getContextSpaceDefn() {
-        return contextSpaceDefn;
+    public SpaceTypeDefn getContextSpaceTypeDefn() {
+        return contextSpaceTypeDefn;
     }
 
-    public AbstractActionDefn setContextSpaceDefn(SpaceDefn contextSpaceDefn) {
-        this.contextSpaceDefn = contextSpaceDefn;
+    public AbstractActionDefn setContextSpaceTypeDefn(SpaceTypeDefn contextSpaceTypeDefn) {
+        this.contextSpaceTypeDefn = contextSpaceTypeDefn;
         return this;
     }
 
     @Override
     public String toString() {
-        return contextSpaceDefn.getName() + "." + getName() + "()";
+        return contextSpaceTypeDefn.getName() + "." + getName() + "()";
     }
 }

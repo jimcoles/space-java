@@ -30,15 +30,15 @@ public class Ra2AstParserListener extends SpaceParserBaseListener {
     private AstBuilder astBuilder = new AstBuilder();
 
     @Override
-    public void enterSpaceDefn(SpaceParser.SpaceDefnContext ctx) {
+    public void enterSpaceTypeDefn(SpaceParser.SpaceTypeDefnContext ctx) {
         astBuilder.initProgram();
-//        astBuilder.getAstRoot().addSpaceDefn(new EntityDefn(null, ctx.ge))
-        super.enterSpaceDefn(ctx);
+//        astBuilder.getAstRoot().addSpaceTypeDefn(new EntityDefn(null, ctx.ge))
+        super.enterSpaceTypeDefn(ctx);
     }
 
     @Override
-    public void exitSpaceDefn(SpaceParser.SpaceDefnContext ctx) {
-        super.exitSpaceDefn(ctx);
+    public void exitSpaceTypeDefn(SpaceParser.SpaceTypeDefnContext ctx) {
+        super.exitSpaceTypeDefn(ctx);
     }
 
     @Override
@@ -72,13 +72,13 @@ public class Ra2AstParserListener extends SpaceParserBaseListener {
     }
 
     @Override
-    public void enterSpaceDefnBody(SpaceParser.SpaceDefnBodyContext ctx) {
-        super.enterSpaceDefnBody(ctx);
+    public void enterSpaceTypeDefnBody(SpaceParser.SpaceTypeDefnBodyContext ctx) {
+        super.enterSpaceTypeDefnBody(ctx);
     }
 
     @Override
-    public void exitSpaceDefnBody(SpaceParser.SpaceDefnBodyContext ctx) {
-        super.exitSpaceDefnBody(ctx);
+    public void exitSpaceTypeDefnBody(SpaceParser.SpaceTypeDefnBodyContext ctx) {
+        super.exitSpaceTypeDefnBody(ctx);
     }
 
     @Override

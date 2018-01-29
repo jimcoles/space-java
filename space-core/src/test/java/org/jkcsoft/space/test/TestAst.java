@@ -28,16 +28,16 @@ public class TestAst {
         ObjectBuilder objBuilder = ObjectBuilder.getInstance();
 
         astBuilder.initProgram();
-        SpaceDefn spaceDefn = astBuilder.newSpaceDefn("MyHelloSpace");
+        SpaceTypeDefn spaceTypeDefn = astBuilder.newSpaceTypeDefn("MyHelloSpace");
         astBuilder.getAstRoot()
-            .addSpaceDefn(spaceDefn)
+            .addSpaceDefn(spaceTypeDefn)
                 .addVariable(astBuilder.newVariableDefn("myIntDim", PrimitiveType.CARD))
                     .setType(PrimitiveType.CHAR);
-        spaceDefn
+        spaceTypeDefn
             .addVariable(astBuilder.newVariableDefn("myCharDim", PrimitiveType.CHAR))
             ;
         SpaceActionDefn mainMethod = astBuilder.newSpaceActionDefn("main");
-        spaceDefn.addActionDefn(mainMethod);
+        spaceTypeDefn.addActionDefn(mainMethod);
 //        CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
 //        astBuilder.getAstRoot().addObjectInstance(arg1, astBuilder);
 

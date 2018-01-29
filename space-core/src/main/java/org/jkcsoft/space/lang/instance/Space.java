@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.SpaceDefn;
+import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -33,13 +33,13 @@ import java.util.function.Consumer;
 public class Space extends SpaceObject implements Assignable, SpaceSet, Iterable<Tuple> {
 
     /** Can be an EntityDefn or a ViewDefn */
-    private SpaceDefn definition;
+    private SpaceTypeDefn definition;
     private Space contextSpace;
 
     /** The backing list maintains the sequence of tuples as they are added */
     private List<Tuple> tuples = new LinkedList<>();
 
-    Space(SpaceOid oid, Space contextSpace, SpaceDefn definition) {
+    Space(SpaceOid oid, Space contextSpace, SpaceTypeDefn definition) {
         super(oid);
         this.contextSpace = contextSpace;
         this.definition = definition;
@@ -56,7 +56,7 @@ public class Space extends SpaceObject implements Assignable, SpaceSet, Iterable
 
     }
 
-    public SpaceDefn getDefinition() {
+    public SpaceTypeDefn getDefinition() {
         return definition;
     }
 

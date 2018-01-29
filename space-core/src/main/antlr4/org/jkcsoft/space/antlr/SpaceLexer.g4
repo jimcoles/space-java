@@ -15,11 +15,15 @@ lexer grammar SpaceLexer;
 //   ALL UPPPER : Fragments
 //   CamelCaseUpper : Tokens
 
-ListStart   : '(';
-ListEnd     : ')';
+BlockStart : '{';
+BlockEnd   : '}';
 
-SetStart    : '{';
-SetEnd      : '}';
+UserSeqStart   : '(';
+UserSeqEnd     : ')';
+ListSep    : ',';
+
+UserSetStart    : '{';
+UserSetEnd      : '}';
 
 SpaceStart  : '|';
 SpaceEnd    : '|';
@@ -29,12 +33,17 @@ TupleEnd    : ']';
 
 StatementEnd : ';' ;
 
+NewOper : 'new' ;
+
 AccessKeyword :
     PublicKeyword
     ;
 
-SpaceKeyword    : 'space-def';
-EquationKeyword : 'equation-def';
+TypeDefKeyword  : 'type-def';
+EquationDefKeyword : 'equation-def';
+FunctionDefKeyword: 'function-def';
+QueryDefKeyword : 'query-def';
+RegexDefKeyword : 'regex-def';
 //
 BooleanKeyword  : 'boolean';
 OrdinalKeyword  : 'ord';
@@ -55,7 +64,10 @@ SpaceDefnType
 AssignOper  : '=';
 
 // Space Path Expressions - reduced syntax
-SPathNavAssocToOper     : '/';
+SPathNavAssocToOper     : '/'
+    ;
+SPathNavAssocToOper2     : '.'
+    ;
 
 /*
     Interpret the following definition of "StringLiteral" as:
@@ -65,7 +77,9 @@ SPathNavAssocToOper     : '/';
         by closing double-quote.
 */
 
-StringLiteral : '"' ( ~'"' | '\\' '"' )* '"' ;
+StringLiteral
+    : '"' ( ~'"' | '\\' '"' )* '"'
+    ;
 
 IntegerLiteral : INT;
 
@@ -81,7 +95,9 @@ Identifier
 
 //IdentifierRef : (Identifier '.' )* Identifier;
 
-Whitespace : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
+Whitespace
+    : [ \t\r\n]+ -> skip  // skip spaces, tabs, newlines
+    ;
 
 
 //SLC_START : '//' -> pushMode(QUOTED);
@@ -114,8 +130,22 @@ fragment IdStartChars : ('a'..'z' | 'A'..'Z' | '_') ;
 fragment IdTailChars : IdStartChars | '0'..'9' | '-';
 
 // Tool-generated comment token
-BlockComment : '/*' .*? '*/'; // -> channel(HIDDEN);
-SingleLineComment : '//' ~[\n\r]*? [\n\r]; // -> channel(HIDDEN);
+//
+// For some reason the '-> skip' works whilest
+// basic recognition does not, i.e., if I just remove the '-> skip' then comments
+// generate an error. So, at this point, I don't know how to get the comment
+// contents into a parse tree so I can grab it.
+// - Try using hidden channel.
+// - Try using sub-grammar.
+//
+BlockComment
+    : '/*' .*? '*/' -> skip
+    // -> channel(HIDDEN);
+    ;
+SingleLineComment
+    : '//' ~[\n\r]* [\n\r] -> skip
+     // -> channel(HIDDEN);
+    ;
 
 //mode QUOTED;
 

@@ -9,12 +9,10 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.SpaceDefn;
 import org.jkcsoft.space.lang.ast.VariableDefn;
 import org.jkcsoft.space.lang.runtime.RuntimeException;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * Conceptually, a Tuple is an element of a Relation (which is a Set of Tuples).

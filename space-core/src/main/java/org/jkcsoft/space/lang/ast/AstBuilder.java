@@ -11,7 +11,6 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.ObjectBuilder;
-import org.jkcsoft.space.util.Namespace;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -57,9 +56,9 @@ public class AstBuilder {
         return  astRoot;
     }
 
-    public SpaceDefn newSpaceDefn(String name) {
-        SpaceDefn spaceDefn = new SpaceDefn(name);
-        return spaceDefn;
+    public SpaceTypeDefn newSpaceTypeDefn(String name) {
+        SpaceTypeDefn spaceTypeDefn = new SpaceTypeDefn(name);
+        return spaceTypeDefn;
     }
 
     public SpaceActionDefn newSpaceActionDefn(String name) {
@@ -70,15 +69,15 @@ public class AstBuilder {
         return new VariableDefn(name, type);
     }
 
-    public AbstractActionDefn newNativeActionDefn(String name, Method jMethod, SpaceDefn nativeArgSpaceDefn) {
-        return new NativeActionDefn(name, jMethod, nativeArgSpaceDefn);
+    public AbstractActionDefn newNativeActionDefn(String name, Method jMethod, SpaceTypeDefn nativeArgSpaceTypeDefn) {
+        return new NativeActionDefn(name, jMethod, nativeArgSpaceTypeDefn);
     }
 
     public ActionCallExpr newActionCallExpr(String name, ValueExpr functionPathExpr, ValueExpr ... argValueExprs) {
         return new ActionCallExpr(name, functionPathExpr, argValueExprs);
     }
 
-    public AssociationDefn newAssociationDefn(String name, SpaceDefn from, SpaceDefn to) {
+    public AssociationDefn newAssociationDefn(String name, SpaceTypeDefn from, SpaceTypeDefn to) {
         return new AssociationDefn(name, from, to);
     }
 

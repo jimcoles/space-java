@@ -23,7 +23,7 @@ public class TestParser2 {
     public void testParser() {
         G2AntlrParser spaceParser = new G2AntlrParser();
         try {
-            spaceParser.load(FileUtils.getFile("..", "space-core", "src", "test", "space2", "Hello.space"));
+            spaceParser.load(FileUtils.getFile("..", "space-core", "src", "test", "space", "Hello.space"));
         }
         catch (Exception e) {
             e.printStackTrace();
