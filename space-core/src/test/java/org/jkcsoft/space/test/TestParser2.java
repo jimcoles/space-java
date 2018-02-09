@@ -6,8 +6,7 @@
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
- */
-
+*/
 package org.jkcsoft.space.test;
 
 import org.apache.commons.io.FileUtils;
@@ -17,16 +16,10 @@ import org.junit.Test;
 /**
  * @author Jim Coles
  */
-public class TestParser2 {
+public class TestParser2 extends TestSourceStub {
 
     @Test
     public void testParser() {
-        G2AntlrParser spaceParser = new G2AntlrParser();
-        try {
-            spaceParser.load(FileUtils.getFile("..", "space-core", "src", "test", "space", "Hello.space"));
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.runTestSource("Hello.space");
     }
 }

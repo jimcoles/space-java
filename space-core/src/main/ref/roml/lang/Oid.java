@@ -4,8 +4,7 @@
  * This software is the proprietary information of Systematic Solutions Corporation.
  * Use is subject to license terms.
  *
- */
-
+*/
 package com.jkc.roml.lang;
 
 /**

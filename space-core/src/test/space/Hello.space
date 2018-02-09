@@ -1,16 +1,16 @@
 
-public space-def MySpace
+public type-def MySpace
 /*
  This is a smart annotation comment for
   my awesome space.
 */
-(
+{
     card myIntVar = 1;
     boolean myBoolVar = true;
     CharSequence greeting = "Hello from this reference to a CharSequence.";
 
-    void main(CharSequence args;) (
+    function-def void main(CharSequence args) {
         JnOpSys.println["Hello, Space!"];
         JnOpSys.println[greeting];
-    )
-)
+    }
+}

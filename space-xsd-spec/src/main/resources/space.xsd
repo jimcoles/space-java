@@ -10,23 +10,60 @@
   -->
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
-           targetNamespace="http://jkcsoft.org/2016/space" >
+           targetNamespace="http://jkcsoft.org/2016/space"
+           xmlns:spc="http://jkcsoft.org/2016/space" >
 
     <!--
         Types: Roughly in order of fundamentalness.
      -->
+
+    <xs:complexType name="model-element">
+        <xs:annotation><xs:documentation>Common base type for all model elements.</xs:documentation></xs:annotation>
+        <xs:sequence>
+            <xs:element name="name" type="xs:string">
+
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="type-def">
+        <xs:complexType>
+            <xs:annotation><xs:documentation>Type definition.</xs:documentation></xs:annotation>
+            <xs:complexContent>
+                <xs:extension base="spc:model-element">
+                    <xs:sequence>
+                        <xs:element name="var-def" type="spc:variable-def" maxOccurs="unbounded">
+
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="variable-def">
+        <xs:annotation><xs:documentation>Type definition.</xs:documentation></xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="spc:model-element">
+                <xs:sequence>
+                </xs:sequence>
+                <xs:attribute name="type" type="xs:string"  />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
     <xs:complexType name="set">
         <xs:annotation><xs:documentation>Foundational notion of a Set that attempts to model
             the pure mathematical notion.</xs:documentation></xs:annotation>
     </xs:complexType>
 
+
     <xs:complexType name="relation">
         <xs:annotation><xs:documentation>"Everything is a Relation ... almost".
             The central notion of this language -- a set of tuples in
             the strict set-theoretic sense.</xs:documentation></xs:annotation>
         <xs:complexContent>
-            <xs:extension base="set">
+            <xs:extension base="spc:set">
 
             </xs:extension>
         </xs:complexContent>
@@ -39,7 +76,7 @@
             sequences, the ordinal of an element is not part of the space
         </xs:documentation></xs:annotation>
         <xs:complexContent>
-            <xs:extension base="relation">
+            <xs:extension base="spc:relation">
 
             </xs:extension>
         </xs:complexContent>
@@ -48,18 +85,21 @@
     <xs:complexType name="object-defn">
         <xs:annotation><xs:documentation>Polymorphic common defn of Tuples.
         </xs:documentation></xs:annotation>
+<!--
         <xs:complexContent>
             <xs:extension base="object-defn">
 
             </xs:extension>
         </xs:complexContent>
+-->
     </xs:complexType>
 
     <!--
         Elements.
      -->
 
-    <xs:element name="space" defn="relation">
+
+    <xs:element name="space">
         <xs:annotation>
             <xs:documentation>A Space is a zero to many dimensional thing that is the subject
                 of computational reasoning.  A Space is an object and a space has
@@ -68,11 +108,10 @@
                 A Space can contain other spaces and so
             </xs:documentation>
         </xs:annotation>
-        <xs:
 
     </xs:element>
 
-    <xs:element name="view" defn="relation">
+    <xs:element name="view">
         <xs:annotation>
             <xs:documentation>A cartesian product of one or more normalized
                 Spaces.</xs:documentation>
@@ -80,7 +119,7 @@
 
     </xs:element>
 
-    <xs:element name="dimension" defn="relation">
+    <xs:element name="dimension">
 
     </xs:element>
 
@@ -105,7 +144,7 @@
 
     </xs:element>
 
-    <xs:element name="object" defn="relation">
+    <xs:element name="object">
         <xs:annotation><xs:documentation>An identifiable tuple associated
             with a Space or a View.</xs:documentation></xs:annotation>
 

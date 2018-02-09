@@ -1,13 +1,12 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
  *
  * Licensed under the following license agreement:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
- */
-
+*/
 package org.jkcsoft.space.lang.ast;
 
 /**
@@ -19,7 +18,31 @@ package org.jkcsoft.space.lang.ast;
 public class SpacePathExpr extends ModelElement {
 
     private boolean isTypeExpr;  // If true, evaluates to a meta (definition) object.
-
     private PathOperEnum oper;
-    SpacePathExpr childExpr;
+    private String text;
+    private SpacePathExpr nextExpr;
+
+    public SpacePathExpr(boolean isTypeExpr, PathOperEnum oper, String text, SpacePathExpr nextExpr) {
+        this.isTypeExpr = isTypeExpr;
+        this.oper = oper;
+        this.text = text;
+        this.nextExpr = nextExpr;
+    }
+
+    public boolean isTypeExpr() {
+        return isTypeExpr;
+    }
+
+    public PathOperEnum getOper() {
+        return oper;
+    }
+
+    @Override
+    public String getText() {
+        return text;
+    }
+
+    public SpacePathExpr getNextExpr() {
+        return nextExpr;
+    }
 }

@@ -1,20 +1,23 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
  *
  * Licensed under the following license agreement:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
  */
-
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.java.util.JavaHelper;
+import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.instance.ObjectBuilder;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * The AST is built by calling adder methods on this object.
@@ -30,6 +33,10 @@ public class AstBuilder {
     private Map<String, Class<ModelElement>> metaTypeMap = new HashMap<>();
     private SpaceProgram astRoot;
     private ModelElement currentAstNode;
+
+    public AstBuilder() {
+
+    }
 
     private ObjectBuilder getObjectBuilder() {
         return ObjectBuilder.getInstance();
@@ -51,8 +58,9 @@ public class AstBuilder {
         return currentAstNode;
     }
 
-    public SpaceProgram initProgram() {
-        astRoot = new SpaceProgram();
+    public SpaceProgram initProgram(String name) {
+        astRoot = new SpaceProgram(name);
+        currentAstNode = astRoot;
         return  astRoot;
     }
 
@@ -62,43 +70,75 @@ public class AstBuilder {
     }
 
     public SpaceActionDefn newSpaceActionDefn(String name) {
-        return new SpaceActionDefn(name);
+        SpaceActionDefn element = new SpaceActionDefn(name);
+        return element;
     }
 
     public VariableDefn newVariableDefn(String name, PrimitiveType type) {
-        return new VariableDefn(name, type);
+        VariableDefn element = new VariableDefn(name, type);
+        return element;
     }
 
     public AbstractActionDefn newNativeActionDefn(String name, Method jMethod, SpaceTypeDefn nativeArgSpaceTypeDefn) {
-        return new NativeActionDefn(name, jMethod, nativeArgSpaceTypeDefn);
+        NativeActionDefn element = new NativeActionDefn(name, jMethod, nativeArgSpaceTypeDefn);
+        return element;
     }
 
-    public ActionCallExpr newActionCallExpr(String name, ValueExpr functionPathExpr, ValueExpr ... argValueExprs) {
-        return new ActionCallExpr(name, functionPathExpr, argValueExprs);
+    public ActionCallExpr newActionCallExpr(String name, SpacePathExpr functionPathExpr, ValueExpr ... argValueExprs) {
+        ActionCallExpr element = new ActionCallExpr(name, functionPathExpr, argValueExprs);
+        return element;
     }
 
-    public AssociationDefn newAssociationDefn(String name, SpaceTypeDefn from, SpaceTypeDefn to) {
-        return new AssociationDefn(name, from, to);
+    public AssociationDefn newAssociationDefn(String name, SpacePathExpr toPath) {
+        AssociationDefn element = new AssociationDefn(name, null, toPath);
+        return element;
     }
 
     public LiteralExpr newLiteralHolder(String text) {
-        return new LiteralExpr(text);
+        LiteralExpr element = new LiteralExpr(text);
+        return element;
     }
 
     public MetaObjectRefLiteral newMetaObjectRefLiteral(ModelElement spaceMetaObject) {
-        return new MetaObjectRefLiteral(spaceMetaObject);
+        MetaObjectRefLiteral element = new MetaObjectRefLiteral(spaceMetaObject);
+        return element;
     }
 
     public OperLookupExpr newOperLookupExpr(OperEnum operEnum) {
-        return new OperLookupExpr(operEnum);
+        OperLookupExpr element = new OperLookupExpr(operEnum);
+        return element;
     }
 
-    public SpacePathExpr newSpacePathExpr() {
-        return new SpacePathExpr();
+    public SpacePathExpr newSpacePathExpr(PathOperEnum oper, String searchName) {
+        SpacePathExpr element = new SpacePathExpr(true, oper, searchName, null);
+        return element;
     }
 
     public ThisExpr newThis() {
-        return new ThisExpr();
+        ThisExpr element = new ThisExpr();
+        return element;
+    }
+
+    public String print() {
+        StringBuilder sb = new StringBuilder();
+        ModelElement modelElement = this.getAstRoot();
+        append(sb, modelElement, 0);
+        return sb.toString();
+    }
+
+    private void append(StringBuilder sb, ModelElement modelElement, int depth) {
+        String indent = Strings.multiplyString("\t", depth);
+        sb.append(JavaHelper.EOL)
+                .append(indent)
+                .append("(")
+                .append(modelElement.toString());
+        List<ModelElement> children = modelElement.getChildren();
+        for (ModelElement child : children) {
+            append(sb, child, depth + 1);
+        }
+        sb.append(JavaHelper.EOL)
+                .append(indent)
+                .append(")");
     }
 
 }

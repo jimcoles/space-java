@@ -6,8 +6,7 @@
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
- */
-
+*/
 package org.jkcsoft.space.lang.runtime.jnative.math;
 
 import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;

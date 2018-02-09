@@ -1,9 +1,9 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
  *
  * Licensed under the following license agreement:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
  */
@@ -26,16 +26,16 @@ import java.util.Map;
  */
 public class SpaceTypeDefn extends ModelElement {
 
-    private SpaceTypeDefn contextSpaceTypeDefn;
-    private List<VariableDefn>      variableDefnList;
-    private List<AssociationDefn>   associationDefnList;
-    private List<EquationDefn>      equations;
-    private List<TransformDefn>     transformDefns;
+    private SpaceTypeDefn               contextSpaceTypeDefn;
+    private List<VariableDefn>          variableDefnList;
+    private List<AssociationDefn>       associationDefnList;
+    private List<EquationDefn>          equations;
+    private List<TransformDefn>         transformDefns;
     private List<AbstractActionDefn>    functionDefns = new LinkedList<>();
 
     // redundant
-    private Map<String, VariableDefn>     indexCoordinatesByName = new HashMap<>();
-    private Map<String, AssociationDefn>     indexAssociationsByName = new HashMap<>();
+    private Map<String, VariableDefn>       indexCoordinatesByName = new HashMap<>();
+    private Map<String, AssociationDefn>    indexAssociationsByName = new HashMap<>();
     private Map<String, AbstractActionDefn> indexFunctionsByName = new HashMap<>();
 
     SpaceTypeDefn(String name) {
@@ -114,8 +114,7 @@ public class SpaceTypeDefn extends ModelElement {
         return actionDefn;
     }
 
-    @Override
-    public String toString() {
+    public String toLogString() {
         StringBuilder sb = new StringBuilder("SpaceTypeDefn {" + getName() + ": ");
         for (AbstractActionDefn functionDefn: functionDefns) {
             sb.append(functionDefn.getName()+"(),");

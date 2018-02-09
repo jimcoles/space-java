@@ -6,8 +6,7 @@
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
- */
-
+*/
 package org.jkcsoft.space.lang.runtime.loaders.antlr.g2;
 
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -17,8 +16,10 @@ import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.runtime.ExecState;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A brute force interrogator of the ANTLR parse tree that I'll use
@@ -30,9 +31,15 @@ import java.util.List;
  */
 public class Ra2AstTransform {
 
-    private static final Logger log = Logger.getRootLogger();
+    private static final Logger log = Logger.getLogger(Ra2AstTransform.class);
 
     public static final ActionCallExpr NAV_OPER = asCall("space", "nav");
+
+    private interface Transformer {
+        ModelElement trans(ParseTree parseNode);
+    }
+
+    private Map<Class<? extends ParseTree>, Transformer> transformerMap = new HashMap<>();
 
     private static ActionCallExpr asCall(String ... paths) {
         return null;
@@ -40,21 +47,34 @@ public class Ra2AstTransform {
 
     private ExecState state = ExecState.INITIALIZATION;
     private List<AstLoadError> errors = new LinkedList();
-
     private AstBuilder astBuilder;
 //    private ObjectBuilder objBuilder = ObjectBuilder.getInstance();
 
-    public AstBuilder toAst(SpaceParser.ParseUnitContext spaceParseUnit) {
-        List<ParseTree> children = spaceParseUnit.children;
-        log.info("transforming " + SpaceParser.ParseUnitContext.class.getSimpleName());
 
-        astBuilder = new AstBuilder();
-        astBuilder.initProgram();
-        astBuilder.getAstRoot().addSpaceDefn(toAst(spaceParseUnit.spaceTypeDefn()));
+    public Ra2AstTransform() {
+    }
+
+    public AstBuilder transformAndBuild(ParseTree parseTreeRoot) {
+
+//        visitNodeRecurse(parseTreeRoot);
+
         return astBuilder;
     }
 
-    private SpaceTypeDefn toAst(SpaceParser.SpaceTypeDefnContext spaceTypeDefnContext) {
+    private ModelElement lookupTrans(ParseTree node) {
+        ModelElement trans = transformerMap.get(node.getClass()).trans(node);
+        return trans;
+    }
+
+    public AstBuilder transform(SpaceParser.ParseUnitContext spaceParseUnit) {
+        log.info("transforming ANTLR parse tree to AST starting with " + SpaceParser.ParseUnitContext.class.getSimpleName());
+        astBuilder = new AstBuilder();
+        astBuilder.initProgram("");
+        astBuilder.getAstRoot().addSpaceDefn(typeDef2Ast(spaceParseUnit.spaceTypeDefn()));
+        return astBuilder;
+    }
+
+    public SpaceTypeDefn typeDef2Ast(SpaceParser.SpaceTypeDefnContext spaceTypeDefnContext) {
         log.info("transforming " + SpaceParser.SpaceTypeDefnContext.class.getSimpleName());
 
         SpaceTypeDefn spaceTypeDefn = null;
@@ -100,8 +120,23 @@ public class Ra2AstTransform {
     }
 
     private AssociationDefn toAst(SpaceParser.AssociationDefnContext assocDefCtx) {
-        // TODO Impl
-        return null;
+        assocDefCtx.rightAssignmentExpr();
+        assocDefCtx.getSourceInterval();
+        return astBuilder.newAssociationDefn(
+                toText(assocDefCtx.associationDecl().identifier()),
+
+                toAst(assocDefCtx.associationDecl().spacePathExpr())
+        );
+    }
+
+    private SpacePathExpr toAst(SpaceParser.SpacePathExprContext spacePathExprContext) {
+        spacePathExprContext.identifier();
+        spacePathExprContext.SPathNavAssocToOper();
+        spacePathExprContext.SPathNavAssocToOper2();
+        return astBuilder.newSpacePathExpr(
+                PathOperEnum.ASSOC_NAV,
+                toText(spacePathExprContext.identifier())
+        );
     }
 
     private AbstractActionDefn toAst(SpaceParser.ActionDefnContext actionDefnContext) {
@@ -130,7 +165,7 @@ public class Ra2AstTransform {
     }
 
     private ActionCallExpr toAst(SpaceParser.ActionCallExprContext actionCallExprContext) {
-        ActionCallExpr spacePathExpr = toAst(actionCallExprContext.spacePathExpr());
+        SpacePathExpr spacePathExpr = toAst(actionCallExprContext.spacePathExpr());
 
         SpaceParser.ValueOrAssignmentExprListContext callArgExprCtxts =
                 actionCallExprContext.valueOrAssignmentExprList();
@@ -168,7 +203,7 @@ public class Ra2AstTransform {
                 // nested
                 rightSide = toAst(actionCallExprContext);
             else if (spacePathExprContext != null) {
-                rightSide = toAst(spacePathExprContext);
+                rightSide = toAstCall(spacePathExprContext);
             }
         }
         return rightSide;
@@ -179,16 +214,20 @@ public class Ra2AstTransform {
     }
 
     /** Transforms parse tree Space Path Expr to a nested list of nav operations. */
-    private ActionCallExpr toAst(SpaceParser.SpacePathExprContext spacePathExprContext) {
-        spacePathExprContext.spacePathExpr();
-        spacePathExprContext.identifier();
-        ActionCallExpr nextCallExpr = toAst(spacePathExprContext.spacePathExpr());
-        ActionCallExpr actionCallExpr =
-            astBuilder.newActionCallExpr("callPoint",
-                                         NAV_OPER,
-                                         nextCallExpr
-                                         );
-            nextCallExpr.addChild(actionCallExpr);
+    private ActionCallExpr toAstCall(SpaceParser.SpacePathExprContext spacePathExprContext) {
+        ActionCallExpr actionCallExpr = null;
+//        spacePathExprContext.spacePathExpr();
+//        spacePathExprContext.identifier();
+        ActionCallExpr nextCallExpr = null;
+        if (spacePathExprContext.spacePathExpr() != null) {
+            nextCallExpr = toAstCall(spacePathExprContext.spacePathExpr());
+        }
+//        ActionCallExpr actionCallExpr =
+//            astBuilder.newActionCallExpr("callPoint",
+//                                         OperEnum.ASSOC_NAV,
+//                                         nextCallExpr
+//                                         );
+//            nextCallExpr.addChild(actionCallExpr);
         return actionCallExpr;
     }
 
@@ -228,9 +267,11 @@ public class Ra2AstTransform {
 
     private VariableDefn toAst(SpaceParser.VariableDefnContext variableDefnContext) {
         log.info("transforming " + SpaceParser.VariableDefnContext.class.getSimpleName());
-
-        return astBuilder.newVariableDefn(toText(variableDefnContext.variableDecl().identifier()),
-                                            toAst(variableDefnContext.variableDecl().primitiveTypeName()));
+        VariableDefn element = astBuilder.newVariableDefn(
+                toText(variableDefnContext.variableDecl().identifier()),
+                toAst(variableDefnContext.variableDecl().primitiveTypeName())
+        );
+        return element;
     }
 
     private PrimitiveType toAst(SpaceParser.PrimitiveTypeNameContext primitiveTypeNameContext) {

@@ -6,8 +6,7 @@
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
- */
-
+*/
 package org.jkcsoft.space.test;
 
 import org.jkcsoft.space.lang.ast.*;
@@ -23,11 +22,9 @@ public class TestAst {
     @Test
     public void testBuildAndRunProgram() {
         AstBuilder astBuilder = new AstBuilder();
-        astBuilder.initProgram();
+        astBuilder.initProgram("(API Builder Program)");
         //
         ObjectBuilder objBuilder = ObjectBuilder.getInstance();
-
-        astBuilder.initProgram();
         SpaceTypeDefn spaceTypeDefn = astBuilder.newSpaceTypeDefn("MyHelloSpace");
         astBuilder.getAstRoot()
             .addSpaceDefn(spaceTypeDefn)
@@ -46,13 +43,9 @@ public class TestAst {
         mainMethod.addAction(
             astBuilder.newActionCallExpr(
                 "callPoint",
-                astBuilder.newActionCallExpr(
-                    "",
-                    astBuilder.newOperLookupExpr(OperEnum.ASSOC_NAV),
-                    null
-                ),
-                astBuilder.newMetaObjectRefLiteral(null),
-                astBuilder.newLiteralHolder("Hello, Space!")
+                    astBuilder.newSpacePathExpr(PathOperEnum.ASSOC_NAV, ""),
+                    astBuilder.newMetaObjectRefLiteral(null),
+                    astBuilder.newLiteralHolder("Hello, Space!")
             )
         );
 //        spaceDefn.
@@ -66,7 +59,7 @@ public class TestAst {
         Executor spex = new Executor();
 
         try {
-            spex.exec(astBuilder.getAstRoot());
+            spex.linkAndExec(astBuilder.getAstRoot());
         }
         catch (Exception e) {
             e.printStackTrace();

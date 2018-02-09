@@ -74,7 +74,7 @@ public class XmlLoader extends DefaultHandler {
 
         SAXParserFactory spf = SAXParserFactory.newInstance();
         SAXParser parser = spf.newSAXParser();
-        _program = astBuilder.initProgram();
+        _program = astBuilder.initProgram("");
 
         parser.parse(_in, this);
 

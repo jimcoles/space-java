@@ -1,0 +1,46 @@
+@startuml
+
+title ANTRL4 Visitor (Code Gen) Usage
+hide footbox
+
+box "Extended Visitor"
+    participant MyGenVisitor #Pink
+    participant MyTopVisitor
+end box
+
+box "ANTRL Parse Tree"
+    entity ParentTreeNode
+    entity ChildTreeNodeN
+end box
+
+MyTopVisitor -> ParentTreeNode: accept(visitor)
+ParentTreeNode -> MyTopVisitor: visit__(me)
+note over MyGenVisitor
+    One visit method per
+    parse rule type.
+    Here is where visitor
+    operation work is
+    done
+end note
+
+MyTopVisitor -> MyGenVisitor: visitChildren()
+
+group For each child of ParentTreeNode
+    MyGenVisitor -> ChildTreeNodeN: accept(visitor)
+    ChildTreeNodeN -> MyTopVisitor: visit__()
+end
+
+note over MyGenVisitor
+    One visit method per
+    parse rule type.
+end note
+
+note over MyGenVisitor #Pink
+    Problem: there is no one method that
+    get's to touch every visit and therefore
+    no place to do common work such as
+    logging would require instrumenting
+    every visit___() method.
+end note
+
+@enduml

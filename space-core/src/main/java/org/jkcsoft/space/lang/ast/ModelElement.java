@@ -1,9 +1,9 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
  *
  * Licensed under the following license agreement:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
  */
@@ -28,6 +28,7 @@ public abstract class ModelElement extends SpaceObject implements Named {
     private String              name;
     private String              description;
     private List<ModelElement>  children = new LinkedList<>();
+    private ModelElement        parent;
 
     ModelElement() {
         this(null);
@@ -36,6 +37,15 @@ public abstract class ModelElement extends SpaceObject implements Named {
     ModelElement(String name) {
         super(ObjectBuilder.getInstance().newOid());
         this.name = name;
+    }
+
+    public ModelElement getParent() {
+        return parent;
+    }
+
+    /** Limit access to package. */
+    void setParent(ModelElement parent) {
+        this.parent = parent;
     }
 
     public String getName() {
@@ -60,12 +70,23 @@ public abstract class ModelElement extends SpaceObject implements Named {
         this.description = description;
     }
 
-    public ModelElement addChild(ModelElement child) {
+    ModelElement addChild(ModelElement child) {
         children.add(child);
+        child.setParent(this);
         return child;
     }
 
     public List<ModelElement> getChildren() {
         return children;
+    }
+
+    public String getText() {
+        return "";
+    }
+
+    @Override
+    public String toString() {
+        return "[" + this.getClass().getSimpleName() + "] " +
+                (getName() != null ? this.getName() : ("\"" + this.getText() + "\""));
     }
 }

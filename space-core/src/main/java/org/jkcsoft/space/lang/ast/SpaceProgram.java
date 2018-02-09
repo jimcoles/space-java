@@ -1,9 +1,9 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
  *
  * Licensed under the following license agreement:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
  */
@@ -14,8 +14,10 @@ import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.instance.SpaceObject;
 import org.jkcsoft.space.lang.runtime.loaders.antlr.g2.G2AntlrParser;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Encapsulates an entire executable system as defined by Space definition elements
@@ -34,6 +36,7 @@ public class SpaceProgram extends ModelElement {
 //    private Space assocDefns;
 //    private Space actionSequenceDefns;
 
+    private Set<ParseUnit>      parseUnits = new HashSet<>();
     private List<SpaceTypeDefn> spaceTypeDefns = new LinkedList<>();
     private List<SpaceObject>   objectHeap = new LinkedList<>();
 
@@ -54,15 +57,8 @@ public class SpaceProgram extends ModelElement {
 
     // ==================
 
-    SpaceProgram() {
-
-    }
-
-    public SpaceTypeDefn addSpaceDefn(SpaceTypeDefn spaceTypeDefn) {
-        spaceTypeDefns.add(spaceTypeDefn);
-        // redundant
-        addChild(spaceTypeDefn);
-        return spaceTypeDefn;
+    SpaceProgram(String name) {
+        super(name);
     }
 
     public SpaceTypeDefn getFirstSpaceDefn() {
@@ -76,4 +72,20 @@ public class SpaceProgram extends ModelElement {
     public List<SpaceObject> getObjectHeap() {
         return objectHeap;
     }
+
+    // =========================================================================
+    // Child adders
+
+    public ParseUnit addParseUnit(ParseUnit parseUnit) {
+        parseUnits.add(parseUnit);
+        return parseUnit;
+    }
+
+    public SpaceTypeDefn addSpaceDefn(SpaceTypeDefn spaceTypeDefn) {
+        spaceTypeDefns.add(spaceTypeDefn);
+        // redundant
+        addChild(spaceTypeDefn);
+        return spaceTypeDefn;
+    }
+
 }

@@ -1,13 +1,15 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
  *
  * Licensed under the following license agreement:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
  */
 package org.jkcsoft.space.lang.ast;
+
+import org.jkcsoft.space.antlr.SpaceParser;
 
 /**
  * Captures a wide range of relationships such as one-to-many, recursive.
@@ -19,13 +21,15 @@ package org.jkcsoft.space.lang.ast;
  */
 public class AssociationDefn extends ModelElement {
 
+    private SpacePathExpr fromPath;
     private SpaceTypeDefn from;
     private int fromMult;   // Defaults to "many" if assoc is declared within a Space Type Defn.
 
+    private SpacePathExpr toPath;
     private SpaceTypeDefn to;
     private int toMult;     // Defaults to 1 if assoc is declared within a Space Type Defn.
 
-    AssociationDefn(String name, SpaceTypeDefn from, SpaceTypeDefn to) {
+    AssociationDefn(String name, SpacePathExpr fromPath, SpacePathExpr toPath) {
         super(name);
         this.from = from;
         this.to = to;
@@ -37,6 +41,22 @@ public class AssociationDefn extends ModelElement {
 
     public SpaceTypeDefn getTo() {
         return to;
+    }
+
+    public SpacePathExpr getFromPath() {
+        return fromPath;
+    }
+
+    public int getFromMult() {
+        return fromMult;
+    }
+
+    public SpacePathExpr getToPath() {
+        return toPath;
+    }
+
+    public int getToMult() {
+        return toMult;
     }
 
     /**

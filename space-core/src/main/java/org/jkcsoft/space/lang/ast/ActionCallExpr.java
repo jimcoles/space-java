@@ -1,13 +1,12 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
  *
  * Licensed under the following license agreement:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
  */
-
 package org.jkcsoft.space.lang.ast;
 
 /**
@@ -19,7 +18,7 @@ public class ActionCallExpr extends ModelElement implements ValueExpr {
 
     /** The name of some other named design-time thing such as a function.
      */
-    private ValueExpr   functionPathExpr;
+    private SpacePathExpr   functionPathExpr;
     private ValueExpr[] argumentExprs;
 
     /**
@@ -34,13 +33,13 @@ public class ActionCallExpr extends ModelElement implements ValueExpr {
      * @param argumentExprs Nested expression that evaluate at runtime to the values
      *                      used in this action call.
      */
-    ActionCallExpr(String name, ValueExpr functionPathExpr, ValueExpr ... argumentExprs) {
+    ActionCallExpr(String name, SpacePathExpr functionPathExpr, ValueExpr ... argumentExprs) {
         super(name);
         this.functionPathExpr = functionPathExpr;
         this.argumentExprs = argumentExprs;
     }
 
-    public ValueExpr getFunctionPathExpr() {
+    public SpacePathExpr getFunctionPathExpr() {
         return functionPathExpr;
     }
 
@@ -48,8 +47,7 @@ public class ActionCallExpr extends ModelElement implements ValueExpr {
         return argumentExprs;
     }
 
-    @Override
-    public String toString() {
+    public String toLogString() {
         return "call expression to " + functionPathExpr + "()";
     }
 }

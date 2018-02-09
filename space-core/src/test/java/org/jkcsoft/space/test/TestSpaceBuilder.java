@@ -29,6 +29,7 @@ public class TestSpaceBuilder extends TestSourceStub {
 
     public void testSpaceBuilderAPI() {
         AstBuilder ast = new AstBuilder();
+        ast.initProgram("");
         ObjectBuilder objs = ObjectBuilder.getInstance();
         //
         SpaceTypeDefn testPersonTypeDefn = ast.newSpaceTypeDefn("PersonType");

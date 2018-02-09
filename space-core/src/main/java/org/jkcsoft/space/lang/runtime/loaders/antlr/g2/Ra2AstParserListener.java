@@ -6,8 +6,7 @@
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
- */
-
+*/
 package org.jkcsoft.space.lang.runtime.loaders.antlr.g2;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -31,7 +30,7 @@ public class Ra2AstParserListener extends SpaceParserBaseListener {
 
     @Override
     public void enterSpaceTypeDefn(SpaceParser.SpaceTypeDefnContext ctx) {
-        astBuilder.initProgram();
+        astBuilder.initProgram("");
 //        astBuilder.getAstRoot().addSpaceTypeDefn(new EntityDefn(null, ctx.ge))
         super.enterSpaceTypeDefn(ctx);
     }

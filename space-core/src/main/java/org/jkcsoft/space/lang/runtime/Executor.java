@@ -14,10 +14,10 @@ import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.*;
+import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.lang.runtime.impl.CastTransforms;
 import org.jkcsoft.space.lang.runtime.jnative.math.JnMath;
 import org.jkcsoft.space.lang.runtime.jnative.opsys.JnOpSys;
-import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.lang.runtime.jnative.space.SpaceOpers;
 
 import java.io.File;
@@ -34,7 +34,8 @@ import java.util.*;
  */
 public class Executor extends ExprProcessor {
 
-    private static final Logger log = Logger.getRootLogger();
+    private static final Logger log = Logger.getLogger(Executor.class);
+
     private static Executor instance;
 
     public static Executor getInstance() {
@@ -72,12 +73,18 @@ public class Executor extends ExprProcessor {
         }
         try {
             AstBuilder astBuilder = astLoader.load(file);
-            linkRefs(astBuilder.getAstRoot());
-            exec(astBuilder.getAstRoot());
+            if (log.isDebugEnabled())
+                log.debug("AST dump: " +astBuilder.print());
+            linkAndExec(astBuilder.getAstRoot());
         }
         catch (Exception ex) {
             throw new RuntimeException("Failed running program", ex);
         }
+    }
+
+    public void linkAndExec(SpaceProgram sprog) throws Exception {
+        linkRefs(sprog);
+        exec(sprog);
     }
 
     /*
@@ -99,7 +106,6 @@ public class Executor extends ExprProcessor {
      *  with static logic.  These are the intrinsic, native objects.
      */
     private AstBuilder                  rootModelBuilder = new AstBuilder();
-
     private Set<ModelElement>           spaceModelObjects = new HashSet<>();
     private Map<String, ModelElement>   indexModelObjectsByFullPath = new TreeMap<>();
     /** The 'object' tables for 'instance' objects associated with the running program.
@@ -127,6 +133,7 @@ public class Executor extends ExprProcessor {
     private Map _exprProcessors = null;
 
     public Executor() {
+        rootModelBuilder.initProgram("");
         loadNativeSpaces();
     }
 
@@ -158,7 +165,7 @@ public class Executor extends ExprProcessor {
             nativeArgSpaceTypeDefn.addVariable(rootModelBuilder.newVariableDefn("arg1", null));
             AbstractActionDefn actionDefn = spaceTypeDefn.addActionDefn(rootModelBuilder.newNativeActionDefn
                 (jMethod.getName(), jMethod, nativeArgSpaceTypeDefn));
-            trackMetaObject(actionDefn);;
+            trackMetaObject(actionDefn);
         }
         trackMetaObject(spaceTypeDefn);
     }
@@ -191,6 +198,10 @@ public class Executor extends ExprProcessor {
 //                                           "does not implement the ["+Callable.class.getName()+"] interface.");
 
         return modelElement;
+    }
+
+    private Object lookupMetaElement(SpacePathExpr functionPathExpr) {
+        return null;
     }
 
     private void dumpSymbolTables() {
