@@ -6,7 +6,7 @@
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
-*/
+ */
 package org.jkcsoft.space.lang.ast;
 
 import java.lang.reflect.Method;

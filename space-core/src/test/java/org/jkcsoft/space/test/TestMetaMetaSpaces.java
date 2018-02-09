@@ -1,4 +1,5 @@
-package org.jkcsoft.space.test;/*
+package org.jkcsoft.space.test;
+/*
  * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
  *
  * Licensed under the following license agreement:
