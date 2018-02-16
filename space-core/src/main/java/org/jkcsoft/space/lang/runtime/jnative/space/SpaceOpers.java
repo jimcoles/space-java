@@ -29,29 +29,29 @@ public class SpaceOpers {
 //        Space2Lexer.ruleNames[Space2Lexer.AssignOper];
 //    }
 
-    public static SpaceObject nav(Tuple current, String assocName) {
+    public static SpaceObject nav(Executor exec, Tuple current, String assocName) {
         SpaceObject next = null;
         next = ((Tuple) current).getAssoc(assocName);
         if (next == null) {
-            next = Executor.getInstance().dereference(((Tuple) current).getReferenceOid(assocName));
+            next = exec.dereference(((Tuple) current).getReferenceOid(assocName));
         }
         return next;
     }
 
-    public static Space newSpace(ObjectBuilder objectBuilder, Space context, SpaceTypeDefn defn) {
-        return objectBuilder.newSpace(context, defn);
+    public static Space newSpace(ObjectFactory objectFactory, Space context, SpaceTypeDefn defn) {
+        return objectFactory.newSpace(context, defn);
     }
 
     /** */
-    public static Tuple newTuple(ObjectBuilder objectBuilder, Space space, ScalarValue ... args) {
-        Tuple tuple = objectBuilder.newTuple(space, args);
+    public static Tuple newTuple(ObjectFactory objectFactory, Space space, ScalarValue ... args) {
+        Tuple tuple = objectFactory.newTuple(space, args);
 
         return tuple;
     }
 
     /** */
-    public static CharacterSequence newCharSequence(ObjectBuilder objectBuilder, String chars) {
-        return objectBuilder.newCharacterSequence(chars);
+    public static CharacterSequence newCharSequence(ObjectFactory objectFactory, String chars) {
+        return objectFactory.newCharacterSequence(chars);
     }
 
     /**
@@ -66,7 +66,7 @@ public class SpaceOpers {
      * Association  Tuple
      *
      */
-    public static void assign(Executor exec, ObjectBuilder objectBuilder, Assignable leftAss, Assignable rightAss) {
+    public static void assign(Executor exec, ObjectFactory objectFactory, Assignable leftAss, Assignable rightAss) {
 //        SpaceObject leftSpaceObject = exec.dereference(leftOid);
 //        if (rightObject instanceof ScalarValue) {
 //            assert (leftSpaceObject instanceof ScalarValue);

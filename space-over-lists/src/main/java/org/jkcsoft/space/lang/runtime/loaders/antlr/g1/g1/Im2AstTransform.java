@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.runtime.loaders.antlr.g1.g1;
 
-import org.jkcsoft.space.lang.ast.AstBuilder;
+import org.jkcsoft.space.lang.ast.AstFactory;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,15 +19,15 @@ import java.util.List;
  */
 public class Im2AstTransform {
 
-    private AstBuilder astBuilder = new AstBuilder();
+    private AstFactory astFactory = new AstFactory();
     private List<AstLoadError> errors = new LinkedList<>();
 
     public void transform(ImTreeNode imRoot) {
-        if (astBuilder.getAstRoot() == null) {
+        if (astFactory.getAstRoot() == null) {
             if (!ImTrees.first(imRoot).getText().equals("space-defn"))
                 errors.add(new AstLoadError("first ID must be 'space-defn'"));
-//            astBuilder.addMetaObject(new SpaceProgram());
-            astBuilder.getAstRoot();
+//            astFactory.addMetaObject(new SpaceProgram());
+            astFactory.getAstRoot();
         }
     }
 

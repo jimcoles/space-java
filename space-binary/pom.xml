@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+  ~ Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
   ~
   ~ Licensed under the following license agreement:
   ~
@@ -8,21 +8,29 @@
   ~
   ~ Also see the LICENSE file in the repository root directory.
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <parent>
         <artifactId>space-parent</artifactId>
         <groupId>org.jkcsoft</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>space-ship</artifactId>
-    <description>A generic command SHell Interface Pod (SHIP) with code-completion and ability to navigate
-        and invoke all named things in a Space context. This is an excellent way
-        to demonstrate the power of the language and its differentiations.
-    </description>
+    <artifactId>space-binary</artifactId>
+    <description>Contains code to marshall and unmarshall the Space AST to/from binary.</description>
+
+    <build>
+        <plugins>
+
+        </plugins>
+    </build>
+
+    <dependencies>
+
+    </dependencies>
 
 </project>

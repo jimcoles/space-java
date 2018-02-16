@@ -33,4 +33,6 @@ public class VariableDefn extends ModelElement {
     public PrimitiveType getType() {
         return type;
     }
+
+
 }

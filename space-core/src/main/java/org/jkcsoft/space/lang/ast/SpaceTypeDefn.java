@@ -27,6 +27,7 @@ import java.util.Map;
 public class SpaceTypeDefn extends ModelElement {
 
     private SpaceTypeDefn               contextSpaceTypeDefn;
+    private boolean                     isEntity;
     private List<VariableDefn>          variableDefnList;
     private List<AssociationDefn>       associationDefnList;
     private List<EquationDefn>          equations;
@@ -66,30 +67,8 @@ public class SpaceTypeDefn extends ModelElement {
         return variableDefnList;
     }
 
-    public VariableDefn addVariable(VariableDefn variableDefn) {
-        if (variableDefnList == null)
-            variableDefnList = new LinkedList<>();
-        variableDefnList.add(variableDefn);
-        //
-        indexCoordinatesByName.put(variableDefn.getName(), variableDefn);
-        //
-        addChild(variableDefn);
-        return variableDefn;
-    }
-
     public VariableDefn getVariableDefnAt(int index) {
         return variableDefnList.get(index);
-    }
-
-    public AssociationDefn addAssociation(AssociationDefn associationDefn) {
-        if (associationDefnList == null)
-            associationDefnList = new LinkedList<>();
-        associationDefnList.add(associationDefn);
-        //
-        indexAssociationsByName.put(associationDefn.getName(), associationDefn);
-        //
-        addChild(associationDefn);
-        return associationDefn;
     }
 
     public AssociationDefn getAssocDefnAt(int index) {
@@ -102,6 +81,31 @@ public class SpaceTypeDefn extends ModelElement {
             throw new RuntimeException("function ["+name+"] not found in " + this);
         }
         return abstractActionDefn;
+    }
+
+    // ===========================================================
+    // Child adders
+    //
+    public VariableDefn addVariable(VariableDefn variableDefn) {
+        if (variableDefnList == null)
+            variableDefnList = new LinkedList<>();
+        variableDefnList.add(variableDefn);
+        //
+        indexCoordinatesByName.put(variableDefn.getName(), variableDefn);
+        //
+        addChild(variableDefn);
+        return variableDefn;
+    }
+
+    public AssociationDefn addAssociation(AssociationDefn associationDefn) {
+        if (associationDefnList == null)
+            associationDefnList = new LinkedList<>();
+        associationDefnList.add(associationDefn);
+        //
+        indexAssociationsByName.put(associationDefn.getName(), associationDefn);
+        //
+        addChild(associationDefn);
+        return associationDefn;
     }
 
     public AbstractActionDefn addActionDefn(AbstractActionDefn actionDefn) {
@@ -121,4 +125,5 @@ public class SpaceTypeDefn extends ModelElement {
         }
         return sb.toString();
     }
+
 }

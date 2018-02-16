@@ -12,6 +12,9 @@ package org.jkcsoft.space.lang.runtime.loaders.antlr.g2;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.log4j.Logger;
 
+/**
+ * @author Jim Coles
+ */
 public class ParseTreeWalker {
 
     private static final Logger log = Logger.getLogger(ParseTreeWalker.class);

@@ -30,6 +30,7 @@
             <groupId>org.jkcsoft</groupId>
             <artifactId>space-core</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.jkcsoft</groupId>
             <artifactId>space-antlr</artifactId>
@@ -40,6 +41,7 @@
     <build>
         <plugins>
 
+<!--
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
@@ -56,13 +58,36 @@
                         </configuration>
                     </execution>
                 </executions>
-                <!--
+                &lt;!&ndash;
                                 <configuration>
                                     <descriptorRefs>
                                         <descriptorRef>jar-with-dependencies</descriptorRef>
                                     </descriptorRefs>
                                 </configuration>
-                -->
+                &ndash;&gt;
+            </plugin>
+-->
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
+                <configuration>
+                    <repositoryLayout>flat</repositoryLayout>
+                    <programs>
+                        <program>
+                            <id>space</id>
+                            <mainClass>org.jkcsoft.space.SpaceMain</mainClass>
+                        </program>
+                    </programs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assemble</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

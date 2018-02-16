@@ -36,23 +36,13 @@ public class Executor extends ExprProcessor {
 
     private static final Logger log = Logger.getLogger(Executor.class);
 
-    private static Executor instance;
-
-    public static Executor getInstance() {
-        return instance;
-    }
-
-    /**
-     *
-     */
-    public static void main(String[] args) {
-        try {
-            Executor exec = new Executor();
-            exec.run(args[0]);
-        } catch (Throwable th) {
-            log.error("error running", th);
-        }
-    }
+//    private static Executor instance;
+//
+//    public static Executor getInstance() {
+//        if (instance == null)
+//            instance = new Executor();
+//        return instance;
+//    }
 
     public void run(String ... filePath) throws RuntimeException {
         File file = FileUtils.getFile(filePath);
@@ -72,10 +62,10 @@ public class Executor extends ExprProcessor {
             throw new RuntimeException("Could not load parser [{0}]", e);
         }
         try {
-            AstBuilder astBuilder = astLoader.load(file);
+            AstFactory astFactory = astLoader.load(file);
             if (log.isDebugEnabled())
-                log.debug("AST dump: " +astBuilder.print());
-            linkAndExec(astBuilder.getAstRoot());
+                log.debug("AST dump: " + astFactory.print());
+            linkAndExec(astFactory.getAstRoot());
         }
         catch (Exception ex) {
             throw new RuntimeException("Failed running program", ex);
@@ -105,7 +95,7 @@ public class Executor extends ExprProcessor {
     /** Definition objects are loaded as we parse the source code.  Some objects are loaded
      *  with static logic.  These are the intrinsic, native objects.
      */
-    private AstBuilder                  rootModelBuilder = new AstBuilder();
+    private AstFactory rootModelBuilder = new AstFactory();
     private Set<ModelElement>           spaceModelObjects = new HashSet<>();
     private Map<String, ModelElement>   indexModelObjectsByFullPath = new TreeMap<>();
     /** The 'object' tables for 'instance' objects associated with the running program.
@@ -137,8 +127,8 @@ public class Executor extends ExprProcessor {
         loadNativeSpaces();
     }
 
-    private ObjectBuilder getObjBuilder() {
-        return ObjectBuilder.getInstance();
+    private ObjectFactory getObjBuilder() {
+        return ObjectFactory.getInstance();
     }
 
     private void loadNativeSpaces() {

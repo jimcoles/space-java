@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.runtime.loaders.xml;
 
-import org.jkcsoft.space.lang.ast.AstBuilder;
+import org.jkcsoft.space.lang.ast.AstFactory;
 import org.jkcsoft.space.lang.ast.SpaceProgram;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -32,7 +32,7 @@ public class XmlLoader extends DefaultHandler {
 
     private InputStream _in = null;
     private SpaceProgram _program = null;
-    private AstBuilder astBuilder = new AstBuilder();
+    private AstFactory astFactory = new AstFactory();
 
     public XmlLoader(InputStream in) {
         _in = in;
@@ -74,7 +74,7 @@ public class XmlLoader extends DefaultHandler {
 
         SAXParserFactory spf = SAXParserFactory.newInstance();
         SAXParser parser = spf.newSAXParser();
-        _program = astBuilder.initProgram("");
+        _program = astFactory.initProgram("");
 
         parser.parse(_in, this);
 

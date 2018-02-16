@@ -16,11 +16,17 @@ import org.antlr.v4.runtime.atn.ATN;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.Tree;
+import org.antlr.v4.tool.ast.GrammarAST;
 import org.jkcsoft.java.util.Strings;
+import org.jkcsoft.space.lang.runtime.loaders.antlr.g2.SimpleTransListener;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class AntlrUtil {
+
+    private static final List<String> tabsCache = new ArrayList<>();
 
     public static String getNodeTypeInfo(Tree treeContext, String[] ruleNameIndex) {
         String dumpString = "?";
@@ -29,11 +35,14 @@ public class AntlrUtil {
                 RuleContext ruleContext = (RuleContext) treeContext;
                 dumpString = toDumpString(ruleContext, ruleNameIndex[ruleContext.getRuleIndex()]);
             } else if (treeContext instanceof TerminalNode) {
-                TerminalNode terminalNode = (TerminalNode) treeContext;
-                dumpString = toDumpString(terminalNode);
-            } else if (treeContext instanceof ErrorNode) {
-                ErrorNode errorNode = (ErrorNode) treeContext;
-                dumpString = toDumpString(errorNode);
+                if (treeContext instanceof ErrorNode) {
+                    ErrorNode errorNode = (ErrorNode) treeContext;
+                    dumpString = toDumpString(errorNode);
+                }
+                else {
+                    TerminalNode terminalNode = (TerminalNode) treeContext;
+                    dumpString = toDumpString(terminalNode);
+                }
             }
         } else {
             // no recog for rule names
@@ -79,7 +88,22 @@ public class AntlrUtil {
     }
 
     public static String indent(int depthOneBased) {
-        return Strings.multiplyString("\t", (depthOneBased - 1));
+        String tabs = null;
+        if (tabsCache.size() < depthOneBased) {
+            fillCache(depthOneBased);
+        }
+        tabs = tabsCache.get(depthOneBased - 1);
+        return tabs;
     }
 
+    private static void fillCache(int depthOneBased) {
+        for (int idxTab = tabsCache.size(); idxTab < depthOneBased; idxTab++) {
+            tabsCache.add(Strings.multiplyString("\t", idxTab));
+        }
+    }
+
+    /** The ANTLR rule name is always the first child of the rule node. */
+    public static String extractRuleName(GrammarAST rule) {
+        return rule.getChild(0).getText();
+    }
 }

@@ -9,5 +9,6 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-public interface SpaceSet {
+public interface SpaceSet<T> {
+
 }

@@ -47,18 +47,18 @@ public class Ra2AstTransform {
 
     private ExecState state = ExecState.INITIALIZATION;
     private List<AstLoadError> errors = new LinkedList();
-    private AstBuilder astBuilder;
-//    private ObjectBuilder objBuilder = ObjectBuilder.getInstance();
+    private AstFactory astFactory;
+//    private ObjectFactory objBuilder = ObjectFactory.getInstance();
 
 
     public Ra2AstTransform() {
     }
 
-    public AstBuilder transformAndBuild(ParseTree parseTreeRoot) {
+    public AstFactory transformAndBuild(ParseTree parseTreeRoot) {
 
 //        visitNodeRecurse(parseTreeRoot);
 
-        return astBuilder;
+        return astFactory;
     }
 
     private ModelElement lookupTrans(ParseTree node) {
@@ -66,12 +66,12 @@ public class Ra2AstTransform {
         return trans;
     }
 
-    public AstBuilder transform(SpaceParser.ParseUnitContext spaceParseUnit) {
+    public AstFactory transform(SpaceParser.ParseUnitContext spaceParseUnit) {
         log.info("transforming ANTLR parse tree to AST starting with " + SpaceParser.ParseUnitContext.class.getSimpleName());
-        astBuilder = new AstBuilder();
-        astBuilder.initProgram("");
-        astBuilder.getAstRoot().addSpaceDefn(typeDef2Ast(spaceParseUnit.spaceTypeDefn()));
-        return astBuilder;
+        astFactory = new AstFactory();
+        astFactory.initProgram("");
+        astFactory.getAstRoot().addSpaceDefn(typeDef2Ast(spaceParseUnit.spaceTypeDefn()));
+        return astFactory;
     }
 
     public SpaceTypeDefn typeDef2Ast(SpaceParser.SpaceTypeDefnContext spaceTypeDefnContext) {
@@ -79,7 +79,7 @@ public class Ra2AstTransform {
 
         SpaceTypeDefn spaceTypeDefn = null;
         // TODO: 2/8/17 Not all spaces are Entities?
-        spaceTypeDefn = astBuilder.newSpaceTypeDefn(toText(spaceTypeDefnContext.identifier()));
+        spaceTypeDefn = astFactory.newSpaceTypeDefn(toText(spaceTypeDefnContext.identifier()));
         spaceTypeDefnContext.accessModifier();
         spaceTypeDefnContext.defnTypeModifier();
         spaceTypeDefnContext.elementDefnHeader();
@@ -88,16 +88,16 @@ public class Ra2AstTransform {
         }
         SpaceParser.SpaceTypeDefnBodyContext spaceTypeDefnBodyContext = spaceTypeDefnContext.spaceTypeDefnBody();
 
-        List<SpaceParser.VariableDefnStmntContext> varDefCtxts = spaceTypeDefnBodyContext.variableDefnStmnt();
+        List<SpaceParser.VariableDefnStmtContext> varDefCtxts = spaceTypeDefnBodyContext.variableDefnStmt();
         if (varDefCtxts != null && !varDefCtxts.isEmpty()) {
-            for (SpaceParser.VariableDefnStmntContext variableDefnStmntContext : varDefCtxts) {
-                spaceTypeDefn.addVariable(toAst(variableDefnStmntContext.variableDefn()));
+            for (SpaceParser.VariableDefnStmtContext variableDefnStmtContext : varDefCtxts) {
+                spaceTypeDefn.addVariable(toAst(variableDefnStmtContext.variableDefn()));
             }
         }
 
-        List<SpaceParser.AssociationDefnStmntContext> assocDefCtxts = spaceTypeDefnBodyContext.associationDefnStmnt();
+        List<SpaceParser.AssociationDefnStmtContext> assocDefCtxts = spaceTypeDefnBodyContext.associationDefnStmt();
         if (assocDefCtxts != null && !assocDefCtxts.isEmpty()) {
-            for (SpaceParser.AssociationDefnStmntContext assocDefCtx : assocDefCtxts) {
+            for (SpaceParser.AssociationDefnStmtContext assocDefCtx : assocDefCtxts) {
                 spaceTypeDefn.addAssociation(toAst(assocDefCtx.associationDefn()));
             }
         }
@@ -122,7 +122,7 @@ public class Ra2AstTransform {
     private AssociationDefn toAst(SpaceParser.AssociationDefnContext assocDefCtx) {
         assocDefCtx.rightAssignmentExpr();
         assocDefCtx.getSourceInterval();
-        return astBuilder.newAssociationDefn(
+        return astFactory.newAssociationDefn(
                 toText(assocDefCtx.associationDecl().identifier()),
 
                 toAst(assocDefCtx.associationDecl().spacePathExpr())
@@ -133,7 +133,7 @@ public class Ra2AstTransform {
         spacePathExprContext.identifier();
         spacePathExprContext.SPathNavAssocToOper();
         spacePathExprContext.SPathNavAssocToOper2();
-        return astBuilder.newSpacePathExpr(
+        return astFactory.newSpacePathExpr(
                 PathOperEnum.ASSOC_NAV,
                 toText(spacePathExprContext.identifier())
         );
@@ -143,7 +143,7 @@ public class Ra2AstTransform {
         log.info("transforming " + SpaceParser.ActionDefnContext.class.getSimpleName());
 
         SpaceActionDefn actionDefn
-            = astBuilder.newSpaceActionDefn(toText(actionDefnContext.identifier()));
+            = astFactory.newSpaceActionDefn(toText(actionDefnContext.identifier()));
 
         List<SpaceParser.StatementContext> statements = actionDefnContext.actionDefnBody().statement();
         for (SpaceParser.StatementContext statement : statements) {
@@ -177,7 +177,7 @@ public class Ra2AstTransform {
             idxArg++;
         }
 
-        return astBuilder.newActionCallExpr("callPoint", spacePathExpr, thisCallArgs);
+        return astFactory.newActionCallExpr("callPoint", spacePathExpr, thisCallArgs);
     }
 
     /** Then general translator from ANTLR expression to AST expression.
@@ -223,7 +223,7 @@ public class Ra2AstTransform {
             nextCallExpr = toAstCall(spacePathExprContext.spacePathExpr());
         }
 //        ActionCallExpr actionCallExpr =
-//            astBuilder.newActionCallExpr("callPoint",
+//            astFactory.newActionCallExpr("callPoint",
 //                                         OperEnum.ASSOC_NAV,
 //                                         nextCallExpr
 //                                         );
@@ -245,10 +245,10 @@ public class Ra2AstTransform {
 //            stringLiteralContext.StringLiteral().getText()
 //        );
 
-        rightSide = astBuilder.newLiteralHolder(stringLiteralContext.StringLiteral().getText());
+        rightSide = astFactory.newLiteralHolder(stringLiteralContext.StringLiteral().getText());
 
 //        objBuilder.newObjectReference(
-//            astBuilder.newAssociationDefn("arg1", null, null),
+//            astFactory.newAssociationDefn("arg1", null, null),
 //            arg1.getOid()
 //        );
 
@@ -256,7 +256,7 @@ public class Ra2AstTransform {
     }
 
     private ValueExpr toAst(SpaceParser.ScalarLiteralContext scalarLiteralContext) {
-        return astBuilder.newLiteralHolder(scalarLiteralContext.integerLiteral().getText());
+        return astFactory.newLiteralHolder(scalarLiteralContext.integerLiteral().getText());
     }
 
     private List<SpaceParser.IdentifierContext> collapseList(SpaceParser.SpacePathExprContext identifierRefContext) {
@@ -267,7 +267,7 @@ public class Ra2AstTransform {
 
     private VariableDefn toAst(SpaceParser.VariableDefnContext variableDefnContext) {
         log.info("transforming " + SpaceParser.VariableDefnContext.class.getSimpleName());
-        VariableDefn element = astBuilder.newVariableDefn(
+        VariableDefn element = astFactory.newVariableDefn(
                 toText(variableDefnContext.variableDecl().identifier()),
                 toAst(variableDefnContext.variableDecl().primitiveTypeName())
         );

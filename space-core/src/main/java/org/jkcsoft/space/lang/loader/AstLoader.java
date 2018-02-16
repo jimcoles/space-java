@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.loader;
 
-import org.jkcsoft.space.lang.ast.AstBuilder;
+import org.jkcsoft.space.lang.ast.AstFactory;
 
 import java.io.File;
 
@@ -18,7 +18,7 @@ import java.io.File;
  */
 public interface AstLoader {
 
-    /** Loads an AstBuilder object. */
-    AstBuilder load(File file) throws Exception;
+    /** Loads an AstFactory object. */
+    AstFactory load(File file) throws Exception;
 
 }

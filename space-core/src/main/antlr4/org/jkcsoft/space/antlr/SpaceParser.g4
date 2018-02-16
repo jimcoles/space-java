@@ -15,7 +15,7 @@ Meta-Naming Conventions:
            runtime.  Might express a mix of operations and truths
            (predicates).
            ?? Do we need ActionExpr vs EquationExpr.
-  __Stmnt : Expresses a thing to be executed such as a function call,
+  __Stmt : Expresses a thing to be executed such as a function call,
             not a structure;
 
 Examples to prime the pump:
@@ -174,8 +174,8 @@ elementDefnHeader :
 */
 spaceTypeDefnBody :
     BlockStart
-    variableDefnStmnt*
-    associationDefnStmnt*
+    variableDefnStmt*
+    associationDefnStmt*
     actionDefn*
     spaceTypeDefn*
     BlockEnd
@@ -186,7 +186,7 @@ spaceTypeDefnBody :
 //    SeqStart variableDefn (',' variableDefn)* SeqEnd
 //    ;
 
-variableDefnStmnt :
+variableDefnStmt :
     variableDefn ';'
     ;
 
@@ -202,7 +202,7 @@ variableDecl :
 //    SeqStart associationDefn (',' associationDefn)* SeqEnd
 //    ;
 
-associationDefnStmnt :
+associationDefnStmt :
     associationDefn ';'
     ;
 

@@ -1,0 +1,23 @@
+/**
+* The start of the ultimate attempt to run the Space executor upon another
+* Space executor.  To do this we must load a *.space program into Space-based
+* structures using the following definitions.  This enables us to run
+* queries against a loaded Space program.
+*
+* TODO: Need essentially one type-def for each notion in the Space grammar.
+*/
+
+public type-def ModelElement {
+    CharSequence name;
+}
+
+public type-def SpaceTypeDefn extends ModelElement
+{
+
+}
+
+public type-def AssociationDefn extends ModelElement
+{
+
+}
+

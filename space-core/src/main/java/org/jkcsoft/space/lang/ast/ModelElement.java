@@ -9,9 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.ObjectBuilder;
+import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.instance.SpaceObject;
-import org.jkcsoft.space.lang.instance.SpaceOid;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,7 +34,7 @@ public abstract class ModelElement extends SpaceObject implements Named {
     }
 
     ModelElement(String name) {
-        super(ObjectBuilder.getInstance().newOid());
+        super(ObjectFactory.getInstance().newOid());
         this.name = name;
     }
 

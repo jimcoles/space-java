@@ -9,250 +9,245 @@
  */
 package org.jkcsoft.space.lang.runtime.loaders.antlr.g2;
 
-import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.RuleNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.antlr.SpaceParserBaseVisitor;
-import org.jkcsoft.space.antlr.SpaceParserVisitor;
-import org.jkcsoft.space.lang.ast.AstBuilder;
+import org.jkcsoft.space.lang.ast.AstFactory;
 
 /**
  * Each visitXyz( ) transforms from the raw ANTLR parse tree node to an AST node
  * and then adds the resulting AST node to the AST tree.
  */
-public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<AstBuilder> {
+public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<AstFactory> {
 
-    private AstBuilder astBuilder;
+    private AstFactory astFactory;
 
     public void init() {
-        astBuilder = new AstBuilder();
-        astBuilder.initProgram("");
+        astFactory = new AstFactory();
+        astFactory.initProgram("");
     }
 
     @Override
-    public AstBuilder visitParseUnit(SpaceParser.ParseUnitContext ctx) {
+    public AstFactory visitParseUnit(SpaceParser.ParseUnitContext ctx) {
         return super.visitParseUnit(ctx);
     }
 
     @Override
-    public AstBuilder visitParseUnitRelational(SpaceParser.ParseUnitRelationalContext ctx) {
+    public AstFactory visitParseUnitRelational(SpaceParser.ParseUnitRelationalContext ctx) {
         return super.visitParseUnitRelational(ctx);
     }
 
     @Override
-    public AstBuilder visitAnyThing(SpaceParser.AnyThingContext ctx) {
+    public AstFactory visitAnyThing(SpaceParser.AnyThingContext ctx) {
         return super.visitAnyThing(ctx);
     }
 
     @Override
-    public AstBuilder visitSpaceTypeDefn(SpaceParser.SpaceTypeDefnContext ctx) {
+    public AstFactory visitSpaceTypeDefn(SpaceParser.SpaceTypeDefnContext ctx) {
         return super.visitSpaceTypeDefn(ctx);
     }
 
     @Override
-    public AstBuilder visitEquationDefn(SpaceParser.EquationDefnContext ctx) {
+    public AstFactory visitEquationDefn(SpaceParser.EquationDefnContext ctx) {
         return super.visitEquationDefn(ctx);
     }
 
     @Override
-    public AstBuilder visitAccessModifier(SpaceParser.AccessModifierContext ctx) {
+    public AstFactory visitAccessModifier(SpaceParser.AccessModifierContext ctx) {
         return super.visitAccessModifier(ctx);
     }
 
     @Override
-    public AstBuilder visitDefnTypeModifier(SpaceParser.DefnTypeModifierContext ctx) {
+    public AstFactory visitDefnTypeModifier(SpaceParser.DefnTypeModifierContext ctx) {
         return super.visitDefnTypeModifier(ctx);
     }
 
     @Override
-    public AstBuilder visitElementDefnHeader(SpaceParser.ElementDefnHeaderContext ctx) {
+    public AstFactory visitElementDefnHeader(SpaceParser.ElementDefnHeaderContext ctx) {
         return super.visitElementDefnHeader(ctx);
     }
 
     @Override
-    public AstBuilder visitSpaceTypeDefnBody(SpaceParser.SpaceTypeDefnBodyContext ctx) {
+    public AstFactory visitSpaceTypeDefnBody(SpaceParser.SpaceTypeDefnBodyContext ctx) {
         return super.visitSpaceTypeDefnBody(ctx);
     }
 
     @Override
-    public AstBuilder visitVariableDefnStmnt(SpaceParser.VariableDefnStmntContext ctx) {
-        return super.visitVariableDefnStmnt(ctx);
+    public AstFactory visitVariableDefnStmt(SpaceParser.VariableDefnStmtContext ctx) {
+        return super.visitVariableDefnStmt(ctx);
     }
 
     @Override
-    public AstBuilder visitVariableDefn(SpaceParser.VariableDefnContext ctx) {
+    public AstFactory visitVariableDefn(SpaceParser.VariableDefnContext ctx) {
         return super.visitVariableDefn(ctx);
     }
 
     @Override
-    public AstBuilder visitVariableDecl(SpaceParser.VariableDeclContext ctx) {
+    public AstFactory visitVariableDecl(SpaceParser.VariableDeclContext ctx) {
         return super.visitVariableDecl(ctx);
     }
 
     @Override
-    public AstBuilder visitAssociationDefnStmnt(SpaceParser.AssociationDefnStmntContext ctx) {
-        return super.visitAssociationDefnStmnt(ctx);
+    public AstFactory visitAssociationDefnStmt(SpaceParser.AssociationDefnStmtContext ctx) {
+        return super.visitAssociationDefnStmt(ctx);
     }
 
     @Override
-    public AstBuilder visitAssociationDefn(SpaceParser.AssociationDefnContext ctx) {
+    public AstFactory visitAssociationDefn(SpaceParser.AssociationDefnContext ctx) {
         return super.visitAssociationDefn(ctx);
     }
 
     @Override
-    public AstBuilder visitAssociationDecl(SpaceParser.AssociationDeclContext ctx) {
+    public AstFactory visitAssociationDecl(SpaceParser.AssociationDeclContext ctx) {
         return super.visitAssociationDecl(ctx);
     }
 
     @Override
-    public AstBuilder visitParameterDecl(SpaceParser.ParameterDeclContext ctx) {
+    public AstFactory visitParameterDecl(SpaceParser.ParameterDeclContext ctx) {
         return super.visitParameterDecl(ctx);
     }
 
     @Override
-    public AstBuilder visitActionDefn(SpaceParser.ActionDefnContext ctx) {
+    public AstFactory visitActionDefn(SpaceParser.ActionDefnContext ctx) {
         return super.visitActionDefn(ctx);
     }
 
     @Override
-    public AstBuilder visitActionDefnBody(SpaceParser.ActionDefnBodyContext ctx) {
+    public AstFactory visitActionDefnBody(SpaceParser.ActionDefnBodyContext ctx) {
         return super.visitActionDefnBody(ctx);
     }
 
     @Override
-    public AstBuilder visitStatement(SpaceParser.StatementContext ctx) {
+    public AstFactory visitStatement(SpaceParser.StatementContext ctx) {
         return super.visitStatement(ctx);
     }
 
     @Override
-    public AstBuilder visitExpression(SpaceParser.ExpressionContext ctx) {
+    public AstFactory visitExpression(SpaceParser.ExpressionContext ctx) {
         return super.visitExpression(ctx);
     }
 
     @Override
-    public AstBuilder visitActionCallExpr(SpaceParser.ActionCallExprContext ctx) {
+    public AstFactory visitActionCallExpr(SpaceParser.ActionCallExprContext ctx) {
         return super.visitActionCallExpr(ctx);
     }
 
     @Override
-    public AstBuilder visitObjectExpr(SpaceParser.ObjectExprContext ctx) {
+    public AstFactory visitObjectExpr(SpaceParser.ObjectExprContext ctx) {
         return super.visitObjectExpr(ctx);
     }
 
     @Override
-    public AstBuilder visitValueExpr(SpaceParser.ValueExprContext ctx) {
+    public AstFactory visitValueExpr(SpaceParser.ValueExprContext ctx) {
         return super.visitValueExpr(ctx);
     }
 
     @Override
-    public AstBuilder visitValueOrAssignmentExprList(SpaceParser.ValueOrAssignmentExprListContext ctx) {
+    public AstFactory visitValueOrAssignmentExprList(SpaceParser.ValueOrAssignmentExprListContext ctx) {
         return super.visitValueOrAssignmentExprList(ctx);
     }
 
     @Override
-    public AstBuilder visitValueOrAssignmentExpr(SpaceParser.ValueOrAssignmentExprContext ctx) {
+    public AstFactory visitValueOrAssignmentExpr(SpaceParser.ValueOrAssignmentExprContext ctx) {
         return super.visitValueOrAssignmentExpr(ctx);
     }
 
     @Override
-    public AstBuilder visitSetLiteral(SpaceParser.SetLiteralContext ctx) {
+    public AstFactory visitSetLiteral(SpaceParser.SetLiteralContext ctx) {
         return super.visitSetLiteral(ctx);
     }
 
     @Override
-    public AstBuilder visitSpaceDecl(SpaceParser.SpaceDeclContext ctx) {
+    public AstFactory visitSpaceDecl(SpaceParser.SpaceDeclContext ctx) {
         return super.visitSpaceDecl(ctx);
     }
 
     @Override
-    public AstBuilder visitComment(SpaceParser.CommentContext ctx) {
+    public AstFactory visitComment(SpaceParser.CommentContext ctx) {
         return super.visitComment(ctx);
     }
 
     @Override
-    public AstBuilder visitSingleLineComment(SpaceParser.SingleLineCommentContext ctx) {
+    public AstFactory visitSingleLineComment(SpaceParser.SingleLineCommentContext ctx) {
         return super.visitSingleLineComment(ctx);
     }
 
     @Override
-    public AstBuilder visitMultiLineComment(SpaceParser.MultiLineCommentContext ctx) {
+    public AstFactory visitMultiLineComment(SpaceParser.MultiLineCommentContext ctx) {
         return super.visitMultiLineComment(ctx);
     }
 
     @Override
-    public AstBuilder visitAnyTypeRef(SpaceParser.AnyTypeRefContext ctx) {
+    public AstFactory visitAnyTypeRef(SpaceParser.AnyTypeRefContext ctx) {
         return super.visitAnyTypeRef(ctx);
     }
 
     @Override
-    public AstBuilder visitPrimitiveTypeName(SpaceParser.PrimitiveTypeNameContext ctx) {
+    public AstFactory visitPrimitiveTypeName(SpaceParser.PrimitiveTypeNameContext ctx) {
         return super.visitPrimitiveTypeName(ctx);
     }
 
     @Override
-    public AstBuilder visitRightAssignmentExpr(SpaceParser.RightAssignmentExprContext ctx) {
+    public AstFactory visitRightAssignmentExpr(SpaceParser.RightAssignmentExprContext ctx) {
         return super.visitRightAssignmentExpr(ctx);
     }
 
     @Override
-    public AstBuilder visitAssignmentExpr(SpaceParser.AssignmentExprContext ctx) {
+    public AstFactory visitAssignmentExpr(SpaceParser.AssignmentExprContext ctx) {
         return super.visitAssignmentExpr(ctx);
     }
 
     @Override
-    public AstBuilder visitLiteralExpr(SpaceParser.LiteralExprContext ctx) {
+    public AstFactory visitLiteralExpr(SpaceParser.LiteralExprContext ctx) {
         return super.visitLiteralExpr(ctx);
     }
 
     @Override
-    public AstBuilder visitScalarLiteral(SpaceParser.ScalarLiteralContext ctx) {
+    public AstFactory visitScalarLiteral(SpaceParser.ScalarLiteralContext ctx) {
         return super.visitScalarLiteral(ctx);
     }
 
     @Override
-    public AstBuilder visitStringLiteral(SpaceParser.StringLiteralContext ctx) {
+    public AstFactory visitStringLiteral(SpaceParser.StringLiteralContext ctx) {
         return super.visitStringLiteral(ctx);
     }
 
     @Override
-    public AstBuilder visitIntegerLiteral(SpaceParser.IntegerLiteralContext ctx) {
+    public AstFactory visitIntegerLiteral(SpaceParser.IntegerLiteralContext ctx) {
         return super.visitIntegerLiteral(ctx);
     }
 
     @Override
-    public AstBuilder visitFloatLiteral(SpaceParser.FloatLiteralContext ctx) {
+    public AstFactory visitFloatLiteral(SpaceParser.FloatLiteralContext ctx) {
         return super.visitFloatLiteral(ctx);
     }
 
     @Override
-    public AstBuilder visitIdentifier(SpaceParser.IdentifierContext ctx) {
+    public AstFactory visitIdentifier(SpaceParser.IdentifierContext ctx) {
         return super.visitIdentifier(ctx);
     }
 
     @Override
-    public AstBuilder visitQueryDefn(SpaceParser.QueryDefnContext ctx) {
+    public AstFactory visitQueryDefn(SpaceParser.QueryDefnContext ctx) {
         return super.visitQueryDefn(ctx);
     }
 
     @Override
-    public AstBuilder visitSpacePathExpr(SpaceParser.SpacePathExprContext ctx) {
+    public AstFactory visitSpacePathExpr(SpaceParser.SpacePathExprContext ctx) {
         return super.visitSpacePathExpr(ctx);
     }
 
     @Override
-    public AstBuilder visitSpacePathList(SpaceParser.SpacePathListContext ctx) {
+    public AstFactory visitSpacePathList(SpaceParser.SpacePathListContext ctx) {
         return super.visitSpacePathList(ctx);
     }
 
     @Override
-    public AstBuilder visitGrammarExpression(SpaceParser.GrammarExpressionContext ctx) {
+    public AstFactory visitGrammarExpression(SpaceParser.GrammarExpressionContext ctx) {
         return super.visitGrammarExpression(ctx);
     }
 
     @Override
-    public AstBuilder visitRegularExpr(SpaceParser.RegularExprContext ctx) {
+    public AstFactory visitRegularExpr(SpaceParser.RegularExprContext ctx) {
         return super.visitRegularExpr(ctx);
     }
 }

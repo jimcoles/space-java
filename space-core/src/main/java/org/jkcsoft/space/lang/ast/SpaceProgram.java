@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.ObjectBuilder;
+import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.instance.SpaceObject;
 import org.jkcsoft.space.lang.runtime.loaders.antlr.g2.G2AntlrParser;
@@ -43,7 +43,7 @@ public class SpaceProgram extends ModelElement {
     // ================== The starting point for using Space to execute Space programs
 
     // Uses Space constructs to hold a table (space) of SpaceOids to
-    private ObjectBuilder spaceBuilder = ObjectBuilder.getInstance();
+    private ObjectFactory spaceBuilder = ObjectFactory.getInstance();
     private G2AntlrParser spaceInSpace = new G2AntlrParser();
     {
         try {
@@ -65,7 +65,7 @@ public class SpaceProgram extends ModelElement {
         return spaceTypeDefns.get(0);
     }
 
-    public void addObjectInstance(SpaceObject spaceObject, AstBuilder astBuilder) {
+    public void addObjectInstance(SpaceObject spaceObject, AstFactory astFactory) {
         objectHeap.add(spaceObject);
     }
 

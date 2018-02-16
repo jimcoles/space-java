@@ -11,13 +11,12 @@ package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
-import org.jkcsoft.space.lang.instance.ObjectBuilder;
+import org.jkcsoft.space.lang.instance.ObjectFactory;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * The AST is built by calling adder methods on this object.
@@ -27,19 +26,19 @@ import java.util.function.Consumer;
  *
  * @author Jim Coles
  */
-public class AstBuilder {
+public class AstFactory {
 
     // holds things (mostly named things) defined in the source code
     private Map<String, Class<ModelElement>> metaTypeMap = new HashMap<>();
     private SpaceProgram astRoot;
     private ModelElement currentAstNode;
 
-    public AstBuilder() {
+    public AstFactory() {
 
     }
 
-    private ObjectBuilder getObjectBuilder() {
-        return ObjectBuilder.getInstance();
+    private ObjectFactory getObjectBuilder() {
+        return ObjectFactory.getInstance();
     }
 
     public boolean validate() {

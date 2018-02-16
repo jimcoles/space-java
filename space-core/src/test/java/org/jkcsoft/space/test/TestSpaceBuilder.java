@@ -1,9 +1,9 @@
 package org.jkcsoft.space.test;
 
-import org.jkcsoft.space.lang.ast.AstBuilder;
+import org.jkcsoft.space.lang.ast.AstFactory;
 import org.jkcsoft.space.lang.ast.PrimitiveType;
 import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
-import org.jkcsoft.space.lang.instance.ObjectBuilder;
+import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.instance.TextValue;
 import org.jkcsoft.space.lang.instance.Tuple;
@@ -28,9 +28,9 @@ public class TestSpaceBuilder extends TestSourceStub {
      */
 
     public void testSpaceBuilderAPI() {
-        AstBuilder ast = new AstBuilder();
+        AstFactory ast = new AstFactory();
         ast.initProgram("");
-        ObjectBuilder objs = ObjectBuilder.getInstance();
+        ObjectFactory objs = ObjectFactory.getInstance();
         //
         SpaceTypeDefn testPersonTypeDefn = ast.newSpaceTypeDefn("PersonType");
         testPersonTypeDefn.addVariable(ast.newVariableDefn("firstName", PrimitiveType.TEXT));

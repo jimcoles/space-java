@@ -1,6 +1,7 @@
-public space-def Http
+public type-def Http
 /*
   A Space model of the HTTP protocol.
 */
-(
-)
+{
+
+}

@@ -14,7 +14,7 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.antlr.SpaceParserBaseListener;
-import org.jkcsoft.space.lang.ast.AstBuilder;
+import org.jkcsoft.space.lang.ast.AstFactory;
 
 /**
  * Implements the transform from the raw ANTLR parse tree to the Space AST.
@@ -26,12 +26,12 @@ import org.jkcsoft.space.lang.ast.AstBuilder;
  */
 public class Ra2AstParserListener extends SpaceParserBaseListener {
 
-    private AstBuilder astBuilder = new AstBuilder();
+    private AstFactory astFactory = new AstFactory();
 
     @Override
     public void enterSpaceTypeDefn(SpaceParser.SpaceTypeDefnContext ctx) {
-        astBuilder.initProgram("");
-//        astBuilder.getAstRoot().addSpaceTypeDefn(new EntityDefn(null, ctx.ge))
+        astFactory.initProgram("");
+//        astFactory.getAstRoot().addSpaceTypeDefn(new EntityDefn(null, ctx.ge))
         super.enterSpaceTypeDefn(ctx);
     }
 

@@ -9,6 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-public abstract class Statement extends ModelElement {
+public class Statement extends ModelElement {
 
 }

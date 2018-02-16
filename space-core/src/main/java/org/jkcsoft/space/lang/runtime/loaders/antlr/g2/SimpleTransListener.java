@@ -16,7 +16,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.space.antlr.SpaceParser;
-import org.jkcsoft.space.lang.ast.AstBuilder;
+import org.jkcsoft.space.lang.ast.AstFactory;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -32,34 +32,13 @@ import java.util.TreeMap;
 public class SimpleTransListener implements ParseTreeListener {
 
     private static final Logger log = Logger.getLogger(SimpleTransListener.class);
-    public static final String AST_PACKAGE_NAME = AstBuilder.class.getPackage().getName();
-
-    private static SortedMap<Integer, RuleMeta> ruleMetas = new TreeMap<>();
-    static {
-        addRuleMeta(SpaceParser.RULE_statement);
-        addRuleMeta(SpaceParser.RULE_valueOrAssignmentExpr);
-        addRuleMeta(SpaceParser.RULE_expression);
-        addRuleMeta(SpaceParser.RULE_anyThing);
-        addRuleMeta(SpaceParser.RULE_parameterDecl);
-        addRuleMeta(SpaceParser.RULE_valueExpr);
-        addRuleMeta(SpaceParser.RULE_valueOrAssignmentExpr);
-        addRuleMeta(SpaceParser.RULE_comment);
-        addRuleMeta(SpaceParser.RULE_anyTypeRef);
-        addRuleMeta(SpaceParser.RULE_primitiveTypeName);
-        addRuleMeta(SpaceParser.RULE_literalExpr);
-        addRuleMeta(SpaceParser.RULE_scalarLiteral);
-    }
-
-    private static RuleMeta addRuleMeta(int ruleId) {
-        return ruleMetas.put(ruleId, new RuleMeta(ruleId, true));
-    }
 
     // ---------------------------------
     //
     private String[] ruleIndex;
     private SortedMap<Integer, RuleStatInfo> ruleStats = new TreeMap<>();
     private int coalesceDepth = 0;
-    private AstBuilder spaceAst = new AstBuilder();
+    private AstFactory spaceAst = new AstFactory();
 
     // ---------------------------------
     //
@@ -71,40 +50,20 @@ public class SimpleTransListener implements ParseTreeListener {
     public void enterEveryRule(ParserRuleContext ctx) {
         String ruleName = this.ruleIndex[ctx.getRuleIndex()];
         incRuleTypeCounter(ctx.getRuleIndex());
-        String astClassName = mangleClassName(ruleName);
-        String astClassFQN = AST_PACKAGE_NAME + "." + astClassName;
-        RuleStatInfo info = ruleStats.get(ctx.getRuleIndex());
-        info.className = astClassName;
-        if (shouldCoalesce(ctx.getRuleIndex())) {
+        String astClassName = Antrl2AstMapping.antlrRuleToAstClassname(ruleName);
+        String astClassFQN = Antrl2AstMapping.computeFQAstClassName(astClassName);
+        RuleStatInfo statInfo = ruleStats.get(ctx.getRuleIndex());
+        statInfo.className = astClassName;
+        if (Antrl2AstMapping.shouldCoalesce(ctx.getRuleIndex())) {
             log.debug("coalescing " + ruleName + " at " + ctx.getSourceInterval());
             coalesceDepth++;
         }
         else {
-            info.hasAstWrapper = canLoad(astClassFQN);
+            statInfo.hasAstWrapper = Antrl2AstMapping.canLoad(astClassFQN);
         }
         return;
     }
 
-    private boolean shouldCoalesce(int ruleId) {
-        RuleMeta ruleMeta = ruleMetas.get(ruleId);
-        return ruleMeta != null && ruleMeta.isChoiceRule;
-    }
-
-    private boolean canLoad(String astClassFQN) {
-        boolean canLoad = false;
-        try {
-            Class.forName(astClassFQN);
-            canLoad = true;
-        } catch (ClassNotFoundException e) {
-            canLoad = false;
-        }
-        return canLoad;
-    }
-
-    private String mangleClassName(String ruleName) {
-        return Character.toUpperCase(ruleName.charAt(0))
-                + ruleName.substring(1, ruleName.length());
-    }
 
     private void incRuleTypeCounter(int ruleId) {
         String ruleName = ruleIndex[ruleId];
@@ -138,11 +97,11 @@ public class SimpleTransListener implements ParseTreeListener {
         ruleStats.keySet().forEach(
                 key -> {
                     RuleStatInfo statInfo = ruleStats.get(key);
-                    RuleMeta ruleMeta = ruleMetas.get(key);
+                    Antrl2AstMapping.RuleMeta ruleMeta = Antrl2AstMapping.getRuleMapping(key);
                     sb.append(statInfo)
                         .append(
                             (statInfo != null && statInfo.hasAstWrapper != null && !statInfo.hasAstWrapper
-                             && !(shouldCoalesce(key)))
+                             && !(Antrl2AstMapping.shouldCoalesce(key)))
                              ? "****" : ""
                         )
                         .append(JavaHelper.EOL);
@@ -175,16 +134,4 @@ public class SimpleTransListener implements ParseTreeListener {
         }
     }
 
-    public static class RuleMeta {
-        /**
-         * True if rule is a choice.
-         */
-        public Integer ruleId;
-        public boolean isChoiceRule;
-
-        public RuleMeta(Integer ruleId, boolean isChoiceRule) {
-            this.ruleId = ruleId;
-            this.isChoiceRule = isChoiceRule;
-        }
-    }
 }

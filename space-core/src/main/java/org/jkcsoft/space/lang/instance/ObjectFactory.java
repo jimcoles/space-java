@@ -18,13 +18,13 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * @author Jim Coles
  */
-public class ObjectBuilder {
+public class ObjectFactory {
 
-    private static ObjectBuilder instance;
+    private static ObjectFactory instance;
 
-    public static ObjectBuilder getInstance() {
+    public static ObjectFactory getInstance() {
         if (instance == null)
-            instance = new ObjectBuilder();
+            instance = new ObjectFactory();
         return instance;
     }
 
@@ -32,7 +32,7 @@ public class ObjectBuilder {
 
     private AtomicLong latestOid = new AtomicLong(1L);
 
-    private ObjectBuilder() {
+    private ObjectFactory() {
         //no instance
     }
 
