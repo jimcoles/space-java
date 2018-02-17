@@ -9,8 +9,6 @@
  */
 package org.jkcsoft.space.lang.metameta;
 
-import org.jkcsoft.space.antlr.SpaceLexer;
-
 /**
  * @author Jim Coles
  */
@@ -19,8 +17,8 @@ public class Keywords {
     static {
     }
 
-    public static void main(String[] args) {
-        String displayName = SpaceLexer.VOCABULARY.getDisplayName(SpaceLexer.SPathNavAssocToOper);
-        System.out.println(displayName);
-    }
+//    public static void main(String[] args) {
+//        String displayName = SpaceLexer.VOCABULARY.getDisplayName(SpaceLexer.SPathNavAssocToOper);
+//        System.out.println(displayName);
+//    }
 }

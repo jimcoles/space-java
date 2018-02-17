@@ -7,7 +7,7 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.loaders.antlr;
+package org.jkcsoft.space.antlr;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RuleContext;
@@ -18,11 +18,9 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.Tree;
 import org.antlr.v4.tool.ast.GrammarAST;
 import org.jkcsoft.java.util.Strings;
-import org.jkcsoft.space.lang.runtime.loaders.antlr.g2.SimpleTransListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class AntlrUtil {
 

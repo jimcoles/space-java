@@ -20,6 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>space-antlr</artifactId>
+    <packaging>jar</packaging>
 
     <dependencies>
 
@@ -27,11 +28,7 @@
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4</artifactId>
-            <scope>compile</scope>
-        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -40,14 +37,21 @@
 
         <dependency>
             <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
         </dependency>
+
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
 
-        <!--  -->
+        <!-- Our modules -->
+
         <dependency>
             <groupId>org.jkcsoft</groupId>
             <artifactId>java-core</artifactId>
@@ -61,12 +65,20 @@
     </dependencies>
 
     <build>
+
+        <resources>
+            <resource>
+                <directory>src/main/antlr4</directory>
+            </resource>
+        </resources>
+
         <plugins>
+
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
                 <configuration>
-                    <sourceDirectory>./src/main/antlr4/org/jkcsoft/space/antlr</sourceDirectory>
+                    <!--<sourceDirectory>./src/main/antlr4/org/jkcsoft/space/antlr</sourceDirectory>-->
                     <!--<grammars>SpaceParser.g4</grammars>-->
                     <visitor>true</visitor>
                     <listener>true</listener>
@@ -80,6 +92,7 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 

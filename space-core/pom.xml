@@ -25,16 +25,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4-runtime</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
@@ -49,43 +39,6 @@
     <build>
         <plugins>
 
-            <plugin>
-                <groupId>org.antlr</groupId>
-                <artifactId>antlr4-maven-plugin</artifactId>
-                <configuration>
-                    <!--<sourceDirectory>./src/main/antlr4/org/jkcsoft/space/antlr</sourceDirectory>-->
-                    <!--<grammars>SpaceParser.g4</grammars>-->
-                    <visitor>true</visitor>
-                    <listener>true</listener>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>antlr</id>
-                        <goals>
-                            <goal>antlr4</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>appassembler-maven-plugin</artifactId>
-                <configuration>
-                    <repositoryLayout>flat</repositoryLayout>
-                    <programs>
-                        <program>
-                            <id>space</id>
-                            <mainClass>org.jkcsoft.space.SpaceMain</mainClass>
-                        </program>
-                    </programs>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-            </plugin>
 
         </plugins>
     </build>

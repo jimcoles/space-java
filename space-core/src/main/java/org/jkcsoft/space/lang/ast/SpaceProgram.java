@@ -12,7 +12,6 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.instance.SpaceObject;
-import org.jkcsoft.space.lang.runtime.loaders.antlr.g2.G2AntlrParser;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -44,15 +43,6 @@ public class SpaceProgram extends ModelElement {
 
     // Uses Space constructs to hold a table (space) of SpaceOids to
     private ObjectFactory spaceBuilder = ObjectFactory.getInstance();
-    private G2AntlrParser spaceInSpace = new G2AntlrParser();
-    {
-        try {
-//            spaceInSpace.load(null);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     private Space namespace = spaceBuilder.newSpace(null, null);
 
     // ==================

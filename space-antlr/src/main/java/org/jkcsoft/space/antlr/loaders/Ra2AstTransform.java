@@ -7,7 +7,7 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.loaders.antlr.g2;
+package org.jkcsoft.space.antlr.loaders;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.log4j.Logger;
@@ -51,7 +51,8 @@ public class Ra2AstTransform {
 //    private ObjectFactory objBuilder = ObjectFactory.getInstance();
 
 
-    public Ra2AstTransform() {
+    public Ra2AstTransform(AstFactory astFactory) {
+        this.astFactory = astFactory;
     }
 
     public AstFactory transformAndBuild(ParseTree parseTreeRoot) {
@@ -67,9 +68,7 @@ public class Ra2AstTransform {
     }
 
     public AstFactory transform(SpaceParser.ParseUnitContext spaceParseUnit) {
-        log.info("transforming ANTLR parse tree to AST starting with " + SpaceParser.ParseUnitContext.class.getSimpleName());
-        astFactory = new AstFactory();
-        astFactory.initProgram("");
+        log.info("transforming ANTLR parse tree to AST starting with root parse node.");
         astFactory.getAstRoot().addSpaceDefn(typeDef2Ast(spaceParseUnit.spaceTypeDefn()));
         return astFactory;
     }

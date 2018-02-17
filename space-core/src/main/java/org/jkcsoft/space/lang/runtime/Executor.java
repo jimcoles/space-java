@@ -28,6 +28,12 @@ import java.util.*;
 /**
  * The top-level executive for Space.  It manages interactions between second-level
  * elements including XmlLoader, ExprProcessor, Querier.
+ * <p>The general pattern is:
+ *  <ul>
+ *      <li>exec() methods handle executable bits like the program itself and statements.</li>
+ *      <li>eval() methods handle expression</li>
+ *  </ul>
+ *  </p>
  *
  * @author J. Coles
  * @version 1.0
@@ -43,8 +49,41 @@ public class Executor extends ExprProcessor {
 //            instance = new Executor();
 //        return instance;
 //    }
+    public AbstractActionDefn OPER_NAV;
+    public AbstractActionDefn OPER_NEW_TUPLE;
+    public AbstractActionDefn OPER_NEW_CHAR;
+    public AbstractActionDefn OPER_ASSIGN;
+    /**
+     * Definition objects are loaded as we parse the source code.  Some objects are loaded
+     * with static logic.  These are the intrinsic, native objects.
+     */
+    private AstFactory astFactory = new AstFactory();
+    private Set<ModelElement> spaceModelObjects = new HashSet<>();
+    private Map<String, ModelElement> indexModelObjectsByFullPath = new TreeMap<>();
+    /**
+     * The 'object' tables for 'instance' objects associated with the running program.
+     * This map is added to as the program runs.
+     */
+    private Map<SpaceOid, SpaceObject> indexObjectsByOid = new TreeMap<>();
+    /**
+     * Key=the referenced object's Oid.
+     * Value=the set of object Oids holding reference to the key Oid.
+     */
+    private Map<SpaceOid, Set<SpaceOid>> objectReferenceMap = new TreeMap<>();
 
-    public void run(String ... filePath) throws RuntimeException {
+    private Stack<ActionCall> callStack = new Stack<>();
+    /**
+     * Mapping from expression type to expression handler. Some handlers will be
+     * Space standard, some will be user-provided.
+     */
+    private Map _exprProcessors = null;
+
+    public Executor() {
+        astFactory.initProgram("");
+        loadNativeSpaces();
+    }
+
+    public void run(String... filePath) throws RuntimeException {
         File file = FileUtils.getFile(filePath);
         if (!file.exists()) {
             throw new RuntimeException("Input file [" + filePath + "] does not exist.");
@@ -54,25 +93,28 @@ public class Executor extends ExprProcessor {
 
     public void run(File file) {
         AstLoader astLoader;
+        String parserImplClassName = "org.jkcsoft.space.antlr.loaders.G2AntlrParser";
+//            String parserImplClassName = "org.jkcsoft.space.antlr.test.TestGrammarParser";
         try {
-            String parserImplClassName = "org.jkcsoft.space.lang.runtime.loaders.antlr.g2.G2AntlrParser";
             Class<?> aClass = Class.forName(parserImplClassName);
+            log.info(String.format("Found loader provider class [%s]", parserImplClassName));
             astLoader = (AstLoader) aClass.newInstance();
+            log.info(String.format("Found source loader [%s]", astLoader.getName()));
         } catch (Exception e) {
-            throw new RuntimeException("Could not load parser [{0}]", e);
+            throw new RuntimeException("Could not find or load source loader ["+parserImplClassName+"]", e);
         }
         try {
             AstFactory astFactory = astLoader.load(file);
             if (log.isDebugEnabled())
                 log.debug("AST dump: " + astFactory.print());
             linkAndExec(astFactory.getAstRoot());
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             throw new RuntimeException("Failed running program", ex);
         }
     }
 
     public void linkAndExec(SpaceProgram sprog) throws Exception {
+        log.debug("linking loaded program");
         linkRefs(sprog);
         exec(sprog);
     }
@@ -84,47 +126,10 @@ public class Executor extends ExprProcessor {
      TODO implement linker
      */
     private void linkRefs(ModelElement astRoot) {
-        log.debug(astRoot.getName());
         List<ModelElement> children = astRoot.getChildren();
         for (ModelElement child : children) {
             linkRefs(child);
         }
-    }
-
-
-    /** Definition objects are loaded as we parse the source code.  Some objects are loaded
-     *  with static logic.  These are the intrinsic, native objects.
-     */
-    private AstFactory rootModelBuilder = new AstFactory();
-    private Set<ModelElement>           spaceModelObjects = new HashSet<>();
-    private Map<String, ModelElement>   indexModelObjectsByFullPath = new TreeMap<>();
-    /** The 'object' tables for 'instance' objects associated with the running program.
-     *  This map is added to as the program runs.
-     */
-    private Map<SpaceOid, SpaceObject>  indexObjectsByOid = new TreeMap<>();
-    /**
-     * Key=the referenced object's Oid.
-     * Value=the set of object Oids holding reference to the key Oid.
-     */
-    private Map<SpaceOid, Set<SpaceOid>> objectReferenceMap = new TreeMap<>();
-
-    private Stack<ActionCall>           callStack = new Stack<>();
-
-
-    public AbstractActionDefn OPER_NAV;
-    public AbstractActionDefn OPER_NEW_TUPLE;
-    public AbstractActionDefn OPER_NEW_CHAR;
-    public AbstractActionDefn OPER_ASSIGN;
-
-    /**
-     * Mapping from expression type to expression handler. Some handlers will be
-     * Space standard, some will be user-provided.
-     */
-    private Map _exprProcessors = null;
-
-    public Executor() {
-        rootModelBuilder.initProgram("");
-        loadNativeSpaces();
     }
 
     private ObjectFactory getObjBuilder() {
@@ -146,15 +151,15 @@ public class Executor extends ExprProcessor {
     }
 
     private void loadNativeClass(Class jnClass) {
-        SpaceTypeDefn spaceTypeDefn = rootModelBuilder.newSpaceTypeDefn(jnClass.getSimpleName());
+        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(jnClass.getSimpleName());
 //        spaceDefn.setName(jnClass.getSimpleName());
         Method[] methods = jnClass.getMethods();
-        for (Method jMethod: methods) {
-            SpaceTypeDefn nativeArgSpaceTypeDefn = rootModelBuilder.newSpaceTypeDefn(null);
+        for (Method jMethod : methods) {
+            SpaceTypeDefn nativeArgSpaceTypeDefn = astFactory.newSpaceTypeDefn(null);
             jMethod.getParameters();    // TODO build dynamic arg space
-            nativeArgSpaceTypeDefn.addVariable(rootModelBuilder.newVariableDefn("arg1", null));
-            AbstractActionDefn actionDefn = spaceTypeDefn.addActionDefn(rootModelBuilder.newNativeActionDefn
-                (jMethod.getName(), jMethod, nativeArgSpaceTypeDefn));
+            nativeArgSpaceTypeDefn.addVariable(astFactory.newVariableDefn("arg1", null));
+            AbstractActionDefn actionDefn = spaceTypeDefn.addActionDefn(astFactory.newNativeActionDefn
+                    (jMethod.getName(), jMethod, nativeArgSpaceTypeDefn));
             trackMetaObject(actionDefn);
         }
         trackMetaObject(spaceTypeDefn);
@@ -163,7 +168,7 @@ public class Executor extends ExprProcessor {
     private AbstractActionDefn findOper(String functionPath) {
         AbstractActionDefn operActionDefn = (AbstractActionDefn) indexModelObjectsByFullPath.get(functionPath);
         if (operActionDefn == null)
-            throw new RuntimeException("operation not found with path ["+functionPath+"]");
+            throw new RuntimeException("operation not found with path [" + functionPath + "]");
         return operActionDefn;
     }
 
@@ -191,7 +196,7 @@ public class Executor extends ExprProcessor {
     }
 
     private Object lookupMetaElement(SpacePathExpr functionPathExpr) {
-        return null;
+        return indexModelObjectsByFullPath.get(functionPathExpr.getText());
     }
 
     private void dumpSymbolTables() {
@@ -205,19 +210,18 @@ public class Executor extends ExprProcessor {
      * Executes a SpaceProgram.
      */
     public ModelElement exec(SpaceProgram program) throws Exception {
-        log.info("enter program exec for " + program.getName());
+        log.info("exec: " + program.getName());
         SpaceTypeDefn firstSpaceTypeDefn = program.getFirstSpaceDefn();
         Space rootSpace = newSpace(null, firstSpaceTypeDefn);
         SpaceActionDefn spMainActionDefn = (SpaceActionDefn) firstSpaceTypeDefn.getFunction("main");
         List<SpaceObject> objectHeap = program.getObjectHeap();
-        for (SpaceObject spaceObj:objectHeap) {
+        for (SpaceObject spaceObj : objectHeap) {
             trackSpaceObject(spaceObj);
         }
 
         try {
             exec(rootSpace, spMainActionDefn);
-        }
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             log.error("error executing", ex);
         }
         log.info("exiting Space program execution");
@@ -239,15 +243,15 @@ public class Executor extends ExprProcessor {
      * and move values (spaces) from action execution into the proper space for
      * parent actions.
      *
-     * @param spcContext Might be a local function space or an argument call space.
+     * @param spcContext    Might be a local function space or an argument call space.
      * @param spcActionDefn The composite, imperative action defined via Space source code (i.e., not Native).
      */
     private Assignable exec(Space spcContext, SpaceActionDefn spcActionDefn) throws RuntimeException {
         ActionCall actionCall = getObjBuilder().newAction(spcContext, spcActionDefn);
-        log.debug("push to call stack and exec: " + spcActionDefn);
+        log.debug("exec: " + spcActionDefn);
         callStack.push(actionCall);
         List<ActionCallExpr> childActions = spcActionDefn.getNestedActions();
-        for (ActionCallExpr childActionExpr: childActions) {
+        for (ActionCallExpr childActionExpr : childActions) {
             Assignable callValueObject = eval(spcContext, childActionExpr);
         }
         callStack.pop();
@@ -255,9 +259,11 @@ public class Executor extends ExprProcessor {
         return actionCall.getReturnSpace();
     }
 
-    /** Invokes a Java native method all via Java reflection.  Native actions
+    /**
+     * Invokes a Java native method all via Java reflection.  Native actions
      * do not have nested actions, at least none that are executed or controlled
-     * by this executor. */
+     * by this executor.
+     */
     private void exec(Space spcContext, NativeActionDefn nativeActionDefn) {
         try {
             log.debug("native Java call: " + nativeActionDefn);
@@ -265,7 +271,7 @@ public class Executor extends ExprProcessor {
             Object jArg1 = "?";
             if (arg1 instanceof Association)
                 //
-                jArg1 = dereference( ((Association) arg1).getReferenceOid()).toString();
+                jArg1 = dereference(((Association) arg1).getReferenceOid()).toString();
             else {
                 jArg1 = arg1.toString();
             }
@@ -274,11 +280,9 @@ public class Executor extends ExprProcessor {
             if (jArg1 instanceof CharacterSequence)
                 jArg1 = casters.charSequenceToString((CharacterSequence) jArg1);
             nativeActionDefn.getjMethod().invoke(new JnOpSys(), jArg1);
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             log.error(e);
-        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             log.error(e);
         }
     }
@@ -289,12 +293,12 @@ public class Executor extends ExprProcessor {
      * space for the call. In general, the arguments themselves are value expressions that must be
      * evaluated, recursively.
      *
-     * @param spcContext The argument space (instance-level with values accessible for read/write).
+     * @param spcContext  The argument space (instance-level with values accessible for read/write).
      * @param spcCallExpr The action-invoking expression to be evaluated (not the instance-level object).
      *                    Can be a Space function call or a Native (Java) function call.
      */
     private Assignable eval(Space spcContext, ActionCallExpr spcCallExpr) throws RuntimeException {
-        log.debug("function call: " + spcCallExpr);
+        log.debug("eval: " + spcCallExpr.getFunctionPathExpr());
         Assignable value = null;
         //
 //        Namespace fullNs = new Namespace(spcCallExpr.getFunctionPathExpr());
@@ -304,7 +308,10 @@ public class Executor extends ExprProcessor {
 //            throw new RuntimeException("Space defn [" + spcCallExpr.getFunctionPathExpr() + "] not found");
 //        String functionName = fullNs.getLast();
         AbstractActionDefn targetFunctionDefn
-            = (AbstractActionDefn) lookupMetaElement(spcCallExpr.getFunctionPathExpr());
+                = (AbstractActionDefn) lookupMetaElement(spcCallExpr.getFunctionPathExpr());
+
+        if (targetFunctionDefn == null)
+            throw new RuntimeException("could not find " + spcCallExpr.getFunctionPathExpr());
 
         // must add a nested Space context beneath the incoming context space to
         // represent the call stack
@@ -320,12 +327,10 @@ public class Executor extends ExprProcessor {
             if (argumentExpr instanceof LiteralExpr) {
                 Assignable literalValue = eval(argSpace, (LiteralExpr) argumentExpr);
                 addValueOrRef(argTuple, idxArg, literalValue);
-            }
-            else if (argumentExpr instanceof  ActionCallExpr) {
+            } else if (argumentExpr instanceof ActionCallExpr) {
                 Assignable actionArgValue = eval(argSpace, (ActionCallExpr) argumentExpr);
                 addValueOrRef(argTuple, idxArg, actionArgValue);
-            }
-            else {
+            } else {
                 throw new RuntimeException("Space: Invalid argument expression []");
             }
         }
@@ -349,16 +354,17 @@ public class Executor extends ExprProcessor {
 //        return value;
 //    }
 
-    /** Returns the literal value object associated with the {@link LiteralExpr}.
+    /**
+     * Returns the literal value object associated with the {@link LiteralExpr}.
      * The returned object may be a scalar, a character sequence, or a complete
-     * space. */
+     * space.
+     */
     private Assignable eval(Space spcContext, LiteralExpr literalExpr) {
         Assignable value = null;
         if (literalExpr.isString()) {
             CharacterSequence arg1 = newCharacterSequence(literalExpr.getAsString());
             value = newAssociation(arg1);
-        }
-        else {
+        } else {
             throw new RuntimeException("Can not yet handle literals other than Java Strings");
         }
         return value;
@@ -404,7 +410,7 @@ public class Executor extends ExprProcessor {
     public SpaceObject dereference(SpaceOid referenceOid) throws RuntimeException {
         SpaceObject spaceObject = indexObjectsByOid.get(referenceOid);
         if (spaceObject == null)
-            throw new RuntimeException("Space Oid ["+referenceOid+"] not found.");
+            throw new RuntimeException("Space Oid [" + referenceOid + "] not found.");
         return spaceObject;
     }
 }

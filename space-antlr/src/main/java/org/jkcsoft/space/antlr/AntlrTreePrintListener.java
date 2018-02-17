@@ -7,17 +7,11 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.loaders.antlr;
+package org.jkcsoft.space.antlr;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RuleContext;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.atn.ATN;
 import org.antlr.v4.runtime.misc.Utils;
 import org.antlr.v4.runtime.tree.*;
-import org.jkcsoft.java.util.Strings;
-
-import java.util.List;
 
 /**
  * @author Jim Coles

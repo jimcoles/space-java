@@ -10,7 +10,10 @@
 package org.jkcsoft.space;
 
 import org.apache.commons.cli.*;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.jkcsoft.apps.Application;
+import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.runtime.Executor;
 
 import java.util.List;
@@ -24,19 +27,27 @@ public class SpaceMain {
 
     public static void main(String[] args) {
         try {
-            instMain(args);
+            SpaceMain main = new SpaceMain();
+            main.instMain(args);
         } catch (Exception e) {
             log.fatal("error running Space", e);
         }
         return;
     }
 
-    private static void instMain(String[] args) throws ParseException {
+    // -------------------------------------------------------------------------
+    //
+    private Application app;
+
+    private SpaceMain() {
+        app = new Application("space");
+    }
+
+    private void instMain(String[] args) throws ParseException {
         Options cliOpts = new Options();
         OptionGroup optionGroup = new OptionGroup();
 
         Option optFileName = new Option("file", true, "File name to run");
-
         Option help = new Option("help", "Print usage");
         Option version = new Option("version", "Show Space version info");
         Option verbose = new Option("verbose", "Print extra runtime info to standard out");
@@ -46,19 +57,47 @@ public class SpaceMain {
         cliOpts.addOption(version);
         cliOpts.addOption(verbose);
 
+        // Parse and validate the command line based on options decl ...
         CommandLineParser cliParse = new DefaultParser();
         CommandLine commandLine = cliParse.parse(cliOpts, args);
+        validate(commandLine);
 
+        // Interpret and apply the command line options ...
+
+        // Opt: help
+        if (commandLine.hasOption(help.getOpt())) {
+            printUsage(cliOpts);
+            return;
+        }
+
+        // Opt: verbose => set log level to DEBUG
+        if (commandLine.hasOption(verbose.getOpt())) {
+            Logger.getRootLogger().setLevel(Level.DEBUG);
+        }
+
+        // Opt: file - Source file to run
         String fileName = commandLine.getOptionValue(optFileName.getOpt());
 
-        List<String> restOfArgs = commandLine.getArgList();
+        if (Strings.isEmpty(fileName)) {
+            List<String> restOfArgs = commandLine.getArgList();
+            if (restOfArgs == null || restOfArgs.size() != 1)
+                throw new IllegalArgumentException("Filename required");
 
-        HelpFormatter helper = new HelpFormatter();
-        helper.printHelp("syntax", "header", cliOpts, "footer", true);
+            fileName = restOfArgs.get(0);
+        }
 
         // Exec specified Space code ...
         Executor exec = new Executor();
         exec.run(fileName);
+    }
+
+    private void printUsage(Options cliOpts) {
+        HelpFormatter helper = new HelpFormatter();
+        helper.printHelp(app.getName(), "", cliOpts, "", true);
+    }
+
+    private static void validate(CommandLine commandLine) {
+
     }
 
 }

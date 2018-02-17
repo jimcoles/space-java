@@ -9,8 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.antlr.SpaceParser;
-
 /**
  * Captures a wide range of relationships such as one-to-many, recursive.
  * Analogous to a foreign key relationship in RDB world or a simple

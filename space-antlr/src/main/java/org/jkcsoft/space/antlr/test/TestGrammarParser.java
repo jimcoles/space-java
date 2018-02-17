@@ -7,19 +7,22 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.loader;
+package org.jkcsoft.space.antlr.test;
 
 import org.jkcsoft.space.lang.ast.AstFactory;
+import org.jkcsoft.space.lang.loader.AstLoader;
 
 import java.io.File;
 
-/**
- * @author Jim Coles
- */
-public interface AstLoader {
+public class TestGrammarParser implements AstLoader {
 
-    /** Loads an AstFactory object. */
-    AstFactory load(File file) throws Exception;
+    @Override
+    public AstFactory load(File file) throws Exception {
+        return null;
+    }
 
-    String getName();
+    @Override
+    public String getName() {
+        return "Dummy Loader";
+    }
 }
