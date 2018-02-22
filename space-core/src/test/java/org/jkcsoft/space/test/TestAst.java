@@ -12,7 +12,11 @@ package org.jkcsoft.space.test;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.runtime.Executor;
+import org.jkcsoft.space.lang.runtime.RuntimeError;
 import org.junit.Test;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Jim Coles
@@ -22,28 +26,30 @@ public class TestAst {
     @Test
     public void testBuildAndRunProgram() {
         AstFactory astFactory = new AstFactory();
-        astFactory.initProgram("(API Builder Program)");
+        astFactory.newProgram(new CodeSourceInfo(), "(API Builder Program)");
         //
         ObjectFactory objBuilder = ObjectFactory.getInstance();
-        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn("MyHelloSpace");
-        astFactory.getAstRoot()
+        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(new CodeSourceInfo(), "MyHelloSpace");
+
+        Schema astSchema = astFactory.newAstSchema(new CodeSourceInfo(), "TestAst");
+        astSchema
             .addSpaceDefn(spaceTypeDefn)
-                .addVariable(astFactory.newVariableDefn("myIntDim", PrimitiveType.CARD))
+                 .addVariable(astFactory.newVariableDefn(new CodeSourceInfo(), "myIntDim", PrimitiveType.CARD))
                     .setType(PrimitiveType.CHAR);
         spaceTypeDefn
-            .addVariable(astFactory.newVariableDefn("myCharDim", PrimitiveType.CHAR))
+            .addVariable(astFactory.newVariableDefn(new CodeSourceInfo(), "myCharDim", PrimitiveType.CHAR))
             ;
-        SpaceActionDefn mainMethod = astFactory.newSpaceActionDefn("main");
+        SpaceActionDefn mainMethod = astFactory.newSpaceActionDefn(new CodeSourceInfo(), "main");
         spaceTypeDefn.addActionDefn(mainMethod);
 //        CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
-//        astFactory.getAstRoot().addObjectInstance(arg1, astFactory);
+//        astFactory.getUserAstRoot().addObjectInstance(arg1, astFactory);
 
         ThisExpr thisTupleExpr = astFactory.newThis();
 
         mainMethod.addAction(
             astFactory.newActionCallExpr(
-                "callPoint",
-                    astFactory.newSpacePathExpr(PathOperEnum.ASSOC_NAV, ""),
+                    new CodeSourceInfo(),
+                    astFactory.newSpacePathExpr(new CodeSourceInfo(), PathOperEnum.ASSOC_NAV, ""),
                     astFactory.newMetaObjectRefLiteral(null),
                     astFactory.newLiteralHolder("Hello, Space!")
             )
@@ -59,7 +65,8 @@ public class TestAst {
         Executor spex = new Executor();
 
         try {
-            spex.linkAndExec(astFactory.getAstRoot());
+            List<RuntimeError> errors = new LinkedList<>();
+            spex.linkAndExec(errors, astSchema);
         }
         catch (Exception e) {
             e.printStackTrace();

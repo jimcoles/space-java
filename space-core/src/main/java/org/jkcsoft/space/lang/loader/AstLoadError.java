@@ -9,30 +9,26 @@
  */
 package org.jkcsoft.space.lang.loader;
 
+import org.jkcsoft.space.lang.ast.SourceInfo;
+
 /**
  * @author Jim Coles
  */
 public class AstLoadError {
 
     private String message;
-    private int line;
-    private int character;
+    private SourceInfo sourceInfo;
 
-    public AstLoadError(String message, int line, int character) {
+    public AstLoadError(String message, SourceInfo sourceInfo) {
         this.message = message;
-        this.line = line;
-        this.character = character;
+        this.sourceInfo = sourceInfo;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public int getLine() {
-        return line;
-    }
-
-    public int getCharacter() {
-        return character;
+    public SourceInfo getSourceInfo() {
+        return sourceInfo;
     }
 }

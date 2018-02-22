@@ -19,8 +19,8 @@ public class NativeActionDefn extends AbstractActionDefn implements Callable {
     private final Method jMethod;
     private final SpaceTypeDefn argSpaceTypeDefn;
 
-    NativeActionDefn(String name, Method jMethod, SpaceTypeDefn argSpaceTypeDefn) {
-        super(name);
+    NativeActionDefn(SourceInfo sourceInfo, String name, Method jMethod, SpaceTypeDefn argSpaceTypeDefn) {
+        super(sourceInfo, name);
         this.jMethod = jMethod;
         this.argSpaceTypeDefn = argSpaceTypeDefn;
     }

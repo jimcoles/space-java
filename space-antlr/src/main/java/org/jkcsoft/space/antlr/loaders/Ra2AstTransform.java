@@ -16,6 +16,7 @@ import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.runtime.ExecState;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,25 +35,28 @@ public class Ra2AstTransform {
     private static final Logger log = Logger.getLogger(Ra2AstTransform.class);
 
     public static final ActionCallExpr NAV_OPER = asCall("space", "nav");
+    private static ActionCallExpr asCall(String ... paths) {
+        return null;
+    }
 
     private interface Transformer {
         ModelElement trans(ParseTree parseNode);
     }
 
+    // -------------------------------------------------------------------------
+    //
     private Map<Class<? extends ParseTree>, Transformer> transformerMap = new HashMap<>();
-
-    private static ActionCallExpr asCall(String ... paths) {
-        return null;
-    }
-
-    private ExecState state = ExecState.INITIALIZATION;
+    private ExecState state = ExecState.INITIALIZED;
     private List<AstLoadError> errors = new LinkedList();
     private AstFactory astFactory;
+    private File srcFile;
+
 //    private ObjectFactory objBuilder = ObjectFactory.getInstance();
 
 
-    public Ra2AstTransform(AstFactory astFactory) {
+    public Ra2AstTransform(AstFactory astFactory, File srcFile) {
         this.astFactory = astFactory;
+        this.srcFile = srcFile;
     }
 
     public AstFactory transformAndBuild(ParseTree parseTreeRoot) {
@@ -67,10 +71,11 @@ public class Ra2AstTransform {
         return trans;
     }
 
-    public AstFactory transform(SpaceParser.ParseUnitContext spaceParseUnit) {
+    public Schema transform(SpaceParser.ParseUnitContext spaceParseUnit) {
         log.info("transforming ANTLR parse tree to AST starting with root parse node.");
-        astFactory.getAstRoot().addSpaceDefn(typeDef2Ast(spaceParseUnit.spaceTypeDefn()));
-        return astFactory;
+        Schema schema = astFactory.newAstSchema(Antrl2AstMapping.toAst(srcFile, spaceParseUnit), "user");
+        schema.addSpaceDefn(typeDef2Ast(spaceParseUnit.spaceTypeDefn()));
+        return schema;
     }
 
     public SpaceTypeDefn typeDef2Ast(SpaceParser.SpaceTypeDefnContext spaceTypeDefnContext) {
@@ -78,7 +83,10 @@ public class Ra2AstTransform {
 
         SpaceTypeDefn spaceTypeDefn = null;
         // TODO: 2/8/17 Not all spaces are Entities?
-        spaceTypeDefn = astFactory.newSpaceTypeDefn(toText(spaceTypeDefnContext.identifier()));
+        spaceTypeDefn = astFactory.newSpaceTypeDefn(
+                Antrl2AstMapping.toAst(srcFile, spaceTypeDefnContext),
+                toText(spaceTypeDefnContext.identifier())
+        );
         spaceTypeDefnContext.accessModifier();
         spaceTypeDefnContext.defnTypeModifier();
         spaceTypeDefnContext.elementDefnHeader();
@@ -122,8 +130,9 @@ public class Ra2AstTransform {
         assocDefCtx.rightAssignmentExpr();
         assocDefCtx.getSourceInterval();
         return astFactory.newAssociationDefn(
-                toText(assocDefCtx.associationDecl().identifier()),
-
+                Antrl2AstMapping.toAst(srcFile, assocDefCtx),
+                toText(assocDefCtx.associationDecl().identifier()
+                ),
                 toAst(assocDefCtx.associationDecl().spacePathExpr())
         );
     }
@@ -133,6 +142,7 @@ public class Ra2AstTransform {
         spacePathExprContext.SPathNavAssocToOper();
         spacePathExprContext.SPathNavAssocToOper2();
         return astFactory.newSpacePathExpr(
+                Antrl2AstMapping.toAst(srcFile, spacePathExprContext),
                 PathOperEnum.ASSOC_NAV,
                 toText(spacePathExprContext.identifier())
         );
@@ -142,7 +152,10 @@ public class Ra2AstTransform {
         log.info("transforming " + SpaceParser.ActionDefnContext.class.getSimpleName());
 
         SpaceActionDefn actionDefn
-            = astFactory.newSpaceActionDefn(toText(actionDefnContext.identifier()));
+            = astFactory.newSpaceActionDefn(
+                    Antrl2AstMapping.toAst(srcFile, actionDefnContext),
+                    toText(actionDefnContext.identifier())
+        );
 
         List<SpaceParser.StatementContext> statements = actionDefnContext.actionDefnBody().statement();
         for (SpaceParser.StatementContext statement : statements) {
@@ -176,7 +189,9 @@ public class Ra2AstTransform {
             idxArg++;
         }
 
-        return astFactory.newActionCallExpr("callPoint", spacePathExpr, thisCallArgs);
+        return astFactory.newActionCallExpr(
+                Antrl2AstMapping.toAst(srcFile, actionCallExprContext),
+                spacePathExpr, thisCallArgs);
     }
 
     /** Then general translator from ANTLR expression to AST expression.
@@ -267,6 +282,7 @@ public class Ra2AstTransform {
     private VariableDefn toAst(SpaceParser.VariableDefnContext variableDefnContext) {
         log.info("transforming " + SpaceParser.VariableDefnContext.class.getSimpleName());
         VariableDefn element = astFactory.newVariableDefn(
+                Antrl2AstMapping.toAst(srcFile, variableDefnContext),
                 toText(variableDefnContext.variableDecl().identifier()),
                 toAst(variableDefnContext.variableDecl().primitiveTypeName())
         );

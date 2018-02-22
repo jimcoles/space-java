@@ -10,7 +10,7 @@ public type-def MySpace
     CharSequence greeting = "Hello from this reference to a CharSequence.";
 
     function-def void main(CharSequence args) {
-        JnOpSys.println["Hello, Space!"];
-        JnOpSys.println[greeting];
+        OpSys.println["Hello, Space!"];
+        OpSys.println[greeting];
     }
 }

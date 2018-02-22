@@ -18,9 +18,9 @@ public class Validator {
      * Type checking.  Ensure that referenced things exist and that node types
      * match.
      *
-     * @param spaceProgram
+     * @param schema
      */
-    public void validate(SpaceProgram spaceProgram) {
+    public void validate(Schema schema) {
 
     }
 

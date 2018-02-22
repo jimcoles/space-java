@@ -25,27 +25,27 @@ public enum ExecState {
     /**
      * source files are opened and environment configured
      */
-    INITIALIZATION,
+    INITIALIZED,
 
     /**
-     * Parse from source into in-memory AST tree.
+     * Parse from source into in-memory parse tree.
      */
-    PARSING,
+    PARSED,
 
     /**
      * Do we need an initial in-memory tree or just a final AST tree?
      */
-    CONVERSION,
+    LOADED,
 
     /**
      * Performs consistency and validity checks that the grammar can't check for, and resolves classes
      */
-    SEMANTIC_ANALYSIS,
+    LINKED,
 
     /**
      * Complete building the AST
      */
-    CANONICALIZATION,
+    EXECUTED
 
 //    /**
 //     * instruction set is chosen, for example java5 or pre java5

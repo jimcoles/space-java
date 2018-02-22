@@ -1,0 +1,39 @@
+@startuml
+
+title Pattern for Space AST Building
+hide footbox
+
+participant FactoryConsumer
+participant AstFactory
+
+box
+    participant AstMetaThing
+    participant NamedElement
+    participant ModelElement
+end box
+
+participant AstMetaChildType
+
+FactoryConsumer -> AstFactory : newAstMetaThing( )
+AstFactory --> AstMetaThing : init( )
+FactoryConsumer -> AstFactory : newAstMetaChildType( )
+AstFactory --> AstMetaChildType : init( )
+note over FactoryConsumer
+    A child object must be
+    fully initialized
+    before we can
+    use it as an arg to
+    an 'adder' method.
+end note
+FactoryConsumer -> AstMetaThing : addAstChildType( newMetaChildObj )
+AstMetaThing -> NamedElement : addChild( )
+NamedElement -> ModelElement : addChild( )
+ModelElement -> AstMetaChildType : setParent( me )
+
+hnote over NamedElement : if child\nis named
+NamedElement -> NamedElement : add to named map
+
+hnote over AstMetaThing : if i hold Space\npath expr
+AstMetaThing -> AstMetaThing : addReference()
+
+@enduml

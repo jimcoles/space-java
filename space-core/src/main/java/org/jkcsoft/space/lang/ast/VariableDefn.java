@@ -17,12 +17,12 @@ package org.jkcsoft.space.lang.ast;
  * @author Jim Coles
  * @version 1.0
  */
-public class VariableDefn extends ModelElement {
+public class VariableDefn extends NamedElement {
 
     private PrimitiveType type;
 
-    VariableDefn(String name, PrimitiveType type) {
-        super(name);
+    VariableDefn(SourceInfo sourceInfo, String name, PrimitiveType type) {
+        super(sourceInfo, name);
         this.type = type;
     }
 

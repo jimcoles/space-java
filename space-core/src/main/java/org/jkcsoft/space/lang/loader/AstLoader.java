@@ -9,17 +9,23 @@
  */
 package org.jkcsoft.space.lang.loader;
 
-import org.jkcsoft.space.lang.ast.AstFactory;
+import org.jkcsoft.space.lang.ast.Schema;
 
 import java.io.File;
 
 /**
+ * An AstLoader loads an AST corresponding to a file or files on the file system.
+ * Other types of loaders might also evolve, e.g., load from binary.  Several
+ * AstLoader's might be used in a given Space runtime instance.
+ *
  * @author Jim Coles
  */
 public interface AstLoader {
 
-    /** Loads an AstFactory object. */
-    AstFactory load(File file) throws Exception;
-
+    /** A loader should provide a unique name useful for logging and debugging. */
     String getName();
+
+    /** Loaders should return the root (directory) node */
+    Schema load(File file) throws Exception;
+
 }

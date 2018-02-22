@@ -8,12 +8,11 @@
  * Also see the LICENSE file in the repository root directory.
  */
 package org.jkcsoft.space.lang.ast;
-
 /**
- * Probably just a marker interface.
  *
  * @author Jim Coles
  */
-public interface Statement {
-
+public enum LoadState {
+    INITIALIZED,  // unresolved
+    RESOLVED  // linked and type checked
 }

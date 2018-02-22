@@ -16,6 +16,8 @@ import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.antlr.SpaceParserBaseListener;
 import org.jkcsoft.space.lang.ast.AstFactory;
 
+import java.io.File;
+
 /**
  * Implements the transform from the raw ANTLR parse tree to the Space AST.
  *
@@ -27,11 +29,18 @@ import org.jkcsoft.space.lang.ast.AstFactory;
 public class Ra2AstParserListener extends SpaceParserBaseListener {
 
     private AstFactory astFactory = new AstFactory();
+    private  File file;
+
+    public Ra2AstParserListener(File file) {
+        this.file = file;
+    }
 
     @Override
     public void enterSpaceTypeDefn(SpaceParser.SpaceTypeDefnContext ctx) {
-        astFactory.initProgram("");
-//        astFactory.getAstRoot().addSpaceTypeDefn(new EntityDefn(null, ctx.ge))
+        astFactory.newProgram(
+                Antrl2AstMapping.toAst(file, ctx),
+                "");
+//        astFactory.getUserAstRoot().addSpaceTypeDefn(new EntityDefn(null, ctx.ge))
         super.enterSpaceTypeDefn(ctx);
     }
 

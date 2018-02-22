@@ -8,12 +8,23 @@
  * Also see the LICENSE file in the repository root directory.
  */
 package org.jkcsoft.space.lang.ast;
-
 /**
- * Probably just a marker interface.
- *
  * @author Jim Coles
  */
-public interface Statement {
+public class CodeSourceInfo implements SourceInfo {
 
+    @Override
+    public int getLine() {
+        return 0;
+    }
+
+    @Override
+    public int getCharacter() {
+        return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "CodeSourceInfo{}";
+    }
 }

@@ -17,32 +17,47 @@ package org.jkcsoft.space.lang.ast;
  * @author J. Coles
  * @version 1.0
  */
-public class AssociationDefn extends ModelElement {
+public class AssociationDefn extends NamedElement {
 
-    private SpacePathExpr fromPath;
-    private SpaceTypeDefn from;
+    private MetaReference<SpaceTypeDefn> fromTypeRef;
     private int fromMult;   // Defaults to "many" if assoc is declared within a Space Type Defn.
 
-    private SpacePathExpr toPath;
-    private SpaceTypeDefn to;
+    private MetaReference<SpaceTypeDefn> toTypeRef;
     private int toMult;     // Defaults to 1 if assoc is declared within a Space Type Defn.
 
-    AssociationDefn(String name, SpacePathExpr fromPath, SpacePathExpr toPath) {
-        super(name);
-        this.from = from;
-        this.to = to;
+    AssociationDefn(SourceInfo sourceInfo, String name, SpacePathExpr fromPath, SpacePathExpr toPath) {
+        super(sourceInfo, name);
+
+        if (fromPath != null)
+            this.fromTypeRef = new MetaReference<>(fromPath);
+
+        if (toPath == null) throw new RuntimeException("bug: path to class ref cannot be null");
+        this.toTypeRef = new MetaReference<>(toPath);
+        //
+        if (fromTypeRef != null)
+            addReference(fromTypeRef);
+
+        addReference(toTypeRef);
     }
 
-    public SpaceTypeDefn getFrom() {
-        return from;
+    public MetaReference<SpaceTypeDefn> getFromTypeRef() {
+        return fromTypeRef;
     }
 
-    public SpaceTypeDefn getTo() {
-        return to;
+    public MetaReference<SpaceTypeDefn> getToTypeRef() {
+        return toTypeRef;
+    }
+
+    public SpaceTypeDefn getFromType() {
+        return fromTypeRef.getResolvedMetaObj();
+    }
+
+    public SpaceTypeDefn getToType() {
+        return toTypeRef.getResolvedMetaObj();
     }
 
     public SpacePathExpr getFromPath() {
-        return fromPath;
+        return fromTypeRef.getSpacePathExpr();
     }
 
     public int getFromMult() {
@@ -50,7 +65,7 @@ public class AssociationDefn extends ModelElement {
     }
 
     public SpacePathExpr getToPath() {
-        return toPath;
+        return toTypeRef.getSpacePathExpr();
     }
 
     public int getToMult() {
@@ -61,7 +76,7 @@ public class AssociationDefn extends ModelElement {
      * In Space, this expression would go in an Equation expression.
      */
     public boolean isRecursive() {
-        return from == to;
+        return fromTypeRef.getResolvedMetaObj() == toTypeRef.getResolvedMetaObj();
     }
 
 }

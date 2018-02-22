@@ -27,10 +27,11 @@ import java.util.List;
 public class SpaceActionDefn extends AbstractActionDefn implements Callable {
 
     private SpaceTypeDefn argSpaceTypeDefn;
-    private List<ActionCallExpr> nestedActions = new LinkedList<>();  // child nestedActions
+    private SpaceTypeDefn localSpaceTypeDefn;
+    private List<ActionCallExpr> nestedActions = new LinkedList<>();  // child statements
 
-    SpaceActionDefn(String name) {
-        super(name);
+    SpaceActionDefn(SourceInfo sourceInfo, String name) {
+        super(sourceInfo, name);
     }
 
     public void setArgSpaceTypeDefn(SpaceTypeDefn argSpaceTypeDefn) {

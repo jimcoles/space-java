@@ -12,12 +12,12 @@ package org.jkcsoft.space.lang.ast;
 /**
  * @author Jim Coles
  */
-public abstract class AbstractActionDefn extends ModelElement {
+public abstract class AbstractActionDefn extends NamedElement {
 
     private SpaceTypeDefn contextSpaceTypeDefn;  // the calling space defn
 
-    AbstractActionDefn(String name) {
-        super(name);
+    AbstractActionDefn(SourceInfo sourceInfo, String name) {
+        super(sourceInfo, name);
     }
 
     public SpaceTypeDefn getContextSpaceTypeDefn() {

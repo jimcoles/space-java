@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.runtime;
 import org.jkcsoft.space.lang.instance.SpaceOid;
 
 /**
- * In pattern terms, the command processor.  Knows how to run a SpaceProgram
+ * In pattern terms, the command processor.  Knows how to run a Schema
  * including executing Queries.
  *
  * @author J. Coles

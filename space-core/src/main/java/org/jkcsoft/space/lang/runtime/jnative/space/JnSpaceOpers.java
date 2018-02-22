@@ -21,7 +21,7 @@ import java.util.TreeMap;
 /**
  * @author Jim Coles
  */
-public class SpaceOpers {
+public class JnSpaceOpers {
 
     private static Map<String, String> tokenToMethod = new TreeMap<>();
 

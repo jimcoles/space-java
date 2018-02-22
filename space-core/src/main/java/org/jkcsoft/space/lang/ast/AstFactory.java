@@ -9,29 +9,22 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.java.util.JavaHelper;
-import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.instance.ObjectFactory;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
- * The AST is built by calling adder methods on this object.
- * The AST memory model uses Space instance-level constructs to hold the
+ * The AST is built by calling 'new_' methods on this object.  An
+ * AstFactory can be used by any AstLoader to aid in the correct formulation
+ * of AST objects.
+ *
+ * (Future) The AST memory model uses Space instance-level constructs to hold the
  * Space program itself, i.e., we are eating our own dogfood.  This gives
  * us the ability to query the AST using relational queries.
  *
  * @author Jim Coles
  */
 public class AstFactory {
-
-    // holds things (mostly named things) defined in the source code
-    private Map<String, Class<ModelElement>> metaTypeMap = new HashMap<>();
-    private SpaceProgram astRoot;
-    private ModelElement currentAstNode;
 
     public AstFactory() {
 
@@ -41,55 +34,42 @@ public class AstFactory {
         return ObjectFactory.getInstance();
     }
 
-    public boolean validate() {
-        return true;
+    public Schema newAstSchema(SourceInfo sourceInfo, String name) {
+        return new Schema(sourceInfo, name);
     }
 
-    public void addMetaObject(ModelElement object) {
-        // metaObjects;
+    public Schema newProgram(SourceInfo sourceInfo, String name) {
+        Schema schema = new Schema(sourceInfo, name);
+        return schema;
     }
 
-    public SpaceProgram getAstRoot() {
-        return astRoot;
-    }
-
-    public ModelElement getCurrentAstNode() {
-        return currentAstNode;
-    }
-
-    public SpaceProgram initProgram(String name) {
-        astRoot = new SpaceProgram(name);
-        currentAstNode = astRoot;
-        return  astRoot;
-    }
-
-    public SpaceTypeDefn newSpaceTypeDefn(String name) {
-        SpaceTypeDefn spaceTypeDefn = new SpaceTypeDefn(name);
+    public SpaceTypeDefn newSpaceTypeDefn(SourceInfo sourceInfo, String name) {
+        SpaceTypeDefn spaceTypeDefn = new SpaceTypeDefn(sourceInfo, name);
         return spaceTypeDefn;
     }
 
-    public SpaceActionDefn newSpaceActionDefn(String name) {
-        SpaceActionDefn element = new SpaceActionDefn(name);
+    public SpaceActionDefn newSpaceActionDefn(SourceInfo sourceInfo, String name) {
+        SpaceActionDefn element = new SpaceActionDefn(sourceInfo, name);
         return element;
     }
 
-    public VariableDefn newVariableDefn(String name, PrimitiveType type) {
-        VariableDefn element = new VariableDefn(name, type);
+    public VariableDefn newVariableDefn(SourceInfo sourceInfo, String name, PrimitiveType type) {
+        VariableDefn element = new VariableDefn(sourceInfo, name, type);
         return element;
     }
 
-    public AbstractActionDefn newNativeActionDefn(String name, Method jMethod, SpaceTypeDefn nativeArgSpaceTypeDefn) {
-        NativeActionDefn element = new NativeActionDefn(name, jMethod, nativeArgSpaceTypeDefn);
+    public NativeActionDefn newNativeActionDefn(SourceInfo sourceInfo, String name, Method jMethod, SpaceTypeDefn nativeArgSpaceTypeDefn) {
+        NativeActionDefn element = new NativeActionDefn(sourceInfo, name, jMethod, nativeArgSpaceTypeDefn);
         return element;
     }
 
-    public ActionCallExpr newActionCallExpr(String name, SpacePathExpr functionPathExpr, ValueExpr ... argValueExprs) {
-        ActionCallExpr element = new ActionCallExpr(name, functionPathExpr, argValueExprs);
+    public ActionCallExpr newActionCallExpr(SourceInfo sourceInfo, SpacePathExpr functionPathExpr, ValueExpr ... argValueExprs) {
+        ActionCallExpr element = new ActionCallExpr(sourceInfo, functionPathExpr, argValueExprs);
         return element;
     }
 
-    public AssociationDefn newAssociationDefn(String name, SpacePathExpr toPath) {
-        AssociationDefn element = new AssociationDefn(name, null, toPath);
+    public AssociationDefn newAssociationDefn(SourceInfo sourceInfo, String name, SpacePathExpr toPath) {
+        AssociationDefn element = new AssociationDefn(sourceInfo, name, null, toPath);
         return element;
     }
 
@@ -103,41 +83,19 @@ public class AstFactory {
         return element;
     }
 
-    public OperLookupExpr newOperLookupExpr(OperEnum operEnum) {
-        OperLookupExpr element = new OperLookupExpr(operEnum);
+    public OperLookupExpr newOperLookupExpr(SourceInfo sourceInfo, OperEnum operEnum) {
+        OperLookupExpr element = new OperLookupExpr(sourceInfo, operEnum);
         return element;
     }
 
-    public SpacePathExpr newSpacePathExpr(PathOperEnum oper, String searchName) {
-        SpacePathExpr element = new SpacePathExpr(true, oper, searchName, null);
+    public SpacePathExpr newSpacePathExpr(SourceInfo sourceInfo, PathOperEnum oper, String searchName) {
+        SpacePathExpr element = new SpacePathExpr(sourceInfo, true, oper, searchName, null);
         return element;
     }
 
     public ThisExpr newThis() {
         ThisExpr element = new ThisExpr();
         return element;
-    }
-
-    public String print() {
-        StringBuilder sb = new StringBuilder();
-        ModelElement modelElement = this.getAstRoot();
-        append(sb, modelElement, 0);
-        return sb.toString();
-    }
-
-    private void append(StringBuilder sb, ModelElement modelElement, int depth) {
-        String indent = Strings.multiplyString("\t", depth);
-        sb.append(JavaHelper.EOL)
-                .append(indent)
-                .append("(")
-                .append(modelElement.toString());
-        List<ModelElement> children = modelElement.getChildren();
-        for (ModelElement child : children) {
-            append(sb, child, depth + 1);
-        }
-        sb.append(JavaHelper.EOL)
-                .append(indent)
-                .append(")");
     }
 
 }

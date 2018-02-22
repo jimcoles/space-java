@@ -7,13 +7,11 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.ast;
-
+package org.jkcsoft.space.lang.runtime.jnative;
 /**
- * Probably just a marker interface.
- *
  * @author Jim Coles
  */
-public interface Statement {
+@SpaceNative
+public class JnCharSequence {
 
 }

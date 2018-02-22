@@ -19,8 +19,8 @@ package org.jkcsoft.space.lang.ast;
  */
 public class TransformDefn extends SpaceActionDefn {
 
-    TransformDefn(String name) {
-        super(name);
+    TransformDefn(SourceInfo sourceInfo, String name) {
+        super(sourceInfo, name);
     }
 
 }

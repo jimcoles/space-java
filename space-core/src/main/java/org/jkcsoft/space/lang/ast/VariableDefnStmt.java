@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-public class VariableDefnStmt extends Statement {
+public class VariableDefnStmt implements Statement {
+    private VariableDecl variableDecl;
 
 }

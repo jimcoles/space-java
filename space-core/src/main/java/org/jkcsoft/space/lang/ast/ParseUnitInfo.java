@@ -9,6 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-public class ParseUnit {
+public class ParseUnitInfo {
 
 }

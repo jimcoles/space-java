@@ -10,25 +10,34 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
+import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.lang.runtime.impl.CastTransforms;
+import org.jkcsoft.space.lang.runtime.jnative.JnCharSequence;
 import org.jkcsoft.space.lang.runtime.jnative.math.JnMath;
 import org.jkcsoft.space.lang.runtime.jnative.opsys.JnOpSys;
-import org.jkcsoft.space.lang.runtime.jnative.space.SpaceOpers;
+import org.jkcsoft.space.lang.runtime.jnative.space.JnSpaceOpers;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.*;
 
 /**
- * The top-level executive for Space.  It manages interactions between second-level
+ * <p>
+ *     The top-level executive context for loading Space meta objects and running a
+ * Space program.  Holds and manages instance level objects, call stack, etc..
+ * <p>
+ *     An Executor manages interactions between second-level
  * elements including XmlLoader, ExprProcessor, Querier.
- * <p>The general pattern is:
+ * <p>
+ *     The general pattern is:
  *  <ul>
  *      <li>exec() methods handle executable bits like the program itself and statements.</li>
  *      <li>eval() methods handle expression</li>
@@ -49,22 +58,45 @@ public class Executor extends ExprProcessor {
 //            instance = new Executor();
 //        return instance;
 //    }
+
+    // ================== The starting point for using Space to execute Space programs
+
+    // The following "Space" types if we want to back our 'definition' model with our
+    // own notions.  The problem is that it will take time to build a
+    // "Space model of Space" itself.
+
+//    private Space relationDefns;
+//    private Space assocDefns;
+//    private Space actionSequenceDefns;
+
+    // Uses Space constructs to hold a table (space) of SpaceOids to
+//    private ObjectFactory spaceBuilder = ObjectFactory.getInstance();
+
+    // ==================
+
     public AbstractActionDefn OPER_NAV;
     public AbstractActionDefn OPER_NEW_TUPLE;
     public AbstractActionDefn OPER_NEW_CHAR;
     public AbstractActionDefn OPER_ASSIGN;
     /**
-     * Definition objects are loaded as we parse the source code.  Some objects are loaded
-     * with static logic.  These are the intrinsic, native objects.
+     * Meta objects are loaded as we parse the source code. Intrinsic and native meta
+     * objects are loaded prior to parsing and source files.  Must be able to lookup
+     * a meta object by name or by id.  Some meta object are anonymous.
      */
-    private AstFactory astFactory = new AstFactory();
-    private Set<ModelElement> spaceModelObjects = new HashSet<>();
-    private Map<String, ModelElement> indexModelObjectsByFullPath = new TreeMap<>();
+    private final List<Schema> dirChain = new LinkedList<>();
+    /** A special directory root to hold intrinsic operators. */
+    private Schema langRootSchema;
+
+    /** The central meta object table. */
+    private Set<ModelElement> metaObjectNormalTable = new HashSet<>();
+    /** (not used currently) Idea is to hold redundantly accumulated info useful
+     * for lookup during execution. */
+    private Map<NamedElement, MetaInfo> metaObjectExtendedInfoMap = new TreeMap<>();
     /**
      * The 'object' tables for 'instance' objects associated with the running program.
      * This map is added to as the program runs.
      */
-    private Map<SpaceOid, SpaceObject> indexObjectsByOid = new TreeMap<>();
+    private Map<SpaceOid, SpaceObject> instObjectsIndexByOid = new TreeMap<>();
     /**
      * Key=the referenced object's Oid.
      * Value=the set of object Oids holding reference to the key Oid.
@@ -72,18 +104,31 @@ public class Executor extends ExprProcessor {
     private Map<SpaceOid, Set<SpaceOid>> objectReferenceMap = new TreeMap<>();
 
     private Stack<ActionCall> callStack = new Stack<>();
+
     /**
+     * TODO: Use specialized expression processors for each type of expression, e.g.,
+     * unary int, binary int, unary string, binary string, etc.
+     *
      * Mapping from expression type to expression handler. Some handlers will be
      * Space standard, some will be user-provided.
      */
-    private Map _exprProcessors = null;
+    private Map<String, ExprProcessor> exprProcessors = null;
 
     public Executor() {
-        astFactory.initProgram("");
-        loadNativeSpaces();
+//        userAstFactory.newProgram(new NativeSourceInfo(null), "root");
+        initRuntime();
+        loadNativeMetaObjects();
     }
 
-    public void run(String... filePath) throws RuntimeException {
+    private void initRuntime() {
+        AstFactory astFactory = new AstFactory();
+        langRootSchema = astFactory.newAstSchema(new CodeSourceInfo(), "lang");
+
+        dirChain.add(langRootSchema);
+        trackMetaObject(langRootSchema);
+    }
+
+    public void run(String ... filePath) throws RuntimeException {
         File file = FileUtils.getFile(filePath);
         if (!file.exists()) {
             throw new RuntimeException("Input file [" + filePath + "] does not exist.");
@@ -97,139 +142,226 @@ public class Executor extends ExprProcessor {
 //            String parserImplClassName = "org.jkcsoft.space.antlr.test.TestGrammarParser";
         try {
             Class<?> aClass = Class.forName(parserImplClassName);
-            log.info(String.format("Found loader provider class [%s]", parserImplClassName));
+            log.debug(String.format("Found loader provider class [%s]", parserImplClassName));
             astLoader = (AstLoader) aClass.newInstance();
-            log.info(String.format("Found source loader [%s]", astLoader.getName()));
+            log.debug(String.format("Found source loader [%s]", astLoader.getName()));
         } catch (Exception e) {
             throw new RuntimeException("Could not find or load source loader ["+parserImplClassName+"]", e);
         }
+        List<RuntimeError> errors = new LinkedList<>();
         try {
-            AstFactory astFactory = astLoader.load(file);
+            Schema thisSchema = astLoader.load(file);
+            dirChain.add(thisSchema);
+
+            trackMetaObject(thisSchema);
+
             if (log.isDebugEnabled())
-                log.debug("AST dump: " + astFactory.print());
-            linkAndExec(astFactory.getAstRoot());
-        } catch (Exception ex) {
+                dumpSymbolTables();
+
+            if (log.isDebugEnabled())
+                dumpAsts();
+
+            linkAndExec(errors, thisSchema);
+        }
+        catch (RuntimeException ex) {
+            throw ex;
+        }
+        catch (Exception ex) {
             throw new RuntimeException("Failed running program", ex);
         }
     }
 
-    public void linkAndExec(SpaceProgram sprog) throws Exception {
+    private void dumpAsts() {
+        for (Schema schema : dirChain) {
+            log.debug("AST Root /: " + AstUtils.print(schema));
+        }
+    }
+
+    public void linkAndExec(List<RuntimeError> errors, Schema runSchema) throws Exception {
         log.debug("linking loaded program");
-        linkRefs(sprog);
-        exec(sprog);
+        errors = linkRefs(errors, runSchema);
+        if (errors.size() == 0) {
+            log.info("no linker errors");
+            exec(runSchema);
+        }
+        else {
+            log.warn("Found " + errors.size() + " linker errors: " + JavaHelper.EOL + Strings.buildNewlineList(errors));
+        }
     }
 
     /*
      Augments named references to oid-based references after all meta objects
      have been loaded.  Has the effect of doing semantic validation.
-     Could also do this while loading.
-     TODO implement linker
+     Could also do some linking while loading.
      */
-    private void linkRefs(ModelElement astRoot) {
-        List<ModelElement> children = astRoot.getChildren();
-        for (ModelElement child : children) {
-            linkRefs(child);
+    private List<RuntimeError> linkRefs(List<RuntimeError> errors, ModelElement astNode) {
+        if (errors == null)
+            errors = new LinkedList<>();
+        if (astNode.hasReferences()) {
+            log.debug("linking refs held by ["+astNode+"]");
+            Set<MetaReference> references = astNode.getReferences();
+            if (references != null) {
+                for (MetaReference reference : references) {
+                    if (reference.getState() == LoadState.INITIALIZED) {
+                        log.debug("resolving reference [" + reference + "]");
+                        NamedElement lexParent = AstUtils.getLexParent(astNode);
+                        reference.setLexicalContext(lexParent);
+                        log.debug("found lexical parent [" + lexParent + "]");
+                        NamedElement refElem =
+                            lookupLenientMetaObject(reference.getLexicalContext(), reference.getSpacePathExpr());
+                        if (refElem == null) {
+                            errors.add(
+                                new RuntimeError(reference.getSpacePathExpr().getSourceInfo(), 0,
+                                                 "could not resolve space path expr [" + reference + "]"));
+                        }
+                        else {
+                            reference.setResolvedMetaObj(refElem);
+                            reference.setState(LoadState.RESOLVED);
+                        }
+                    }
+                }
+            }
         }
+        List<ModelElement> children = astNode.getChildren();
+        for (ModelElement child : children) {
+            linkRefs(errors, child);
+        }
+        return errors;
     }
 
     private ObjectFactory getObjBuilder() {
         return ObjectFactory.getInstance();
     }
 
-    private void loadNativeSpaces() {
+    private void loadNativeMetaObjects() {
         // use Java annotations Java-native objects
 //        SpaceNative.class.getAnnotations();
-        loadNativeClass(JnOpSys.class);
-        loadNativeClass(JnMath.class);
-        loadNativeClass(SpaceOpers.class);
-        dumpSymbolTables();
+        loadNativeClass(JnOpSys.class, AstUtils.getLangRoot(dirChain));
+        loadNativeClass(JnMath.class, AstUtils.getLangRoot(dirChain));
+        loadNativeClass(JnCharSequence.class, AstUtils.getLangRoot(dirChain));
+        loadNativeClass(JnSpaceOpers.class, AstUtils.getLangRoot(dirChain));
 
-        OPER_NAV = findOper("nav");
-        OPER_NEW_TUPLE = findOper("newTuple");
-        OPER_NEW_CHAR = findOper("newCharSequence");
-        OPER_ASSIGN = findOper("assign");
+        OPER_NAV = lookupOperator("nav");
+        OPER_NEW_TUPLE = lookupOperator("newTuple");
+        OPER_NEW_CHAR = lookupOperator("newCharSequence");
+        OPER_ASSIGN = lookupOperator("assign");
     }
 
-    private void loadNativeClass(Class jnClass) {
-        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(jnClass.getSimpleName());
+    private void loadNativeClass(Class jnClass, Schema rootAstSpace) {
+        AstFactory astFactory = new AstFactory();
+        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(
+            new NativeSourceInfo(jnClass), toSpaceTypeName(jnClass)
+        );
+        rootAstSpace.addSpaceDefn(spaceTypeDefn);
+        trackMetaObject(spaceTypeDefn);
 //        spaceDefn.setName(jnClass.getSimpleName());
         Method[] methods = jnClass.getMethods();
         for (Method jMethod : methods) {
-            SpaceTypeDefn nativeArgSpaceTypeDefn = astFactory.newSpaceTypeDefn(null);
-            jMethod.getParameters();    // TODO build dynamic arg space
-            nativeArgSpaceTypeDefn.addVariable(astFactory.newVariableDefn("arg1", null));
-            AbstractActionDefn actionDefn = spaceTypeDefn.addActionDefn(astFactory.newNativeActionDefn
-                    (jMethod.getName(), jMethod, nativeArgSpaceTypeDefn));
+            if (isExcludedNative(jMethod))
+                continue;
+
+            NativeActionDefn actionDefn = astFactory.newNativeActionDefn(
+                    new NativeSourceInfo(jMethod),
+                    jMethod.getName(),
+                    jMethod,
+                    spaceTypeDefn
+            );
+            spaceTypeDefn.addActionDefn(actionDefn);
             trackMetaObject(actionDefn);
+            //
+            jMethod.getParameters();    // TODO build dynamic arg space
+            Parameter jParam = null;
+//            VariableDefn variableDefn = actionDefn.addParameter(
+//                    userAstFactory.newVariableDefn(
+//                            new NativeSourceInfo(jParam),
+//                            "arg1",
+//                            null
+//                    )
+//            );
+//            trackMetaObject(variableDefn);
         }
-        trackMetaObject(spaceTypeDefn);
     }
 
-    private AbstractActionDefn findOper(String functionPath) {
-        AbstractActionDefn operActionDefn = (AbstractActionDefn) indexModelObjectsByFullPath.get(functionPath);
+    private boolean isExcludedNative(Method jMethod) {
+        Method[] baseMethods = Object.class.getMethods();
+        return ArrayUtils.contains(baseMethods, jMethod);
+    }
+
+    private AbstractActionDefn lookupOperator(String operSimpleName) {
+        NamedElement opersSpaceDefn = lookupMetaObject(langRootSchema, toSpaceTypeName(JnSpaceOpers.class));
+        AbstractActionDefn operActionDefn =
+                (AbstractActionDefn) lookupMetaObject(opersSpaceDefn, operSimpleName);
         if (operActionDefn == null)
-            throw new RuntimeException("operation not found with path [" + functionPath + "]");
+            throw new RuntimeException("space lang object not found with path [" + operSimpleName + "]");
         return operActionDefn;
     }
 
-    /**
-     * Returns the meta-space object associated with the pathExpr.
-     * NOTE: Once we get our AST backed by Space object we can eliminate
-     * this special method.
-     */
-    private ModelElement lookupMetaElement(ValueExpr pathExpr) {
-        ModelElement modelElement = null;
-
-        if (pathExpr instanceof MetaObjectRefLiteral) {
-            modelElement = ((MetaObjectRefLiteral) pathExpr).getSpaceMetaObject();
-        }
-
-//        indexModelObjectsByFullPath.get(spacePath);
-//        if (targetFunctionDefn == null)
-//            throw new RuntimeException("Function defn [" + functionName + "] " +
-//                                           "not found in Space Defn [" + spacePath + "]");
-//        if (! (targetFunctionDefn instanceof Callable) )
-//            throw new RuntimeException("Function defn [" + functionName + "] " +
-//                                           "does not implement the ["+Callable.class.getName()+"] interface.");
-
-        return modelElement;
+    private String toSpaceTypeName(Class spaceJavaWrapperClass) {
+        return spaceJavaWrapperClass.getSimpleName().substring(2);
     }
 
-    private Object lookupMetaElement(SpacePathExpr functionPathExpr) {
-        return indexModelObjectsByFullPath.get(functionPathExpr.getText());
+    public NamedElement lookupLenientMetaObject(NamedElement context, SpacePathExpr spacePathExpr) {
+        NamedElement lookup = null;
+        List<NamedElement> trySequence = new LinkedList<>();
+        trySequence.add(context);
+        trySequence.addAll(dirChain);
+        for (NamedElement tryContext : trySequence) {
+            lookup = lookupMetaObject(tryContext, spacePathExpr);
+            if (lookup != null)
+                break;
+        }
+        return lookup;
+    }
+
+    public static NamedElement lookupMetaObject(NamedElement context, SpacePathExpr spacePathExpr) {
+        log.debug("lookup meta object from " + context.getName() + " -> " + spacePathExpr );
+        NamedElement targetChild = lookupMetaObject(context, spacePathExpr.getText());
+        if (spacePathExpr.hasNextExpr()) {
+            targetChild = lookupMetaObject(targetChild, spacePathExpr.getNextExpr());
+        }
+        return targetChild;
+    }
+
+    public static NamedElement lookupMetaObject(NamedElement context, String name) {
+        NamedElement childByName = context.getChildByName(name);
+        if (childByName == null)
+            log.warn("element ["+context+"] does not contain named child ["+name+"]");
+        return childByName;
     }
 
     private void dumpSymbolTables() {
-        log.debug("dump table of definition objects: " + Strings.buildCommaDelList(spaceModelObjects));
-        log.debug("dump map of definition objects: " + Strings.buildCommaDelList(indexModelObjectsByFullPath.entrySet()));
+        log.debug("normalized meta object table: " + JavaHelper.EOL
+                + Strings.buildNewlineList(metaObjectNormalTable));
+//        log.debug("dump namespace meta object index: " + JavaHelper.EOL
+//                + Strings.buildNewlineList(metaObjectExtendedInfoMap.values()));
     }
 
     // ------------------------- Execs ------------------------
 
     /**
-     * Executes a SpaceProgram.
+     * Executes a Schema.
      */
-    public ModelElement exec(SpaceProgram program) throws Exception {
-        log.info("exec: " + program.getName());
-        SpaceTypeDefn firstSpaceTypeDefn = program.getFirstSpaceDefn();
+    public ModelElement exec(Schema programSchema) throws Exception {
+        log.debug("exec: " + programSchema);
+        SpaceTypeDefn firstSpaceTypeDefn = programSchema.getFirstSpaceDefn();
         Space rootSpace = newSpace(null, firstSpaceTypeDefn);
         SpaceActionDefn spMainActionDefn = (SpaceActionDefn) firstSpaceTypeDefn.getFunction("main");
-        List<SpaceObject> objectHeap = program.getObjectHeap();
-        for (SpaceObject spaceObj : objectHeap) {
-            trackSpaceObject(spaceObj);
-        }
+//        List<SpaceObject> objectHeap = programSchema.getObjectHeap();
+//        for (SpaceObject spaceObj : objectHeap) {
+//            trackInstanceObject(spaceObj);
+//        }
 
         try {
             exec(rootSpace, spMainActionDefn);
         } catch (RuntimeException ex) {
             log.error("error executing", ex);
         }
-        log.info("exiting Space program execution");
+        log.debug("exiting Space program execution");
         return null;
     }
 
     private void delegateExec(Space spcContext, AbstractActionDefn function) throws RuntimeException {
-        log.debug("enter delegateExec: " + function);
+        log.debug("delegate exec: " + function);
         if (function instanceof SpaceActionDefn)
             exec(spcContext, (SpaceActionDefn) function);
         else if (function instanceof NativeActionDefn)
@@ -247,8 +379,8 @@ public class Executor extends ExprProcessor {
      * @param spcActionDefn The composite, imperative action defined via Space source code (i.e., not Native).
      */
     private Assignable exec(Space spcContext, SpaceActionDefn spcActionDefn) throws RuntimeException {
-        ActionCall actionCall = getObjBuilder().newAction(spcContext, spcActionDefn);
         log.debug("exec: " + spcActionDefn);
+        ActionCall actionCall = getObjBuilder().newAction(spcContext, spcActionDefn);
         callStack.push(actionCall);
         List<ActionCallExpr> childActions = spcActionDefn.getNestedActions();
         for (ActionCallExpr childActionExpr : childActions) {
@@ -298,20 +430,20 @@ public class Executor extends ExprProcessor {
      *                    Can be a Space function call or a Native (Java) function call.
      */
     private Assignable eval(Space spcContext, ActionCallExpr spcCallExpr) throws RuntimeException {
-        log.debug("eval: " + spcCallExpr.getFunctionPathExpr());
+        log.debug("eval: call to " + spcCallExpr.getFunctionRef());
         Assignable value = null;
         //
 //        Namespace fullNs = new Namespace(spcCallExpr.getFunctionPathExpr());
 //        String spacePath = fullNs.subPath(0, fullNs.getSize() - 2);
-//        SpaceDefn targetSpaceDefn = lookupMetaElement(spcCallExpr.getFunctionPathExpr());
+//        SpaceDefn targetSpaceDefn = lookupMetaObject(spcCallExpr.getFunctionPathExpr());
 //        if (targetSpaceDefn == null)
 //            throw new RuntimeException("Space defn [" + spcCallExpr.getFunctionPathExpr() + "] not found");
 //        String functionName = fullNs.getLast();
-        AbstractActionDefn targetFunctionDefn
-                = (AbstractActionDefn) lookupMetaElement(spcCallExpr.getFunctionPathExpr());
+
+        AbstractActionDefn targetFunctionDefn = spcCallExpr.getFunctionRef().getResolvedMetaObj();
 
         if (targetFunctionDefn == null)
-            throw new RuntimeException("could not find " + spcCallExpr.getFunctionPathExpr());
+            throw new RuntimeException("unresolved function ref " + spcCallExpr.getFunctionRef());
 
         // must add a nested Space context beneath the incoming context space to
         // represent the call stack
@@ -374,41 +506,53 @@ public class Executor extends ExprProcessor {
 
     private Space newSpace(Space spaceContext, SpaceTypeDefn firstSpaceTypeDefn) {
         Space rootSpace = getObjBuilder().newSpace(spaceContext, firstSpaceTypeDefn);
-        trackSpaceObject(rootSpace);
+        trackInstanceObject(rootSpace);
         return rootSpace;
     }
 
     private Tuple newTuple(Space argSpace) {
         Tuple tuple = getObjBuilder().newTuple(argSpace);
-        trackSpaceObject(tuple);
+        trackInstanceObject(tuple);
         return tuple;
     }
 
     private Association newAssociation(CharacterSequence arg1) {
         Association association = getObjBuilder().newObjectReference(null, arg1.getOid());
-        trackSpaceObject(association);
+        trackInstanceObject(association);
         return association;
     }
 
     private CharacterSequence newCharacterSequence(String stringValue) {
         CharacterSequence newCs = getObjBuilder().newCharacterSequence(stringValue);
-        trackSpaceObject(newCs);
+        trackInstanceObject(newCs);
         return newCs;
     }
 
     // -------------- Tracking of runtime/instance things ---------------
 
     private void trackMetaObject(ModelElement modelElement) {
-        spaceModelObjects.add(modelElement);
-        indexModelObjectsByFullPath.put(modelElement.getName(), modelElement);
+        // add to normalized object table ...
+        metaObjectNormalTable.add(modelElement);
+//        metaObjectIndexByFullPath.put(modelElement.getFullPath(), modelElement);
+
+        // track denormalized info for fast lookup ...
+//        if (modelElement instanceof NamedElement) {
+//            MetaInfo metaInfo = new MetaInfo((NamedElement) modelElement);
+//            metaObjectExtendedInfoMap.put((NamedElement) modelElement, metaInfo);
+//
+//            // if this object has a parent, add this object to parent's child map
+//            if (modelElement.hasParent()) {
+//                metaObjectExtendedInfoMap.get(modelElement.getParent()).addChild((NamedElement) modelElement);
+//            }
+//        }
     }
 
-    private void trackSpaceObject(SpaceObject spaceObject) {
-        indexObjectsByOid.put(spaceObject.getOid(), spaceObject);
+    private void trackInstanceObject(SpaceObject spaceObject) {
+        instObjectsIndexByOid.put(spaceObject.getOid(), spaceObject);
     }
 
     public SpaceObject dereference(SpaceOid referenceOid) throws RuntimeException {
-        SpaceObject spaceObject = indexObjectsByOid.get(referenceOid);
+        SpaceObject spaceObject = instObjectsIndexByOid.get(referenceOid);
         if (spaceObject == null)
             throw new RuntimeException("Space Oid [" + referenceOid + "] not found.");
         return spaceObject;

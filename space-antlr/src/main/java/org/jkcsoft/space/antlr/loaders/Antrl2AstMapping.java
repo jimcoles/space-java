@@ -9,9 +9,13 @@
  */
 package org.jkcsoft.space.antlr.loaders;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.AstFactory;
+import org.jkcsoft.space.lang.ast.FileSourceInfo;
+import org.jkcsoft.space.lang.ast.SourceInfo;
 
+import java.io.File;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -88,5 +92,12 @@ public class Antrl2AstMapping {
             this.ruleId = ruleId;
             this.isChoiceRule = isChoiceRule;
         }
+    }
+
+    public static SourceInfo toAst(File file, ParserRuleContext parserRuleContext) {
+        return new FileSourceInfo(
+                file,
+                parserRuleContext.start.getLine(),
+                parserRuleContext.start.getCharPositionInLine());
     }
 }

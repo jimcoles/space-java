@@ -24,7 +24,7 @@ import java.util.Map;
  * @author Jim Coles
  * @version 1.0
  */
-public class SpaceTypeDefn extends ModelElement {
+public class SpaceTypeDefn extends NamedElement {
 
     private SpaceTypeDefn               contextSpaceTypeDefn;
     private boolean                     isEntity;
@@ -35,12 +35,12 @@ public class SpaceTypeDefn extends ModelElement {
     private List<AbstractActionDefn>    functionDefns = new LinkedList<>();
 
     // redundant
-    private Map<String, VariableDefn>       indexCoordinatesByName = new HashMap<>();
-    private Map<String, AssociationDefn>    indexAssociationsByName = new HashMap<>();
-    private Map<String, AbstractActionDefn> indexFunctionsByName = new HashMap<>();
+//    private Map<String, VariableDefn>       indexCoordinatesByName = new HashMap<>();
+//    private Map<String, AssociationDefn>    indexAssociationsByName = new HashMap<>();
+//    private Map<String, AbstractActionDefn> indexFunctionsByName = new HashMap<>();
 
-    SpaceTypeDefn(String name) {
-        super(name);
+    SpaceTypeDefn(SourceInfo sourceInfo, String name) {
+        super(sourceInfo, name);
     }
 
     public boolean isComputed() {
@@ -76,7 +76,10 @@ public class SpaceTypeDefn extends ModelElement {
     }
 
     public AbstractActionDefn getFunction(String name) {
-        AbstractActionDefn abstractActionDefn = indexFunctionsByName.get(name);
+        NamedElement childWithName = getChildByName(name);
+        if (!(childWithName instanceof  AbstractActionDefn))
+            throw new RuntimeException("");
+        AbstractActionDefn abstractActionDefn = (AbstractActionDefn) childWithName;
         if (abstractActionDefn == null) {
             throw new RuntimeException("function ["+name+"] not found in " + this);
         }
@@ -91,7 +94,7 @@ public class SpaceTypeDefn extends ModelElement {
             variableDefnList = new LinkedList<>();
         variableDefnList.add(variableDefn);
         //
-        indexCoordinatesByName.put(variableDefn.getName(), variableDefn);
+//        indexCoordinatesByName.put(variableDefn.getName(), variableDefn);
         //
         addChild(variableDefn);
         return variableDefn;
@@ -102,9 +105,17 @@ public class SpaceTypeDefn extends ModelElement {
             associationDefnList = new LinkedList<>();
         associationDefnList.add(associationDefn);
         //
-        indexAssociationsByName.put(associationDefn.getName(), associationDefn);
+//        indexAssociationsByName.put(associationDefn.getName(), associationDefn);
         //
         addChild(associationDefn);
+        //
+
+// NOTE: The following commented out because SpaceTypeDef is not the direct holder of references.
+//        if (associationDefn.getFromTypeRef() != null)
+//            addReference(associationDefn.getFromTypeRef());
+//
+//        addReference(associationDefn.getToTypeRef());
+        //
         return associationDefn;
     }
 
@@ -112,7 +123,7 @@ public class SpaceTypeDefn extends ModelElement {
         functionDefns.add(actionDefn);
         actionDefn.setContextSpaceTypeDefn(this);
         //
-        indexFunctionsByName.put(actionDefn.getName(), actionDefn);
+//        indexFunctionsByName.put(actionDefn.getName(), actionDefn);
         //
         addChild(actionDefn);
         return actionDefn;

@@ -21,6 +21,7 @@ import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.antlr.SpaceLexer;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.AstFactory;
+import org.jkcsoft.space.lang.ast.Schema;
 import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.antlr.AntlrTreePrintListener;
 import org.jkcsoft.space.antlr.AntlrUtil;
@@ -59,14 +60,13 @@ public class G2AntlrParser implements AstLoader {
         checkAstClasses();
     }
 
-
     @Override
     public String getName() {
         return "ANTLR";
     }
 
     @Override
-    public AstFactory load(File spaceSrcFile) throws Exception {
+    public Schema load(File spaceSrcFile) throws Exception {
         this.srcFile = spaceSrcFile;
         log.info("Parsing file [" + spaceSrcFile.getAbsolutePath() + "]");
         InputStream fileInputStream = new FileInputStream(spaceSrcFile);
@@ -74,7 +74,7 @@ public class G2AntlrParser implements AstLoader {
         return load(input);
     }
 
-    private AstFactory load(ANTLRInputStream aisSpaceSrc) {
+    private Schema load(ANTLRInputStream aisSpaceSrc) {
         AstFactory astFactory = null;
         List<String> parseErrors = new LinkedList<>();
         ANTLRErrorListener errorListener;
@@ -115,11 +115,9 @@ public class G2AntlrParser implements AstLoader {
 
 
         astFactory = new AstFactory();
-        astFactory.initProgram(srcFile.getName());
-        Ra2AstTransform ra2AstTransform = new Ra2AstTransform(astFactory);
-        astFactory = ra2AstTransform.transform(parseUnitContext);
-
-        return astFactory;
+        Ra2AstTransform ra2AstTransform = new Ra2AstTransform(astFactory, srcFile);
+        Schema schema = ra2AstTransform.transform(parseUnitContext);
+        return schema;
     }
 
     private void checkAstClasses() {

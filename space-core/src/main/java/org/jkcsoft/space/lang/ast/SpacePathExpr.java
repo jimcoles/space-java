@@ -22,7 +22,8 @@ public class SpacePathExpr extends ModelElement {
     private String text;
     private SpacePathExpr nextExpr;
 
-    public SpacePathExpr(boolean isTypeExpr, PathOperEnum oper, String text, SpacePathExpr nextExpr) {
+    public SpacePathExpr(SourceInfo sourceInfo, boolean isTypeExpr, PathOperEnum oper, String text, SpacePathExpr nextExpr) {
+        super(sourceInfo);
         this.isTypeExpr = isTypeExpr;
         this.oper = oper;
         this.text = text;
@@ -37,12 +38,17 @@ public class SpacePathExpr extends ModelElement {
         return oper;
     }
 
-    @Override
-    public String getText() {
-        return text;
+    public boolean hasNextExpr() {
+        return nextExpr != null;
     }
 
     public SpacePathExpr getNextExpr() {
         return nextExpr;
     }
+
+    @Override
+    public String getText() {
+        return text;
+    }
+
 }

@@ -16,8 +16,8 @@ public class OperLookupExpr extends ModelElement implements ValueExpr {
 
     private OperEnum operLookupKey;
 
-    public OperLookupExpr(OperEnum operLookupKey) {
-        super(operLookupKey.toString());
+    public OperLookupExpr(SourceInfo sourceInfo, OperEnum operLookupKey) {
+        super(sourceInfo);
         this.operLookupKey = operLookupKey;
     }
 

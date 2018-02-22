@@ -12,6 +12,9 @@ package org.jkcsoft.space.lang.ast;
 /**
  * @author Jim Coles
  */
-public class SourceInfo {
+public interface SourceInfo {
 
+    int getLine();
+
+    int getCharacter();
 }

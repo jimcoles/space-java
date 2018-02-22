@@ -23,12 +23,14 @@ public class Im2AstTransform {
     private List<AstLoadError> errors = new LinkedList<>();
 
     public void transform(ImTreeNode imRoot) {
-        if (astFactory.getAstRoot() == null) {
+/*
+        if (astFactory.getUserAstRoot() == null) {
             if (!ImTrees.first(imRoot).getText().equals("space-defn"))
                 errors.add(new AstLoadError("first ID must be 'space-defn'"));
-//            astFactory.addMetaObject(new SpaceProgram());
-            astFactory.getAstRoot();
+//            astFactory.addMetaObject(new Schema());
+            astFactory.getUserAstRoot();
         }
+*/
     }
 
 }

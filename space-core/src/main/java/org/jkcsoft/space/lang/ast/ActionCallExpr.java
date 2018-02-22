@@ -18,13 +18,12 @@ public class ActionCallExpr extends ModelElement implements ValueExpr {
 
     /** The name of some other named design-time thing such as a function.
      */
-    private SpacePathExpr   functionPathExpr;
+    private MetaReference<SpaceActionDefn>   functionRef;
     private ValueExpr[] argumentExprs;
 
     /**
+     * Represents the invocation of a function.
      *
-     * @param name The (optional) name of the expression itself.  Space allows any expression
-     *             to be named for use in refactoring and version change management.
      * @param functionPathExpr This expression must evaluate to the meta object (reference)
      *                         representing the function of operation being invoked.
      *                         Actions invoked
@@ -33,14 +32,16 @@ public class ActionCallExpr extends ModelElement implements ValueExpr {
      * @param argumentExprs Nested expression that evaluate at runtime to the values
      *                      used in this action call.
      */
-    ActionCallExpr(String name, SpacePathExpr functionPathExpr, ValueExpr ... argumentExprs) {
-        super(name);
-        this.functionPathExpr = functionPathExpr;
+    ActionCallExpr(SourceInfo sourceInfo, SpacePathExpr functionPathExpr, ValueExpr ... argumentExprs) {
+        super(sourceInfo);
+        if (functionPathExpr == null) throw new RuntimeException("bug: function path null");
+        this.functionRef = new MetaReference(functionPathExpr);
+        this.addReference(functionRef);
         this.argumentExprs = argumentExprs;
     }
 
-    public SpacePathExpr getFunctionPathExpr() {
-        return functionPathExpr;
+    public MetaReference<SpaceActionDefn> getFunctionRef() {
+        return functionRef;
     }
 
     public ValueExpr[] getArgumentExprs() {
@@ -48,6 +49,6 @@ public class ActionCallExpr extends ModelElement implements ValueExpr {
     }
 
     public String toLogString() {
-        return "call expression to " + functionPathExpr + "()";
+        return "call expression to " + functionRef + "()";
     }
 }
