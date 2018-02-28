@@ -7,14 +7,13 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.instance;
-
+package org.jkcsoft.space.lang.ast;
 /**
  * @author Jim Coles
  */
-public class BinaryStream extends SpaceObject {
+public class ArgList extends ModelElement {
 
-    public BinaryStream(SpaceOid oid) {
-        super(oid);
+    ArgList(SourceInfo sourceInfo) {
+        super(sourceInfo);
     }
 }

@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.AssociationDefn;
-import org.jkcsoft.space.lang.ast.SpaceActionDefn;
+import org.jkcsoft.space.lang.ast.FunctionDefn;
 import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -44,9 +44,8 @@ public class ObjectFactory {
         return new Space(newOid(), spcContext, spaceTypeDefn);
     }
 
-    public Tuple newTuple(Space space, Assignable ... values) {
-        Tuple tuple = new Tuple(newOid(), space, values);
-        space.addTuple(tuple);
+    public Tuple newTuple(SpaceTypeDefn defn, Assignable ... values) {
+        Tuple tuple = new Tuple(newOid(), defn, values);
         return tuple;
     }
 
@@ -55,14 +54,18 @@ public class ObjectFactory {
         return characterSequence;
     }
 
-    public ActionCall newAction(Space spcContext, SpaceActionDefn spcActionDefn) {
-        ActionCall actionCall = new ActionCall(spcContext, spcActionDefn);
-        return actionCall;
+    public FunctionCall newFunctionCall(Tuple ctxObject, FunctionDefn spcFunctionDefn, Tuple argTuple) {
+        FunctionCall functionCall = new FunctionCall(ctxObject, spcFunctionDefn, argTuple);
+        return functionCall;
     }
 
-    public Association newObjectReference(AssociationDefn associationDefn, SpaceOid refToOid) {
-        Association association = new Association(newOid(), associationDefn, refToOid);
-        return association;
+    public Reference newObjectReference(AssociationDefn associationDefn, SpaceOid refToOid) {
+        Reference reference = new Reference(associationDefn, refToOid);
+        return reference;
+    }
+
+    public Space box(Tuple tuple) {
+        return new Space(newOid(), null, tuple.getDefn());
     }
 
     public CardinalValue newCardinalValue(int i) {
@@ -71,5 +74,9 @@ public class ObjectFactory {
 
     public TextValue newTextValue(String value) {
         return new TextValue(value);
+    }
+
+    public BooleanValue newBooleanValue(boolean aBoolean) {
+        return BooleanValue.getValue(aBoolean);
     }
 }

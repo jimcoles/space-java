@@ -22,13 +22,13 @@ import java.util.List;
  * date < date
  * boolean == boolean
  */
-public class BooleanExpr {
+public class BooleanExpr implements ValueExpr {
 
     private BooleanOper oper;
     /* could be one, two or more args.  Could be nested expressions
     or could be literals. For a given operator, the expression must
     return a value of the proper dimensionality and type.
     */
-    private List<ValueExpr> restArgs;
-
+    private ValueExpr left;
+    private ValueExpr right;
 }

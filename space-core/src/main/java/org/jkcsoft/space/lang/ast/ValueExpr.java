@@ -10,6 +10,8 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
+ * Mostly a marker interface.
+ *
  * @author Jim Coles
  */
 public interface ValueExpr {

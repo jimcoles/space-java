@@ -16,4 +16,7 @@ package org.jkcsoft.space.lang.ast;
  */
 public class ThisExpr extends ModelElement implements ValueExpr {
 
+    ThisExpr(SourceInfo sourceInfo) {
+        super(sourceInfo);
+    }
 }

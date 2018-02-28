@@ -12,40 +12,43 @@ package org.jkcsoft.space.lang.instance;
 import org.jkcsoft.space.lang.ast.AssociationDefn;
 
 /**
- * Holds a reference to an "object", which might be an Entity Tuple or a member of a
+ * Holds a reference to an "object", which might be a Tuple or a member of a
  * Tuple.
  *
  * Might just as well be named "(Object) Reference".
  *
  * @author Jim Coles
  */
-public class Association extends SpaceObject implements Assignable {
+public class Reference implements Assignable {
 
     private Tuple           parentTuple;
     private AssociationDefn defn;
     /** Oid of the referenced 'to' object */
-    private SpaceOid        referenceOid;
+    private SpaceOid toOid;
 
-    Association(SpaceOid oid, AssociationDefn defn, SpaceOid referenceOid) {
-        super(oid);
+    Reference(AssociationDefn defn, SpaceOid toOid) {
         this.defn = defn;
-        this.referenceOid = referenceOid;
+        this.toOid = toOid;
     }
 
-    public void setReferenceOid(SpaceOid referenceOid) {
-        this.referenceOid = referenceOid;
+    public void setToOid(SpaceOid toOid) {
+        this.toOid = toOid;
     }
 
-    public SpaceOid getReferenceOid() {
-        return referenceOid;
+    public SpaceOid getToOid() {
+        return toOid;
     }
 
     public AssociationDefn getDefn() {
         return defn;
     }
 
+    public Tuple getParentTuple() {
+        return parentTuple;
+    }
+
     //    @Override
 //    public String asString() {
-//        return Executor.getInstance().dereference(referenceOid).toString();
+//        return Executor.getInstance().dereference(toOid).toString();
 //    }
 }

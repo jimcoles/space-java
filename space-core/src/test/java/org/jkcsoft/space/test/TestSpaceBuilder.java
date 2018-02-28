@@ -1,9 +1,6 @@
 package org.jkcsoft.space.test;
 
-import org.jkcsoft.space.lang.ast.AstFactory;
-import org.jkcsoft.space.lang.ast.CodeSourceInfo;
-import org.jkcsoft.space.lang.ast.PrimitiveType;
-import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
+import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.instance.TextValue;
@@ -34,14 +31,16 @@ public class TestSpaceBuilder extends TestSourceStub {
         ObjectFactory objs = ObjectFactory.getInstance();
         //
         SpaceTypeDefn testPersonTypeDefn = ast.newSpaceTypeDefn(new CodeSourceInfo(), "PersonType");
-        testPersonTypeDefn.addVariable(ast.newVariableDefn(new CodeSourceInfo(), "firstName", PrimitiveType.TEXT));
-        testPersonTypeDefn.addVariable(ast.newVariableDefn(new CodeSourceInfo(), "lastName", PrimitiveType.TEXT));
+        VariableDefn firstName = ast.newVariableDefn(new CodeSourceInfo(), "firstName", PrimitiveType.TEXT);
+        testPersonTypeDefn.addVariable(firstName);
+        VariableDefn lastName = ast.newVariableDefn(new CodeSourceInfo(), "lastName", PrimitiveType.TEXT);
+        testPersonTypeDefn.addVariable(lastName);
         Space space = objs.newSpace(null, testPersonTypeDefn);
         //
-        Tuple testObjectTuple = objs.newTuple(space);
+        Tuple testObjectTuple = objs.newTuple(testPersonTypeDefn);
         TextValue textValue = objs.newTextValue("jim");
-        testObjectTuple.setValue("firstName", textValue);
-        testObjectTuple.setValue("lastName", objs.newTextValue("Coles"));
+        testObjectTuple.setValue(firstName.getOid(), textValue);
+        testObjectTuple.setValue(lastName.getOid(), objs.newTextValue("Coles"));
         space.addTuple(testObjectTuple);
         //
     }

@@ -224,10 +224,12 @@ parameterDecl :
 //    ;
 
 actionDefn :
-    'function-def' accessModifier? anyTypeRef identifier '(' (parameterDecl (',' parameterDecl)*)? ')'
+    'function-def' accessModifier? anyTypeRef identifier parameterDefnList
     elementDefnHeader?
     actionDefnBody
     ;
+
+parameterDefnList : '(' (parameterDecl (',' parameterDecl)*)? ')' ;
 
 actionDefnBody :
     BlockStart
@@ -322,11 +324,13 @@ literalExpr :
 
 scalarLiteral :
     integerLiteral
-    | floatLiteral;
+    | floatLiteral
+    | booleanLiteral;
 
 stringLiteral : StringLiteral;
 integerLiteral : IntegerLiteral;
 floatLiteral : FloatLiteral;
+booleanLiteral : BooleanLiteral;
 
 identifier : Identifier;
 

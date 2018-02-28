@@ -61,6 +61,11 @@ SpaceDefnType
     | 'native'
     ;
 
+BooleanLiteral
+    : 'true'
+    | 'false'
+    ;
+
 AssignOper  : '=';
 
 // Space Path Expressions - reduced syntax

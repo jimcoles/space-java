@@ -10,10 +10,16 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * Probably just a marker interface.
+ * A statement is an executable, or imperative, instruction.  A
+ * statement may contain an expression to be evaluated such
+ * as a function call, or it may be part of a looping or conditional
+ * construct.
  *
  * @author Jim Coles
  */
-public interface Statement {
+public abstract class Statement extends ModelElement {
 
+    public Statement(SourceInfo sourceInfo) {
+        super(sourceInfo);
+    }
 }

@@ -9,9 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import java.util.Map;
-import java.util.TreeMap;
-
 /**
  * Named elements define the lexical structure of the AST -- the structure by which elements
  * such as type definitions, variables, and functions may be referenced.
@@ -20,9 +17,8 @@ import java.util.TreeMap;
  */
 public class NamedElement extends ModelElement implements Named, Comparable<NamedElement> {
 
-    private String              name;
-    private String              description;
-    private Map<String, NamedElement> namedChildMap = new TreeMap<>();
+    private String name;
+    private String description;
 
     NamedElement(SourceInfo sourceInfo, String name) {
         super(sourceInfo);
@@ -54,22 +50,14 @@ public class NamedElement extends ModelElement implements Named, Comparable<Name
 
     @Override
     ModelElement addChild(ModelElement child) {
-        if (child instanceof NamedElement) {
-            NamedElement nChild = (NamedElement) child;
-            namedChildMap.put(nChild.getName(), nChild);
-        }
         return super.addChild(child);
-    }
-
-    public NamedElement getChildByName(String name) {
-        return namedChildMap.get(name);
     }
 
     @Override
     public int compareTo(NamedElement o) {
         if (!(this.isNamed() && o.isNamed()))
             throw new IllegalArgumentException("Space bug: cannot compare two objects " +
-                    "(" + this + "," + o +") unless both are named.");
+                                                   "(" + this + "," + o + ") unless both are named.");
         return this.getName().compareTo(o.getName());
     }
 

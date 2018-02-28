@@ -19,10 +19,9 @@ package org.jkcsoft.space.lang.ast;
  * @author J. Coles
  * @version 1.0
  */
-public class EquationDefn extends ModelElement {
+public class EquationDefn extends NamedElement {
 
-    EquationDefn() {
-        super();
+    public EquationDefn(SourceInfo sourceInfo, String name) {
+        super(sourceInfo, name);
     }
-
 }

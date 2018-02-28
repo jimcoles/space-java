@@ -14,12 +14,12 @@ import java.lang.reflect.Method;
 /**
  * @author Jim Coles
  */
-public class NativeActionDefn extends AbstractActionDefn implements Callable {
+public class NativeFunctionDefn extends AbstractFunctionDefn implements Callable {
 
     private final Method jMethod;
     private final SpaceTypeDefn argSpaceTypeDefn;
 
-    NativeActionDefn(SourceInfo sourceInfo, String name, Method jMethod, SpaceTypeDefn argSpaceTypeDefn) {
+    NativeFunctionDefn(SourceInfo sourceInfo, String name, Method jMethod, SpaceTypeDefn argSpaceTypeDefn) {
         super(sourceInfo, name);
         this.jMethod = jMethod;
         this.argSpaceTypeDefn = argSpaceTypeDefn;

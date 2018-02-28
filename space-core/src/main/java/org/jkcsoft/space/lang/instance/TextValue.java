@@ -11,6 +11,10 @@ package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.PrimitiveType;
 
+/**
+ * TODO: In Space, a string of characters is not a scalar value.  So
+ * a 'text' value should really be a reference to a CharacterSequence object.
+ */
 public class TextValue extends ScalarValue<String> {
 
     TextValue(String value) {

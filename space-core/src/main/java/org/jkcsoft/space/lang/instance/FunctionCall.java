@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.SpaceActionDefn;
+import org.jkcsoft.space.lang.ast.FunctionDefn;
 
 /**
  * The instance level state for the invocation of an Action Definition.  Might be
@@ -18,24 +18,42 @@ import org.jkcsoft.space.lang.ast.SpaceActionDefn;
  * @author J. Coles
  * @version 1.0
  */
-public class ActionCall {
+public class FunctionCall {
 
-    private SpaceActionDefn actionDefn;
+    private FunctionDefn actionDefn;
     //
-    private Space context;
+    private Tuple ctxTuple;
+    private Tuple argTuple;
     private Space returnSpace;
 
     /**
-     * @param spcContext Could be a local function space or the argument space
+     * @param ctxTuple Could be a local function space or the argument space
      *                   for a function call.
      */
-    ActionCall(Space spcContext, SpaceActionDefn actionDefn) {
+    FunctionCall(Tuple ctxTuple, FunctionDefn actionDefn, Tuple argTuple) {
         this.actionDefn = actionDefn;
-        this.context = spcContext;
+        this.ctxTuple = ctxTuple;
+        this.argTuple = argTuple;
     }
 
     public void setReturnSpace(Space returnSpace) {
         this.returnSpace = returnSpace;
+    }
+
+    public Space getReturnValue() {
+        return returnSpace;
+    }
+
+    public FunctionDefn getActionDefn() {
+        return actionDefn;
+    }
+
+    public Tuple getCtxTuple() {
+        return ctxTuple;
+    }
+
+    public Tuple getArgTuple() {
+        return argTuple;
     }
 
     public Space getReturnSpace() {

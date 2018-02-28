@@ -14,33 +14,46 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class ActionCallExpr extends ModelElement implements ValueExpr {
+@GroupingNode
+public class FunctionCallExpr extends ModelElement implements ValueExpr {
 
     /** The name of some other named design-time thing such as a function.
      */
-    private MetaReference<SpaceActionDefn>   functionRef;
+    private MetaReference<AbstractFunctionDefn>   functionRef;
     private ValueExpr[] argumentExprs;
 
     /**
      * Represents the invocation of a function.
-     *
-     * @param functionPathExpr This expression must evaluate to the meta object (reference)
-     *                         representing the function of operation being invoked.
-     *                         Actions invoked
-     *                         can only be the space path operations such as the navigation
-     *                         operator.
-     * @param argumentExprs Nested expression that evaluate at runtime to the values
-     *                      used in this action call.
      */
-    ActionCallExpr(SourceInfo sourceInfo, SpacePathExpr functionPathExpr, ValueExpr ... argumentExprs) {
+    FunctionCallExpr(SourceInfo sourceInfo) {
         super(sourceInfo);
-        if (functionPathExpr == null) throw new RuntimeException("bug: function path null");
-        this.functionRef = new MetaReference(functionPathExpr);
-        this.addReference(functionRef);
-        this.argumentExprs = argumentExprs;
     }
 
-    public MetaReference<SpaceActionDefn> getFunctionRef() {
+    public FunctionCallExpr setFunctionRef(SpacePathExpr functionPathExpr)
+    {
+        if (functionPathExpr == null) throw new RuntimeException("bug: function path null");
+        //
+        this.functionRef = new MetaReference(functionPathExpr);
+        addChild(functionPathExpr);
+        //
+        addReference(functionRef);
+        //
+        return this;
+    }
+
+    public void setArgumentExprs(ValueExpr[] argumentExprs) {
+        this.argumentExprs = argumentExprs;
+        //
+        for (ValueExpr argumentExpr : argumentExprs) {
+            addChild((ModelElement) argumentExpr);
+            //
+            if (argumentExpr instanceof MetaReference) {
+                addReference((MetaReference) argumentExpr);
+            }
+        }
+    }
+
+    public MetaReference<AbstractFunctionDefn> getFunctionRef() {
         return functionRef;
     }
 
@@ -48,7 +61,8 @@ public class ActionCallExpr extends ModelElement implements ValueExpr {
         return argumentExprs;
     }
 
-    public String toLogString() {
-        return "call expression to " + functionRef + "()";
+    @Override
+    public String getText() {
+        return "" + functionRef;
     }
 }

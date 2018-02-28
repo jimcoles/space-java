@@ -16,10 +16,10 @@ import org.jkcsoft.space.lang.ast.VariableDefn;
  * A {@link Variable} contains a reference to its definition, a VariableDefn, and
  * zero or one {@link ScalarValue}s.
  */
-public class Variable {
+public class Variable implements Assignable {
 
-    private Tuple           parentTuple;
     private VariableDefn    definition;
+    private Tuple           parentTuple;
     private ScalarValue     scalarValue;
 
     public Variable(Tuple parentTuple, VariableDefn definition, ScalarValue scalarValue) {
@@ -42,5 +42,10 @@ public class Variable {
 
     public ScalarValue getScalarValue() {
         return scalarValue;
+    }
+
+    @Override
+    public String toString() {
+        return scalarValue != null ? scalarValue.toString() : "(not initialized)";
     }
 }

@@ -9,6 +9,9 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.AssociationDefn;
+import org.jkcsoft.space.lang.ast.NamedElement;
+import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
 import org.jkcsoft.space.lang.ast.VariableDefn;
 import org.jkcsoft.space.lang.runtime.RuntimeException;
 
@@ -24,109 +27,109 @@ import java.util.*;
  * @author Jim Coles
  * @version 1.0
  */
-public class Tuple extends SpaceObject implements Assignable {
+public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable {
 
-    /** The Space to which this Tuple belongs. The Space may be anonymous. */
-    private Space space;
-
-//    private List<Assignable>    assignables = new LinkedList<>();
+    private List<Assignable>    assignables = new LinkedList<>();
 //    private List<ScalarValue>   values = new LinkedList<>();
-//    private List<Association>   associations = new LinkedList<>();
+//    private List<Reference>   associations = new LinkedList<>();
 
     // variables in definition order
-    private List<Variable> variables = new LinkedList<>();
+//    private List<Variable> variables = new LinkedList<>();
     // seminal map
-    private Map<String, Assignable> indexAllByName = new HashMap<>();
+    private Map<SpaceOid, Assignable> indexAllByMemberOid = new HashMap<>();
     // redundant
-    private Map<String, ScalarValue> indexValuesByName = new HashMap<>();
-    private Map<String, Association> indexAssociationsByName = new HashMap<>();
+//    private Map<String, ScalarValue> indexValuesByName = new HashMap<>();
+//    private Map<String, Reference> indexRefsByName = new HashMap<>();
 
-    Tuple(SpaceOid oid, Space space) {
-        super(oid);
-        this.space = space;
-        List<VariableDefn> varDefnList = getVarDefnList();
-        for (VariableDefn variableDefn : varDefnList) {
-            variables.add(new Variable(this, variableDefn, null));
+    Tuple(SpaceOid oid, SpaceTypeDefn defn) {
+        super(oid, defn);
+        // initialize
+        if (defn.hasVariables()) {
+            List<VariableDefn> varDefnList = getVarDefnList();
+            for (VariableDefn variableDefn : varDefnList) {
+                initVar(variableDefn);
+            }
+        }
+        if (defn.hasAssociations()) {
+            List<AssociationDefn> assocDefnList = defn.getAssociationDefnList();
+            for (AssociationDefn assocDefn : assocDefnList) {
+                initRef(assocDefn);
+            }
         }
     }
 
-    Tuple(SpaceOid oid, Space space, Assignable ... assignables) {
-        this(oid, space);
+    private void initRef(AssociationDefn assocDefn) {
+        Reference ref = new Reference(assocDefn, null);
+        assignables.add(ref);
+        indexAllByMemberOid.put(ref.getDefn().getOid(), ref);
+    }
+
+    private void initVar(VariableDefn variableDefn) {
+        Variable datum = new Variable(this, variableDefn, null);
+        assignables.add(datum);
+        indexAllByMemberOid.put(datum.getDefinition().getOid(), datum);
+    }
+
+    Tuple(SpaceOid oid, SpaceTypeDefn defn, Assignable... assignables) {
+        this(oid, defn);
 //        this.assignables.addAll(Arrays.asList(assignables));
         // set values based on order of variable and assoc in space type definition
-        if (assignables.length > getVarDefnList().size())
+        if (getVarDefnList() != null && assignables.length > getVarDefnList().size())
             throw new RuntimeException("Too many variables for this Space.");
         for (int idxVar = 0; idxVar < assignables.length; idxVar++) {
-            setValue(getVarNameAt(idxVar), assignables[idxVar]);
+            setValue(getNthMemberOid(idxVar), assignables[idxVar]);
         }
     }
 
-    public void setSpace(Space space) {
-        this.space = space;
-    }
-
-    public Space getSpace() {
-        return space;
-    }
-
-    public Tuple setValue(String name, Assignable value) {
-        indexAllByName.put(name, value);
+    public Tuple setValue(SpaceOid memberOid, Assignable value) {
+        indexAllByMemberOid.put(memberOid, value);
         return this;
     }
 
     public Tuple setValue(int idx, Assignable value) {
-        indexAllByName.put(getVarNameAt(idx), value);
+        indexAllByMemberOid.put(getNthMemberOid(idx), value);
         return this;
     }
 
-//    private Tuple addValue(ScalarValue scalarValue) {
-
-    /**
-     * Return value of Tuple variable with <code>name</code>
-     */
-    public ScalarValue getValue(String name) {
-        return indexValuesByName.get(name);
+    private SpaceOid getNthMemberOid(int idx) {
+        return getDefn().getAllMembers().get(idx).getOid();
     }
 
-    public ScalarValue getValueAt(int index) {
-        return indexValuesByName.get(getVarNameAt(index));
+    public Assignable get(NamedElement member) {
+        return indexAllByMemberOid.get(member.getOid());
     }
 
-    public Assignable getAssignableAt(int index) {
-        return indexAllByName.get(getVarNameAt(index));
+    public Assignable getAssignableAt(int idx) {
+        return indexAllByMemberOid.get(getNthMemberOid(idx));
     }
 
 //    public List<Assignable> getAssignables() {
 //        return assignables;
 //    }
 
-    public List<ScalarValue> getValues() {
-        List<VariableDefn> varDefnList = getVarDefnList();
-        List<ScalarValue> values = new ArrayList<>(varDefnList.size());
-        varDefnList.forEach(variableDefn -> {
-            values.add(getValue(variableDefn.getName()));
-        });
-        return values;
+    public List<Assignable> getValues() {
+        return assignables;
     }
 
-    public SpaceOid getReferenceOid(String name) {
-        return indexAssociationsByName.get(name).getReferenceOid();
+    public SpaceOid getToOid(SpaceOid refMemberOid) {
+        Reference reference = getRefByOid(refMemberOid);
+        return reference.getToOid();
     }
 
-    public Association getAssoc(String name) {
-        return indexAssociationsByName.get(name);
-    }
+    public Reference getRefByOid(SpaceOid memberOid) {
+        Assignable assignable = indexAllByMemberOid.get(memberOid);
+        if (assignable == null)
+            throw new IllegalArgumentException(memberOid + " not set");
 
-//    public List<Association> getAssociations() {
-//        return associations;
-//    }
+        if (!(assignable instanceof Reference))
+            throw new IllegalArgumentException(memberOid + " is not a reference");
 
-    private String getVarNameAt(int idxVar) {
-        List<VariableDefn> variableDefnList = getVarDefnList();
-        return variableDefnList.get(idxVar).getName();
+        return (Reference) assignable;
     }
 
     private List<VariableDefn> getVarDefnList() {
-        return space.getDefinition().getVariableDefnList();
+        return getDefn().getVariableDefnList();
     }
+
+
 }

@@ -34,27 +34,30 @@ public class TestAst {
         Schema astSchema = astFactory.newAstSchema(new CodeSourceInfo(), "TestAst");
         astSchema
             .addSpaceDefn(spaceTypeDefn)
-                 .addVariable(astFactory.newVariableDefn(new CodeSourceInfo(), "myIntDim", PrimitiveType.CARD))
-                    .setType(PrimitiveType.CHAR);
+            .getBody()
+            .addVariable(astFactory.newVariableDefn(new CodeSourceInfo(), "myIntDim", PrimitiveType.CARD))
+            .setType(PrimitiveType.CHAR);
         spaceTypeDefn
+            .setBody(astFactory.newTypeDefnBody(new CodeSourceInfo()))
             .addVariable(astFactory.newVariableDefn(new CodeSourceInfo(), "myCharDim", PrimitiveType.CHAR))
             ;
-        SpaceActionDefn mainMethod = astFactory.newSpaceActionDefn(new CodeSourceInfo(), "main");
-        spaceTypeDefn.addActionDefn(mainMethod);
+        FunctionDefn mainMethod = astFactory.newSpaceFunctionDefn(new CodeSourceInfo(), "main");
+        spaceTypeDefn.getBody().addFunctionDefn(mainMethod);
 //        CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
 //        astFactory.getUserAstRoot().addObjectInstance(arg1, astFactory);
 
-        ThisExpr thisTupleExpr = astFactory.newThis();
+        ThisExpr thisTupleExpr = astFactory.newThisExpr(new CodeSourceInfo());
 
-        mainMethod.addAction(
-            astFactory.newActionCallExpr(
-                    new CodeSourceInfo(),
-                    astFactory.newSpacePathExpr(new CodeSourceInfo(), PathOperEnum.ASSOC_NAV, ""),
-                    astFactory.newMetaObjectRefLiteral(null),
-                    astFactory.newLiteralHolder("Hello, Space!")
-            )
+        mainMethod.getStatementBlock().addExpr(
+            astFactory.newFunctionCallExpr(new CodeSourceInfo())
+                .setFunctionRef(
+                    astFactory.newSpacePathExpr(new CodeSourceInfo(), PathOperEnum.ASSOC_NAV, "", null)
+                )
         );
-//        spaceDefn.
+//        astFactory.newMetaObjectRefLiteral(null),
+//            astFactory.newLiteralHolder("Hello, Space!")
+
+        //        spaceDefn.
 //            .setContextSpaceDefn(new SpaceDefn() {
 //                @Override
 //                public VariableDefn addVariable(VariableDefn coordinateDefn) {

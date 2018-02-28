@@ -9,7 +9,10 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-public class VariableDefnStmt implements Statement {
-    private VariableDecl variableDecl;
+@Deprecated
+public class VariableDefnStmt {
+
+    private VariableDefn variableDecl;
+    private AssignmentExpr assignmentExpr; // optional
 
 }

@@ -26,8 +26,8 @@ public class QueryDefn extends EquationDefn {
     private List<SpacePathExpr> variables;
     private BooleanExpr filter;  // nestable expression
 
-    QueryDefn(SpaceTypeDefn contextSpaceTypeDefn, String name) {
-
+    public QueryDefn(SourceInfo sourceInfo, String name) {
+        super(sourceInfo, name);
     }
 
 }

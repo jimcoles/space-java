@@ -11,11 +11,9 @@ package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.instance.SpaceObject;
+import org.jkcsoft.space.lang.runtime.AstUtils;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Base class for all things defined in source code, structures/type defs, callables
@@ -26,18 +24,20 @@ import java.util.Set;
  */
 public abstract class ModelElement extends SpaceObject {
 
+    private ModelElement        parent;
     private SourceInfo sourceInfo;
     private List<ModelElement>  children = new LinkedList<>();
-    private ModelElement        parent;
     //
+    private Map<String, NamedElement> namedChildMap = new TreeMap<>();
     private Set<MetaReference> references = null;
+    private List<ModelElement> groupingNodes = new LinkedList<>();
 
-    ModelElement() {
-        this(null);
-    }
+//    ModelElement() {
+//        this(null);
+//    }
 
     ModelElement(SourceInfo sourceInfo) {
-        super(ObjectFactory.getInstance().newOid());
+        super(ObjectFactory.getInstance().newOid(), null);
         this.sourceInfo = sourceInfo;
     }
 
@@ -53,6 +53,15 @@ public abstract class ModelElement extends SpaceObject {
     ModelElement addChild(ModelElement child) {
         children.add(child);
         child.setParent(this);
+        //
+        if (child instanceof NamedElement) {
+            NamedElement nChild = (NamedElement) child;
+            namedChildMap.put(nChild.getName(), nChild);
+        }
+        if (AstUtils.isGroupingNode(child)) {
+            groupingNodes.add(child);
+        }
+        //
         return child;
     }
 
@@ -60,7 +69,7 @@ public abstract class ModelElement extends SpaceObject {
         return children;
     }
 
-    /** Must be called by the adder method for children, e.g., {@link SpaceTypeDefn}.addAssociation()
+    /** Must be called by the adder method for children, e.g., {@link SpaceTypeDefn}.addAssocDefn()
      * should call this for the {@link SpacePathExpr} associated with it's 'from' and 'to'
      * type definition. */
     void addReference(MetaReference reference) {
@@ -78,6 +87,10 @@ public abstract class ModelElement extends SpaceObject {
         return references;
     }
 
+    public NamedElement getChildByName(String name) {
+        return namedChildMap.get(name);
+    }
+
     public String getText() {
         return "";
     }
@@ -90,9 +103,18 @@ public abstract class ModelElement extends SpaceObject {
         return parent != null;
     }
 
-    @Override
-    public String toString() {
-        return "[" + this.getClass().getSimpleName() + ":" + this.getOid() + "] " + "\"" + this.getText() + "\"";
+
+    public boolean hasGroupingNodes() {
+        return groupingNodes != null && groupingNodes.size() > 0;
     }
 
+    public List<ModelElement> getGroupingNodes() {
+        return groupingNodes;
+    }
+
+    @Override
+    public String toString() {
+        return "[" + this.getClass().getSimpleName() + ":" + this.getOid() + "] " + "\"" + this.getText() + "\""
+            + " (" + getSourceInfo() + ")";
+    }
 }

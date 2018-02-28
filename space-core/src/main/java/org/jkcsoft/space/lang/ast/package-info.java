@@ -23,21 +23,23 @@
  * xyzDefn - the named defining expression<br>
  * xyzExpr - the defining expression<br>
  * xyz - the runtime instance that adheres to its corresponding definition, xyzDefn<br>
- * <p>This applies to Transform, Equation, Action, and Type.
+ * <p>This applies to Transform, Equation, Function, and Type.
  * <h2>Primary Notions</h2>
  * <p>The following are concrete notions defined by a Space programmer.</p>
  * <ul>
  *     <li>SpaceDefn - A Space is a thing, a noun, an entity. A Space has state
- *     describe via Dimensions</li>
- *     <li>{@link org.jkcsoft.space.lang.ast.VariableDefn} - A scalar valued element
+ *     described via Variables and Associations.</li>
+ *     <li>{@link org.jkcsoft.space.lang.ast.VariableDefn} - A scalar-valued element
  *     with some semantic meaning associated with a Space</li>
  *     <li>EquationDefn</li>
  * </ul>
  * <p><em>Declarative</em> versus <em>Imperative</em> notions.</p>
- * <table>
- *     <tr><th>Declarative</th><th>Imperative</th></tr>
+ * <table border="true" padding="5">
+ *     <tr><th>Declarative</th><th></th><th>Imperative</th></tr>
  *     <tr>
- *         <td>EquationDefn</td><td>ActionSequenceDefn</td>
+ *         <td>{@link org.jkcsoft.space.lang.ast.EquationDefn}</td>
+ *         <td></td>
+ *         <td>{@link org.jkcsoft.space.lang.ast.FunctionDefn}</td>
  *     </tr>
  * </table>
  *

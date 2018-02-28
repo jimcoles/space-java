@@ -24,6 +24,6 @@ public class CharacterValue extends ScalarValue<Character> {
 
     @Override
     public String asString() {
-        return null;
+        return String.valueOf(getValue());
     }
 }

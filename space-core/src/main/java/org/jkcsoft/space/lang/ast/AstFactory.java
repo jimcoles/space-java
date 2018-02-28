@@ -48,8 +48,8 @@ public class AstFactory {
         return spaceTypeDefn;
     }
 
-    public SpaceActionDefn newSpaceActionDefn(SourceInfo sourceInfo, String name) {
-        SpaceActionDefn element = new SpaceActionDefn(sourceInfo, name);
+    public FunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name) {
+        FunctionDefn element = new FunctionDefn(sourceInfo, name);
         return element;
     }
 
@@ -58,13 +58,13 @@ public class AstFactory {
         return element;
     }
 
-    public NativeActionDefn newNativeActionDefn(SourceInfo sourceInfo, String name, Method jMethod, SpaceTypeDefn nativeArgSpaceTypeDefn) {
-        NativeActionDefn element = new NativeActionDefn(sourceInfo, name, jMethod, nativeArgSpaceTypeDefn);
+    public NativeFunctionDefn newNativeFunctionDefn(SourceInfo sourceInfo, String name, Method jMethod, SpaceTypeDefn nativeArgSpaceTypeDefn) {
+        NativeFunctionDefn element = new NativeFunctionDefn(sourceInfo, name, jMethod, nativeArgSpaceTypeDefn);
         return element;
     }
 
-    public ActionCallExpr newActionCallExpr(SourceInfo sourceInfo, SpacePathExpr functionPathExpr, ValueExpr ... argValueExprs) {
-        ActionCallExpr element = new ActionCallExpr(sourceInfo, functionPathExpr, argValueExprs);
+    public FunctionCallExpr newFunctionCallExpr(SourceInfo sourceInfo) {
+        FunctionCallExpr element = new FunctionCallExpr(sourceInfo);
         return element;
     }
 
@@ -73,29 +73,34 @@ public class AstFactory {
         return element;
     }
 
-    public LiteralExpr newLiteralHolder(String text) {
-        LiteralExpr element = new LiteralExpr(text);
+    public LiteralExpr newLiteralHolder(SourceInfo sourceInfo, PrimitiveType primitiveType, String text) {
+        LiteralExpr element = new LiteralExpr(sourceInfo, primitiveType, text);
         return element;
     }
 
-    public MetaObjectRefLiteral newMetaObjectRefLiteral(ModelElement spaceMetaObject) {
-        MetaObjectRefLiteral element = new MetaObjectRefLiteral(spaceMetaObject);
+    public SpacePathExpr newSpacePathExpr(SourceInfo sourceInfo, PathOperEnum oper, String searchName,
+                                          SpacePathExpr nextExpr)
+    {
+        SpacePathExpr element = new SpacePathExpr(sourceInfo, true, oper, searchName, nextExpr);
         return element;
     }
 
-    public OperLookupExpr newOperLookupExpr(SourceInfo sourceInfo, OperEnum operEnum) {
-        OperLookupExpr element = new OperLookupExpr(sourceInfo, operEnum);
+    public ThisExpr newThisExpr(SourceInfo sourceInfo) {
+        ThisExpr element = new ThisExpr(sourceInfo);
         return element;
     }
 
-    public SpacePathExpr newSpacePathExpr(SourceInfo sourceInfo, PathOperEnum oper, String searchName) {
-        SpacePathExpr element = new SpacePathExpr(sourceInfo, true, oper, searchName, null);
-        return element;
+    public SpaceTypeDefnBody newTypeDefnBody(SourceInfo codeSourceInfo) {
+        return new SpaceTypeDefnBody(codeSourceInfo);
     }
 
-    public ThisExpr newThis() {
-        ThisExpr element = new ThisExpr();
-        return element;
+    public StatementBlock newStatementBlock(SourceInfo sourceInfo) {
+        return new StatementBlock(sourceInfo);
     }
 
+    public AssignmentExpr newAssignmentExpr(SourceInfo sourceInfo)
+    {
+        AssignmentExpr element = new AssignmentExpr(sourceInfo);
+        return element;
+    }
 }

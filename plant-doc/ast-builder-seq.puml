@@ -25,7 +25,7 @@ note over FactoryConsumer
     use it as an arg to
     an 'adder' method.
 end note
-FactoryConsumer -> AstMetaThing : addAstChildType( newMetaChildObj )
+FactoryConsumer -> AstMetaThing : addXyz( ) or setXyz( ) with child element
 AstMetaThing -> NamedElement : addChild( )
 NamedElement -> ModelElement : addChild( )
 ModelElement -> AstMetaChildType : setParent( me )

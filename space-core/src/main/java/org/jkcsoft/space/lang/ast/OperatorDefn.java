@@ -13,11 +13,14 @@ package org.jkcsoft.space.lang.ast;
  * Possibly only used by the language itself, i.e., we probably won't
  * allow users to define new operators.
  *
- * An Operator (Defn) is like an Action (Defn) exception that Operator arguments
+ * An Operator (Defn) is like an Function (Defn) exception that Operator arguments
  * are not named.
  *
  * @author Jim Coles
  */
 public class OperatorDefn extends ModelElement {
 
+    OperatorDefn(SourceInfo sourceInfo) {
+        super(sourceInfo);
+    }
 }

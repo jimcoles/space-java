@@ -17,9 +17,25 @@ import org.jkcsoft.space.lang.metameta.CharSequenceNature;
  * representation of a higher level expression; therefore, it is often
  * associated with devices to marshall from or unmarshall to an in-memory
  * representation.  In other words,
- *
+ * <p>
  *  CharacterSequence -- Unmarshaller --> Space
+ *  <br>
  *  Space --> Marshaller --> CharacterSequence
+ * <p>Also, since the values of a character are 'physically' just
+ * identifiers that reference an abstract table of 'glyphs' that
+ * represent a character. E.g.:</p>
+ * "abcd" -> "id(a)id(b)id(c)id(d)"
+ *
+ * Table for UTF-16 character set:
+ * <table border="1px">
+ *     <th>id</th>
+ * </table>
+ *
+ * <p>Mapping of one character set to another:</p>
+ * <table border="2px">
+ *      <th>My Charset ID</th><th>Std Charset ID</th>
+ *      <tr><td>01</td><td>07</td></tr>
+ * </table>
  *
  * @author Jim Coles
  */
@@ -31,12 +47,12 @@ public class CharacterSequence extends BinarySequence<CharacterValue> {
 
     /** Limit constructor access to package-only. */
     CharacterSequence(SpaceOid oid, CharacterValue[] characterValues) {
-        super(oid);
+        super(oid, null);
         this.characterValues = characterValues;
     }
 
     CharacterSequence(SpaceOid oid, String characters) {
-        super(oid);
+        super(oid, null);
         this.characters = characters;
     }
 

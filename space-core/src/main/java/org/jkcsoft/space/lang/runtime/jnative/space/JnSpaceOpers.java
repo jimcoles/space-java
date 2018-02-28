@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.runtime.jnative.space;
 
+import org.jkcsoft.space.lang.ast.AssociationDefn;
 import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
 import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.runtime.Executor;
@@ -29,12 +30,8 @@ public class JnSpaceOpers {
 //        Space2Lexer.ruleNames[Space2Lexer.AssignOper];
 //    }
 
-    public static SpaceObject nav(Executor exec, Tuple current, String assocName) {
-        SpaceObject next = null;
-        next = ((Tuple) current).getAssoc(assocName);
-        if (next == null) {
-            next = exec.dereference(((Tuple) current).getReferenceOid(assocName));
-        }
+    public static SpaceObject nav(Executor exec, Tuple current, AssociationDefn assoc) {
+        SpaceObject next = exec.dereference(current.getRefByOid(assoc.getOid()).getToOid());
         return next;
     }
 
@@ -43,8 +40,8 @@ public class JnSpaceOpers {
     }
 
     /** */
-    public static Tuple newTuple(ObjectFactory objectFactory, Space space, ScalarValue ... args) {
-        Tuple tuple = objectFactory.newTuple(space, args);
+    public static Tuple newTuple(ObjectFactory objectFactory, SpaceTypeDefn defn, ScalarValue ... args) {
+        Tuple tuple = objectFactory.newTuple(defn, args);
 
         return tuple;
     }
@@ -61,9 +58,9 @@ public class JnSpaceOpers {
      * Left         Right
      * ------------------------
      * Variable     Variable
-     * Association  Oid
-     * Association  Association
-     * Association  Tuple
+     * Reference  Oid
+     * Reference  Reference
+     * Reference  Tuple
      *
      */
     public static void assign(Executor exec, ObjectFactory objectFactory, Assignable leftAss, Assignable rightAss) {

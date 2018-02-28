@@ -36,6 +36,6 @@ public class NativeSourceInfo implements SourceInfo {
 
     @Override
     public String toString() {
-        return "(NativeSourceInfo) " + jMetaObject;
+        return "" + jMetaObject;
     }
 }

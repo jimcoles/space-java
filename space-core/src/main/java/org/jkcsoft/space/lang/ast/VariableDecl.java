@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+@Deprecated
 public class VariableDecl {
 
 }

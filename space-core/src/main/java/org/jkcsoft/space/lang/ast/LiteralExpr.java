@@ -10,37 +10,32 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * A instance of this type is created for every occurrence of a literal valueExpr in a source file
- * e.g., numbers.
+ * A instance of this type is created for every occurrence of a literal string
+ * in a source file.
  *
  * @author Jim Coles
  */
 public class LiteralExpr extends ModelElement implements ValueExpr {
 
-    private Object valueExpr;
+    private PrimitiveType   primitiveType;
+    private String valueExpr;
 
-    LiteralExpr(Object valueExpr) {
+    LiteralExpr(SourceInfo sourceInfo, PrimitiveType primitiveType, String valueExpr) {
+        super(sourceInfo);
+        this.primitiveType = primitiveType;
         this.valueExpr = valueExpr;
     }
 
-    public boolean isString() {
-        return valueExpr != null && valueExpr instanceof String;
+    public PrimitiveType getPrimitiveType() {
+        return primitiveType;
     }
 
-    public boolean isInt() {
-        return valueExpr != null && valueExpr instanceof Integer;
-    }
-
-    public int getAsInt() {
-        return ((int) valueExpr);
-    }
-
-    public String getAsString() {
-        return (String) valueExpr;
+    public String getValueExpr() {
+        return valueExpr;
     }
 
     @Override
     public String getText() {
-        return getAsString();
+        return valueExpr;
     }
 }

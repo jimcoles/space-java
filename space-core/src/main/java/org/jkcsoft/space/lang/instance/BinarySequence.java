@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.StreamTypeDefn;
+
 /**
  * A BinarySequence allows random get/set access to elements of the sequence, but does not
  * allow a direct 'append' to increase the size of the sequence.
@@ -20,8 +22,8 @@ package org.jkcsoft.space.lang.instance;
 public abstract class BinarySequence<T> extends SpaceObject {
 
     /** Limit constructor access to package-only. */
-    BinarySequence(SpaceOid oid) {
-        super(oid);
+    BinarySequence(SpaceOid oid, StreamTypeDefn defn) {
+        super(oid, defn);
     }
 
     abstract public T getElement(int index);

@@ -10,13 +10,18 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
+ * A Function is, in the abstract, a solution to an Equation.  A function
+ * is a special kind of relation (Space).
+ *
  * @author Jim Coles
  */
-public abstract class AbstractActionDefn extends NamedElement {
+public abstract class AbstractFunctionDefn extends NamedElement {
 
+    private EquationDefn governingEquation;
     private SpaceTypeDefn contextSpaceTypeDefn;  // the calling space defn
+    private SpaceTypeDefn argSpaceTypeDefn;
 
-    AbstractActionDefn(SourceInfo sourceInfo, String name) {
+    AbstractFunctionDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
     }
 
@@ -24,12 +29,21 @@ public abstract class AbstractActionDefn extends NamedElement {
         return contextSpaceTypeDefn;
     }
 
-    public AbstractActionDefn setContextSpaceTypeDefn(SpaceTypeDefn contextSpaceTypeDefn) {
+    public AbstractFunctionDefn setContextSpaceTypeDefn(SpaceTypeDefn contextSpaceTypeDefn) {
         this.contextSpaceTypeDefn = contextSpaceTypeDefn;
         return this;
     }
 
     public String toLogString() {
         return contextSpaceTypeDefn.getName() + "." + getName() + "()";
+    }
+
+    public void setArgSpaceTypeDefn(SpaceTypeDefn argSpaceTypeDefn) {
+        this.argSpaceTypeDefn = argSpaceTypeDefn;
+        argSpaceTypeDefn.setParent(this.getContextSpaceTypeDefn());
+    }
+
+    public SpaceTypeDefn getArgSpaceTypeDefn() {
+        return argSpaceTypeDefn;
     }
 }

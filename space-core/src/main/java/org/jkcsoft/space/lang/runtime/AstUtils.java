@@ -10,12 +10,12 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
-import org.jkcsoft.space.lang.ast.ModelElement;
-import org.jkcsoft.space.lang.ast.NamedElement;
-import org.jkcsoft.space.lang.ast.Schema;
+import org.jkcsoft.space.lang.ast.*;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -25,6 +25,8 @@ import java.util.List;
  * @author Jim Coles
  */
 public class AstUtils {
+
+    private static final Logger log = Logger.getLogger(AstUtils.class);
 
     public static NamedElement getLexParent(ModelElement anElem) {
         NamedElement named = null;
@@ -46,16 +48,16 @@ public class AstUtils {
     private static void append(StringBuilder sb, ModelElement modelElement, int depth) {
         String indent = Strings.multiplyString("\t", depth);
         sb.append(JavaHelper.EOL)
-                .append(indent)
-                .append("(")
-                .append(modelElement.toString());
+          .append(indent)
+          .append("(")
+          .append(modelElement.toString());
         List<ModelElement> children = modelElement.getChildren();
         for (ModelElement child : children) {
             append(sb, child, depth + 1);
         }
         sb.append(JavaHelper.EOL)
-                .append(indent)
-                .append(")");
+          .append(indent)
+          .append(")");
     }
 
     public static Schema getRunSchema(Schema thisSchema) {
@@ -67,5 +69,58 @@ public class AstUtils {
 
     public static Schema getLangRoot(List<Schema> dirChain) {
         return dirChain.get(0);
+    }
+
+    public static boolean isGroupingNode(ModelElement child) {
+        GroupingNode groupAnno = child.getClass().getAnnotation(GroupingNode.class);
+        return (groupAnno != null);
+    }
+
+    public static NamedElement lookupLenientMetaObject(List<Schema> dirChain, ModelElement context,
+                                                       SpacePathExpr spacePathExpr)
+    {
+        NamedElement lookup = null;
+        List<ModelElement> trySequence = new LinkedList<>();
+        trySequence.add(context);
+        trySequence.addAll(dirChain);
+        for (ModelElement tryContext : trySequence) {
+            log.debug("trying to find ["+spacePathExpr+"] under ["+tryContext+"]");
+            lookup = lookupMetaObject(tryContext, spacePathExpr, true);
+            if (lookup != null)
+                break;
+            else
+                log.debug("could not find ["+spacePathExpr+"] under ["+tryContext+"]");
+        }
+        return lookup;
+    }
+
+    public static NamedElement lookupMetaObject(ModelElement context, SpacePathExpr spacePathExpr, boolean isRoot) {
+//        Executor.log.debug("lookup meta object from " + context.getName() + " -> " + spacePathExpr );
+        NamedElement targetChild = lookupMetaObject(context, spacePathExpr.getText());
+        if (targetChild != null) {
+            if (spacePathExpr.hasNextExpr()) {
+                targetChild = lookupMetaObject(targetChild, spacePathExpr.getNextExpr(), false);
+            }
+        }
+        else {
+            if (context.hasParent())
+                targetChild = lookupMetaObject(context.getParent(), spacePathExpr.getText());
+        }
+        return targetChild;
+    }
+
+    /** Will traverse into child grouping nodes */
+    public static NamedElement lookupMetaObject(ModelElement context, String name) {
+        NamedElement childByName = context.getChildByName(name);
+        if (childByName == null) {
+            if (context.hasGroupingNodes()) {
+                for (ModelElement groupElement : context.getGroupingNodes()) {
+
+                    childByName = lookupMetaObject(groupElement, name);
+                }
+            }
+//            Executor.log.warn("element [" + context + "] does not contain named child [" + name + "]");
+        }
+        return childByName;
     }
 }

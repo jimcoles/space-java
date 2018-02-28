@@ -13,7 +13,7 @@ package org.jkcsoft.space.lang.ast;
  * @param <T> The class of meta object being referenced.
  * @author Jim Coles
  */
-public class MetaReference<T extends NamedElement> {
+public class MetaReference<T extends NamedElement> extends ModelElement implements ValueExpr {
 
     private NamedElement lexicalContext;
     private SpacePathExpr spacePathExpr;
@@ -21,6 +21,7 @@ public class MetaReference<T extends NamedElement> {
     private LoadState state = LoadState.INITIALIZED;
 
     public MetaReference(SpacePathExpr spacePathExpr) {
+        super(spacePathExpr.getSourceInfo());
         this.spacePathExpr = spacePathExpr;
     }
 
@@ -58,11 +59,11 @@ public class MetaReference<T extends NamedElement> {
 
     @Override
     public String toString() {
-        return "MetaReference{" +
-            "state=" + state +
-            ", spacePathExpr=" + spacePathExpr +
-            ", lexicalContext=" + lexicalContext +
-            ", resolvedMetaObj=" + resolvedMetaObj +
-            '}';
+        return "<" +
+            spacePathExpr +
+            " " + state +
+            " ctx=" + (lexicalContext != null ? lexicalContext : "") +
+            " obj=" + (resolvedMetaObj != null ? resolvedMetaObj : "") +
+            '>';
     }
 }

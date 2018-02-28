@@ -4,13 +4,24 @@ public type-def MySpace
  This is a smart annotation comment for
   my awesome space.
 */
-{
+{   // type def body (block)
+
+    // var list
     card myIntVar = 1;
     boolean myBoolVar = true;
+
+    // assoc list
     CharSequence greeting = "Hello from this reference to a CharSequence.";
 
-    function-def void main(CharSequence args) {
+    // functions
+    function-def void main(CharSequence args)
+    {   // statement block: may include block-local vars, objects, spaces + any other statement type
         OpSys.println["Hello, Space!"];
-        OpSys.println[greeting];
+//        OpSys.println[greeting];
+        OpSys.println[myIntVar];
+//        OpSys.println[myBoolVar];
+//        {
+            // other block
+//        }
     }
 }

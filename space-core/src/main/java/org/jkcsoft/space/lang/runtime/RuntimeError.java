@@ -31,9 +31,6 @@ public class RuntimeError {
 
     @Override
     public String toString() {
-        return "Space runtime error @" +
-                "sourceInfo=" + sourceInfo +
-                ", message='" + message + '\'' +
-                ", errorCode=" + errorCode ;
+        return "error " + (errorCode != 0 ? "<" + errorCode + ">" : "") + sourceInfo + " " + message ;
     }
 }

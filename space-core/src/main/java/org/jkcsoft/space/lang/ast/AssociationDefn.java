@@ -28,11 +28,15 @@ public class AssociationDefn extends NamedElement {
     AssociationDefn(SourceInfo sourceInfo, String name, SpacePathExpr fromPath, SpacePathExpr toPath) {
         super(sourceInfo, name);
 
-        if (fromPath != null)
+        if (fromPath != null) {
             this.fromTypeRef = new MetaReference<>(fromPath);
+            addChild(fromPath);
+        }
 
         if (toPath == null) throw new RuntimeException("bug: path to class ref cannot be null");
         this.toTypeRef = new MetaReference<>(toPath);
+        //
+        addChild(toPath);
         //
         if (fromTypeRef != null)
             addReference(fromTypeRef);

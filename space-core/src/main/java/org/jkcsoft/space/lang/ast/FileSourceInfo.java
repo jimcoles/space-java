@@ -38,9 +38,6 @@ public class FileSourceInfo implements SourceInfo {
 
     @Override
     public String toString() {
-        return "file=" + file +
-                ", line=" + line +
-                ", character=" + character +
-                '}';
+        return file.getName() + ":[" + line + "," + character + "]";
     }
 }

@@ -40,16 +40,19 @@ public class Space extends SpaceObject implements Assignable, SpaceSet, Iterable
     private List<Tuple> tuples = new LinkedList<>();
 
     Space(SpaceOid oid, Space contextSpace, SpaceTypeDefn definition) {
-        super(oid);
+        super(oid, definition);
         this.contextSpace = contextSpace;
         this.definition = definition;
     }
 
     public Space addTuple(Tuple tuple) {
         tuples.add(tuple);
-        tuple.setSpace(this);
         validate(tuple);
         return this;
+    }
+
+    public Tuple getTupleAt(int idx) {
+        return tuples.get(idx);
     }
 
     private void validate(Tuple tuple) {

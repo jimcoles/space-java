@@ -11,130 +11,118 @@
 
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.runtime.RuntimeException;
+import org.jkcsoft.java.util.Strings;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
- * The central declarative meta notion of Space.  A
+ * The central declarative, data-centric, meta notion of Space.
+ * <p>
+ * <p>
+ * OOP Analog: Class (definition) RDB Analog: Table definition (creat table ... statement)
  *
  * @author Jim Coles
  * @version 1.0
  */
 public class SpaceTypeDefn extends NamedElement {
 
-    private SpaceTypeDefn               contextSpaceTypeDefn;
-    private boolean                     isEntity;
-    private List<VariableDefn>          variableDefnList;
-    private List<AssociationDefn>       associationDefnList;
-    private List<EquationDefn>          equations;
-    private List<TransformDefn>         transformDefns;
-    private List<AbstractActionDefn>    functionDefns = new LinkedList<>();
-
-    // redundant
-//    private Map<String, VariableDefn>       indexCoordinatesByName = new HashMap<>();
-//    private Map<String, AssociationDefn>    indexAssociationsByName = new HashMap<>();
-//    private Map<String, AbstractActionDefn> indexFunctionsByName = new HashMap<>();
+    private boolean isEntity;
+    private SpaceTypeDefnBody body;
 
     SpaceTypeDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
     }
 
+    public List<TransformDefn> getTransformDefns() {
+        return body.getTransformDefns();
+    }
+
+    public List<AbstractFunctionDefn> getFunctionDefns() {
+        return body.getFunctionDefns();
+    }
+
     public boolean isComputed() {
-        return false;
+        return body.isComputed();
     }
 
     public boolean isEnumerated() {
-        return true;
-    }
-
-    void setContextSpaceTypeDefn(SpaceTypeDefn contextSpaceTypeDefn) {
-        this.contextSpaceTypeDefn = contextSpaceTypeDefn;
-    }
-
-    public SpaceTypeDefn getContextSpaceTypeDefn() {
-        return contextSpaceTypeDefn;
-    }
-
-    public boolean hasContextSpaceDefn() {
-        return contextSpaceTypeDefn != null;
+        return body.isEnumerated();
     }
 
     public List<VariableDefn> getVariableDefnList() {
-        return variableDefnList;
+        return body.getVariableDefnList();
     }
 
     public VariableDefn getVariableDefnAt(int index) {
-        return variableDefnList.get(index);
+        return body.getVariableDefnAt(index);
     }
 
     public AssociationDefn getAssocDefnAt(int index) {
-        return associationDefnList.get(index);
+        return body.getAssocDefnAt(index);
     }
 
-    public AbstractActionDefn getFunction(String name) {
-        NamedElement childWithName = getChildByName(name);
-        if (!(childWithName instanceof  AbstractActionDefn))
-            throw new RuntimeException("");
-        AbstractActionDefn abstractActionDefn = (AbstractActionDefn) childWithName;
-        if (abstractActionDefn == null) {
-            throw new RuntimeException("function ["+name+"] not found in " + this);
-        }
-        return abstractActionDefn;
+    public FunctionDefn getFunction(String name) {
+        return body.getFunction(name);
     }
 
-    // ===========================================================
-    // Child adders
-    //
     public VariableDefn addVariable(VariableDefn variableDefn) {
-        if (variableDefnList == null)
-            variableDefnList = new LinkedList<>();
-        variableDefnList.add(variableDefn);
-        //
-//        indexCoordinatesByName.put(variableDefn.getName(), variableDefn);
-        //
-        addChild(variableDefn);
-        return variableDefn;
+        return body.addVariable(variableDefn);
     }
 
-    public AssociationDefn addAssociation(AssociationDefn associationDefn) {
-        if (associationDefnList == null)
-            associationDefnList = new LinkedList<>();
-        associationDefnList.add(associationDefn);
-        //
-//        indexAssociationsByName.put(associationDefn.getName(), associationDefn);
-        //
-        addChild(associationDefn);
-        //
-
-// NOTE: The following commented out because SpaceTypeDef is not the direct holder of references.
-//        if (associationDefn.getFromTypeRef() != null)
-//            addReference(associationDefn.getFromTypeRef());
-//
-//        addReference(associationDefn.getToTypeRef());
-        //
-        return associationDefn;
+    public AssociationDefn addAssocDefn(AssociationDefn associationDefn) {
+        return body.addAssocDefn(associationDefn);
     }
 
-    public AbstractActionDefn addActionDefn(AbstractActionDefn actionDefn) {
-        functionDefns.add(actionDefn);
-        actionDefn.setContextSpaceTypeDefn(this);
-        //
-//        indexFunctionsByName.put(actionDefn.getName(), actionDefn);
-        //
-        addChild(actionDefn);
-        return actionDefn;
+    public AbstractFunctionDefn addFunctionDefn(AbstractFunctionDefn functionDefn) {
+        return body.addFunctionDefn(functionDefn);
     }
+
+    public boolean hasVariables() {
+        return body.hasVariables();
+    }
+
+    public boolean hasAssociations() {
+        return body.hasAssociations();
+    }
+
+    public List<AssociationDefn> getAssociationDefnList() {
+        return body.getAssociationDefnList();
+    }
+
+    /**
+     * Might not be needed; essentially, asking 'is this a basis type' or a 'derived' type.
+     */
+    public boolean isEntity() {
+        return isEntity;
+    }
+
+    public SpaceTypeDefnBody setBody(SpaceTypeDefnBody body) {
+        this.body = body;
+        //
+        addChild(body);
+        //
+        return body;
+    }
+
+    public SpaceTypeDefnBody getBody() {
+        return body;
+    }
+
 
     public String toLogString() {
         StringBuilder sb = new StringBuilder("SpaceTypeDefn {" + getName() + ": ");
-        for (AbstractActionDefn functionDefn: functionDefns) {
-            sb.append(functionDefn.getName()+"(),");
-        }
+        Strings.buildCommaDelList(body.getVariableDefnList());
         return sb.toString();
+    }
+
+    public List<NamedElement> getAllMembers() {
+        LinkedList<NamedElement> namedElements = new LinkedList<>();
+        if (hasVariables())
+            namedElements.addAll(getVariableDefnList());
+        if (hasAssociations())
+            namedElements.addAll(getAssociationDefnList());
+        return namedElements;
     }
 
 }
