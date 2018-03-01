@@ -96,7 +96,7 @@ public class Executor extends ExprProcessor {
      * (not used currently) Idea is to hold redundantly accumulated info useful
      * for lookup during execution.
      */
-    private Map<NamedElement, MetaInfo> metaObjectExtendedInfoMap = new TreeMap<>();
+//    private Map<NamedElement, MetaInfo> metaObjectExtendedInfoMap = new TreeMap<>();
 
     private ObjectTable objectTable = new ObjectTable();
 
@@ -110,6 +110,10 @@ public class Executor extends ExprProcessor {
      * Space standard, some will be user-provided.
      */
     private Map<String, ExprProcessor> exprProcessors = null;
+    public static SpaceTypeDefn MATH_TYPE_DEF;
+    public static SpaceTypeDefn CHAR_SEQ_TYPE_DEF;
+    public static SpaceTypeDefn space_opers_type_def;
+    public static SpaceTypeDefn op_sys_type_def;
 
     public Executor() {
 //        userAstFactory.newProgram(new NativeSourceInfo(null), "root");
@@ -174,6 +178,7 @@ public class Executor extends ExprProcessor {
 
     public void linkAndExec(List<RuntimeError> errors, Schema runSchema) throws Exception {
         log.debug("linking loaded program");
+        errors = linkRefs(errors, langRootSchema);
         errors = linkRefs(errors, runSchema);
         if (errors.size() == 0) {
             log.info("no linker errors");
@@ -235,10 +240,10 @@ public class Executor extends ExprProcessor {
     private void loadNativeMetaObjects() {
         // use Java annotations Java-native objects
 //        SpaceNative.class.getAnnotations();
-        loadNativeClass(JnOpSys.class, AstUtils.getLangRoot(dirChain));
-        loadNativeClass(JnMath.class, AstUtils.getLangRoot(dirChain));
-        loadNativeClass(JnCharSequence.class, AstUtils.getLangRoot(dirChain));
-        loadNativeClass(JnSpaceOpers.class, AstUtils.getLangRoot(dirChain));
+        CHAR_SEQ_TYPE_DEF = loadNativeClass(JnCharSequence.class, AstUtils.getLangRoot(dirChain));
+        op_sys_type_def = loadNativeClass(JnOpSys.class, AstUtils.getLangRoot(dirChain));
+        MATH_TYPE_DEF = loadNativeClass(JnMath.class, AstUtils.getLangRoot(dirChain));
+        space_opers_type_def = loadNativeClass(JnSpaceOpers.class, AstUtils.getLangRoot(dirChain));
 
         OPER_NAV = lookupOperator("nav");
         OPER_NEW_TUPLE = lookupOperator("newTuple");
@@ -246,39 +251,71 @@ public class Executor extends ExprProcessor {
         OPER_ASSIGN = lookupOperator("assign");
     }
 
-    private void loadNativeClass(Class jnClass, Schema rootAstSpace) {
+    private SpaceTypeDefn loadNativeClass(Class jnClass, Schema rootAstSchema) {
         AstFactory astFactory = new AstFactory();
         SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(
             new NativeSourceInfo(jnClass), toSpaceTypeName(jnClass)
         );
         trackMetaObject(spaceTypeDefn);
         //
-        rootAstSpace.addSpaceDefn(spaceTypeDefn);
+        rootAstSchema.addSpaceDefn(spaceTypeDefn);
         //
-        spaceTypeDefn.setBody(astFactory.newTypeDefnBody(new CodeSourceInfo()));
+        spaceTypeDefn.setBody(astFactory.newTypeDefnBody(new NativeSourceInfo(jnClass)));
         //
-//        spaceDefn.setName(jnClass.getSimpleName());
         Method[] methods = jnClass.getMethods();
         for (Method jMethod : methods) {
             if (isExcludedNative(jMethod))
                 continue;
 
-            NativeFunctionDefn functionDefn = astFactory.newNativeFunctionDefn(
-                new NativeSourceInfo(jMethod),
+            NativeSourceInfo jMethodInfo = new NativeSourceInfo(jMethod);
+            NativeFunctionDefn functionDefnAST = astFactory.newNativeFunctionDefn(
+                jMethodInfo,
                 jMethod.getName(),
                 jMethod,
-                spaceTypeDefn
+                astFactory.newSpaceTypeDefn(jMethodInfo, "_methodSig_" + jMethod.getName())
             );
             //
-            spaceTypeDefn.getBody().addFunctionDefn(functionDefn);
-            trackMetaObject(functionDefn);
+            spaceTypeDefn.getBody().addFunctionDefn(functionDefnAST);
+            trackMetaObject(functionDefnAST);
             //
-            Parameter[] jParameters = jMethod.getParameters();// TODO build dynamic arg space
+            functionDefnAST.getArgSpaceTypeDefn().setBody(astFactory.newTypeDefnBody(jMethodInfo));
+            //
+            Parameter[] jParameters = jMethod.getParameters();
             for (Parameter jParam : jParameters) {
-                functionDefn.getArgSpaceTypeDefn().addVariable(
-                    astFactory.newVariableDefn(new CodeSourceInfo(), jParam.getName(), PrimitiveType.TEXT));
+                PrimitiveType spcPrim = javaToSpace(jParam);
+                if (spcPrim == PrimitiveType.TEXT) {
+                    NativeSourceInfo jParamInfo = new NativeSourceInfo(jParam);
+                    functionDefnAST.getArgSpaceTypeDefn().addAssocDefn(
+                        astFactory.newAssociationDefn(jParamInfo, jParam.getName(),
+                                                      astFactory.newSpacePathExpr(jParamInfo, null,
+                                                                                  CHAR_SEQ_TYPE_DEF.getName(),
+                                                                                  null)));
+                }
+                else {
+                    functionDefnAST.getArgSpaceTypeDefn().addVariable(
+                        astFactory.newVariableDefn(new CodeSourceInfo(), jParam.getName(), spcPrim));
+                }
             }
         }
+        return spaceTypeDefn;
+    }
+
+    private PrimitiveType javaToSpace(Parameter jParam) {
+        PrimitiveType spcPrimType = PrimitiveType.TEXT;
+        Class<?> jType = jParam.getType();
+        if (jType == String.class) {
+            spcPrimType = PrimitiveType.TEXT;
+        }
+        else if (jType == Boolean.TYPE) {
+            spcPrimType = PrimitiveType.BOOLEAN;
+        }
+        else if (jType == Integer.TYPE) {
+            spcPrimType = PrimitiveType.CARD;
+        }
+        else if (jType == Float.TYPE) {
+            spcPrimType = PrimitiveType.REAL;
+        }
+        return spcPrimType;
     }
 
     private boolean isExcludedNative(Method jMethod) {
@@ -331,7 +368,7 @@ public class Executor extends ExprProcessor {
         return null;
     }
 
-    private Assignable delegateExec(Tuple spcContext, AbstractFunctionDefn function, Tuple argTuple)
+    private Assignable eval(Tuple spcContext, AbstractFunctionDefn function, Tuple argTuple)
         throws RuntimeException
     {
         log.debug("delegate eval: " + function);
@@ -423,22 +460,24 @@ public class Executor extends ExprProcessor {
         log.debug("eval: " + nativeFunctionDefn);
         Assignable value = null;
         try {
-            Assignable arg1 = argTuple.getAssignableAt(0);
-            Object jArg1 = "?";
-            if (arg1 instanceof Reference)
-                //
-                jArg1 = dereference(((Reference) arg1).getToOid()).toString();
-            else {
-                jArg1 = arg1.toString();
+            Object[] jArgs = new Object[argTuple.getSize()];
+            for (int idxArg = 0; idxArg < argTuple.getValuesHolders().size(); idxArg++) {
+                Assignable spcArgValue = argTuple.getValuesHolders().get(idxArg);
+                Object jArg = "?";
+                if (spcArgValue instanceof Reference)
+                    //
+                    jArg = dereference(((Reference) spcArgValue).getToOid()).toString();
+                else {
+                    jArg = spcArgValue.toString();
+                }
+                // TODO: 1/29/17 Remove hardcodings and improve casting generalization
+                CastTransforms casters = new CastTransforms();
+                if (jArg instanceof CharacterSequence)
+                    jArg = casters.charSequenceToString((CharacterSequence) jArg);
+                jArgs[idxArg] = jArg;
             }
-            // TODO: 1/29/17 Remove hardcodings and improve casting generalization
-            CastTransforms casters = new CastTransforms();
-            if (jArg1 instanceof CharacterSequence)
-                jArg1 = casters.charSequenceToString((CharacterSequence) jArg1);
-
-            Object jObjectDummy = null;
-                jObjectDummy = nativeFunctionDefn.getjMethod().getDeclaringClass().newInstance();
-            nativeFunctionDefn.getjMethod().invoke(jObjectDummy, jArg1);
+            Object jObjectDummy = nativeFunctionDefn.getjMethod().getDeclaringClass().newInstance();
+            nativeFunctionDefn.getjMethod().invoke(jObjectDummy, jArgs);
         } catch (InstantiationException e) {
             log.error(e);
         } catch (IllegalAccessException e) {
@@ -472,7 +511,6 @@ public class Executor extends ExprProcessor {
 
         // must add a nested Space context beneath the incoming context space to
         // represent the call stack
-//        Space argSpace = newSpace(spcContext, ((Callable) targetFunctionDefn).getArgSpaceTypeDefn());
         Tuple argTuple = newTuple(spcCallExpr.getFunctionRef().getResolvedMetaObj().getArgSpaceTypeDefn());
 
         // assignments may be by name or by order (like a SQL update statement)
@@ -480,9 +518,10 @@ public class Executor extends ExprProcessor {
         for (int idxArg = 0; idxArg < argumentExprs.length; idxArg++) {
             ValueExpr argumentExpr = argumentExprs[idxArg];
             Assignable argValue = eval(ctxObj, argumentExpr);
-            addValueOrRef(argTuple, idxArg, argValue);
+            argValue = castRightSideAsNeeded(argTuple.getDefn().getAllMembers().get(idxArg), argValue);
+            argTuple.setValueAt(idxArg, argValue);
         }
-        value = delegateExec(ctxObj, targetFunctionDefn, argTuple);
+        value = eval(ctxObj, targetFunctionDefn, argTuple);
         //
         return value;
     }
@@ -493,34 +532,33 @@ public class Executor extends ExprProcessor {
     }
 
     private Assignable eval(Tuple ctxObject, AssignmentExpr assignmentExpr) {
-        Assignable leftSide = ctxObject.get(assignmentExpr.getMemberRef().getResolvedMetaObj());
+        NamedElement leftSideDefnObj = assignmentExpr.getMemberRef().getResolvedMetaObj();
         Assignable rightSideValue = eval(ctxObject, assignmentExpr.getValueExpr());
-        if (leftSide instanceof ScalarValue) {
-            if (rightSideValue instanceof ScalarValue) {
-                log.debug("setting scalar to scalar");
-                ((ScalarValue) leftSide).setValue(((ScalarValue) rightSideValue).getValue());
-            }
-        }
-        else if (leftSide instanceof Reference) {
-            if (rightSideValue instanceof Reference) {
-                log.debug("setting reference to reference");
-                ((Reference) leftSide).setToOid(((Reference) rightSideValue).getToOid());
-            }
-        }
-        else if (leftSide instanceof Space) {
-
-        }
-        else if (leftSide instanceof Tuple) {
-
-        }
-        else if (leftSide instanceof Variable) {
-
-        }
-        return leftSide;
+        rightSideValue = castRightSideAsNeeded(leftSideDefnObj, rightSideValue);
+        Assignable leftSideHolder = SpaceUtils.assignOper(ctxObject, leftSideDefnObj, rightSideValue);
+        log.debug("eval: resulting assigned value: " + leftSideHolder);
+        return leftSideHolder;
     }
 
-    private void addValueOrRef(Tuple argTuple, int idxArg, Assignable literalValue) {
-        argTuple.setValue(idxArg, literalValue);
+    private Assignable castRightSideAsNeeded(NamedElement leftSideDefnObj, Assignable rightSideValue) {
+        if ( leftSideDefnObj instanceof AssociationDefn &&
+            ((AssociationDefn) leftSideDefnObj).getToType().getOid().equals(Executor.CHAR_SEQ_TYPE_DEF.getOid())
+             && !(rightSideValue instanceof Reference) )
+        {
+            if (rightSideValue instanceof ScalarValue) {
+                CharacterSequence characterSequence =
+                    newCharacterSequence(((ScalarValue) rightSideValue).getValue().toString());
+                rightSideValue = newReference(characterSequence);
+                log.debug("cast scalar value to CharSequence");
+            }
+            else if (rightSideValue instanceof Variable) {
+                CharacterSequence characterSequence =
+                    newCharacterSequence(((Variable) rightSideValue).getScalarValue().getValue().toString());
+                rightSideValue = newReference(characterSequence);
+                log.debug("cast scalar value to CharSequence");
+            }
+        }
+        return rightSideValue;
     }
 
     /**
@@ -551,7 +589,7 @@ public class Executor extends ExprProcessor {
                 value = getObjBuilder().newCardinalValue(new Integer(literalExpr.getValueExpr()));
                 break;
             case BOOLEAN:
-                value = getObjBuilder().newBooleanValue(Boolean.getBoolean(literalExpr.getValueExpr()));
+                value = getObjBuilder().newBooleanValue(Boolean.valueOf(literalExpr.getValueExpr()));
                 break;
             case CHAR:
             case REAL:
@@ -576,13 +614,17 @@ public class Executor extends ExprProcessor {
         return tuple;
     }
 
-    private Reference newReference(SpaceObject spcObject) {
-        Reference reference = getObjBuilder().newObjectReference(null, spcObject.getOid());
+    private Reference newReference(SpaceObject toObject) {
+        Reference reference = newReference(toObject.getOid());
 //        trackInstanceObject(reference);
         return reference;
     }
 
-    private CharacterSequence newCharacterSequence(String stringValue) {
+    private Reference newReference(SpaceOid toOid) {
+        return getObjBuilder().newObjectReference(null, toOid);
+    }
+
+    CharacterSequence newCharacterSequence(String stringValue) {
         CharacterSequence newCs = getObjBuilder().newCharacterSequence(stringValue);
         trackInstanceObject(newCs);
         return newCs;

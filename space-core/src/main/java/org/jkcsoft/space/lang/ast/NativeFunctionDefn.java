@@ -23,6 +23,8 @@ public class NativeFunctionDefn extends AbstractFunctionDefn implements Callable
         super(sourceInfo, name);
         this.jMethod = jMethod;
         this.argSpaceTypeDefn = argSpaceTypeDefn;
+        //
+        addChild(argSpaceTypeDefn);
     }
 
     public Method getjMethod() {

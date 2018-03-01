@@ -13,6 +13,7 @@ package org.jkcsoft.space.lang.ast;
  * @author Jim Coles
  */
 public enum PrimitiveType {
+    VOID,
     BOOLEAN,
     CHAR,
     TEXT,

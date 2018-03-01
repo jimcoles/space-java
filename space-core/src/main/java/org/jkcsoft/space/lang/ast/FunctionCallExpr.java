@@ -34,9 +34,9 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
         if (functionPathExpr == null) throw new RuntimeException("bug: function path null");
         //
         this.functionRef = new MetaReference(functionPathExpr);
-        addChild(functionPathExpr);
+        addChild(functionRef);
         //
-        addReference(functionRef);
+//        addReference(functionRef);
         //
         return this;
     }
@@ -47,9 +47,9 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
         for (ValueExpr argumentExpr : argumentExprs) {
             addChild((ModelElement) argumentExpr);
             //
-            if (argumentExpr instanceof MetaReference) {
-                addReference((MetaReference) argumentExpr);
-            }
+//            if (argumentExpr instanceof MetaReference) {
+//                addReference((MetaReference) argumentExpr);
+//            }
         }
     }
 

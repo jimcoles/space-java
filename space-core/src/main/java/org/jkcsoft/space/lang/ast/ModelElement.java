@@ -61,6 +61,9 @@ public abstract class ModelElement extends SpaceObject {
         if (AstUtils.isGroupingNode(child)) {
             groupingNodes.add(child);
         }
+        if (child instanceof MetaReference) {
+            addReference(((MetaReference) child));
+        }
         //
         return child;
     }
@@ -72,7 +75,7 @@ public abstract class ModelElement extends SpaceObject {
     /** Must be called by the adder method for children, e.g., {@link SpaceTypeDefn}.addAssocDefn()
      * should call this for the {@link SpacePathExpr} associated with it's 'from' and 'to'
      * type definition. */
-    void addReference(MetaReference reference) {
+    private void addReference(MetaReference reference) {
         if (reference == null) throw new IllegalArgumentException("attempt to add null reference");
         if (references == null)
             references = new HashSet<>();
@@ -117,4 +120,5 @@ public abstract class ModelElement extends SpaceObject {
         return "[" + this.getClass().getSimpleName() + ":" + this.getOid() + "] " + "\"" + this.getText() + "\""
             + " (" + getSourceInfo() + ")";
     }
+
 }

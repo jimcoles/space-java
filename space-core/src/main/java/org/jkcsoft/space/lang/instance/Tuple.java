@@ -14,8 +14,12 @@ import org.jkcsoft.space.lang.ast.NamedElement;
 import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
 import org.jkcsoft.space.lang.ast.VariableDefn;
 import org.jkcsoft.space.lang.runtime.RuntimeException;
+import org.jkcsoft.space.lang.runtime.SpaceUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Conceptually, a Tuple is an element of a Relation (which is a Set of Tuples).
@@ -58,6 +62,19 @@ public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable {
         }
     }
 
+    Tuple(SpaceOid oid, SpaceTypeDefn defn, Assignable... assignables) {
+        this(oid, defn);
+        //
+        List<NamedElement> allMembers = getDefn().getAllMembers();
+        if (!getDefn().hasMembers() || assignables.length > allMembers.size())
+            throw new RuntimeException(
+                "Too many values [" + assignables.length + "] for this space [" + allMembers.size() + "].");
+        //
+        for (int idxVar = 0; idxVar < assignables.length; idxVar++) {
+            SpaceUtils.assignOper(this, allMembers.get(idxVar), assignables[idxVar]);
+        }
+    }
+
     private void initRef(AssociationDefn assocDefn) {
         Reference ref = new Reference(assocDefn, null);
         assignables.add(ref);
@@ -70,29 +87,31 @@ public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable {
         indexAllByMemberOid.put(datum.getDefinition().getOid(), datum);
     }
 
-    Tuple(SpaceOid oid, SpaceTypeDefn defn, Assignable... assignables) {
-        this(oid, defn);
-//        this.assignables.addAll(Arrays.asList(assignables));
-        // set values based on order of variable and assoc in space type definition
-        if (getVarDefnList() != null && assignables.length > getVarDefnList().size())
-            throw new RuntimeException("Too many variables for this Space.");
-        for (int idxVar = 0; idxVar < assignables.length; idxVar++) {
-            setValue(getNthMemberOid(idxVar), assignables[idxVar]);
+    public Tuple setValue(NamedElement member, Assignable value) {
+        SpaceUtils.assignOper(this, member, value);
+        return this;
+    }
+
+    public Tuple setValueAt(int idx, Assignable value) {
+        SpaceUtils.assignOper(this, getNthMember(idx), value);
+        return this;
+    }
+
+    private NamedElement getNthMember(int idx) {
+        return getDefn().getAllMembers().get(idx);
+    }
+
+    /** Get the 0-based ordinal of the specified member */
+    private int getMemberIdx(SpaceOid memberOid) {
+        int idxMember = -1;
+        List<NamedElement> allMembers = getDefn().getAllMembers();
+        for (int idx = 0; idx < allMembers.size(); idx++) {
+            if (allMembers.get(idx).getOid().equals(memberOid)) {
+                idxMember = idx;
+                break;
+            }
         }
-    }
-
-    public Tuple setValue(SpaceOid memberOid, Assignable value) {
-        indexAllByMemberOid.put(memberOid, value);
-        return this;
-    }
-
-    public Tuple setValue(int idx, Assignable value) {
-        indexAllByMemberOid.put(getNthMemberOid(idx), value);
-        return this;
-    }
-
-    private SpaceOid getNthMemberOid(int idx) {
-        return getDefn().getAllMembers().get(idx).getOid();
+        return idxMember;
     }
 
     public Assignable get(NamedElement member) {
@@ -100,20 +119,20 @@ public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable {
     }
 
     public Assignable getAssignableAt(int idx) {
-        return indexAllByMemberOid.get(getNthMemberOid(idx));
+        return indexAllByMemberOid.get(getNthMember(idx).getOid());
     }
 
-//    public List<Assignable> getAssignables() {
-//        return assignables;
-//    }
-
-    public List<Assignable> getValues() {
+    public List<Assignable> getValuesHolders() {
         return assignables;
     }
 
     public SpaceOid getToOid(SpaceOid refMemberOid) {
         Reference reference = getRefByOid(refMemberOid);
         return reference.getToOid();
+    }
+
+    public int getSize() {
+        return assignables.size();
     }
 
     public Reference getRefByOid(SpaceOid memberOid) {
@@ -130,6 +149,5 @@ public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable {
     private List<VariableDefn> getVarDefnList() {
         return getDefn().getVariableDefnList();
     }
-
 
 }

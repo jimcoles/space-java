@@ -7,8 +7,8 @@ public type-def MySpace
 {   // type def body (block)
 
     // var list
-    card myIntVar = 1;
-    boolean myBoolVar = true;
+    card myIntVar = 127;
+    boolean myBoolVar = false;
 
     // assoc list
     CharSequence greeting = "Hello from this reference to a CharSequence.";
@@ -16,10 +16,10 @@ public type-def MySpace
     // functions
     function-def void main(CharSequence args)
     {   // statement block: may include block-local vars, objects, spaces + any other statement type
-        OpSys.println["Hello, Space!"];
-//        OpSys.println[greeting];
+        OpSys.println["Hello, Space! (string literal)"];
+        OpSys.println[greeting];
         OpSys.println[myIntVar];
-//        OpSys.println[myBoolVar];
+        OpSys.println[myBoolVar];
 //        {
             // other block
 //        }

@@ -68,7 +68,7 @@ public class JnSpaceOpers {
 //        if (rightObject instanceof ScalarValue) {
 //            assert (leftSpaceObject instanceof ScalarValue);
 //            Object newValueObject = ((ScalarValue) rightObject).getValue();
-//            ((ScalarValue) leftSpaceObject).setValue(newValueObject);
+//            ((ScalarValue) leftSpaceObject).setValueAt(newValueObject);
 //        }
 //        else if (rightObject instanceof Tuple) {
 //            if (leftSpaceObject instanceof Space) {

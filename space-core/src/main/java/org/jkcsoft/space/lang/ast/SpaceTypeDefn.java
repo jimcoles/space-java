@@ -116,6 +116,10 @@ public class SpaceTypeDefn extends NamedElement {
         return sb.toString();
     }
 
+    public boolean hasMembers() {
+        return body.hasVariables() || body.hasAssociations();
+    }
+
     public List<NamedElement> getAllMembers() {
         LinkedList<NamedElement> namedElements = new LinkedList<>();
         if (hasVariables())

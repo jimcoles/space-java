@@ -30,18 +30,18 @@ public class AssociationDefn extends NamedElement {
 
         if (fromPath != null) {
             this.fromTypeRef = new MetaReference<>(fromPath);
-            addChild(fromPath);
+            addChild(fromTypeRef);
         }
 
         if (toPath == null) throw new RuntimeException("bug: path to class ref cannot be null");
         this.toTypeRef = new MetaReference<>(toPath);
         //
-        addChild(toPath);
+        addChild(toTypeRef);
         //
-        if (fromTypeRef != null)
-            addReference(fromTypeRef);
-
-        addReference(toTypeRef);
+//        if (fromTypeRef != null)
+//            addReference(fromTypeRef);
+//
+//        addReference(toTypeRef);
     }
 
     public MetaReference<SpaceTypeDefn> getFromTypeRef() {

@@ -45,4 +45,9 @@ public abstract class ScalarValue<T> implements Assignable {
     }
 
     public abstract String asString();
+
+    @Override
+    public String toString() {
+        return "("+type+") " + value;
+    }
 }

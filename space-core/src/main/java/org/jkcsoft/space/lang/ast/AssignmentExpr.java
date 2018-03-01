@@ -29,7 +29,7 @@ public class AssignmentExpr extends ModelElement implements ValueExpr {
         //
         addChild(memberRef);
         //
-        addReference(memberRef);
+//        addReference(memberRef);
     }
 
     public void setValueExpr(ValueExpr valueExpr) {
@@ -38,8 +38,8 @@ public class AssignmentExpr extends ModelElement implements ValueExpr {
         if (valueExpr instanceof ModelElement)
             addChild(((ModelElement) valueExpr));
 
-        if (valueExpr instanceof MetaReference)
-            addReference(((MetaReference) valueExpr));
+//        if (valueExpr instanceof MetaReference)
+//            addReference(((MetaReference) valueExpr));
 
     }
 

@@ -18,7 +18,7 @@ import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;
 public class JnOpSys {
 
     public void println(String msg) {
-        System.out.println(msg);
+        System.err.println(msg);
     }
 
 }

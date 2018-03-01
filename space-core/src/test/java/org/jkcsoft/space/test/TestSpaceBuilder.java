@@ -39,8 +39,8 @@ public class TestSpaceBuilder extends TestSourceStub {
         //
         Tuple testObjectTuple = objs.newTuple(testPersonTypeDefn);
         TextValue textValue = objs.newTextValue("jim");
-        testObjectTuple.setValue(firstName.getOid(), textValue);
-        testObjectTuple.setValue(lastName.getOid(), objs.newTextValue("Coles"));
+        testObjectTuple.setValue(firstName, textValue);
+        testObjectTuple.setValue(lastName, objs.newTextValue("Coles"));
         space.addTuple(testObjectTuple);
         //
     }

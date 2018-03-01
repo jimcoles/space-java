@@ -47,8 +47,8 @@ public class Reference implements Assignable {
         return parentTuple;
     }
 
-    //    @Override
-//    public String asString() {
-//        return Executor.getInstance().dereference(toOid).toString();
-//    }
+    @Override
+    public String toString() {
+        return "-> " + toOid;
+    }
 }
