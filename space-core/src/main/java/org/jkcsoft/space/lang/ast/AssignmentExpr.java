@@ -8,6 +8,9 @@
  * Also see the LICENSE file in the repository root directory.
  */
 package org.jkcsoft.space.lang.ast;
+
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 /**
  * @author Jim Coles
  */
@@ -24,8 +27,9 @@ public class AssignmentExpr extends ModelElement implements ValueExpr {
         return memberRef;
     }
 
+    /** The left-side reference. */
     public void setMemberRef(SpacePathExpr memberPath) {
-        this.memberRef = new MetaReference<>(memberPath);
+        this.memberRef = new MetaReference<>(memberPath, MetaType.DATUM);
         //
         addChild(memberRef);
         //

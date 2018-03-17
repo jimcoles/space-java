@@ -14,13 +14,13 @@ package org.jkcsoft.space.lang.ast;
  *
  * Similar to Operator.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class TransformDefn extends FunctionDefn {
 
-    TransformDefn(SourceInfo sourceInfo, String name) {
-        super(sourceInfo, name);
+    TransformDefn(SourceInfo sourceInfo, String name, SpacePathExpr returnPathExpr) {
+        super(sourceInfo, name, returnPathExpr);
     }
 
 }

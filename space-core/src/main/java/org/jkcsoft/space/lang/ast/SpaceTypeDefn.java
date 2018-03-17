@@ -12,6 +12,7 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.java.util.Strings;
+import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,19 +20,24 @@ import java.util.List;
 /**
  * The central declarative, data-centric, meta notion of Space.
  * <p>
- * <p>
- * OOP Analog: Class (definition) RDB Analog: Table definition (creat table ... statement)
+ * OOP Analog: Class (definition)<br>
+ * RDB Analog: Table definition (create table ... statement)
  *
  * @author Jim Coles
  * @version 1.0
  */
-public class SpaceTypeDefn extends NamedElement {
+public class SpaceTypeDefn extends NamedElement implements DatumType {
 
     private boolean isEntity;
     private SpaceTypeDefnBody body;
 
     SpaceTypeDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
+    }
+
+    @Override
+    public MetaType getMetaType() {
+        return MetaType.TYPE;
     }
 
     public List<TransformDefn> getTransformDefns() {
@@ -129,4 +135,8 @@ public class SpaceTypeDefn extends NamedElement {
         return namedElements;
     }
 
+    @Override
+    public int getScalarDofs() {
+        return body.getScalarDofs();
+    }
 }

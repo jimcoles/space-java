@@ -15,7 +15,7 @@ import org.jkcsoft.space.lang.instance.Transform;
 /**
  * Hardcoded transform from Space to JavaBeans.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class SpaceToJavaTransform implements Transform {

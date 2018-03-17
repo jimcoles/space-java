@@ -7,12 +7,16 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.ast;
+package org.jkcsoft.space.lang.metameta;
 
-@Deprecated
-public class VariableDefnStmt {
-
-    private VariableDefn variableDecl;
-    private AssignmentExpr assignmentExpr; // optional
-
+/**
+ * Used by linker and semantic analyzer for compile-time type checking.
+ *
+ * @author Jim Coles
+ */
+public enum MetaType {
+    TYPE,
+    DATUM, // var, domain, assoc
+    FUNCTION,
+//    ANY
 }

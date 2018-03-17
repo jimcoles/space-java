@@ -10,7 +10,7 @@ package com.jkc.roml.behaviors;
 /**
  * A hard-coded Action List.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class JdbcToXmlAction 

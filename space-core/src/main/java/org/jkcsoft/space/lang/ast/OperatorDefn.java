@@ -18,9 +18,36 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class OperatorDefn extends ModelElement {
+public abstract class OperatorDefn extends ModelElement {
 
-    OperatorDefn(SourceInfo sourceInfo) {
+    private DatumType datumType;
+    private int minArgs;
+    private int maxArgs;
+
+    OperatorDefn(SourceInfo sourceInfo, DatumType datumType, int numArgs) {
+        this(sourceInfo, datumType, numArgs, numArgs);
+    }
+
+    OperatorDefn(SourceInfo sourceInfo, DatumType datumType, int minArgs, int maxArgs) {
         super(sourceInfo);
+        this.datumType = datumType;
+        this.minArgs = minArgs;
+        this.maxArgs = maxArgs;
+    }
+
+    public boolean isMaxInf() {
+        return false;
+    }
+
+    public DatumType getDatumType() {
+        return datumType;
+    }
+
+    public int getMinArgs() {
+        return minArgs;
+    }
+
+    public int getMaxArgs() {
+        return maxArgs;
     }
 }

@@ -14,7 +14,7 @@ package com.jkc.roml.lang;
  * and the Transform being the physical or pragmatic.  Multiple Transforms can 
  * be derived from a single Equation.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class Transform extends ActionSequenceExpr

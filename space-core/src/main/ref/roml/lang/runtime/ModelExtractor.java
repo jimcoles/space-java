@@ -16,7 +16,7 @@ package com.jkc.roml.dms;
  * designers can reverse engineer the generated model to build a 'logical' 
  * model.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class ModelExtractor 

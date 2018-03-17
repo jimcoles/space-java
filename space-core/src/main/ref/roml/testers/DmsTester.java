@@ -12,7 +12,7 @@ import com.jkc.dms.data.DataSystemManager;
 
 /**
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class DmsTester extends com.jkc.testers.Tester

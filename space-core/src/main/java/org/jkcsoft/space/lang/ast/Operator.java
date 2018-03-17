@@ -7,7 +7,7 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.instance;
+package org.jkcsoft.space.lang.ast;
 
 /**
  * @author Jim Coles

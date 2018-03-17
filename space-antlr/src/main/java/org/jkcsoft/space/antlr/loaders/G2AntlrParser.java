@@ -36,7 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * This class wraps the Antlr Scanner (Tokenizer, Lexer) and Parser (Recognizer).
+ * This class wraps the ANTLR Scanner (Tokenizer, Lexer) and Parser (Recognizer).
  * <p>
  * Accepts tokens and builds the first parse tree.
  *

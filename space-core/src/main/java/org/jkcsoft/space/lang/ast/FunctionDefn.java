@@ -28,11 +28,10 @@ package org.jkcsoft.space.lang.ast;
  */
 public class FunctionDefn extends AbstractFunctionDefn implements Callable {
 
-    private SpaceTypeDefn localSpaceTypeDefn;
     private StatementBlock statementBlock;
 
-    FunctionDefn(SourceInfo sourceInfo, String name) {
-        super(sourceInfo, name);
+    FunctionDefn(SourceInfo sourceInfo, String name, SpacePathExpr returnPathExpr) {
+        super(sourceInfo, name, returnPathExpr);
     }
 
     // ------------------------------------------------------------------------
@@ -40,6 +39,7 @@ public class FunctionDefn extends AbstractFunctionDefn implements Callable {
 
     public StatementBlock setStatementBlock(StatementBlock statementBlock) {
         this.statementBlock = statementBlock;
+        this.statementBlock.setGroupingNode(true);
         //
         addChild(statementBlock);
         //

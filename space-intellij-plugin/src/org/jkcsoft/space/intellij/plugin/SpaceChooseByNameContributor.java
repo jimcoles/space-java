@@ -33,7 +33,7 @@ public class SpaceChooseByNameContributor implements ChooseByNameContributor {
   @NotNull
   @Override
   public NavigationItem[] getItemsByName(String name, String pattern, Project project, boolean includeNonProjectItems) {
-    // todo include non project items
+    // todo include non Project items
     List<SimpleProperty> properties = SpaceUtil.findProperties(project, name);
     return properties.toArray(new NavigationItem[properties.size()]);
   }

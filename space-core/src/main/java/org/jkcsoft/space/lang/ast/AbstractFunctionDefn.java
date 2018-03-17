@@ -9,41 +9,49 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 /**
  * A Function is, in the abstract, a solution to an Equation.  A function
  * is a special kind of relation (Space).
  *
  * @author Jim Coles
  */
-public abstract class AbstractFunctionDefn extends NamedElement {
+public abstract class AbstractFunctionDefn extends NamedElement implements SolutionExpr {
 
-    private EquationDefn governingEquation;
-    private SpaceTypeDefn contextSpaceTypeDefn;  // the calling space defn
+    private EquationDefn governingEquation; // TODO
     private SpaceTypeDefn argSpaceTypeDefn;
+    private MetaReference returnTypeRef;
 
-    AbstractFunctionDefn(SourceInfo sourceInfo, String name) {
+    AbstractFunctionDefn(SourceInfo sourceInfo, String name, SpacePathExpr returnTypePath) {
         super(sourceInfo, name);
+        this.returnTypeRef = new MetaReference<>(returnTypePath, MetaType.TYPE);
+        //
+        addChild(returnTypeRef);
     }
 
-    public SpaceTypeDefn getContextSpaceTypeDefn() {
-        return contextSpaceTypeDefn;
-    }
-
-    public AbstractFunctionDefn setContextSpaceTypeDefn(SpaceTypeDefn contextSpaceTypeDefn) {
-        this.contextSpaceTypeDefn = contextSpaceTypeDefn;
-        return this;
-    }
-
-    public String toLogString() {
-        return contextSpaceTypeDefn.getName() + "." + getName() + "()";
+    @Override
+    public MetaType getMetaType() {
+        return MetaType.FUNCTION;
     }
 
     public void setArgSpaceTypeDefn(SpaceTypeDefn argSpaceTypeDefn) {
         this.argSpaceTypeDefn = argSpaceTypeDefn;
-        argSpaceTypeDefn.setParent(this.getContextSpaceTypeDefn());
+        this.argSpaceTypeDefn.setGroupingNode(true);
+        //
+        addChild(argSpaceTypeDefn);
     }
 
     public SpaceTypeDefn getArgSpaceTypeDefn() {
         return argSpaceTypeDefn;
     }
+
+    public EquationDefn getGoverningEquation() {
+        return governingEquation;
+    }
+
+    public MetaReference getReturnTypeRef() {
+        return returnTypeRef;
+    }
+
 }

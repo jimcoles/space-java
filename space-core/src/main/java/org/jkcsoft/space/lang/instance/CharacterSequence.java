@@ -39,7 +39,7 @@ import org.jkcsoft.space.lang.metameta.CharSequenceNature;
  *
  * @author Jim Coles
  */
-public class CharacterSequence extends BinarySequence<CharacterValue> {
+public class CharacterSequence extends BinarySequence<CharacterValue> implements UniqueKeyStream {
 
     private CharSequenceNature nature = CharSequenceNature.OPAQUE;
     private String characters;

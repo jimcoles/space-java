@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.AssociationDefn;
-import org.jkcsoft.space.lang.ast.FunctionDefn;
+import org.jkcsoft.space.lang.ast.FunctionCallExpr;
 import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -44,8 +44,8 @@ public class ObjectFactory {
         return new Space(newOid(), spcContext, spaceTypeDefn);
     }
 
-    public Tuple newTuple(SpaceTypeDefn defn, Assignable ... values) {
-        Tuple tuple = new Tuple(newOid(), defn, values);
+    public Tuple newTuple(SpaceTypeDefn defn) {
+        Tuple tuple = new Tuple(newOid(), defn);
         return tuple;
     }
 
@@ -54,9 +54,9 @@ public class ObjectFactory {
         return characterSequence;
     }
 
-    public FunctionCall newFunctionCall(Tuple ctxObject, FunctionDefn spcFunctionDefn, Tuple argTuple) {
-        FunctionCall functionCall = new FunctionCall(ctxObject, spcFunctionDefn, argTuple);
-        return functionCall;
+    public FunctionCallContext newFunctionCall(Tuple ctxObject, FunctionCallExpr functionCallExpr, Tuple argTuple) {
+        FunctionCallContext functionCallContext = new FunctionCallContext(ctxObject, functionCallExpr, argTuple);
+        return functionCallContext;
     }
 
     public Reference newObjectReference(AssociationDefn associationDefn, SpaceOid refToOid) {
@@ -70,10 +70,6 @@ public class ObjectFactory {
 
     public CardinalValue newCardinalValue(int i) {
         return new CardinalValue(i);
-    }
-
-    public TextValue newTextValue(String value) {
-        return new TextValue(value);
     }
 
     public BooleanValue newBooleanValue(boolean aBoolean) {

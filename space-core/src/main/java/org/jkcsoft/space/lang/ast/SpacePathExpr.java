@@ -21,13 +21,14 @@ public class SpacePathExpr extends ModelElement {
     private PathOperEnum oper;
     private String text;
     private SpacePathExpr nextExpr;
+    private SpacePathExpr prevExpr;
 
     SpacePathExpr(SourceInfo sourceInfo, boolean isTypeExpr, PathOperEnum oper, String text, SpacePathExpr nextExpr) {
         super(sourceInfo);
         this.isTypeExpr = isTypeExpr;
         this.oper = oper;
         this.text = text;
-        this.nextExpr = nextExpr;
+        setNextExpr(nextExpr);
     }
 
     public boolean isTypeExpr() {
@@ -46,8 +47,18 @@ public class SpacePathExpr extends ModelElement {
         return nextExpr;
     }
 
+    public SpacePathExpr getPrevExpr() {
+        return prevExpr;
+    }
+
+    public void setPrevExpr(SpacePathExpr prevExpr) {
+        this.prevExpr = prevExpr;
+    }
+
     public void setNextExpr(SpacePathExpr nextExpr) {
         this.nextExpr = nextExpr;
+        if (nextExpr != null)
+            nextExpr.setPrevExpr(this);
     }
 
     public String getFullPath() {

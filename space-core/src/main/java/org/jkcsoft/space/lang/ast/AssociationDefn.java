@@ -9,46 +9,48 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 /**
  * Captures a wide range of relationships such as one-to-many, recursive.
  * Analogous to a foreign key relationship in RDB world or a simple
  * object reference in Java.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
-public class AssociationDefn extends NamedElement {
+public class AssociationDefn<T extends NamedElement> extends NamedElement {
 
     private MetaReference<SpaceTypeDefn> fromTypeRef;
     private int fromMult;   // Defaults to "many" if assoc is declared within a Space Type Defn.
 
-    private MetaReference<SpaceTypeDefn> toTypeRef;
+    private MetaReference<T> toTypeRef;
     private int toMult;     // Defaults to 1 if assoc is declared within a Space Type Defn.
 
     AssociationDefn(SourceInfo sourceInfo, String name, SpacePathExpr fromPath, SpacePathExpr toPath) {
         super(sourceInfo, name);
 
         if (fromPath != null) {
-            this.fromTypeRef = new MetaReference<>(fromPath);
+            this.fromTypeRef = new MetaReference<>(fromPath, MetaType.TYPE);
             addChild(fromTypeRef);
         }
 
         if (toPath == null) throw new RuntimeException("bug: path to class ref cannot be null");
-        this.toTypeRef = new MetaReference<>(toPath);
+        this.toTypeRef = new MetaReference<>(toPath, MetaType.TYPE);
         //
         addChild(toTypeRef);
-        //
-//        if (fromTypeRef != null)
-//            addReference(fromTypeRef);
-//
-//        addReference(toTypeRef);
+    }
+
+    @Override
+    public MetaType getMetaType() {
+        return MetaType.DATUM;
     }
 
     public MetaReference<SpaceTypeDefn> getFromTypeRef() {
         return fromTypeRef;
     }
 
-    public MetaReference<SpaceTypeDefn> getToTypeRef() {
+    public MetaReference<T> getToTypeRef() {
         return toTypeRef;
     }
 
@@ -56,7 +58,7 @@ public class AssociationDefn extends NamedElement {
         return fromTypeRef.getResolvedMetaObj();
     }
 
-    public SpaceTypeDefn getToType() {
+    public T getToType() {
         return toTypeRef.getResolvedMetaObj();
     }
 

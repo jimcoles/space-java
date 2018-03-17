@@ -19,7 +19,7 @@ package org.jkcsoft.space.lang.runtime;
  * IObjectRecord does not have save() and load() methods and therefore does not
  * allow the option of bean-managed persistence.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class Persister {

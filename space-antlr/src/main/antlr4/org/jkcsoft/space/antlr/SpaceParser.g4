@@ -104,7 +104,7 @@ query-def <queryName> (
 
 // Space operators
 (rootSpace=MySpace1
-  (select <locallyQualified>)  // implies need joins
+  (Select <locallyQualified>)  // implies need joins
   (<annonymoust constraint definition> or <constraintRef>)
 )
 
@@ -121,7 +121,7 @@ query-def <queryName> (
 // NOTE: Parse Rule names must start with a lowercase letter.
 
 parseUnit :
-    spaceTypeDefn | equationDefn | actionDefn
+    spaceTypeDefn | equationDefn | functionDefn
     ;
 
 /*
@@ -176,7 +176,8 @@ spaceTypeDefnBody :
     BlockStart
     variableDefnStmt*
     associationDefnStmt*
-    actionDefn*
+    statementBlock*
+    functionDefn*
     spaceTypeDefn*
     BlockEnd
     ;
@@ -223,36 +224,112 @@ parameterDecl :
 //    SeqStart actionDefn (',' actionDefn) SeqEnd
 //    ;
 
-actionDefn :
+functionDefn :
     'function-def' accessModifier? anyTypeRef identifier parameterDefnList
     elementDefnHeader?
-    actionDefnBody
+    statementBlock
     ;
 
 parameterDefnList : '(' (parameterDecl (',' parameterDecl)*)? ')' ;
 
-actionDefnBody :
+statementBlock :
     BlockStart
+    variableDefnStmt*
+    associationDefnStmt*
     statement*
     BlockEnd
     ;
 
 statement :
     expression ';'
+    | statementBlock
+    | ifStatement
+    | forEachStatement
+    | returnStatement
     ;
 
 expression :
     variableDefn |
     associationDefn |
-    actionCallExpr |
-    assignmentExpr
+    functionCallExpr |
+    assignmentExpr |
+    booleanExpr |
+    numericExpr |
+    navCallChainExpr
     ;
 
 // Important that an action call may be a list of params or a single tuple
 // object holding parameters.  The language runtime knows the names/paths of
 // all elements in a Tuple.
-actionCallExpr :
-    spacePathExpr TupleStart valueOrAssignmentExprList? TupleEnd
+functionCallExpr :
+    spacePathExpr '(' argTupleOrRef? ')'
+    ;
+
+argTupleOrRef : (tupleLiteral | spacePathExpr) ;
+
+tupleLiteral : TupleStart valueOrAssignmentExprList? TupleEnd ;
+
+navCallChainExpr :
+    (functionCallExpr | spacePathExpr) ('.' navCallChainExpr)?
+    ;
+
+//spacePathExpr :
+//    spacePathRootExpr
+//    | identifier (spacePathAnyNavOper spacePathExpr)?
+//    ;
+
+//treeExpr :
+////    expression (numericOper | bo
+//    ;
+
+parenExpr :
+    '(' binaryOperExpr ')'
+    ;
+
+binaryOperExpr :
+    booleanExpr | numericExpr
+    ;
+
+booleanExpr :
+    booleanMonoExpr
+    | booleanBinaryExpr
+    | booleanMonoExpr BooleanBinaryOper '(' booleanBinaryExpr ')'
+    | '(' booleanBinaryExpr ')' BooleanBinaryOper booleanMonoExpr
+    ;
+
+booleanMonoExpr :
+    booleanLiteral
+    | spacePathExpr
+    | functionCallExpr
+    | BooleanUnaryOper booleanMonoExpr
+    ;
+
+booleanBinaryExpr :
+    booleanMonoExpr BooleanBinaryOper booleanMonoExpr
+    ;
+
+numericOper : '+' | '-' | '*' | NumDivOper;
+
+numericExpr :
+    integerLiteral
+    | floatLiteral
+    | spacePathExpr
+    | functionCallExpr
+    | numericExpr numericOper numericExpr
+    ;
+
+ifStatement :
+    'if' '(' booleanExpr ')'
+    statementBlock
+    ;
+
+forEachStatement :
+    'foreach' identifier 'in' valueExpr
+    statementBlock
+    ;
+
+returnStatement :
+    'return' valueExpr ';'
     ;
 
 // ===============================================================================
@@ -266,7 +343,7 @@ objectExpr :
 valueExpr :
     literalExpr
     | spacePathExpr
-    | actionCallExpr
+    | functionCallExpr
     | objectExpr
     ;
 
@@ -278,9 +355,6 @@ valueOrAssignmentExpr :
     valueExpr | assignmentExpr
     ;
 
-setLiteral : UserSetStart UserSetEnd;
-
-spaceDecl : SpaceStart SpaceEnd;
 
 comment
     : singleLineComment
@@ -293,8 +367,13 @@ singleLineComment : SingleLineComment;
 multiLineComment : BlockComment;
 
 anyTypeRef :
-    primitiveTypeName
+      voidTypeName
+    | primitiveTypeName
     | spacePathExpr;
+
+voidTypeName :
+    VoidKeyword
+    ;
 
 primitiveTypeName :
     BooleanKeyword
@@ -332,23 +411,40 @@ integerLiteral : IntegerLiteral;
 floatLiteral : FloatLiteral;
 booleanLiteral : BooleanLiteral;
 
+setLiteral :
+    UserSetStart
+    UserSetEnd
+    ;
+
+spaceLiteralDecl :
+    SpaceStart
+
+    SpaceEnd
+    ;
+
 identifier : Identifier;
+
+// ------------ SPACE PATH EXPRESSIONS -----------
+
+spacePathExpr :
+    spacePathRootExpr
+    | identifier (spacePathAnyNavOper spacePathExpr)?
+    ;
+
+spacePathRootExpr : SPathRoot ;
+
+spacePathAnyNavOper :
+    SPathDirNavOper | SPathMemberNavOper | SPathRefNavOper
+    ;
+
+spacePathList :
+    spacePathExpr (',' spacePathExpr)*
+    ;
 
 // ------------ QUERY EXPRESSIONS --------------
 
 queryDefn :
     'query-def'
-    ;
-
-// ------------ SPACE PATH EXPRESSIONS -----------
-spacePathExpr :
-    identifier
-    | identifier SPathNavAssocToOper spacePathExpr
-    | identifier SPathNavAssocToOper2 spacePathExpr
-    ;
-
-spacePathList :
-    spacePathExpr (',' spacePathExpr)*
     ;
 
 // ------------ GRAMMAR EXPRESSIONS ---------------

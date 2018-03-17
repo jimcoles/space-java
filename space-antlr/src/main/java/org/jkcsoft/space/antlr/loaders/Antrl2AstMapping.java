@@ -10,13 +10,13 @@
 package org.jkcsoft.space.antlr.loaders;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.AstFactory;
 import org.jkcsoft.space.lang.ast.FileSourceInfo;
 import org.jkcsoft.space.lang.ast.SourceInfo;
 
 import java.io.File;
-import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -97,7 +97,35 @@ public class Antrl2AstMapping {
     public static SourceInfo toAst(File file, ParserRuleContext parserRuleContext) {
         return new FileSourceInfo(
                 file,
-                parserRuleContext.start.getLine(),
-                parserRuleContext.start.getCharPositionInLine());
+                toAst(parserRuleContext.start, false),
+                toAst(parserRuleContext.stop, true));
+    }
+
+    private static SourceInfo.FileCoord toAst(Token tokenAO, boolean end) {
+        return new SourceInfo.FileCoord() {
+            @Override
+            public boolean isStart() {
+                return !end;
+            }
+
+            @Override
+            public int getLine() {
+                return tokenAO.getLine();
+            }
+
+            @Override
+            public int getCursorIndexInLine() {
+                return (
+                    isStart() ?
+                    tokenAO.getCharPositionInLine()
+                    : (tokenAO.getCharPositionInLine() + 1) + (tokenAO.getStopIndex() - tokenAO.getStartIndex())
+                );
+            }
+
+            @Override
+            public String toString() {
+                return getLine() + "," + (isStart() ? getCursorIndexInLine() + 1 : getCursorIndexInLine());
+            }
+        };
     }
 }

@@ -54,6 +54,12 @@ VoidKeyword     : 'void';
 PublicKeyword   : 'public';
 ExtendsKeyword  : 'extends';
 
+IfKeyword : 'if';
+ThenKeyword : 'then';
+ForEachKeyword : 'foreach';
+InKeyword : 'in';
+ReturnKeyword : 'return';
+
 SpaceDefnType
     : 'abstract'
     | 'basis'
@@ -68,11 +74,24 @@ BooleanLiteral
 
 AssignOper  : '=';
 
+BooleanBinaryOper :
+    '&' | '|'
+    ;
+
+BooleanUnaryOper :
+    '!'
+    ;
+
+NumAddOper : '+' ;
+NumSubOper : '-' ;
+NumMultOper : '*' ;
+NumDivOper : '/' ;
+
 // Space Path Expressions - reduced syntax
-SPathNavAssocToOper     : '/'
-    ;
-SPathNavAssocToOper2     : '.'
-    ;
+SPathRoot           : '//' ;
+SPathDirNavOper     : '/' ;
+SPathMemberNavOper  : '.' ;
+SPathRefNavOper     : '->' ;
 
 /*
     Interpret the following definition of "StringLiteral" as:

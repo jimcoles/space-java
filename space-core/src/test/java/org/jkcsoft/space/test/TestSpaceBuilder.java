@@ -1,10 +1,7 @@
 package org.jkcsoft.space.test;
 
 import org.jkcsoft.space.lang.ast.*;
-import org.jkcsoft.space.lang.instance.ObjectFactory;
-import org.jkcsoft.space.lang.instance.Space;
-import org.jkcsoft.space.lang.instance.TextValue;
-import org.jkcsoft.space.lang.instance.Tuple;
+import org.jkcsoft.space.lang.instance.*;
 import org.junit.Test;
 
 /*
@@ -27,20 +24,19 @@ public class TestSpaceBuilder extends TestSourceStub {
 
     public void testSpaceBuilderAPI() {
         AstFactory ast = new AstFactory();
-        ast.newProgram(new CodeSourceInfo(), "");
+        ast.newProgram(new ProgSourceInfo(), "");
         ObjectFactory objs = ObjectFactory.getInstance();
         //
-        SpaceTypeDefn testPersonTypeDefn = ast.newSpaceTypeDefn(new CodeSourceInfo(), "PersonType");
-        VariableDefn firstName = ast.newVariableDefn(new CodeSourceInfo(), "firstName", PrimitiveType.TEXT);
-        testPersonTypeDefn.addVariable(firstName);
-        VariableDefn lastName = ast.newVariableDefn(new CodeSourceInfo(), "lastName", PrimitiveType.TEXT);
-        testPersonTypeDefn.addVariable(lastName);
+        SpaceTypeDefn testPersonTypeDefn = ast.newSpaceTypeDefn(new ProgSourceInfo(), "PersonType");
+//        VariableDefn firstName = ast.newVariableDefn(new ProgSourceInfo(), "firstName", PrimitiveTypeDefn.TEXT);
+//        testPersonTypeDefn.addVariable(firstName);
+//        VariableDefn lastName = ast.newVariableDefn(new ProgSourceInfo(), "lastName", PrimitiveTypeDefn.TEXT);
+//        testPersonTypeDefn.addVariable(lastName);
         Space space = objs.newSpace(null, testPersonTypeDefn);
         //
         Tuple testObjectTuple = objs.newTuple(testPersonTypeDefn);
-        TextValue textValue = objs.newTextValue("jim");
-        testObjectTuple.setValue(firstName, textValue);
-        testObjectTuple.setValue(lastName, objs.newTextValue("Coles"));
+//        SpaceUtils.assignOper(testObjectTuple, (NamedElement) firstName, (Assignable) textValue);
+//        SpaceUtils.assignOper(testObjectTuple, (NamedElement) lastName, (Assignable) objs.newTextValue("Coles"));
         space.addTuple(testObjectTuple);
         //
     }

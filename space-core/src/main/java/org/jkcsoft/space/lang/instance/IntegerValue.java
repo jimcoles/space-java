@@ -9,16 +9,15 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.PrimitiveType;
-import org.jkcsoft.space.lang.ast.VariableDefn;
+import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
 
 /**
  * @author Jim Coles
  */
 public abstract class IntegerValue extends ScalarValue<Integer> {
 
-    public IntegerValue(PrimitiveType primitiveType, Integer value) {
-        super(primitiveType, value);
+    public IntegerValue(PrimitiveTypeDefn primitiveTypeDefn, Integer value) {
+        super(primitiveTypeDefn, value);
     }
 
     @Override

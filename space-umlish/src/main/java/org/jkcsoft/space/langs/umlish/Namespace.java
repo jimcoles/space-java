@@ -12,7 +12,7 @@ package org.jkcsoft.space.langmaps.umlish;
 /**
  * UML: core.Namespace.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public abstract class Namespace extends ModelElement {

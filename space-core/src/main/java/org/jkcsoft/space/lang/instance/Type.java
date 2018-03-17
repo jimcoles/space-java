@@ -15,7 +15,7 @@ import java.util.Map;
  * The instance-level notion corresponding essentially to a row of data or to
  * an object in OOP.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public abstract class Type {

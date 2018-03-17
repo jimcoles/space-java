@@ -10,7 +10,7 @@ package com.jkc.roml.lang;
 /**
  * A named Type expression.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class TypeDefn extends ModelElement

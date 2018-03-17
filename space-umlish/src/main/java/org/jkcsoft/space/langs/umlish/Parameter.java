@@ -14,7 +14,7 @@ package org.jkcsoft.space.langmaps.umlish;
  * UML Deviation: Our Parameters can be either ordered or named, but not both,
  * with respect to an Operation call.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class Parameter {

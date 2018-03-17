@@ -11,7 +11,7 @@ package com.jkc.roml.lang;
  * A unit of data and computation.  A System has a corresponding set of data
  * and behavior definitions.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class ModelDefn 

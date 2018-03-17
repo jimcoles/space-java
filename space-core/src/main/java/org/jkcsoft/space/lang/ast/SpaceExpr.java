@@ -16,7 +16,7 @@ import org.jkcsoft.space.lang.instance.SpaceList;
  * <p>
  * Question: Is a SpaceExpr a Relation, or vice versa?
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public abstract class SpaceExpr {

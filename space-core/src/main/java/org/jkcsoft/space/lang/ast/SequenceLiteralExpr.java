@@ -9,25 +9,29 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 /**
  * A instance of this type is created for every occurrence of a literal string
  * in a source file.
  *
  * @author Jim Coles
  */
-public class LiteralExpr extends ModelElement implements ValueExpr {
+public class SequenceLiteralExpr extends ModelElement implements ValueExpr {
 
-    private PrimitiveType   primitiveType;
+    private MetaReference<StreamTypeDefn> typeRef;
     private String valueExpr;
 
-    LiteralExpr(SourceInfo sourceInfo, PrimitiveType primitiveType, String valueExpr) {
+    SequenceLiteralExpr(SourceInfo sourceInfo, SpacePathExpr pathExpr, String valueExpr) {
         super(sourceInfo);
-        this.primitiveType = primitiveType;
+        this.typeRef = new MetaReference<StreamTypeDefn>(pathExpr, MetaType.TYPE);
         this.valueExpr = valueExpr;
+        //
+        addChild(typeRef);
     }
 
-    public PrimitiveType getPrimitiveType() {
-        return primitiveType;
+    public MetaReference<StreamTypeDefn> getTypeRef() {
+        return typeRef;
     }
 
     public String getValueExpr() {

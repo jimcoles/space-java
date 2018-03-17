@@ -19,8 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Utility methods for querying and traversing the Space AST, which
- * can also be thought of as a directory of nodes.
+ * Utility methods for querying and traversing the Space AST, which can also be thought of as a directory of nodes.
  *
  * @author Jim Coles
  */
@@ -48,22 +47,19 @@ public class AstUtils {
     private static void append(StringBuilder sb, ModelElement modelElement, int depth) {
         String indent = Strings.multiplyString("\t", depth);
         sb.append(JavaHelper.EOL)
-          .append(indent)
-          .append("(")
-          .append(modelElement.toString());
+          .append(indent).append("(").append(modelElement.toString());
         List<ModelElement> children = modelElement.getChildren();
         for (ModelElement child : children) {
             append(sb, child, depth + 1);
         }
         sb.append(JavaHelper.EOL)
-          .append(indent)
-          .append(")");
+          .append(indent).append(")");
     }
 
     public static Schema getRunSchema(Schema thisSchema) {
         Schema schema =
             (Schema) CollectionUtils.find(thisSchema.getChildren(),
-                                                object -> object instanceof Schema);
+                                          object -> object instanceof Schema);
         return schema;
     }
 
@@ -72,24 +68,37 @@ public class AstUtils {
     }
 
     public static boolean isGroupingNode(ModelElement child) {
-        GroupingNode groupAnno = child.getClass().getAnnotation(GroupingNode.class);
-        return (groupAnno != null);
+        return child.isGroupingNode() ||
+        child.getClass().getAnnotation(GroupingNode.class) != null;
     }
 
     public static NamedElement lookupLenientMetaObject(List<Schema> dirChain, ModelElement context,
                                                        SpacePathExpr spacePathExpr)
     {
+        NamedElement lookup = checkIntrinsics(spacePathExpr);
+        if (lookup == null) {
+            List<ModelElement> trySequence = new LinkedList<>();
+            trySequence.add(context);
+            trySequence.addAll(dirChain);
+            for (ModelElement tryContext : trySequence) {
+                log.debug("trying to find [" + spacePathExpr + "] under [" + tryContext + "]");
+                lookup = lookupMetaObject(tryContext, spacePathExpr, true);
+                if (lookup != null)
+                    break;
+                else
+                    log.debug("could not find [" + spacePathExpr + "] under [" + tryContext + "]");
+            }
+        }
+        return lookup;
+    }
+
+    private static NamedElement checkIntrinsics(SpacePathExpr spacePathExpr) {
         NamedElement lookup = null;
-        List<ModelElement> trySequence = new LinkedList<>();
-        trySequence.add(context);
-        trySequence.addAll(dirChain);
-        for (ModelElement tryContext : trySequence) {
-            log.debug("trying to find ["+spacePathExpr+"] under ["+tryContext+"]");
-            lookup = lookupMetaObject(tryContext, spacePathExpr, true);
-            if (lookup != null)
-                break;
-            else
-                log.debug("could not find ["+spacePathExpr+"] under ["+tryContext+"]");
+        if (spacePathExpr.getText().equals(VoidType.VOID.getName())) {
+            lookup = VoidType.VOID;
+        }
+        else{
+            lookup = PrimitiveTypeDefn.valueOf(spacePathExpr.getText());
         }
         return lookup;
     }
@@ -102,9 +111,9 @@ public class AstUtils {
                 targetChild = lookupMetaObject(targetChild, spacePathExpr.getNextExpr(), false);
             }
         }
-        else {
-            if (context.hasParent())
-                targetChild = lookupMetaObject(context.getParent(), spacePathExpr.getText());
+        // if not root and child not found under current context, return null (error)
+        else if (isRoot && context.hasParent()) {
+            targetChild = lookupMetaObject(context.getParent(), spacePathExpr.getText());
         }
         return targetChild;
     }
@@ -115,8 +124,9 @@ public class AstUtils {
         if (childByName == null) {
             if (context.hasGroupingNodes()) {
                 for (ModelElement groupElement : context.getGroupingNodes()) {
-
                     childByName = lookupMetaObject(groupElement, name);
+                    if (childByName != null)
+                        break;
                 }
             }
 //            Executor.log.warn("element [" + context + "] does not contain named child [" + name + "]");

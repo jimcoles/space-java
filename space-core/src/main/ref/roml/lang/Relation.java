@@ -13,7 +13,7 @@ package com.jkc.roml.lang;
  * general is computed from Entity (persisted) Relations based on the 
  * Relation's TypeDefn.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  *
  */

@@ -48,18 +48,22 @@ public class AstFactory {
         return spaceTypeDefn;
     }
 
-    public FunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name) {
-        FunctionDefn element = new FunctionDefn(sourceInfo, name);
+    public FunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name, SpacePathExpr returnPathExpr) {
+        FunctionDefn element = new FunctionDefn(sourceInfo, name, returnPathExpr);
         return element;
     }
 
-    public VariableDefn newVariableDefn(SourceInfo sourceInfo, String name, PrimitiveType type) {
+    public VariableDefn newVariableDefn(SourceInfo sourceInfo, String name, PrimitiveTypeDefn type) {
         VariableDefn element = new VariableDefn(sourceInfo, name, type);
         return element;
     }
 
-    public NativeFunctionDefn newNativeFunctionDefn(SourceInfo sourceInfo, String name, Method jMethod, SpaceTypeDefn nativeArgSpaceTypeDefn) {
-        NativeFunctionDefn element = new NativeFunctionDefn(sourceInfo, name, jMethod, nativeArgSpaceTypeDefn);
+    public NativeFunctionDefn newNativeFunctionDefn(SourceInfo sourceInfo, String name, Method jMethod,
+                                                    SpaceTypeDefn nativeArgSpaceTypeDefn,
+                                                    SpacePathExpr returnPathExpr)
+    {
+        NativeFunctionDefn element = new NativeFunctionDefn(sourceInfo, name, jMethod, nativeArgSpaceTypeDefn,
+                                                            returnPathExpr);
         return element;
     }
 
@@ -73,8 +77,19 @@ public class AstFactory {
         return element;
     }
 
-    public LiteralExpr newLiteralHolder(SourceInfo sourceInfo, PrimitiveType primitiveType, String text) {
-        LiteralExpr element = new LiteralExpr(sourceInfo, primitiveType, text);
+    public PrimitiveLiteralExpr newPrimLiteralExpr(SourceInfo sourceInfo, PrimitiveTypeDefn primitiveTypeDefn, String text) {
+        PrimitiveLiteralExpr element = new PrimitiveLiteralExpr(sourceInfo, primitiveTypeDefn, text);
+        return element;
+    }
+
+    public SequenceLiteralExpr newSequenceLiteralExpr(SourceInfo sourceInfo, String text) {
+        SequenceLiteralExpr element =
+            new SequenceLiteralExpr(sourceInfo, newSpacePathExpr(sourceInfo, null, "CharSequence", null), text);
+        return element;
+    }
+
+    public SequenceLiteralExpr newSequenceLiteralExpr(SourceInfo sourceInfo, SpacePathExpr pathToType, String text) {
+        SequenceLiteralExpr element = new SequenceLiteralExpr(sourceInfo, pathToType, text);
         return element;
     }
 
@@ -102,5 +117,13 @@ public class AstFactory {
     {
         AssignmentExpr element = new AssignmentExpr(sourceInfo);
         return element;
+    }
+
+    public ReturnExpr newReturnExpr(SourceInfo sourceInfo, ValueExpr valueExpr) {
+        return new ReturnExpr(sourceInfo, valueExpr);
+    }
+
+    public StreamTypeDefn newStreamTypeDefn(IntrinsicSourceInfo sourceInfo, String name) {
+        return new StreamTypeDefn(sourceInfo, name);
     }
 }

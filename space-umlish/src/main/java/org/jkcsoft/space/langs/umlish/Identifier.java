@@ -12,7 +12,7 @@ package org.jkcsoft.space.langmaps.umlish;
 /**
  * Base class for Oid, Guid, PK, etc.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class Identifier {

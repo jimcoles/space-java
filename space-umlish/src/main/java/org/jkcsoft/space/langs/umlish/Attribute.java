@@ -22,7 +22,7 @@ package org.jkcsoft.space.langmaps.umlish;
  * Note, this means that an Attribute is NOT a Classifier, but rather a usage
  * of a Classifier by a Class.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class Attribute extends ModelElement {

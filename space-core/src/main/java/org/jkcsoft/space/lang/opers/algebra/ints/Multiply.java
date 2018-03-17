@@ -7,9 +7,10 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.ast;
+package org.jkcsoft.space.lang.opers.algebra.ints;
 
-@Deprecated
-public class VariableDecl {
-
+/**
+ * @author Jim Coles
+ */
+public class Multiply {
 }

@@ -14,7 +14,7 @@ package org.jkcsoft.space.langmaps.umlish;
  * <p>
  * Specializations include Generalization and Association.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public abstract class Relationship extends ModelElement {

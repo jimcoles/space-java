@@ -2,10 +2,9 @@
 public type-def MySpace
 /*
  This is a smart annotation comment for
-  my awesome space.
+ my awesome space.
 */
-{   // type def body (block)
-
+{
     // var list
     card myIntVar = 127;
     boolean myBoolVar = false;
@@ -13,15 +12,59 @@ public type-def MySpace
     // assoc list
     CharSequence greeting = "Hello from this reference to a CharSequence.";
 
+    {
+        // nested init block
+    }
+
+    // streams / sequences
+
+    // A general binary stream.  Like an RDB 'blob'. Can read/write any bit sequence to/from a bstream.
+//    bstream aBinaryStream;
+
+    // character sequence (finite) - a special kind of bstream
+//    cseq aCharSeq = "";
+//    cseq greeting = "Hello from this reference to a CharSequence.";
+
     // functions
     function-def void main(CharSequence args)
     {   // statement block: may include block-local vars, objects, spaces + any other statement type
-        OpSys.println["Hello, Space! (string literal)"];
-        OpSys.println[greeting];
-        OpSys.println[myIntVar];
-        OpSys.println[myBoolVar];
-//        {
+        boolean boolToo = 127;
+        OpSys.println( ["Hello, Space! (string literal)"] );
+        OpSys.println( [greeting] );
+//        OpSys.println( [another] );
+        OpSys.println( [myIntVar] );
+        OpSys.println( [myBoolVar] );
+        OpSys.println( [boolToo] );
+
+        foo( [args] );  // call from within a function
+
+        {
             // other block
-//        }
+        }
+
+        if (true) {
+            // var
+            // ref
+            // statement 1
+            // next block-like
+        }
+
+        foreach myTuple in mySpace {
+            // var
+            // ref
+            // statement 1
+            // next block-likes
+        }
+    }
+
+    function-def void foo(CharSequence args) {
+        OpSys.println( [myIntVar] );
+    }
+
+    public type-def AnotherType
+    {
+        function-def void getSomething() {
+
+        }
     }
 }

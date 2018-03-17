@@ -9,7 +9,7 @@ package com.jkc.roml.lang.runtime;
 
 /**
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class Builder 

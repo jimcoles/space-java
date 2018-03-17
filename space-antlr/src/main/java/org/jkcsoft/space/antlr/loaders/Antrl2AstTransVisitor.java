@@ -12,7 +12,7 @@ package org.jkcsoft.space.antlr.loaders;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.antlr.SpaceParserBaseVisitor;
 import org.jkcsoft.space.lang.ast.AstFactory;
-import org.jkcsoft.space.lang.ast.CodeSourceInfo;
+import org.jkcsoft.space.lang.instance.ProgSourceInfo;
 
 /**
  * Each visitXyz( ) transforms from the raw ANTLR parse tree node to an AST node
@@ -24,7 +24,7 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<AstFactory> {
 
     public void init() {
         astFactory = new AstFactory();
-        astFactory.newProgram(new CodeSourceInfo(), "");
+        astFactory.newProgram(new ProgSourceInfo(), "");
     }
 
     @Override
@@ -108,13 +108,18 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<AstFactory> {
     }
 
     @Override
-    public AstFactory visitActionDefn(SpaceParser.ActionDefnContext ctx) {
-        return super.visitActionDefn(ctx);
+    public AstFactory visitParameterDefnList(SpaceParser.ParameterDefnListContext ctx) {
+        return super.visitParameterDefnList(ctx);
     }
 
     @Override
-    public AstFactory visitActionDefnBody(SpaceParser.ActionDefnBodyContext ctx) {
-        return super.visitActionDefnBody(ctx);
+    public AstFactory visitStatementBlock(SpaceParser.StatementBlockContext ctx) {
+        return super.visitStatementBlock(ctx);
+    }
+
+    @Override
+    public AstFactory visitBooleanLiteral(SpaceParser.BooleanLiteralContext ctx) {
+        return super.visitBooleanLiteral(ctx);
     }
 
     @Override
@@ -125,11 +130,6 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<AstFactory> {
     @Override
     public AstFactory visitExpression(SpaceParser.ExpressionContext ctx) {
         return super.visitExpression(ctx);
-    }
-
-    @Override
-    public AstFactory visitActionCallExpr(SpaceParser.ActionCallExprContext ctx) {
-        return super.visitActionCallExpr(ctx);
     }
 
     @Override
@@ -155,11 +155,6 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<AstFactory> {
     @Override
     public AstFactory visitSetLiteral(SpaceParser.SetLiteralContext ctx) {
         return super.visitSetLiteral(ctx);
-    }
-
-    @Override
-    public AstFactory visitSpaceDecl(SpaceParser.SpaceDeclContext ctx) {
-        return super.visitSpaceDecl(ctx);
     }
 
     @Override

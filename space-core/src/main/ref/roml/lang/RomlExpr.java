@@ -15,7 +15,7 @@ import java.util.*;  // List, etc.
  *
  * Question: Is a RomlExpr a Relation, or vice versa?
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class RomlExpr

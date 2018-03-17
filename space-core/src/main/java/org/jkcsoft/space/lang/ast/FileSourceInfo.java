@@ -17,27 +17,33 @@ import java.io.File;
 public class FileSourceInfo implements SourceInfo {
 
     private File file;
-    private int line;
-    private int character;
+    private FileCoord start;
+    private FileCoord end;
 
-    public FileSourceInfo(File file, int line, int character) {
+    public FileSourceInfo(File file, FileCoord start, FileCoord end) {
         this.file = file;
-        this.line = line;
-        this.character = character;
+        this.start = start;
+        this.end = end;
     }
 
     @Override
-    public int getLine() {
-        return 0;
+    public FileCoord getStart() {
+        return start;
     }
 
     @Override
-    public int getCharacter() {
-        return 0;
+    public FileCoord getStop() {
+        return end;
     }
 
     @Override
     public String toString() {
-        return file.getName() + ":[" + line + "," + character + "]";
+        return file.getName() + ":[" + start + ".." + end + "]";
     }
+
+    @Override
+    public String toBriefString() {
+        return file.getName() + ":[" + start + "]";
+    }
+
 }

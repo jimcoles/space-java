@@ -21,7 +21,7 @@ package org.jkcsoft.space.langmaps.umlish;
  * <p>
  * NOTE: This might not need its own Java class.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class ScalarClass {

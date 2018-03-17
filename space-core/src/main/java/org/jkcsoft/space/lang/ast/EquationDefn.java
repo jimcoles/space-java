@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 /**
  * An EquationDefn is a symbolic expression that expresses a
  * relation between two otherwise independent things (Spaces).
@@ -16,12 +18,17 @@ package org.jkcsoft.space.lang.ast;
  * grammar Production.  An Equation must at all times evaluate
  * to true if the system is to be deemed in a valid state.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class EquationDefn extends NamedElement {
 
     public EquationDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
+    }
+
+    @Override
+    public MetaType getMetaType() {
+        return null;
     }
 }

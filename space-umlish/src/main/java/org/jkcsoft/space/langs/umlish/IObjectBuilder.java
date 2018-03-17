@@ -20,7 +20,7 @@ package org.jkcsoft.space.langmaps.umlish;
  * <p>
  * Analogous to XML DOM Builder.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public interface IObjectBuilder {

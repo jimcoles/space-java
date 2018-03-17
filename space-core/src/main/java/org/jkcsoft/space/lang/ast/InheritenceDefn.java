@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class InheritenceDefn {

@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * The Class meta element, i.e., a Table, Entity, etc.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class Class extends Classifier {

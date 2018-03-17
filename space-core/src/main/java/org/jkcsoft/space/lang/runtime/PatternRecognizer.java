@@ -16,7 +16,7 @@ package org.jkcsoft.space.lang.runtime;
  * pattern recognition.  Probably take a graph view of the data and try to find
  * patterns based on node values and edge types.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class PatternRecognizer {

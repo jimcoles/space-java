@@ -14,9 +14,9 @@ package com.jkc.roml.lang;
  * 
  * Can be either an QueryExpr or a VariableSetExpr.
  *
- * Essential similar to a select query from RDB.
+ * Essential similar to a Select query from RDB.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class TypeExpr 

@@ -9,11 +9,9 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import java.util.List;
-
 /**
  * {@link BooleanExpr}s are the heart of query criteria and equation
- * expressions.  They expressions that evaluate to true or false
+ * expressions.  They are expressions that evaluate to true or false
  * (or unknown?).  Expect a wide array of boolean operators such as
  * '==', 'AND', 'OR', '<', '>', 'contains', and other set-theoretic opers.
  * int == int

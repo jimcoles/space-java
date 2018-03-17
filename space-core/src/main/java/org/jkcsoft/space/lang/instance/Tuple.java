@@ -13,8 +13,6 @@ import org.jkcsoft.space.lang.ast.AssociationDefn;
 import org.jkcsoft.space.lang.ast.NamedElement;
 import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
 import org.jkcsoft.space.lang.ast.VariableDefn;
-import org.jkcsoft.space.lang.runtime.RuntimeException;
-import org.jkcsoft.space.lang.runtime.SpaceUtils;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -27,11 +25,16 @@ import java.util.Map;
  * Values in a Tuple can be retrieved in order or by the name of the variable.  A Tuple
  * may contain only Scalar values and Oid-based references to Tuples in other
  * Spaces.
+ * <p>A Tuple can be thought of as a 'smart map' in that every tuple has one-and-only-one
+ * base object (and associated Oid).
+ * <p>
+ * - RDB Analog: Row
+ * - Java Analog: Object
  *
  * @author Jim Coles
  * @version 1.0
  */
-public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable {
+public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable, ExeContext {
 
     private List<Assignable>    assignables = new LinkedList<>();
 //    private List<ScalarValue>   values = new LinkedList<>();
@@ -62,18 +65,18 @@ public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable {
         }
     }
 
-    Tuple(SpaceOid oid, SpaceTypeDefn defn, Assignable... assignables) {
-        this(oid, defn);
-        //
-        List<NamedElement> allMembers = getDefn().getAllMembers();
-        if (!getDefn().hasMembers() || assignables.length > allMembers.size())
-            throw new RuntimeException(
-                "Too many values [" + assignables.length + "] for this space [" + allMembers.size() + "].");
-        //
-        for (int idxVar = 0; idxVar < assignables.length; idxVar++) {
-            SpaceUtils.assignOper(this, allMembers.get(idxVar), assignables[idxVar]);
-        }
-    }
+//    Tuple(SpaceOid oid, SpaceTypeDefn defn, Assignable... assignables) {
+//        this(oid, defn);
+//        //
+//        List<NamedElement> allMembers = getDefn().getAllMembers();
+//        if (!getDefn().hasMembers() || assignables.length > allMembers.size())
+//            throw new SpaceX(
+//                "Too many values [" + assignables.length + "] for this space [" + allMembers.size() + "].");
+//        //
+//        for (int idxVar = 0; idxVar < assignables.length; idxVar++) {
+//            SpaceUtils.assignOper(this, allMembers.get(idxVar), assignables[idxVar]);
+//        }
+//    }
 
     private void initRef(AssociationDefn assocDefn) {
         Reference ref = new Reference(assocDefn, null);
@@ -87,17 +90,7 @@ public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable {
         indexAllByMemberOid.put(datum.getDefinition().getOid(), datum);
     }
 
-    public Tuple setValue(NamedElement member, Assignable value) {
-        SpaceUtils.assignOper(this, member, value);
-        return this;
-    }
-
-    public Tuple setValueAt(int idx, Assignable value) {
-        SpaceUtils.assignOper(this, getNthMember(idx), value);
-        return this;
-    }
-
-    private NamedElement getNthMember(int idx) {
+    public NamedElement getNthMember(int idx) {
         return getDefn().getAllMembers().get(idx);
     }
 

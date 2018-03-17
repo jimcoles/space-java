@@ -10,7 +10,7 @@
 package org.jkcsoft.space.langmaps.settheory;
 
 /**
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class Tuple {

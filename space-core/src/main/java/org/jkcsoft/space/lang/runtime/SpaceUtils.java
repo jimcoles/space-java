@@ -19,15 +19,22 @@ import org.jkcsoft.space.lang.instance.*;
  */
 public class SpaceUtils {
 
-    public static Assignable assignOper(Tuple ctxObject, NamedElement member, Assignable rightSideValue) {
-        // TODO Add some notion of 'casting' and 'auto-(un)boxing'.
+    public static void assignOper(Executor.EvalContext exe, Assignable leftSideHolder, Assignable rightSideValue) {
         boolean assigned = false;
-        Assignable leftSideHolder = ctxObject.get(member);
+        RuntimeError error = null;
         if (leftSideHolder instanceof Variable) {
             if (rightSideValue instanceof ScalarValue) {
 //                Executor.log.debug("setting scalar to scalar");
-                ((Variable) leftSideHolder).setScalarValue((ScalarValue) rightSideValue);
-                assigned = true;
+                ScalarValue rsScalarValue = (ScalarValue) rightSideValue;
+                Variable lsHolder = (Variable) leftSideHolder;
+                if (rsScalarValue.getType() == lsHolder.getDefinition().getType()) {
+                    lsHolder.setScalarValue(rsScalarValue);
+                    assigned = true;
+                }
+                else {
+                    error = exe.newRuntimeError(
+                        "can't assign " + rsScalarValue.getType() + " to " + lsHolder.getDefinition().getType() + "");
+                }
             }
         }
         else if (leftSideHolder instanceof Reference) {
@@ -38,9 +45,12 @@ public class SpaceUtils {
             }
         }
         //
-        if (!assigned)
-            throw new IllegalArgumentException("cannot assign " + rightSideValue + " to " + leftSideHolder) ;
+        if (!assigned) {
+            if (error != null)
+                throw new SpaceX(error);
+            else
+                throw new SpaceX(exe.newRuntimeError("cannot assign " + rightSideValue + " to " + leftSideHolder));
+        }
         //
-        return leftSideHolder;
     }
 }

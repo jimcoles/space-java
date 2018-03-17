@@ -13,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
+import org.jkcsoft.java.util.Lister;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.*;
@@ -24,30 +25,29 @@ import org.jkcsoft.space.lang.runtime.jnative.opsys.JnOpSys;
 import org.jkcsoft.space.lang.runtime.jnative.space.JnSpaceOpers;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
 /**
- * <p>
- * The top-level executive context for loading Space meta objects and running a
+ * <p> The top-level executive context for loading Space meta objects and running a
  * Space program.  Holds and manages instance level objects, call stack, etc..
- * <p>
- * An Executor manages interactions between second-level
- * elements including XmlLoader, ExprProcessor, Querier.
- * <p>
- * The general pattern is:
+ *
+ * <p> An Executor manages interactions between second-level
+ * elements including AstLoader's, ExprProcessor's, Querier.
+ *
+ * <p> The general pattern is:
  * <ul>
- * <li>eval() methods handle executable bits like the program itself and statements.</li>
- * <li>eval() methods handle expression</li>
+ * <li>exec() methods handle executable bits like the program itself and statements.</li>
+ * <li>exec() methods handle expression</li>
  * </ul>
  * </p>
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
-public class Executor extends ExprProcessor {
+public class Executor extends ExprProcessor implements ExeContext {
 
     private static final Logger log = Logger.getLogger(Executor.class);
 
@@ -73,6 +73,10 @@ public class Executor extends ExprProcessor {
 //    private ObjectFactory spaceBuilder = ObjectFactory.getInstance();
 
     // ==================
+    public static SpaceTypeDefn MATH_TYPE_DEF;
+    public static StreamTypeDefn CHAR_SEQ_TYPE_DEF;
+    public static SpaceTypeDefn space_opers_type_def;
+    public static SpaceTypeDefn op_sys_type_def;
     /**
      * Meta objects are loaded as we parse the source code. Intrinsic and native meta
      * objects are loaded prior to parsing and source files.  Must be able to lookup
@@ -87,7 +91,6 @@ public class Executor extends ExprProcessor {
      * A special directory root to hold intrinsic operators.
      */
     private Schema langRootSchema;
-
     /**
      * The central meta object table.
      */
@@ -99,21 +102,13 @@ public class Executor extends ExprProcessor {
 //    private Map<NamedElement, MetaInfo> metaObjectExtendedInfoMap = new TreeMap<>();
 
     private ObjectTable objectTable = new ObjectTable();
-
-    private Stack<FunctionCall> callStack = new Stack<>();
-
-    /**
-     * TODO: Use specialized expression processors for each type of expression, e.g.,
-     * unary int, binary int, unary string, binary string, etc.
-     * <p>
-     * Mapping from expression type to expression handler. Some handlers will be
-     * Space standard, some will be user-provided.
+    private Stack<FunctionCallContext> callStack = new Stack<>();
+    /*
+     * TODO: Use specialized expression processors for each type of expression.
+     * E.g., unary int, binary int, unary string, binary string, etc. Mapping from expression type
+     * to expression handler. Some handlers will be Space standard, some will be user-provided.
      */
     private Map<String, ExprProcessor> exprProcessors = null;
-    public static SpaceTypeDefn MATH_TYPE_DEF;
-    public static SpaceTypeDefn CHAR_SEQ_TYPE_DEF;
-    public static SpaceTypeDefn space_opers_type_def;
-    public static SpaceTypeDefn op_sys_type_def;
 
     public Executor() {
 //        userAstFactory.newProgram(new NativeSourceInfo(null), "root");
@@ -122,19 +117,46 @@ public class Executor extends ExprProcessor {
     }
 
     private void initRuntime() {
-        AstFactory astFactory = new AstFactory();
-        langRootSchema = astFactory.newAstSchema(new CodeSourceInfo(), "lang");
+        AstFactory astFactory = getAstFactory();
+        langRootSchema = astFactory.newAstSchema(new ProgSourceInfo(), "lang");
 
         dirChain.add(langRootSchema);
         trackMetaObject(langRootSchema);
     }
 
-    public void run(String... filePath) throws RuntimeException {
-        File file = FileUtils.getFile(filePath);
-        if (!file.exists()) {
-            throw new RuntimeException("Input file [" + filePath + "] does not exist.");
+    public void run(String... filePath) {
+        try {
+            File file = FileUtils.getFile(filePath);
+            if (!file.exists()) {
+                throw new SpaceX("Input file [" + file + "] does not exist.");
+            }
+            run(file);
         }
-        run(file);
+        catch (SpaceX e) {
+            PrintStream ps = System.err;
+            StringBuffer sb = new StringBuffer();
+            ps.println("error: " + e.getMessage());
+            if (e.getError() != null) {
+                sb.append(e.getError().getMessage());
+                if (e.getError().getSpaceTrace() != null) {
+                    sb.append(
+                        Strings.buildDelList(e.getError().getSpaceTrace(),
+                                             new Lister() {
+                                                 @Override
+                                                 public String getListString(Object o) {
+                                                     return ((FunctionCallContext) o).toString();
+                                                 }
+                                             },
+                                             JavaHelper.EOL)
+                    );
+                }
+            }
+            if (e.getCause() != null) {
+//                log.error("", e.getCause());
+                e.getCause().printStackTrace(System.err);
+            }
+            ps.println(sb.toString());
+        }
     }
 
     public void run(File file) {
@@ -147,7 +169,7 @@ public class Executor extends ExprProcessor {
             astLoader = (AstLoader) aClass.newInstance();
             log.debug(String.format("Found source loader [%s]", astLoader.getName()));
         } catch (Exception e) {
-            throw new RuntimeException("can not find or load source loader [" + parserImplClassName + "]", e);
+            throw new SpaceX("can not find or load source loader [" + parserImplClassName + "]", e);
         }
         List<RuntimeError> errors = new LinkedList<>();
         try {
@@ -163,11 +185,17 @@ public class Executor extends ExprProcessor {
                 dumpAsts();
 
             linkAndExec(errors, thisSchema);
-        } catch (RuntimeException ex) {
+        } catch (SpaceX ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new RuntimeException("Failed running program", ex);
+            throw new SpaceX("Failed running program", ex);
         }
+    }
+
+    public Stack<FunctionCallContext> getCallStack() {
+        Stack<FunctionCallContext> copy = new Stack<>();
+        copy.addAll(callStack);
+        return copy;
     }
 
     private void dumpAsts() {
@@ -177,15 +205,27 @@ public class Executor extends ExprProcessor {
     }
 
     public void linkAndExec(List<RuntimeError> errors, Schema runSchema) throws Exception {
+        link(errors, runSchema);
+        if (errors.size() == 0) {
+            exec(runSchema);
+        }
+        else {
+            log.warn("skipping exec due to link errors.");
+        }
+    }
+
+    private void link(List<RuntimeError> errors, Schema runSchema) throws Exception {
         log.debug("linking loaded program");
         errors = linkRefs(errors, langRootSchema);
         errors = linkRefs(errors, runSchema);
         if (errors.size() == 0) {
             log.info("no linker errors");
-            exec(runSchema);
         }
         else {
-            log.warn("Found " + errors.size() + " linker errors: " + JavaHelper.EOL + Strings.buildNewlineList(errors));
+            String redMsg = "Found [" + errors.size() + "] linker errors";
+            log.warn(redMsg + ". See error stream.");
+            System.err.println(redMsg + ":");
+            System.err.println(Strings.buildNewlineList(errors));
         }
     }
 
@@ -207,20 +247,24 @@ public class Executor extends ExprProcessor {
                         NamedElement lexParent = AstUtils.getLexParent(astNode);
                         reference.setLexicalContext(lexParent);
                         log.debug("found lexical parent [" + lexParent + "]");
-                        NamedElement refElem =
-                            AstUtils.lookupLenientMetaObject(dirChain, reference.getLexicalContext(),
-                                                             reference.getSpacePathExpr()
-                            );
+                        NamedElement refElem = AstUtils.lookupLenientMetaObject(dirChain, reference.getLexicalContext(),
+                                                                                reference.getSpacePathExpr());
                         if (refElem == null) {
                             errors.add(
                                 new RuntimeError(reference.getSpacePathExpr().getSourceInfo(), 0,
                                                  "can not resolve symbol '" +
-                                                     reference.getSpacePathExpr().getFullPath() + "'"));
+                                                     reference.getSpacePathExpr().getText() + "'"));
                         }
                         else {
-                            reference.setResolvedMetaObj(refElem);
-                            reference.setState(LoadState.RESOLVED);
-                            log.debug("resolved ref [" + reference + "]");
+                            if (reference.getTargetMetaType() == refElem.getMetaType()) {
+                                reference.setResolvedMetaObj(refElem);
+                                reference.setState(LoadState.RESOLVED);
+                                log.debug("resolved ref [" + reference + "]");
+                            }
+                            else
+                                errors.add(new RuntimeError(reference.getSpacePathExpr().getSourceInfo(), 0,
+                                                            "expression '" + reference.getSpacePathExpr() +
+                                                                "' must reference a " + reference.getTargetMetaType()));
                         }
                     }
                 }
@@ -240,10 +284,10 @@ public class Executor extends ExprProcessor {
     private void loadNativeMetaObjects() {
         // use Java annotations Java-native objects
 //        SpaceNative.class.getAnnotations();
-        CHAR_SEQ_TYPE_DEF = loadNativeClass(JnCharSequence.class, AstUtils.getLangRoot(dirChain));
-        op_sys_type_def = loadNativeClass(JnOpSys.class, AstUtils.getLangRoot(dirChain));
-        MATH_TYPE_DEF = loadNativeClass(JnMath.class, AstUtils.getLangRoot(dirChain));
-        space_opers_type_def = loadNativeClass(JnSpaceOpers.class, AstUtils.getLangRoot(dirChain));
+        CHAR_SEQ_TYPE_DEF = loadSequenceType(AstUtils.getLangRoot(dirChain));
+        op_sys_type_def = loadNativeType(JnOpSys.class, AstUtils.getLangRoot(dirChain));
+        MATH_TYPE_DEF = loadNativeType(JnMath.class, AstUtils.getLangRoot(dirChain));
+        space_opers_type_def = loadNativeType(JnSpaceOpers.class, AstUtils.getLangRoot(dirChain));
 
         OPER_NAV = lookupOperator("nav");
         OPER_NEW_TUPLE = lookupOperator("newTuple");
@@ -251,8 +295,18 @@ public class Executor extends ExprProcessor {
         OPER_ASSIGN = lookupOperator("assign");
     }
 
-    private SpaceTypeDefn loadNativeClass(Class jnClass, Schema rootAstSchema) {
-        AstFactory astFactory = new AstFactory();
+    private StreamTypeDefn loadSequenceType(Schema rootAstSchema) {
+        StreamTypeDefn streamTypeDefn = getAstFactory().newStreamTypeDefn(new IntrinsicSourceInfo(), "CharSequence");
+        //
+        trackMetaObject(streamTypeDefn);
+        //
+        rootAstSchema.addStreamTypeDefn(streamTypeDefn);
+        //
+        return streamTypeDefn;
+    }
+
+    private SpaceTypeDefn loadNativeType(Class jnClass, Schema rootAstSchema) {
+        AstFactory astFactory = getAstFactory();
         SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(
             new NativeSourceInfo(jnClass), toSpaceTypeName(jnClass)
         );
@@ -272,7 +326,8 @@ public class Executor extends ExprProcessor {
                 jMethodInfo,
                 jMethod.getName(),
                 jMethod,
-                astFactory.newSpaceTypeDefn(jMethodInfo, "_methodSig_" + jMethod.getName())
+                astFactory.newSpaceTypeDefn(jMethodInfo, "_sig_" + jMethod.getName()),
+                astFactory.newSpacePathExpr(jMethodInfo, null, javaToSpace(jMethod.getReturnType()).getName(), null)
             );
             //
             spaceTypeDefn.getBody().addFunctionDefn(functionDefnAST);
@@ -282,40 +337,48 @@ public class Executor extends ExprProcessor {
             //
             Parameter[] jParameters = jMethod.getParameters();
             for (Parameter jParam : jParameters) {
-                PrimitiveType spcPrim = javaToSpace(jParam);
-                if (spcPrim == PrimitiveType.TEXT) {
-                    NativeSourceInfo jParamInfo = new NativeSourceInfo(jParam);
-                    functionDefnAST.getArgSpaceTypeDefn().addAssocDefn(
-                        astFactory.newAssociationDefn(jParamInfo, jParam.getName(),
-                                                      astFactory.newSpacePathExpr(jParamInfo, null,
-                                                                                  CHAR_SEQ_TYPE_DEF.getName(),
-                                                                                  null)));
+                DatumType spcPrim = javaToSpace(jParam.getType());
+                if (!(spcPrim instanceof PrimitiveTypeDefn)) {
+                    if (spcPrim == CHAR_SEQ_TYPE_DEF) {
+                        NativeSourceInfo jParamInfo = new NativeSourceInfo(jParam);
+                        functionDefnAST.getArgSpaceTypeDefn().addAssocDefn(
+                            astFactory.newAssociationDefn(jParamInfo, jParam.getName(),
+                                                          astFactory.newSpacePathExpr(jParamInfo, null,
+                                                                                      CHAR_SEQ_TYPE_DEF.getName(),
+                                                                                      null)));
+                    }
+                    else {
+
+                    }
                 }
                 else {
                     functionDefnAST.getArgSpaceTypeDefn().addVariable(
-                        astFactory.newVariableDefn(new CodeSourceInfo(), jParam.getName(), spcPrim));
+                        astFactory.newVariableDefn(new ProgSourceInfo(), jParam.getName(), ((PrimitiveTypeDefn) spcPrim)));
                 }
             }
         }
         return spaceTypeDefn;
     }
 
-    private PrimitiveType javaToSpace(Parameter jParam) {
-        PrimitiveType spcPrimType = PrimitiveType.TEXT;
-        Class<?> jType = jParam.getType();
+    private AstFactory getAstFactory() {
+        return new AstFactory();
+    }
+
+    private DatumType javaToSpace(Class<?> jType) {
+        DatumType spcDatumType = VoidType.VOID;
         if (jType == String.class) {
-            spcPrimType = PrimitiveType.TEXT;
+            spcDatumType = CHAR_SEQ_TYPE_DEF;
         }
         else if (jType == Boolean.TYPE) {
-            spcPrimType = PrimitiveType.BOOLEAN;
+            spcDatumType = PrimitiveTypeDefn.BOOLEAN;
         }
         else if (jType == Integer.TYPE) {
-            spcPrimType = PrimitiveType.CARD;
+            spcDatumType = PrimitiveTypeDefn.CARD;
         }
         else if (jType == Float.TYPE) {
-            spcPrimType = PrimitiveType.REAL;
+            spcDatumType = PrimitiveTypeDefn.REAL;
         }
-        return spcPrimType;
+        return spcDatumType;
     }
 
     private boolean isExcludedNative(Method jMethod) {
@@ -328,7 +391,7 @@ public class Executor extends ExprProcessor {
         AbstractFunctionDefn operActionDefn =
             (AbstractFunctionDefn) AstUtils.lookupMetaObject(opersSpaceDefn, operSimpleName);
         if (operActionDefn == null)
-            throw new RuntimeException("space lang object not found with path [" + operSimpleName + "]");
+            throw new SpaceX("space lang object not found with path [" + operSimpleName + "]");
         return operActionDefn;
     }
 
@@ -339,82 +402,50 @@ public class Executor extends ExprProcessor {
     private void dumpSymbolTables() {
         log.debug("normalized meta object table: " + JavaHelper.EOL
                       + Strings.buildNewlineList(metaObjectNormalTable));
-//        log.debug("dump namespace meta object index: " + JavaHelper.EOL
-//                + Strings.buildNewlineList(metaObjectExtendedInfoMap.values()));
     }
 
-    // ------------------------- Execs ------------------------
+    // ------------------------- Expression Evaluators ------------------------
+    //
 
     /**
-     * Executes a Schema.
+     * The entry point for 'running a program': exec the 'main' function.
      */
-    public ModelElement exec(Schema programSchema) throws Exception {
-        log.debug("eval: " + programSchema);
-        SpaceTypeDefn firstSpaceTypeDefn = programSchema.getFirstSpaceDefn();
-        Tuple ctxObject = newTuple(firstSpaceTypeDefn);
-        FunctionDefn spMainActionDefn = (FunctionDefn) firstSpaceTypeDefn.getBody().getFunction("main");
-//        List<SpaceObject> objectHeap = programSchema.getObjectHeap();
-//        for (SpaceObject spaceObj : objectHeap) {
-//            trackInstanceObject(spaceObj);
-//        }
+    public ModelElement exec(Schema programSchema) {
+        log.debug("exec: " + programSchema);
+        SpaceTypeDefn bootTypeDefn = programSchema.getFirstSpaceDefn();
+        Tuple mainTypeTuple = newTuple(bootTypeDefn);
+        EvalContext evalContext = new EvalContext();
+        FunctionDefn spMainActionDefn = bootTypeDefn.getBody().getFunction("main");
+        FunctionCallContext dummyCtxt =
+            getObjBuilder().newFunctionCall(mainTypeTuple, null, null);
+        // init the tuple
+        callStack.push(dummyCtxt);
+        exec(evalContext, bootTypeDefn.getBody().getInitBlock());
+        callStack.pop();
+        // call the 'main' function a dummy function call expr
+        AstFactory tmpAstFactory = getAstFactory();
+        FunctionCallExpr mainFunctionCallExpr = tmpAstFactory.newFunctionCallExpr(new ProgSourceInfo());
+        mainFunctionCallExpr
+            .setFunctionDefnRef(tmpAstFactory.newSpacePathExpr(new IntrinsicSourceInfo(), null, "main", null));
+        mainFunctionCallExpr.getFunctionDefnRef().setResolvedMetaObj(spMainActionDefn);
+        mainFunctionCallExpr.getFunctionDefnRef().setState(LoadState.RESOLVED);
 
-        try {
-            eval(ctxObject, firstSpaceTypeDefn.getBody().getInitBlock());
-            eval(ctxObject, spMainActionDefn, newTuple(spMainActionDefn.getArgSpaceTypeDefn()));
-        } catch (RuntimeException ex) {
-            log.error("error executing", ex);
-        }
+        eval(evalContext, mainFunctionCallExpr);
         log.debug("exiting Space program execution");
         return null;
     }
 
-    private Assignable eval(Tuple spcContext, AbstractFunctionDefn function, Tuple argTuple)
-        throws RuntimeException
-    {
-        log.debug("delegate eval: " + function);
-        Assignable value = null;
-
-        if (function instanceof FunctionDefn)
-            value = eval(spcContext, (FunctionDefn) function, argTuple);
-        else if (function instanceof NativeFunctionDefn)
-            value = eval(spcContext, (NativeFunctionDefn) function, argTuple);
-
-        return value;
-    }
-
     /**
-     * Execution of FunctionDefn's is the core work of the executor.
-     * The executor must recurse into a depth-first evaluation of nested actions,
-     * resolve all coordinate references, resolve operator calls, push and pop the call stack,
-     * and move values (spaces) from action execution into the proper space for
-     * parent actions.
-     *
-     * @param ctxObject    Might be a local function space or an argument call space.
-     * @param spcActionDefn The composite, imperative action defined via Space source code (i.e., not Native).
+     * TODO I think we'll eventually want all statements to get put on an Action Queue
+     * or Transaction Queue or such.
      */
-    private Assignable eval(Tuple ctxObject, FunctionDefn spcActionDefn, Tuple argTuple) throws RuntimeException {
-        log.debug("eval: " + spcActionDefn);
-        Assignable value = null;
-        log.debug("eval: " + spcActionDefn);
-        FunctionCall functionCall = getObjBuilder().newFunctionCall(ctxObject, spcActionDefn, argTuple);
-        callStack.push(functionCall);
-        StatementBlock statementBlock = spcActionDefn.getStatementBlock();
-        eval(ctxObject, statementBlock);
-//        functionCall.setReturnSpace(cal);
-        callStack.pop();
-        log.debug("popped call stack. size [" + callStack.size() + "]");
-        value = functionCall.getReturnValue();
-        return value;
-    }
-
-    private Assignable eval(Tuple spcContext, StatementBlock statementBlock) {
-        log.debug("eval: " + statementBlock);
-        Assignable value = null;
+    private void exec(EvalContext evalContext, StatementBlock statementBlock) {
+        log.debug("exec: " + statementBlock);
         List<Statement> statementSequence = statementBlock.getStatementSequence();
         for (Statement statement : statementSequence) {
             if (statement instanceof ExprStatement) {
                 ExprStatement exprHolderStatement = (ExprStatement) statement;
-                eval(spcContext, exprHolderStatement.getExpression());
+                eval(evalContext, exprHolderStatement.getExpression());
             }
             else if (statement instanceof IfStatement) {
                 // TODO
@@ -423,15 +454,22 @@ public class Executor extends ExprProcessor {
                 // TODO
             }
             else if (statement instanceof StatementBlock) {
-                eval(spcContext, ((StatementBlock) statement));
+                exec(evalContext, ((StatementBlock) statement));
+                // Klunky (?) handling of space 'return' statement
+                if (evalContext.peekStack().isPendingReturn())
+                    return;
             }
-
+            else if (statement instanceof ReturnExpr) {
+                Assignable retVal = eval(evalContext, ((ReturnExpr) statement).getValueExpr());
+                SpaceUtils.assignOper(evalContext, evalContext.peekStack().getReturnValue(), retVal);
+                evalContext.peekStack().setPendingReturn(true);
+            }
         }
-        return value;
+        return;
     }
 
-    private Assignable eval(Tuple spcContext, ValueExpr expression) {
-        log.debug("eval: " + expression);
+    private Assignable eval(EvalContext spcContext, ValueExpr expression) {
+        log.debug("eval: (deleg) " + expression);
         Assignable value = null;
         if (expression instanceof FunctionCallExpr) {
             value = eval(spcContext, (FunctionCallExpr) expression);
@@ -439,16 +477,68 @@ public class Executor extends ExprProcessor {
         else if (expression instanceof AssignmentExpr) {
             value = eval(spcContext, (AssignmentExpr) expression);
         }
-        else if (expression instanceof LiteralExpr) {
-            value = eval(spcContext, (LiteralExpr) expression);
+        else if (expression instanceof PrimitiveLiteralExpr) {
+            value = eval(spcContext, (PrimitiveLiteralExpr) expression);
+        }
+        else if (expression instanceof SequenceLiteralExpr) {
+            value = eval(spcContext, ((SequenceLiteralExpr) expression) );
         }
         else if (expression instanceof MetaReference) {
             value = eval(spcContext, ((MetaReference) expression));
         }
         else
-            throw new RuntimeException("don't know how to evaluate " + expression);
+            throw new SpaceX("don't know how to evaluate " + expression);
 
         return value;
+    }
+
+    private Assignable eval(EvalContext evalContext, FunctionCallExpr functionCallExpr) {
+        log.debug("eval: " + functionCallExpr);
+        Assignable value = null;
+
+        // Eval the argument expressions to specific values
+        List<SpaceObject> functionPath = eval(evalContext, functionCallExpr.getFunctionDefnRef().getSpacePathExpr());
+        Tuple argTuple =
+            newTuple(((FunctionDefn) functionCallExpr.getFunctionDefnRef().getResolvedMetaObj()).getArgSpaceTypeDefn());
+
+        // Arg assignments may be by name or by order (like a SQL update statement), but not both.
+        List<ValueExpr> argumentExprs = functionCallExpr.getArgumentExprs();
+        int idxArg = 0;
+        for (ValueExpr argumentExpr : argumentExprs) {
+            Assignable argValue = eval(evalContext, argumentExpr);
+            argValue = castRightSideAsNeeded(argTuple.getDefn().getAllMembers().get(idxArg), argValue);
+            Assignable leftSideHolder = argTuple.get(argTuple.getNthMember(idxArg));
+            SpaceUtils.assignOper(evalContext, leftSideHolder, argValue);
+            idxArg++;
+        }
+
+        Tuple callTargetCtxObject = (Tuple) functionPath.get(functionPath.size() - 2);  // 2nd to last
+        FunctionCallContext functionCallContext =
+            getObjBuilder().newFunctionCall(callTargetCtxObject, functionCallExpr, argTuple);
+
+        // push call onto stack
+        callStack.push(functionCallContext);
+        log.debug("pushed call stack. size [" + callStack.size() + "]");
+        try {
+            if (functionCallExpr.getFunctionDefnRef().getResolvedMetaObj() instanceof FunctionDefn) {
+                FunctionDefn targetFunctionDefn =  (FunctionDefn) functionCallExpr.getFunctionDefnRef().getResolvedMetaObj();
+                exec(evalContext, targetFunctionDefn.getStatementBlock());
+                value = evalContext.peekStack().getReturnValue();
+            }
+            else if (functionCallExpr.getFunctionDefnRef().getResolvedMetaObj() instanceof NativeFunctionDefn)
+                value = evalNative(evalContext, functionCallExpr);
+        }
+        finally {
+            FunctionCallContext popCall = callStack.pop();
+            popCall.setPendingReturn(false);
+            log.debug("popped call stack. size [" + callStack.size() + "]");
+        }
+
+        return value;
+    }
+
+    private List<SpaceObject> eval(EvalContext evalContext, SpacePathExpr spacePathExpr) {
+        return null;
     }
 
     /**
@@ -456,13 +546,14 @@ public class Executor extends ExprProcessor {
      * do not have nested actions, at least none that are executed or controlled
      * by this executor.
      */
-    private Assignable eval(Tuple ctxObject, NativeFunctionDefn nativeFunctionDefn, Tuple argTuple) {
-        log.debug("eval: " + nativeFunctionDefn);
+    private Assignable evalNative(EvalContext evalContext, FunctionCallExpr functionCallExpr) {
+        log.debug("eval: " + functionCallExpr);
         Assignable value = null;
         try {
-            Object[] jArgs = new Object[argTuple.getSize()];
-            for (int idxArg = 0; idxArg < argTuple.getValuesHolders().size(); idxArg++) {
-                Assignable spcArgValue = argTuple.getValuesHolders().get(idxArg);
+            List<Assignable> sArgValues = evalContext.peekStack().getArgTuple().getValuesHolders();
+            Object jArgs[] = new Object[sArgValues.size()];
+            int idxArg = 0;
+            for (Assignable spcArgValue : sArgValues) {
                 Object jArg = "?";
                 if (spcArgValue instanceof Reference)
                     //
@@ -475,75 +566,47 @@ public class Executor extends ExprProcessor {
                 if (jArg instanceof CharacterSequence)
                     jArg = casters.charSequenceToString((CharacterSequence) jArg);
                 jArgs[idxArg] = jArg;
+                idxArg++;
             }
-            Object jObjectDummy = nativeFunctionDefn.getjMethod().getDeclaringClass().newInstance();
-            nativeFunctionDefn.getjMethod().invoke(jObjectDummy, jArgs);
-        } catch (InstantiationException e) {
+            NativeFunctionDefn funcDef = (NativeFunctionDefn) functionCallExpr.getDefn();
+            Object jObjectDummy =
+                funcDef.getjMethod().getDeclaringClass().newInstance();
+            Object jValue = funcDef.getjMethod().invoke(jObjectDummy, jArgs);
+        } catch (Exception e) {
             log.error(e);
-        } catch (IllegalAccessException e) {
-            log.error(e);
-        } catch (InvocationTargetException e) {
-            log.error(e);
+            throw new SpaceX(newRuntimeError("error invoking native method " + e.getMessage()));
         }
         return value;
     }
 
-    /**
-     * The central eval method of this executor.
-     * An {@link FunctionCallExpr} is a reference to a {@link FunctionDefn} along with the argument
-     * space for the call. In general, the arguments themselves are value expressions that must be
-     * evaluated, recursively.
-     *
-     * Conceptually, a Function call is the same as a 'join' operation in RDB parlance.
-     *
-     * @param ctxObj  The space object against which this function is being invoked.
-     * @param spcCallExpr The action-invoking expression to be evaluated (not the instance-level object).
-     *                    Can be a Space function call or a Native (Java) function call.
-     */
-    private Assignable eval(Tuple ctxObj, FunctionCallExpr spcCallExpr) throws RuntimeException {
-        log.debug("eval: call to " + spcCallExpr.getFunctionRef().getSpacePathExpr().getFullPath());
-        Assignable value = null;
-        //
-        AbstractFunctionDefn targetFunctionDefn = spcCallExpr.getFunctionRef().getResolvedMetaObj();
-
-        if (targetFunctionDefn == null)
-            throw new RuntimeException("unresolved function ref " + spcCallExpr.getFunctionRef());
-
-        // must add a nested Space context beneath the incoming context space to
-        // represent the call stack
-        Tuple argTuple = newTuple(spcCallExpr.getFunctionRef().getResolvedMetaObj().getArgSpaceTypeDefn());
-
-        // assignments may be by name or by order (like a SQL update statement)
-        ValueExpr[] argumentExprs = spcCallExpr.getArgumentExprs();
-        for (int idxArg = 0; idxArg < argumentExprs.length; idxArg++) {
-            ValueExpr argumentExpr = argumentExprs[idxArg];
-            Assignable argValue = eval(ctxObj, argumentExpr);
-            argValue = castRightSideAsNeeded(argTuple.getDefn().getAllMembers().get(idxArg), argValue);
-            argTuple.setValueAt(idxArg, argValue);
-        }
-        value = eval(ctxObj, targetFunctionDefn, argTuple);
-        //
-        return value;
+    /*
+     Must generalize this exec to find values in all possible locations:
+      - call args
+       - context object (tuple)
+        - static objects
+         */
+    private Assignable eval(EvalContext evalContext, MetaReference<?> metaRef) {
+        log.debug("eval: " + metaRef);
+        NamedElement toMetaObj = metaRef.getResolvedMetaObj();
+        return evalContext.peekStack().getCtxObject().get(toMetaObj);
     }
 
-    private Assignable eval(Tuple ctxObject, MetaReference<?> metaRef) {
-        log.debug("eval: " + metaRef + " wrt " + ctxObject);
-        return ctxObject.get(metaRef.getResolvedMetaObj());
-    }
-
-    private Assignable eval(Tuple ctxObject, AssignmentExpr assignmentExpr) {
+    private Assignable eval(EvalContext evalContext, AssignmentExpr assignmentExpr) {
+        log.debug("eval: " + assignmentExpr);
         NamedElement leftSideDefnObj = assignmentExpr.getMemberRef().getResolvedMetaObj();
-        Assignable rightSideValue = eval(ctxObject, assignmentExpr.getValueExpr());
+        Assignable rightSideValue = eval(evalContext, assignmentExpr.getValueExpr());
         rightSideValue = castRightSideAsNeeded(leftSideDefnObj, rightSideValue);
-        Assignable leftSideHolder = SpaceUtils.assignOper(ctxObject, leftSideDefnObj, rightSideValue);
-        log.debug("eval: resulting assigned value: " + leftSideHolder);
+        // TODO Add some notion of 'casting' and 'auto-(un)boxing'.
+        Assignable leftSideHolder = evalContext.peekStack().getCtxObject().get(leftSideDefnObj);
+        SpaceUtils.assignOper(evalContext, leftSideHolder, rightSideValue);
+        log.debug("eval: resulting assigned value >> " + leftSideHolder);
         return leftSideHolder;
     }
 
     private Assignable castRightSideAsNeeded(NamedElement leftSideDefnObj, Assignable rightSideValue) {
-        if ( leftSideDefnObj instanceof AssociationDefn &&
+        if (leftSideDefnObj instanceof AssociationDefn &&
             ((AssociationDefn) leftSideDefnObj).getToType().getOid().equals(Executor.CHAR_SEQ_TYPE_DEF.getOid())
-             && !(rightSideValue instanceof Reference) )
+            && !(rightSideValue instanceof Reference))
         {
             if (rightSideValue instanceof ScalarValue) {
                 CharacterSequence characterSequence =
@@ -566,36 +629,53 @@ public class Executor extends ExprProcessor {
      * If pathExpr is relative (versus absolute), the expression is evaluated with respect to
      * userSpaceContext. May return a single scalar, a tuple, or a space with multiple
      * tuples, depending on the expression. */
-//    private SpaceObject eval(Space userSpaceContext, SpacePathExpr pathExpr) {
+//    private SpaceObject exec(Space userSpaceContext, SpacePathExpr pathExpr) {
 //        SpaceObject value = null;
 //
 //        return value;
 //    }
 
     /**
-     * Returns the literal value object associated with the {@link LiteralExpr}.
+     * Returns the literal value object associated with the {@link PrimitiveLiteralExpr}.
      * The returned object may be a scalar, a character sequence, or a complete
      * space.
      */
-    private Assignable eval(Tuple spcContext, LiteralExpr literalExpr) {
-        log.debug("eval: " + literalExpr);
+    private Assignable eval(EvalContext evalContext, PrimitiveLiteralExpr primitiveLiteralExpr) {
+        log.debug("eval: " + primitiveLiteralExpr);
         Assignable value = null;
-        switch (literalExpr.getPrimitiveType()) {
-            case TEXT:
-                CharacterSequence csLiteral = newCharacterSequence(literalExpr.getValueExpr());
-                value = newReference(csLiteral);
-                break;
-            case CARD:
-                value = getObjBuilder().newCardinalValue(new Integer(literalExpr.getValueExpr()));
-                break;
-            case BOOLEAN:
-                value = getObjBuilder().newBooleanValue(Boolean.valueOf(literalExpr.getValueExpr()));
-                break;
-            case CHAR:
-            case REAL:
-            case RATIONAL:
-            default:
-                throw new RuntimeException("Can not yet handle literals other than Java Strings");
+        if (primitiveLiteralExpr.getTypeDefn() == PrimitiveTypeDefn.CARD) {
+//            case TEXT:
+//                CharacterSequence csLiteral = newCharacterSequence(primitiveLiteralExpr.getValueExpr());
+//                value = newReference(csLiteral);
+//                break;
+            value = getObjBuilder().newCardinalValue(new Integer(primitiveLiteralExpr.getValueExpr()));
+        }
+        else if (primitiveLiteralExpr.getTypeDefn() == PrimitiveTypeDefn.BOOLEAN) {
+            value = getObjBuilder().newBooleanValue(Boolean.valueOf(primitiveLiteralExpr.getValueExpr()));
+        }
+        else if (primitiveLiteralExpr.getTypeDefn() == PrimitiveTypeDefn.CHAR) {
+
+        }
+        else if (primitiveLiteralExpr.getTypeDefn() == PrimitiveTypeDefn.REAL) {
+
+        }
+//       else if (primitiveLiteralExpr.getTypeDefn() ==  RATIONAL) {
+//       }
+        else {
+            throw new SpaceX("Can not yet handle literal of type " + primitiveLiteralExpr.getTypeDefn());
+        }
+        return value;
+    }
+
+    private Assignable eval(EvalContext evalContext, SequenceLiteralExpr sequenceLiteralExpr) {
+        log.debug("eval: " + sequenceLiteralExpr);
+        Assignable value = null;
+        if (sequenceLiteralExpr.getTypeRef().getResolvedMetaObj() == CHAR_SEQ_TYPE_DEF) {
+            CharacterSequence csLiteral = newCharacterSequence(sequenceLiteralExpr.getValueExpr());
+            value = newReference(csLiteral);
+        }
+        else {
+            throw new SpaceX("Can not yet handle literal of type " + sequenceLiteralExpr);
         }
         return value;
     }
@@ -630,10 +710,14 @@ public class Executor extends ExprProcessor {
         return newCs;
     }
 
+    public RuntimeError newRuntimeError(String msg) {
+        return new RuntimeError(getCallStack(), -1, msg);
+    }
+
     // -------------- Tracking of runtime/instance things ---------------
 
     private void trackMetaObject(ModelElement modelElement) {
-        // add to normalized object table ...
+        // Add to normalized object table ...
         metaObjectNormalTable.add(modelElement);
 //        metaObjectIndexByFullPath.put(modelElement.getFullPath(), modelElement);
 
@@ -642,7 +726,7 @@ public class Executor extends ExprProcessor {
 //            MetaInfo metaInfo = new MetaInfo((NamedElement) modelElement);
 //            metaObjectExtendedInfoMap.put((NamedElement) modelElement, metaInfo);
 //
-//            // if this object has a parent, add this object to parent's child map
+//            // if this object has a parent, Add this object to parent's child map
 //            if (modelElement.hasParent()) {
 //                metaObjectExtendedInfoMap.get(modelElement.getParent()).addChild((NamedElement) modelElement);
 //            }
@@ -653,10 +737,27 @@ public class Executor extends ExprProcessor {
         objectTable.addObject(spaceObject);
     }
 
-    public SpaceObject dereference(SpaceOid referenceOid) throws RuntimeException {
+    public SpaceObject dereference(SpaceOid referenceOid) throws SpaceX {
         SpaceObject spaceObject = objectTable.getObjectByOid(referenceOid);
         if (spaceObject == null)
-            throw new RuntimeException("Space Oid [" + referenceOid + "] not found.");
+            throw new SpaceX("Space Oid [" + referenceOid + "] not found.");
         return spaceObject;
+    }
+
+    /**
+     * Everything needed by an exec( ) method to resolve values in the lexical
+     * context chain.
+     *
+     * @author Jim Coles
+     */
+    public class EvalContext {
+
+        public FunctionCallContext peekStack() {
+            return callStack.peek();
+        }
+
+        RuntimeError newRuntimeError(String msg) {
+            return Executor.this.newRuntimeError(msg);
+        }
     }
 }

@@ -9,12 +9,16 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import java.util.List;
+
 /**
  * @author Jim Coles
  */
 public interface Named {
 
-    String getName();
     boolean isNamed();
 
+    String getName();
+
+    List<String> getFullNamePath();
 }

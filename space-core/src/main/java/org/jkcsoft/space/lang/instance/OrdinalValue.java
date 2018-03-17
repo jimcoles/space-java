@@ -9,8 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.PrimitiveType;
-import org.jkcsoft.space.lang.ast.VariableDefn;
+import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
 
 /**
  * Ordinal numbers are read-only to the User and can be obtained, for instance, as
@@ -20,7 +19,7 @@ import org.jkcsoft.space.lang.ast.VariableDefn;
  */
 public class OrdinalValue extends IntegerValue {
 
-    public OrdinalValue(PrimitiveType type, Integer value) {
+    public OrdinalValue(PrimitiveTypeDefn type, Integer value) {
         super(type, value);
     }
 

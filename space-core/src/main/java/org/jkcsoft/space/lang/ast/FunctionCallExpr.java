@@ -9,18 +9,23 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
+import java.util.List;
+
 /**
- * Represents a call to a function along with arguments expressions.
+ * The AST's representation of a call to an object.function() along with arguments expressions.
  *
  * @author Jim Coles
  */
 @GroupingNode
 public class FunctionCallExpr extends ModelElement implements ValueExpr {
 
-    /** The name of some other named design-time thing such as a function.
+    /**
+     * The name of some other named design-time thing such as a function.
      */
-    private MetaReference<AbstractFunctionDefn>   functionRef;
-    private ValueExpr[] argumentExprs;
+    private MetaReference<AbstractFunctionDefn> functionDefnRef;
+    private List<ValueExpr> argumentExprs;
 
     /**
      * Represents the invocation of a function.
@@ -29,19 +34,18 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
         super(sourceInfo);
     }
 
-    public FunctionCallExpr setFunctionRef(SpacePathExpr functionPathExpr)
+    public FunctionCallExpr setFunctionDefnRef(SpacePathExpr functionPathExpr)
     {
         if (functionPathExpr == null) throw new RuntimeException("bug: function path null");
         //
-        this.functionRef = new MetaReference(functionPathExpr);
-        addChild(functionRef);
+        this.functionDefnRef = new MetaReference(functionPathExpr, MetaType.FUNCTION);
         //
-//        addReference(functionRef);
+        addChild(functionDefnRef);
         //
         return this;
     }
 
-    public void setArgumentExprs(ValueExpr[] argumentExprs) {
+    public void setArgumentExprs(List<ValueExpr> argumentExprs) {
         this.argumentExprs = argumentExprs;
         //
         for (ValueExpr argumentExpr : argumentExprs) {
@@ -53,16 +57,16 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
         }
     }
 
-    public MetaReference<AbstractFunctionDefn> getFunctionRef() {
-        return functionRef;
+    public MetaReference<AbstractFunctionDefn> getFunctionDefnRef() {
+        return functionDefnRef;
     }
 
-    public ValueExpr[] getArgumentExprs() {
+    public List<ValueExpr> getArgumentExprs() {
         return argumentExprs;
     }
 
     @Override
     public String getText() {
-        return "" + functionRef;
+        return "" + functionDefnRef;
     }
 }

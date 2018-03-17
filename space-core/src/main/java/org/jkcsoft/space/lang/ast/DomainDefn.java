@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 /**
  * A {@link DomainDefn} is a wrapper around a 1-dimensional primitive type.
  * A Domain superimposes constraints on simple primitive. Domains may also
@@ -16,13 +18,22 @@ package org.jkcsoft.space.lang.ast;
  * applicable to any objects that contain a variable of a certain Domain
  * regardless of the objects type.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
-public class DomainDefn extends SpaceTypeDefn {
+public class DomainDefn extends NamedElement implements DatumType {
 
     DomainDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
     }
 
+    @Override
+    public MetaType getMetaType() {
+        return MetaType.TYPE;
+    }
+
+    @Override
+    public int getScalarDofs() {
+        return 1;
+    }
 }

@@ -99,8 +99,8 @@ class CreatePropertyQuickFix extends BaseIntentionAction {
             moveCaretRelatively(2, 0, false, false, false);
 
         // almost the same thing but manipulating plain text of the document instead of PSI
-//                FileEditorManager.getInstance(project).openFile(file, true);
-//                final Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
+//                FileEditorManager.getInstance(Project).openFile(file, true);
+//                final Editor editor = FileEditorManager.getInstance(Project).getSelectedTextEditor();
 //                final Document document = editor.getDocument();
 //                document.insertString(document.getTextLength(), "\n" + key.replaceAll(" ", "\\\\ ") + " = ");
 //                editor.getCaretModel().getPrimaryCaret().moveToOffset(document.getTextLength());

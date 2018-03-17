@@ -31,7 +31,8 @@ public class SpaceExprProcessor extends ExprProcessor {
     // Public methods
     //----------------------------------------------------------------------------
     public void eval(ModelElement elem)
-            throws RuntimeException {
+            throws SpaceX
+    {
 
     }
 

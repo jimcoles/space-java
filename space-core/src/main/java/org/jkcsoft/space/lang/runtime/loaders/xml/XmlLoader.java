@@ -25,7 +25,7 @@ import java.io.InputStream;
  * <p>
  * <p>Analogous to a Java class XmlLoader.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class XmlLoader extends DefaultHandler {

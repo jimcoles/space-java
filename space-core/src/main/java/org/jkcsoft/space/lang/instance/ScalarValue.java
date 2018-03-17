@@ -9,8 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.PrimitiveType;
-import org.jkcsoft.space.lang.ast.VariableDefn;
+import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
 
 /**
  * Holds one-dimensional values for primitive types: Ints, Real, Chars
@@ -18,16 +17,16 @@ import org.jkcsoft.space.lang.ast.VariableDefn;
  */
 public abstract class ScalarValue<T> implements Assignable {
 
-    private PrimitiveType type;
+    private PrimitiveTypeDefn type;
     private T value;
 
-    ScalarValue(PrimitiveType type, T value) {
+    ScalarValue(PrimitiveTypeDefn type, T value) {
 //        super(oid);
         this.type = type;
         this.value = value;
     }
 
-    public PrimitiveType getType() {
+    public PrimitiveTypeDefn getType() {
         return type;
     }
 

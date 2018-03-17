@@ -15,7 +15,9 @@ import org.apache.log4j.Logger;
 import org.jkcsoft.apps.Application;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.runtime.Executor;
+import org.jkcsoft.space.lang.runtime.SpaceX;
 
+import java.io.PrintStream;
 import java.util.List;
 
 /**
@@ -30,7 +32,7 @@ public class SpaceMain {
             SpaceMain main = new SpaceMain();
             main.instMain(args);
         } catch (Exception e) {
-            log.fatal("error running Space", e);
+            log.fatal("last ditch error handler =>", e);
         }
         return;
     }
@@ -43,52 +45,59 @@ public class SpaceMain {
         app = new Application("space");
     }
 
-    private void instMain(String[] args) throws ParseException {
-        Options cliOpts = new Options();
-        OptionGroup optionGroup = new OptionGroup();
+    private void instMain(String[] args) {
+        try {
+            Options cliOpts = new Options();
+            OptionGroup optionGroup = new OptionGroup();
 
-        Option optFileName = new Option("file", true, "File name to run");
-        Option help = new Option("help", "Print usage");
-        Option version = new Option("version", "Show Space version info");
-        Option verbose = new Option("verbose", "Print extra runtime info to standard out");
+            Option optFileName = new Option("file", true, "File name to run");
+            Option help = new Option("help", "Print usage");
+            Option version = new Option("version", "Show Space version info");
+            Option verbose = new Option("verbose", "Print extra runtime info to standard out");
 
-        cliOpts.addOption(optFileName);
-        cliOpts.addOption(help);
-        cliOpts.addOption(version);
-        cliOpts.addOption(verbose);
+            cliOpts.addOption(optFileName);
+            cliOpts.addOption(help);
+            cliOpts.addOption(version);
+            cliOpts.addOption(verbose);
 
-        // Parse and validate the command line based on options decl ...
-        CommandLineParser cliParse = new DefaultParser();
-        CommandLine commandLine = cliParse.parse(cliOpts, args);
-        validate(commandLine);
+            // Parse and validate the command line based on options decl ...
+            CommandLineParser cliParse = new DefaultParser();
+            CommandLine commandLine = cliParse.parse(cliOpts, args);
+            validate(commandLine);
 
-        // Interpret and apply the command line options ...
+            // Interpret and apply the command line options ...
 
-        // Opt: help
-        if (commandLine.hasOption(help.getOpt())) {
-            printUsage(cliOpts);
-            return;
+            // Opt: help
+            if (commandLine.hasOption(help.getOpt())) {
+                printUsage(cliOpts);
+                return;
+            }
+
+            // Opt: verbose => set log level to DEBUG
+            if (commandLine.hasOption(verbose.getOpt())) {
+                Logger.getRootLogger().setLevel(Level.DEBUG);
+            }
+
+            // Opt: file - Source file to run
+            String fileName = commandLine.getOptionValue(optFileName.getOpt());
+
+            if (Strings.isEmpty(fileName)) {
+                List<String> restOfArgs = commandLine.getArgList();
+                if (restOfArgs == null || restOfArgs.size() != 1)
+                    throw new IllegalArgumentException("Filename required");
+
+                fileName = restOfArgs.get(0);
+            }
+
+            // Exec specified Space code ...
+            Executor exec = new Executor();
+            exec.run(fileName);
         }
-
-        // Opt: verbose => set log level to DEBUG
-        if (commandLine.hasOption(verbose.getOpt())) {
-            Logger.getRootLogger().setLevel(Level.DEBUG);
+        catch (ParseException e) {
+            String message = "invalid command line: " + e.getMessage();
+            log.error(message);
+            System.err.println(message);
         }
-
-        // Opt: file - Source file to run
-        String fileName = commandLine.getOptionValue(optFileName.getOpt());
-
-        if (Strings.isEmpty(fileName)) {
-            List<String> restOfArgs = commandLine.getArgList();
-            if (restOfArgs == null || restOfArgs.size() != 1)
-                throw new IllegalArgumentException("Filename required");
-
-            fileName = restOfArgs.get(0);
-        }
-
-        // Exec specified Space code ...
-        Executor exec = new Executor();
-        exec.run(fileName);
     }
 
     private void printUsage(Options cliOpts) {

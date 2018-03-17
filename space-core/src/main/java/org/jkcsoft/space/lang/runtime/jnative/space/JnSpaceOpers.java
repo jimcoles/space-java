@@ -13,7 +13,7 @@ import org.jkcsoft.space.lang.ast.AssociationDefn;
 import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
 import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.runtime.Executor;
-import org.jkcsoft.space.lang.runtime.RuntimeException;
+import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.text.MessageFormat;
 import java.util.Map;
@@ -41,8 +41,7 @@ public class JnSpaceOpers {
 
     /** */
     public static Tuple newTuple(ObjectFactory objectFactory, SpaceTypeDefn defn, ScalarValue ... args) {
-        Tuple tuple = objectFactory.newTuple(defn, args);
-
+        Tuple tuple = objectFactory.newTuple(defn);
         return tuple;
     }
 
@@ -86,7 +85,7 @@ public class JnSpaceOpers {
                 if (leftVar.getDefinition().getType() != rightVar.getDefinition().getType()) {
                     String msg = MessageFormat.format("Variable types incompatible. ${0} cannot be assigned to ${1}.",
                             rightVar.getDefinition().getType(), leftVar.getDefinition().getType());
-                    throw new RuntimeException(msg);}
+                    throw new SpaceX(msg);}
                 leftVar.setScalarValue(rightVar.getScalarValue());
             }
         }

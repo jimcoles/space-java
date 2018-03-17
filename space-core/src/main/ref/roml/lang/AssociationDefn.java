@@ -9,7 +9,7 @@ package com.jkc.roml.lang;
 
 /**
  * Captures a wide range of relationships such as one-to-many, recursive.
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class AssociationDefn

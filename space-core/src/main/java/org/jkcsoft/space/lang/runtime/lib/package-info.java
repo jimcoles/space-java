@@ -10,7 +10,8 @@
 
 /**
  * This package contains core Space runtime libraries that are written in Space itself,
- * as opposed to native libs that delegate to the underlying implementation (Java).
+ * as opposed to native libs that delegate to the underlying machine language or
+ * virtual machine, e.g., Java.
  *
  * @author Jim Coles
  */

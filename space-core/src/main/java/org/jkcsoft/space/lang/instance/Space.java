@@ -18,16 +18,18 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 
 /**
- * "Everything is a Space".
+ * <p>"Everything is a Space" (TM).
  *
- * <p> A Space is a collection of Tuples and is the central notion of the Space language.
- * A Space, aka Relation, is an instance-level notion of a collection of Tuples the values
- * of which are controlled by a Space type definition. It is essentially similar to a
- * collection in Java or a Table in RDB. A Space may be derived from other Spaces.
- * A Space may be a purely contextual such as the space of local variables
- * within a Function or Equation.
+ * <p> A Space is a collection of Tuples and is the central notion of the Space
+ * language. A Space, aka Relation, is an instance-level notion of a collection of Tuples the values of which are
+ * controlled by a Space type definition. It is essentially similar to a collection in Java or a Table in RDB. A Space
+ * may be derived from other Spaces. A Space may be a purely contextual such as the space of local variables within a
+ * Function or Equation.
  *
- * @author J. Coles
+ * <p>Java Analog: Array or java.util.Set
+ * <p>RDB Analog: Table, View, or query result set</p>
+ *
+ * @author Jim Coles
  * @version 1.0
  */
 public class Space extends SpaceObject implements Assignable, SpaceSet, Iterable<Tuple> {

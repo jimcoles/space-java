@@ -10,6 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.AssociationDefn;
+import org.jkcsoft.space.lang.ast.SpecInfo;
 
 /**
  * Holds a reference to an "object", which might be a Tuple or a member of a
@@ -19,6 +20,7 @@ import org.jkcsoft.space.lang.ast.AssociationDefn;
  *
  * @author Jim Coles
  */
+@SpecInfo(displayName = "reference")
 public class Reference implements Assignable {
 
     private Tuple           parentTuple;

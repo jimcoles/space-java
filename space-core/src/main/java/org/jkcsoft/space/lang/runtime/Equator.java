@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.runtime;
 /**
  * The Equator's job is, upon any state change, to evaluate all
  * Equations to determine if other state must also change in order
- * to keep the Equation value 'true'.  If I can get this to work,
+ * to keep all Equation values 'true'.  If I can get this to work,
  * it may be possible to do away with user-managed assignment operations.
  *
  * Issues that I foresee:
@@ -22,9 +22,10 @@ package org.jkcsoft.space.lang.runtime;
  *
  * - Handle cases of
  *  - symbolic versus discretely enumerated equations
- *  - non-equalities: <, >
+ *  - inequalities: <, >
  *
  * @author Jim Coles
  */
 public class Equator {
+
 }

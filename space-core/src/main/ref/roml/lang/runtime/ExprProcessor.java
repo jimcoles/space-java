@@ -16,7 +16,7 @@ import com.jkc.roml.lang.Relation;
  * In pattern terms, the command processor.  Knows how to run a RomlProgram
  * including executing Queries.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public abstract class ExprProcessor
@@ -40,7 +40,7 @@ public abstract class ExprProcessor
    *
    * TODO: This is an excellent point to do some trace logging.
    */
-//  abstract public ModelElement exec(ModelElement action) throws RuntimeException;
+//  abstract public ModelElement exec(ModelElement action) throws SpaceX;
 
   //----------------------------------------------------------------------------
   // Private methods

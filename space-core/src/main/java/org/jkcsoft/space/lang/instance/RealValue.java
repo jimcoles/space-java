@@ -9,8 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.PrimitiveType;
-import org.jkcsoft.space.lang.ast.VariableDefn;
+import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
 
 /**
  * @author Jim Coles
@@ -19,7 +18,7 @@ public class RealValue extends ScalarValue<Double> {
 
     private double jFloatDouble = Double.NaN;
 
-    public RealValue(PrimitiveType type, double value) {
+    public RealValue(PrimitiveTypeDefn type, double value) {
         super(type, value);
     }
 

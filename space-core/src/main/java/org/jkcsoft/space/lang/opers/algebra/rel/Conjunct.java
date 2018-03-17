@@ -7,9 +7,12 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.ast;
+package org.jkcsoft.space.lang.opers.algebra.rel;
 
-@Deprecated
-public class AssociationDecl {
-
+/**
+ * Aka, multiplication.
+ *
+ * @author Jim Coles
+ */
+public class Conjunct {
 }

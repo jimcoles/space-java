@@ -10,7 +10,7 @@
 package org.jkcsoft.space.langmaps.umlish;
 
 /**
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class CompOper extends Operation {

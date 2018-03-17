@@ -11,6 +11,7 @@ package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.instance.SpaceObject;
+import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -30,7 +31,7 @@ import java.util.Set;
  * @author Jim Coles
  * @version 1.0
  */
-public class Schema extends NamedElement {
+public class Schema extends NamedElement implements ValueExpr {
 
     private List<Schema> childSchemas = new LinkedList<>();
     private Set<ParseUnitInfo> parseUnitInfos = new HashSet<>();
@@ -45,6 +46,11 @@ public class Schema extends NamedElement {
 
     Schema(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
+    }
+
+    @Override
+    public MetaType getMetaType() {
+        return null;
     }
 
     public SpaceTypeDefn getFirstSpaceDefn() {
@@ -68,6 +74,11 @@ public class Schema extends NamedElement {
         addChild(spaceTypeDefn);
         // TODO: Add type def extends clause as references
         return spaceTypeDefn;
+    }
+
+    public StreamTypeDefn addStreamTypeDefn(StreamTypeDefn streamTypeDefn) {
+        addChild(streamTypeDefn);
+        return streamTypeDefn;
     }
 
 }

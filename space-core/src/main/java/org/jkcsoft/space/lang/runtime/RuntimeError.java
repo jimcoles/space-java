@@ -10,18 +10,28 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.jkcsoft.space.lang.ast.SourceInfo;
+import org.jkcsoft.space.lang.instance.FunctionCallContext;
+
+import java.util.Stack;
 
 /**
- * Holds detailed error info.  Used by {@link RuntimeException} and by loaders
+ * Holds detailed error info.  Used by {@link SpaceX} and by loaders
  * and linkers.
  *
  * @author Jim Coles
  */
 public class RuntimeError {
 
+    private Stack<FunctionCallContext> stackTrace;
+    private int errorCode;
     private SourceInfo sourceInfo;
     private String message;
-    private int errorCode;
+
+    public RuntimeError(Stack<FunctionCallContext> stackTrace, int errorCode, String message) {
+        this.stackTrace = stackTrace;
+        this.message = message;
+        this.errorCode = errorCode;
+    }
 
     public RuntimeError(SourceInfo sourceInfo, int errorCode, String message) {
         this.sourceInfo = sourceInfo;
@@ -29,8 +39,35 @@ public class RuntimeError {
         this.errorCode = errorCode;
     }
 
+    /** Future best practice: use error code to lookup the message text which is templated to
+     * take arguments args.
+     * @param errorId Specific error id.
+     * @param args Arguments, often just Strings, that get inserted into error message.
+     */
+    public RuntimeError(int errorId, Object... args) {
+
+    }
+
+    public Stack<FunctionCallContext> getSpaceTrace() {
+        return stackTrace;
+    }
+
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public SourceInfo getSourceInfo() {
+        return sourceInfo;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
     @Override
     public String toString() {
-        return "error " + (errorCode != 0 ? "<" + errorCode + ">" : "") + sourceInfo + " " + message ;
+        return "error " + (errorCode != 0 ? "<" + errorCode + ">" : "")
+            + (sourceInfo != null ? sourceInfo.toBriefString() : "?")
+            + " " + message;
     }
 }

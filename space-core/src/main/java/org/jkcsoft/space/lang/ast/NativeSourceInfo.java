@@ -20,16 +20,6 @@ public class NativeSourceInfo implements SourceInfo {
         this.jMetaObject = jMetaObject;
     }
 
-    @Override
-    public int getLine() {
-        return 0;
-    }
-
-    @Override
-    public int getCharacter() {
-        return 0;
-    }
-
     public Object getjMetaObject() {
         return jMetaObject;
     }
@@ -37,5 +27,15 @@ public class NativeSourceInfo implements SourceInfo {
     @Override
     public String toString() {
         return "" + jMetaObject;
+    }
+
+    @Override
+    public FileCoord getStart() {
+        return null;
+    }
+
+    @Override
+    public FileCoord getStop() {
+        return null;
     }
 }

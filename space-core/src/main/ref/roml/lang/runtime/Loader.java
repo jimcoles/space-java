@@ -27,7 +27,7 @@ import com.jkc.roml.lang.RomlProgram;
  *
  * <p>Analogous to a Java class XmlLoader.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class Loader extends DefaultHandler

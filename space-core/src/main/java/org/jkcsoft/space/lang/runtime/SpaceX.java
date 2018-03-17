@@ -9,22 +9,28 @@
  */
 package org.jkcsoft.space.lang.runtime;
 
-import org.jkcsoft.space.lang.ast.ModelElement;
-
 /**
  * @author Jim Coles
  * @version 1.0
  */
-public class RuntimeException extends java.lang.RuntimeException {
+public class SpaceX extends RuntimeException {
 
-    public RuntimeException(String message) {
+    private RuntimeError error;
+
+    public SpaceX(RuntimeError error) {
+        super(error.toString());
+        this.error = error;
+    }
+
+    public SpaceX(String message) {
         super(message);
     }
 
-    public RuntimeException(String message, Throwable cause) {
+    public SpaceX(String message, Throwable cause) {
         super(message, cause);
     }
-    public RuntimeException(String message, ModelElement elem, Throwable cause) {
-        super(message, cause);
+
+    public RuntimeError getError() {
+        return error;
     }
 }

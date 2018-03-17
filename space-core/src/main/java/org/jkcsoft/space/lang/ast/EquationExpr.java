@@ -15,7 +15,7 @@ package org.jkcsoft.space.lang.ast;
  * - Operator Refs
  * - Function Calls
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class EquationExpr {

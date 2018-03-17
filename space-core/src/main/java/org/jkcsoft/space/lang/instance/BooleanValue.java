@@ -9,15 +9,15 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.PrimitiveType;
+import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
 
 /**
  * @author Jim Coles
  */
 public class BooleanValue extends ScalarValue<Boolean> {
 
-    public static final BooleanValue TRUE = new BooleanValue(PrimitiveType.BOOLEAN, Boolean.TRUE);
-    public static final BooleanValue FALSE = new BooleanValue(PrimitiveType.BOOLEAN, Boolean.FALSE);
+    public static final BooleanValue TRUE = new BooleanValue(PrimitiveTypeDefn.BOOLEAN, Boolean.TRUE);
+    public static final BooleanValue FALSE = new BooleanValue(PrimitiveTypeDefn.BOOLEAN, Boolean.FALSE);
     public static final BooleanValue getValue(boolean boo) {
         if (boo)
             return TRUE;
@@ -25,7 +25,7 @@ public class BooleanValue extends ScalarValue<Boolean> {
             return FALSE;
     }
 
-    private BooleanValue(PrimitiveType type, Boolean value) {
+    private BooleanValue(PrimitiveTypeDefn type, Boolean value) {
         super(type, value);
     }
 

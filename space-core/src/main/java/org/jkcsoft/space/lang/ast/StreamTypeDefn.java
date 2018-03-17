@@ -8,6 +8,9 @@
  * Also see the LICENSE file in the repository root directory.
  */
 package org.jkcsoft.space.lang.ast;
+
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 /**
  * In Space, a stream is the generalization controling the notions of
  *
@@ -28,13 +31,22 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class StreamTypeDefn extends ModelElement {
+public class StreamTypeDefn extends NamedElement implements DatumType {
 
     private MetaReference<SpaceTypeDefn> typeRef;
     private float length;
 
-    StreamTypeDefn(SourceInfo sourceInfo) {
-        super(sourceInfo);
+    StreamTypeDefn(SourceInfo sourceInfo, String name) {
+        super(sourceInfo, name);
     }
 
+    @Override
+    public MetaType getMetaType() {
+        return MetaType.TYPE;
+    }
+
+    @Override
+    public int getScalarDofs() {
+        return 0;
+    }
 }

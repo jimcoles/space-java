@@ -10,7 +10,7 @@ package com.jkc.roml.lang;
 /**
  * Conceptually, the generalization for sub-types Variable and Constant.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class Property

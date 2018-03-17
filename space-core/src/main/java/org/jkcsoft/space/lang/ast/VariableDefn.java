@@ -8,8 +8,9 @@
  * Also see the LICENSE file in the repository root directory.
  */
 
-
 package org.jkcsoft.space.lang.ast;
+
+import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
  * Definition-level element of a Property.
@@ -19,20 +20,24 @@ package org.jkcsoft.space.lang.ast;
  */
 public class VariableDefn extends NamedElement {
 
-    private PrimitiveType type;
+    private PrimitiveTypeDefn type;
 
-    VariableDefn(SourceInfo sourceInfo, String name, PrimitiveType type) {
+    VariableDefn(SourceInfo sourceInfo, String name, PrimitiveTypeDefn type) {
         super(sourceInfo, name);
         this.type = type;
     }
 
-    public void setType(PrimitiveType type) {
-        this.type = type;
+    @Override
+    public MetaType getMetaType() {
+        return MetaType.DATUM;
     }
 
-    public PrimitiveType getType() {
+    public PrimitiveTypeDefn getType() {
         return type;
     }
 
+    public void setType(PrimitiveTypeDefn type) {
+        this.type = type;
+    }
 
 }

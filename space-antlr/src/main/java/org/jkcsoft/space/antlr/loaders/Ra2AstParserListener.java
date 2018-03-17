@@ -29,7 +29,7 @@ import java.io.File;
 public class Ra2AstParserListener extends SpaceParserBaseListener {
 
     private AstFactory astFactory = new AstFactory();
-    private  File file;
+    private File file;
 
     public Ra2AstParserListener(File file) {
         this.file = file;
@@ -100,25 +100,15 @@ public class Ra2AstParserListener extends SpaceParserBaseListener {
     }
 
     @Override
-    public void enterActionDefn(SpaceParser.ActionDefnContext ctx) {
-        super.enterActionDefn(ctx);
+    public void enterFunctionDefn(SpaceParser.FunctionDefnContext ctx) {
+        super.enterFunctionDefn(ctx);
     }
 
     @Override
-    public void exitActionDefn(SpaceParser.ActionDefnContext ctx) {
-        super.exitActionDefn(ctx);
+    public void exitFunctionDefn(SpaceParser.FunctionDefnContext ctx) {
+        super.exitFunctionDefn(ctx);
     }
 
-
-    @Override
-    public void enterSpaceDecl(SpaceParser.SpaceDeclContext ctx) {
-        super.enterSpaceDecl(ctx);
-    }
-
-    @Override
-    public void exitSpaceDecl(SpaceParser.SpaceDeclContext ctx) {
-        super.exitSpaceDecl(ctx);
-    }
 
     @Override
     public void enterComment(SpaceParser.CommentContext ctx) {

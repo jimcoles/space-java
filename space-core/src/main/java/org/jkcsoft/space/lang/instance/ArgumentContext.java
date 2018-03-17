@@ -7,17 +7,18 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.ast;
+package org.jkcsoft.space.lang.instance;
+
+import org.jkcsoft.space.lang.ast.ModelElement;
 
 /**
+ *
  * @author Jim Coles
  */
-public enum PrimitiveType {
-    VOID,
-    BOOLEAN,
-    CHAR,
-    TEXT,
-    CARD,
-    REAL,
-    RATIONAL
+public class ArgumentContext extends AbstractExeContext {
+
+    public ArgumentContext(ModelElement astNode) {
+        super(astNode);
+    }
+
 }

@@ -19,10 +19,11 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-@GroupingNode
 public class StatementBlock extends Statement {
 
+    protected List<AssociationDefn> associationDefnList;
     private List<Statement> statementSequence = new LinkedList<>();  // child statements
+    private List<VariableDefn> variableDefnList;
 
     public StatementBlock(SourceInfo sourceInfo) {
         super(sourceInfo);
@@ -41,4 +42,68 @@ public class StatementBlock extends Statement {
         return valueExpr;
     }
 
+    public Statement addStatement(Statement statement) {
+        statementSequence.add(statement);
+        //
+        addChild(statement);
+        //
+        return statement;
+    }
+
+    public boolean hasVariables() {
+        return variableDefnList != null && variableDefnList.size() > 0;
+    }
+
+    public List<VariableDefn> getVariableDefnList() {
+        return variableDefnList;
+    }
+
+    public VariableDefn getVariableDefnAt(int index) {
+        return variableDefnList.get(index);
+    }
+
+    public boolean hasAssociations() {
+        return associationDefnList != null && associationDefnList.size() > 0;
+    }
+
+    public List<AssociationDefn> getAssociationDefnList() {
+        return associationDefnList;
+    }
+
+    // ===========================================================
+    // Child adders
+    //
+    public VariableDefn addVariable(VariableDefn variableDefn) {
+        if (variableDefnList == null)
+            variableDefnList = new LinkedList<>();
+        variableDefnList.add(variableDefn);
+        //
+//        indexCoordinatesByName.put(variableDefn.getName(), variableDefn);
+        //
+        addChild(variableDefn);
+        return variableDefn;
+    }
+
+    public AssociationDefn addAssocDefn(AssociationDefn associationDefn) {
+        if (associationDefnList == null)
+            associationDefnList = new LinkedList<>();
+        associationDefnList.add(associationDefn);
+        //
+//        indexAssociationsByName.put(associationDefn.getName(), associationDefn);
+        //
+        addChild(associationDefn);
+        //
+
+// NOTE: The following commented out because SpaceTypeDef is not the direct holder of references.
+//        if (associationDefn.getFromTypeRef() != null)
+//            addAssocDefn(associationDefn.getFromTypeRef());
+//
+//        addAssocDefn(associationDefn.getToTypeRef());
+        //
+        return associationDefn;
+    }
+
+    public int getScalarDofs() {
+        return variableDefnList.size();
+    }
 }

@@ -12,7 +12,7 @@ package org.jkcsoft.space.langmaps.umlish;
 /**
  * UML: core.Primitive -> DataType -> Classifer -> etc.
  *
- * @author J. Coles
+ * @author Jim Coles
  * @version 1.0
  */
 public class PrimitiveDataType extends Classifier {

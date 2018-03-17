@@ -9,13 +9,19 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Named elements define the lexical structure of the AST -- the structure by which elements
  * such as type definitions, variables, and functions may be referenced.
  *
  * @author Jim Coles
  */
-public class NamedElement extends ModelElement implements Named, Comparable<NamedElement> {
+public abstract class NamedElement extends ModelElement implements Named, Comparable<NamedElement> {
 
     private String name;
     private String description;
@@ -39,6 +45,24 @@ public class NamedElement extends ModelElement implements Named, Comparable<Name
     public boolean isNamed() {
         return name != null;
     }
+
+    @Override
+    public List<String> getFullNamePath() {
+        List<String> forwardList = new LinkedList<>();
+        forwardList.add(this.getName());
+        ModelElement node = this;
+        while (node != null) {
+            if (node instanceof NamedElement) {
+                forwardList.add(((NamedElement) node).getName());
+            }
+            //
+            node = node.getParent();
+        }
+        Collections.reverse(forwardList);
+        return forwardList;
+    }
+
+    public abstract MetaType getMetaType();
 
     public String getDescription() {
         return description;
