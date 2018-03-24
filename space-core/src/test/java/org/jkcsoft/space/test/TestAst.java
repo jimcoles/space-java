@@ -11,7 +11,7 @@ package org.jkcsoft.space.test;
 
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.ObjectFactory;
-import org.jkcsoft.space.lang.instance.ProgSourceInfo;
+import org.jkcsoft.space.lang.ast.ProgSourceInfo;
 import org.jkcsoft.space.lang.runtime.Executor;
 import org.jkcsoft.space.lang.runtime.RuntimeError;
 import org.junit.Test;

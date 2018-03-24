@@ -66,8 +66,8 @@ public class RuntimeError {
 
     @Override
     public String toString() {
-        return "error " + (errorCode != 0 ? "<" + errorCode + ">" : "")
-            + (sourceInfo != null ? sourceInfo.toBriefString() : "?")
-            + " " + message;
+        return (errorCode > 0 ? "<" + errorCode + ">" : "") +
+            (sourceInfo != null ? sourceInfo.toBriefString() + " " : "") + message;
     }
+
 }

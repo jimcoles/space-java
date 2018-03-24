@@ -39,7 +39,7 @@ public class SequenceLiteralExpr extends ModelElement implements ValueExpr {
     }
 
     @Override
-    public String getText() {
+    public String getDisplayName() {
         return valueExpr;
     }
 }

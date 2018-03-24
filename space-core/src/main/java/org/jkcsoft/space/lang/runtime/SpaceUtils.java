@@ -33,7 +33,8 @@ public class SpaceUtils {
                 }
                 else {
                     error = exe.newRuntimeError(
-                        "can't assign " + rsScalarValue.getType() + " to " + lsHolder.getDefinition().getType() + "");
+                        "type mismatch: cannot assign " + lsHolder.getDefinition().getType() + " <- " +
+                            rsScalarValue.getType());
                 }
             }
         }
@@ -49,7 +50,7 @@ public class SpaceUtils {
             if (error != null)
                 throw new SpaceX(error);
             else
-                throw new SpaceX(exe.newRuntimeError("cannot assign " + rightSideValue + " to " + leftSideHolder));
+                throw new SpaceX(exe.newRuntimeError("cannot assign " + leftSideHolder + " <- " + rightSideValue));
         }
         //
     }

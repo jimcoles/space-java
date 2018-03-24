@@ -13,10 +13,10 @@ import org.jkcsoft.space.lang.ast.AbstractFunctionDefn;
 import org.jkcsoft.space.lang.ast.FunctionCallExpr;
 import org.jkcsoft.space.lang.ast.FunctionDefn;
 
-import java.util.Stack;
+import java.util.LinkedList;
 
 /**
- * The instance level state for the invocation of an Action Definition.  Might be
+ * The instance level state for the invocation of a Function.  Might be
  * a top-level function call or nested.  Every function call is pushed onto the
  * call stack.  The FunctionCallContext objects holds data specific to this invocation.
  *
@@ -27,7 +27,7 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
 
     private Tuple ctxObject;
     private Tuple argTuple;
-    private Stack<BlockContext> blockContextStack = new Stack<>();
+    private LinkedList<BlockContext> blockContexts = new LinkedList<>();
     private Assignable returnValue;
     private boolean pendingReturn = false;
 
@@ -40,11 +40,13 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
         super(callExpr);
         this.ctxObject = ctxObject;
         this.argTuple = argTuple;
-        if (callExpr != null) {
-            AbstractFunctionDefn resolvedFunctionMetaObj = callExpr.getFunctionDefnRef().getResolvedMetaObj();
-            if (resolvedFunctionMetaObj instanceof FunctionDefn)
-                this.blockContextStack.push(
-                    new BlockContext(this, ((FunctionDefn) resolvedFunctionMetaObj).getStatementBlock()));
+        AbstractFunctionDefn resolvedFunctionMetaObj = callExpr.getFunctionDefnRef().getResolvedMetaObj();
+        if (resolvedFunctionMetaObj instanceof FunctionDefn) {
+            BlockContext rootBlockContext =
+                new BlockContext(this, ((FunctionDefn) resolvedFunctionMetaObj).getStatementBlock(),
+                                 ObjectFactory.getInstance().newTuple(
+                                     ((FunctionDefn) resolvedFunctionMetaObj).getStatementBlock()));
+            addBlockContext(rootBlockContext);
         }
     }
 
@@ -56,8 +58,24 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
         return argTuple;
     }
 
+    public BlockContext getRootBlockContext() {
+        return blockContexts.getFirst();
+    }
+
+    public void addBlockContext(BlockContext blockContext) {
+        blockContexts.add(blockContext);
+    }
+
     public BlockContext currentBlockCtxt() {
-        return blockContextStack.peek();
+        return blockContexts.getLast();
+    }
+
+    public LinkedList<BlockContext> getBlockContexts() {
+        return blockContexts;
+    }
+
+    public BlockContext popBlock() {
+        return blockContexts.pop();
     }
 
     public Assignable getReturnValue() {
@@ -68,12 +86,12 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
         this.returnValue = returnValue;
     }
 
-    public void setPendingReturn(boolean pendingReturn) {
-        this.pendingReturn = pendingReturn;
-    }
-
     public boolean isPendingReturn() {
         return pendingReturn;
+    }
+
+    public void setPendingReturn(boolean pendingReturn) {
+        this.pendingReturn = pendingReturn;
     }
 
     @Override

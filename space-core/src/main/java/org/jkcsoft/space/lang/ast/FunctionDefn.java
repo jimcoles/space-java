@@ -39,7 +39,7 @@ public class FunctionDefn extends AbstractFunctionDefn implements Callable {
 
     public StatementBlock setStatementBlock(StatementBlock statementBlock) {
         this.statementBlock = statementBlock;
-        this.statementBlock.setGroupingNode(true);
+//        this.statementBlock.setGroupingNode(true);
         //
         addChild(statementBlock);
         //

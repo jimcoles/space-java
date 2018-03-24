@@ -9,6 +9,15 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-public interface LexNode {
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+/**
+ * Indicates that the node type
+ *
+ * @author Jim Coles
+ */
+@Retention(RetentionPolicy.RUNTIME)
+public @interface LexicalNode {
 
 }

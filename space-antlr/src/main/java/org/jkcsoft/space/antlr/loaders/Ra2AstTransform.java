@@ -101,8 +101,8 @@ public class Ra2AstTransform {
         SpaceTypeDefnBody typeDefnBodyAST =
             astFactory.newTypeDefnBody(bodySourceInfo);
 
-        StatementBlock initBlock = astFactory.newStatementBlock(bodySourceInfo);
-        typeDefnBodyAST.setInitBlock(initBlock);
+//        StatementBlock initBlock = astFactory.newStatementBlock(bodySourceInfo);
+//        typeDefnBodyAST.setInitBlock(initBlock);
 
         List<SpaceParser.VariableDefnStmtContext> varDefCtxts = spaceTypeDefnBodyContext.variableDefnStmt();
         if (varDefCtxts != null && !varDefCtxts.isEmpty()) {
@@ -111,19 +111,7 @@ public class Ra2AstTransform {
                 VariableDefn variableDefnAST = toAst(variableDefnStmtContext.variableDefn());
                 typeDefnBodyAST.addVariable(variableDefnAST);
                 // Add assignment if there is one
-                SpaceParser.IdentifierContext identifierCtxt =
-                    variableDefnStmtContext.variableDefn().variableDecl().identifier();
-                SpaceParser.RightAssignmentExprContext rightAssignmentExprContext =
-                    variableDefnStmtContext.variableDefn().rightAssignmentExpr();
-                if (rightAssignmentExprContext != null) {
-                    initBlock.addExpr(
-                        toAst(astFactory.newSpacePathExpr(Antrl2AstMapping.toAst(srcFile, identifierCtxt),
-                                                          null,
-                                                          toText(identifierCtxt),
-                                                          null),
-                              rightAssignmentExprContext)
-                    );
-                }
+                extractInit(typeDefnBodyAST, variableDefnStmtContext);
             }
         }
 
@@ -133,16 +121,7 @@ public class Ra2AstTransform {
                 // Add declarative element
                 typeDefnBodyAST.addAssocDefn(toAst(assocDefCtx.associationDefn()));
                 // Add assignment expr if it exists
-                SpaceParser.RightAssignmentExprContext rightAssignmentExprContext =
-                    assocDefCtx.associationDefn().rightAssignmentExpr();
-                if (rightAssignmentExprContext != null) {
-                    initBlock.addExpr(
-                        toAst(
-                            toSpacePathExpr(assocDefCtx.associationDefn().associationDecl().identifier()),
-                            rightAssignmentExprContext
-                        )
-                    );
-                }
+                extractInit(typeDefnBodyAST, assocDefCtx);
             }
         }
 
@@ -157,6 +136,36 @@ public class Ra2AstTransform {
         // TODO Handle sub-space defn
 
         return typeDefnBodyAST;
+    }
+
+    private void extractInit(StatementBlock blockAST, SpaceParser.AssociationDefnStmtContext assocDefCtx) {
+        SpaceParser.RightAssignmentExprContext rightAssignmentExprContext =
+            assocDefCtx.associationDefn().rightAssignmentExpr();
+        if (rightAssignmentExprContext != null) {
+            blockAST.addExpr(
+                toAst(
+                    toSpacePathExpr(assocDefCtx.associationDefn().associationDecl().identifier()),
+                    rightAssignmentExprContext
+                )
+            );
+        }
+    }
+
+    private void extractInit(StatementBlock blockAST, SpaceParser.VariableDefnStmtContext variableDefnStmtContext)
+    {
+        SpaceParser.IdentifierContext identifierCtxt =
+            variableDefnStmtContext.variableDefn().variableDecl().identifier();
+        SpaceParser.RightAssignmentExprContext rightAssignmentExprContext =
+            variableDefnStmtContext.variableDefn().rightAssignmentExpr();
+        if (rightAssignmentExprContext != null) {
+            blockAST.addExpr(
+                toAst(astFactory.newSpacePathExpr(Antrl2AstMapping.toAst(srcFile, identifierCtxt),
+                                                  null,
+                                                  toText(identifierCtxt),
+                                                  null),
+                      rightAssignmentExprContext)
+            );
+        }
     }
 
     private AssignmentExpr toAst(SpacePathExpr memberPath,
@@ -273,10 +282,12 @@ public class Ra2AstTransform {
         //
         for (SpaceParser.VariableDefnStmtContext variableDefnStmtContext : variableDefnStmtContexts) {
             statementBlockAST.addVariable(toAst(variableDefnStmtContext.variableDefn()));
+            extractInit(statementBlockAST, variableDefnStmtContext);
         }
         //
         for (SpaceParser.AssociationDefnStmtContext associationDefnStmtContext : associationDefnStmtContexts) {
             statementBlockAST.addAssocDefn(toAst(associationDefnStmtContext.associationDefn()));
+            extractInit(statementBlockAST, associationDefnStmtContext);
         }
         //
         for (SpaceParser.StatementContext statementContext : statementContexts) {

@@ -12,7 +12,7 @@ package org.jkcsoft.space.antlr.loaders;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.antlr.SpaceParserBaseVisitor;
 import org.jkcsoft.space.lang.ast.AstFactory;
-import org.jkcsoft.space.lang.instance.ProgSourceInfo;
+import org.jkcsoft.space.lang.ast.ProgSourceInfo;
 
 /**
  * Each visitXyz( ) transforms from the raw ANTLR parse tree node to an AST node

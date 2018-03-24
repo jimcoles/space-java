@@ -26,9 +26,10 @@ import java.util.List;
  * @author Jim Coles
  * @version 1.0
  */
-public class SpaceTypeDefn extends NamedElement implements DatumType {
+public class SpaceTypeDefn extends NamedElement implements DatumType, TupleDefn {
 
     private boolean isEntity;
+
     private SpaceTypeDefnBody body;
 
     SpaceTypeDefn(SourceInfo sourceInfo, String name) {
@@ -40,12 +41,9 @@ public class SpaceTypeDefn extends NamedElement implements DatumType {
         return MetaType.TYPE;
     }
 
-    public List<TransformDefn> getTransformDefns() {
-        return body.getTransformDefns();
-    }
-
-    public List<AbstractFunctionDefn> getFunctionDefns() {
-        return body.getFunctionDefns();
+    @Override
+    public int getScalarDofs() {
+        return body.getScalarDofs();
     }
 
     public boolean isComputed() {
@@ -56,6 +54,22 @@ public class SpaceTypeDefn extends NamedElement implements DatumType {
         return body.isEnumerated();
     }
 
+    /**
+     * Might not be needed; essentially, asking 'is this a basis type' or a 'derived' type.
+     */
+    public boolean isEntity() {
+        return isEntity;
+    }
+
+    public List<TransformDefn> getTransformDefns() {
+        return body.getTransformDefns();
+    }
+
+    public List<AbstractFunctionDefn> getFunctionDefns() {
+        return body.getFunctionDefns();
+    }
+
+    @Override
     public List<VariableDefn> getVariableDefnList() {
         return body.getVariableDefnList();
     }
@@ -84,23 +98,24 @@ public class SpaceTypeDefn extends NamedElement implements DatumType {
         return body.addFunctionDefn(functionDefn);
     }
 
+    @Override
     public boolean hasVariables() {
         return body.hasVariables();
     }
 
+    @Override
     public boolean hasAssociations() {
         return body.hasAssociations();
     }
 
+    @Override
     public List<AssociationDefn> getAssociationDefnList() {
         return body.getAssociationDefnList();
     }
 
-    /**
-     * Might not be needed; essentially, asking 'is this a basis type' or a 'derived' type.
-     */
-    public boolean isEntity() {
-        return isEntity;
+    @Override
+    public List<NamedElement> getAllMembers() {
+        return body.getAllMembers();
     }
 
     public SpaceTypeDefnBody setBody(SpaceTypeDefnBody body) {
@@ -115,28 +130,13 @@ public class SpaceTypeDefn extends NamedElement implements DatumType {
         return body;
     }
 
+    public boolean hasMembers() {
+        return body.hasVariables() || body.hasAssociations();
+    }
 
     public String toLogString() {
         StringBuilder sb = new StringBuilder("SpaceTypeDefn {" + getName() + ": ");
         Strings.buildCommaDelList(body.getVariableDefnList());
         return sb.toString();
-    }
-
-    public boolean hasMembers() {
-        return body.hasVariables() || body.hasAssociations();
-    }
-
-    public List<NamedElement> getAllMembers() {
-        LinkedList<NamedElement> namedElements = new LinkedList<>();
-        if (hasVariables())
-            namedElements.addAll(getVariableDefnList());
-        if (hasAssociations())
-            namedElements.addAll(getAssociationDefnList());
-        return namedElements;
-    }
-
-    @Override
-    public int getScalarDofs() {
-        return body.getScalarDofs();
     }
 }

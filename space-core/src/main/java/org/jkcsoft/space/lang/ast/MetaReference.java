@@ -19,11 +19,14 @@ public class MetaReference<T extends NamedElement> extends ModelElement implemen
 
     private SpacePathExpr spacePathExpr;
     private MetaType targetMetaType;
-    //
-    private NamedElement lexicalContext;
+
+    // elements below set by linker
+//    private NamedElement lexicalContext;
     /** e.g., the SpaceTypeDefn object if this ref resolves to such,
      * or VariableDefn, etc.. */
     private T resolvedMetaObj;
+    private ScopeKind resolvedDatumScope;  // only relevant if target is a datum type.
+
     private LoadState state = LoadState.INITIALIZED;
 
     public MetaReference(SpacePathExpr spacePathExpr, MetaType targetMetaType) {
@@ -48,12 +51,20 @@ public class MetaReference<T extends NamedElement> extends ModelElement implemen
         this.state = state;
     }
 
-    public NamedElement getLexicalContext() {
-        return lexicalContext;
+//    public NamedElement getLexicalContext() {
+//        return lexicalContext;
+//    }
+
+//    public void setLexicalContext(NamedElement lexicalContext) {
+//        this.lexicalContext = lexicalContext;
+//    }
+
+    public ScopeKind getResolvedDatumScope() {
+        return resolvedDatumScope;
     }
 
-    public void setLexicalContext(NamedElement lexicalContext) {
-        this.lexicalContext = lexicalContext;
+    public void setResolvedDatumScope(ScopeKind resolvedDatumScope) {
+        this.resolvedDatumScope = resolvedDatumScope;
     }
 
     public T getResolvedMetaObj() {
@@ -64,17 +75,18 @@ public class MetaReference<T extends NamedElement> extends ModelElement implemen
         this.resolvedMetaObj = resolvedMetaObj;
     }
 
-    public String getText() {
+    public String getDisplayName() {
         return spacePathExpr.toString() + "(" + (state == LoadState.RESOLVED ? "res" : "unres") + ")";
     }
 
     @Override
     public String toString() {
         return "<" +
-            spacePathExpr +
-            " " + state +
-            " ctx=" + (lexicalContext != null ? lexicalContext : "") +
-            " obj=" + (resolvedMetaObj != null ? resolvedMetaObj : "") +
+            "fromObj=" + (getNamedParent() != null ? getNamedParent() : "") +
+            " path=" + spacePathExpr + " (" + targetMetaType.toString().substring(0, 3) + ")" +
+//            " " + state.toString().substring(0, 3) +
+            (resolvedDatumScope != null ? " " + resolvedDatumScope.toString().substring(0, 3) : "") +
+            " resObj=" + (resolvedMetaObj != null ? resolvedMetaObj : "?") +
             '>';
     }
 }

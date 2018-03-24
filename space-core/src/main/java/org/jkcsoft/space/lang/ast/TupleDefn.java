@@ -8,23 +8,23 @@
  * Also see the LICENSE file in the repository root directory.
  */
 package org.jkcsoft.space.lang.ast;
+
+import org.jkcsoft.space.lang.instance.Tuple;
+
+import java.util.List;
+
 /**
  * @author Jim Coles
  */
-public class CodeSourceInfo implements SourceInfo {
+public interface TupleDefn {
 
-    @Override
-    public int getLine() {
-        return 0;
-    }
+    boolean hasVariables();
 
-    @Override
-    public int getCharacter() {
-        return 0;
-    }
+    List<VariableDefn> getVariableDefnList();
 
-    @Override
-    public String toString() {
-        return "CodeSourceInfo{}";
-    }
+    boolean hasAssociations();
+
+    List<AssociationDefn> getAssociationDefnList();
+
+    List<NamedElement> getAllMembers();
 }

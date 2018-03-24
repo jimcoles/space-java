@@ -9,6 +9,9 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+
 /**
  * @author Jim Coles
  */
@@ -25,11 +28,6 @@ public class NativeSourceInfo implements SourceInfo {
     }
 
     @Override
-    public String toString() {
-        return "" + jMetaObject;
-    }
-
-    @Override
     public FileCoord getStart() {
         return null;
     }
@@ -37,5 +35,17 @@ public class NativeSourceInfo implements SourceInfo {
     @Override
     public FileCoord getStop() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "(native)"
+            +
+            (jMetaObject instanceof Class ? ((Class) jMetaObject).getSimpleName()
+                : (jMetaObject instanceof Method ? ((Method) jMetaObject).getName()
+                    : (jMetaObject instanceof Parameter ? ((Parameter) jMetaObject).getName()
+                        : "("+jMetaObject.getClass().getSimpleName()+")")
+                )
+            );
     }
 }

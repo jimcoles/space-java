@@ -15,7 +15,6 @@ import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -27,33 +26,30 @@ public class AstUtils {
 
     private static final Logger log = Logger.getLogger(AstUtils.class);
 
-    public static NamedElement getLexParent(ModelElement anElem) {
-        NamedElement named = null;
-        if (anElem.getParent() instanceof NamedElement)
-            named = (NamedElement) anElem.getParent();
+    /** The nearest named parent of an element, e, is the the element thru which 'e' may be referenced. */
+    public static NamedElement getNearestNamedParent(ModelElement anElem) {
+        NamedElement lexParent = null;
+        if (anElem.getParent() instanceof NamedElement
+            && ((NamedElement) anElem.getParent()).isNamed())
+        {
+            lexParent = (NamedElement) anElem.getParent();
+        }
         else if (anElem.getParent() != null) {
-            named = getLexParent(anElem.getParent());
+            lexParent = getNearestNamedParent(anElem.getParent());
         }
-//        if (named == null)
-        return named;
+        return lexParent;
     }
 
-    public static String print(ModelElement modelElement) {
-        StringBuilder sb = new StringBuilder();
-        append(sb, modelElement, 0);
-        return sb.toString();
-    }
-
-    private static void append(StringBuilder sb, ModelElement modelElement, int depth) {
-        String indent = Strings.multiplyString("\t", depth);
-        sb.append(JavaHelper.EOL)
-          .append(indent).append("(").append(modelElement.toString());
-        List<ModelElement> children = modelElement.getChildren();
-        for (ModelElement child : children) {
-            append(sb, child, depth + 1);
+    /** The lexical parent of an element, e, is the the element by which 'e' may be referenced. */
+    public static ModelElement getNearestScopeParent(ModelElement anElem) {
+        ModelElement lexParent = null;
+        if (hasAnnotation(anElem.getParent(), LexicalNode.class)) {
+            lexParent = anElem.getParent();
         }
-        sb.append(JavaHelper.EOL)
-          .append(indent).append(")");
+        else if (anElem.getParent() != null) {
+            lexParent = getNearestScopeParent(anElem.getParent());
+        }
+        return lexParent;
     }
 
     public static Schema getRunSchema(Schema thisSchema) {
@@ -68,69 +64,189 @@ public class AstUtils {
     }
 
     public static boolean isGroupingNode(ModelElement child) {
-        return child.isGroupingNode() ||
-        child.getClass().getAnnotation(GroupingNode.class) != null;
+        return child.isGroupingNode() || hasAnnotation(child, GroupingNode.class);
     }
 
-    public static NamedElement lookupLenientMetaObject(List<Schema> dirChain, ModelElement context,
-                                                       SpacePathExpr spacePathExpr)
+    private static boolean hasAnnotation(ModelElement child, Class annotationClass) {
+        return child.getClass().getAnnotation(annotationClass) != null;
+    }
+
+    /**
+     * Entry point for resolving static references by the linker prior to execution.
+     * Rules for resolution vary depending on the type of object referenced:
+     *
+     * Ref -> Type: must be fully qualified, possibly via an 'import'.
+     * - Linker: Simple locate from root of AST.
+     * - Exe: (no need)
+     *
+     * Ref -> Datum:
+     *  - Linker: If first node in path (including a 1-length path), resolve
+     *  according to this search order (precedence):
+     *
+     *  1. block local -> parent blocks(s)
+     *  2. function args (if ref is inside function body)
+     *  3. object member datums
+     *  4. static/shared datums, fully qualified
+     *
+     *    If not first in chain, resolve with respect to type of preceding object.
+     *
+     *  - Exe: resolves to value or ref.
+     *
+     * Ref -> Function:
+     *  1. "context object" member functions
+     *  2. static functions, fully qualified
+     *
+     * @param dirChain
+     * @param reference
+     * @return
+     */
+    public static NamedElement resolveAstPath(List<Schema> dirChain, MetaReference reference)
     {
-        NamedElement lookup = checkIntrinsics(spacePathExpr);
-        if (lookup == null) {
-            List<ModelElement> trySequence = new LinkedList<>();
-            trySequence.add(context);
-            trySequence.addAll(dirChain);
-            for (ModelElement tryContext : trySequence) {
-                log.debug("trying to find [" + spacePathExpr + "] under [" + tryContext + "]");
-                lookup = lookupMetaObject(tryContext, spacePathExpr, true);
-                if (lookup != null)
-                    break;
-                else
-                    log.debug("could not find [" + spacePathExpr + "] under [" + tryContext + "]");
-            }
-        }
-        return lookup;
-    }
-
-    private static NamedElement checkIntrinsics(SpacePathExpr spacePathExpr) {
         NamedElement lookup = null;
-        if (spacePathExpr.getText().equals(VoidType.VOID.getName())) {
-            lookup = VoidType.VOID;
-        }
-        else{
-            lookup = PrimitiveTypeDefn.valueOf(spacePathExpr.getText());
+        switch (reference.getTargetMetaType()) {
+            case TYPE:
+                lookup = checkIntrinsics(reference.getSpacePathExpr());
+                if (lookup == null) {
+                    lookup = resolveFromRoot(dirChain, reference);
+                }
+                break;
+            case DATUM:
+                lookup = findInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
+                if (lookup == null) {
+                    lookup = resolveFromRoot(dirChain, reference);
+                    if (lookup != null)
+                        reference.setResolvedDatumScope(ScopeKind.STATIC);
+                }
+                break;
+            case FUNCTION:
+                if (!reference.getSpacePathExpr().hasNextExpr())
+                    lookup = findInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
+                else
+                    lookup = resolveFromRoot(dirChain, reference);
+                break;
         }
         return lookup;
     }
 
-    public static NamedElement lookupMetaObject(ModelElement context, SpacePathExpr spacePathExpr, boolean isRoot) {
-//        Executor.log.debug("lookup meta object from " + context.getName() + " -> " + spacePathExpr );
-        NamedElement targetChild = lookupMetaObject(context, spacePathExpr.getText());
+    private static NamedElement resolveFromRoot(List<Schema> dirChain, MetaReference reference) {
+        NamedElement lookup;
+        lookup = findAsSchemaRoot(dirChain, reference.getSpacePathExpr());
+        if (reference.getSpacePathExpr().hasNextExpr()) {
+            lookup = traverseRest(lookup, reference.getSpacePathExpr().getNextExpr());
+        }
+        return lookup;
+    }
+
+    /** Scans dir chain. */
+    public static NamedElement findAsSchemaRoot(List<Schema> dirChain, SpacePathExpr spacePathExpr) {
+        NamedElement lookup = null;
+        for (ModelElement tryContext : dirChain) {
+            log.debug("trying to find [" + spacePathExpr + "] under schema [" + tryContext + "]");
+            lookup = lookupImmediateChild(tryContext, spacePathExpr.getNodeText());
+            if (lookup != null)
+                break;
+            else
+                log.debug("could not find [" + spacePathExpr + "] under [" + tryContext + "]");
+        }
+        return lookup;
+    }
+
+    public static NamedElement traverseRest(ModelElement context, SpacePathExpr spacePathExpr) {
+        NamedElement targetChild = lookupImmediateChild(context, spacePathExpr.getNodeText());
         if (targetChild != null) {
             if (spacePathExpr.hasNextExpr()) {
-                targetChild = lookupMetaObject(targetChild, spacePathExpr.getNextExpr(), false);
+                targetChild = traverseRest(targetChild, spacePathExpr.getNextExpr());
             }
         }
-        // if not root and child not found under current context, return null (error)
-        else if (isRoot && context.hasParent()) {
-            targetChild = lookupMetaObject(context.getParent(), spacePathExpr.getText());
-        }
+        // if not first of path list and child not found under current context, return null (error)
         return targetChild;
     }
 
-    /** Will traverse into child grouping nodes */
-    public static NamedElement lookupMetaObject(ModelElement context, String name) {
+    public static NamedElement findInNearestScope(ModelElement context, MetaReference reference,
+                                                  ScopeKind containerScopeKind)
+    {
+        if (containerScopeKind == null)
+            containerScopeKind = inferScopeKind(context);
+        NamedElement lookup = lookupImmediateChild(context, reference.getSpacePathExpr().getNodeText());
+        if (lookup != null)
+            reference.setResolvedDatumScope(containerScopeKind);
+        else {
+            if (context instanceof StatementBlock) {
+                if (reference.getSpacePathExpr().isFirst() && context.hasParent()) {
+                    // not found so just go up the basic tree
+                    ModelElement parent = context.getParent();
+                    if (parent instanceof StatementBlock)
+                        lookup = findInNearestScope(parent, reference, ScopeKind.BLOCK);
+                    else if (parent instanceof FunctionDefn)
+                        lookup = findInNearestScope(parent, reference, ScopeKind.ARG);
+                }
+            }
+            else if (context instanceof FunctionDefn) {
+                lookup = findInNearestScope(((FunctionDefn) context).getArgSpaceTypeDefn(), reference, ScopeKind.ARG);
+                if (lookup == null)
+                    lookup = findInNearestScope(((FunctionDefn) context).getParent(), reference, ScopeKind.OBJECT);
+            }
+        }
+        return lookup;
+    }
+
+    private static ScopeKind inferScopeKind(ModelElement context) {
+        ScopeKind scopeKind = null;
+        if (context instanceof StatementBlock
+            /* && context.getNamedParent() instanceof FunctionDefn */ )
+            scopeKind = ScopeKind.BLOCK;
+        else if (context instanceof FunctionDefn)
+            scopeKind = ScopeKind.BLOCK;
+        else if (context instanceof SpaceTypeDefn)
+            scopeKind = ScopeKind.OBJECT;
+
+        return scopeKind;
+    }
+
+    /** Will traverse into child grouping nodes and grouping nodes only. */
+    public static NamedElement lookupImmediateChild(ModelElement context, String name) {
         NamedElement childByName = context.getChildByName(name);
         if (childByName == null) {
             if (context.hasGroupingNodes()) {
                 for (ModelElement groupElement : context.getGroupingNodes()) {
-                    childByName = lookupMetaObject(groupElement, name);
+                    childByName = lookupImmediateChild(groupElement, name);
                     if (childByName != null)
                         break;
                 }
             }
-//            Executor.log.warn("element [" + context + "] does not contain named child [" + name + "]");
         }
         return childByName;
+    }
+
+    private static NamedElement checkIntrinsics(SpacePathExpr spacePathExpr) {
+        NamedElement lookup = null;
+        if (spacePathExpr.getNodeText().equals(VoidType.VOID.getName())) {
+            lookup = VoidType.VOID;
+        }
+        else{
+            lookup = PrimitiveTypeDefn.valueOf(spacePathExpr.getNodeText());
+        }
+        return lookup;
+    }
+
+    public static String print(ModelElement modelElement) {
+        StringBuilder sb = new StringBuilder();
+        appendPrint(sb, modelElement, 0);
+        return sb.toString();
+    }
+
+    private static void appendPrint(StringBuilder sb, ModelElement modelElement, int depth) {
+        String indent = Strings.multiplyString("\t", depth);
+        sb.append(JavaHelper.EOL)
+          .append(indent).append("(").append(modelElement.toString());
+        List<ModelElement> children = modelElement.getChildren();
+        for (ModelElement child : children) {
+            appendPrint(sb, child, depth + 1);
+        }
+
+        if (children.size() > 0)
+            sb.append(JavaHelper.EOL).append(indent);
+
+        sb.append(")");
     }
 }

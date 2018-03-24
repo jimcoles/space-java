@@ -17,17 +17,26 @@ import org.jkcsoft.space.lang.ast.StatementBlock;
 public class BlockContext extends AbstractExeContext implements ExeContext {
 
     private FunctionCallContext functionCallContext;
-    private BlockContext previous;
     private Tuple dataTuple;
 
-    BlockContext(FunctionCallContext functionCallContext, StatementBlock astNode) {
+    BlockContext(FunctionCallContext functionCallContext, StatementBlock astNode, Tuple dataTuple) {
         super(astNode);
         this.functionCallContext = functionCallContext;
+        this.dataTuple = dataTuple;
     }
 
-    BlockContext(BlockContext previous, StatementBlock astNode) {
-        super(astNode);
-        this.previous = previous;
+    BlockContext(StatementBlock astNode, Tuple dataTuple) {
+        this(null, astNode, dataTuple);
     }
 
+    public boolean hasFunctionCallContext() {
+        return functionCallContext != null;
+    }
+    public FunctionCallContext getFunctionCallContext() {
+        return functionCallContext;
+    }
+
+    public Tuple getDataTuple() {
+        return dataTuple;
+    }
 }

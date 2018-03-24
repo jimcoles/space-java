@@ -9,10 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.AssociationDefn;
-import org.jkcsoft.space.lang.ast.NamedElement;
-import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
-import org.jkcsoft.space.lang.ast.VariableDefn;
+import org.jkcsoft.space.lang.ast.*;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -27,6 +24,8 @@ import java.util.Map;
  * Spaces.
  * <p>A Tuple can be thought of as a 'smart map' in that every tuple has one-and-only-one
  * base object (and associated Oid).
+ * <p>Space object's are abstract.  A Tuple is the user's handle (view) to access an object,
+ * but the user never gets the object itself, only a view into the object.</p>
  * <p>
  * - RDB Analog: Row
  * - Java Analog: Object
@@ -34,7 +33,7 @@ import java.util.Map;
  * @author Jim Coles
  * @version 1.0
  */
-public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable, ExeContext {
+public class Tuple extends SpaceObject<ModelElement> implements Assignable, ExeContext {
 
     private List<Assignable>    assignables = new LinkedList<>();
 //    private List<ScalarValue>   values = new LinkedList<>();
@@ -48,17 +47,17 @@ public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable, Exe
 //    private Map<String, ScalarValue> indexValuesByName = new HashMap<>();
 //    private Map<String, Reference> indexRefsByName = new HashMap<>();
 
-    Tuple(SpaceOid oid, SpaceTypeDefn defn) {
-        super(oid, defn);
+    Tuple(SpaceOid oid, TupleDefn defn) {
+        super(oid, ((ModelElement) defn));
         // initialize
         if (defn.hasVariables()) {
-            List<VariableDefn> varDefnList = getVarDefnList();
+            List<VariableDefn> varDefnList = ((TupleDefn) getDefn()).getVariableDefnList();
             for (VariableDefn variableDefn : varDefnList) {
                 initVar(variableDefn);
             }
         }
         if (defn.hasAssociations()) {
-            List<AssociationDefn> assocDefnList = defn.getAssociationDefnList();
+            List<AssociationDefn> assocDefnList = ((TupleDefn) getDefn()).getAssociationDefnList();
             for (AssociationDefn assocDefn : assocDefnList) {
                 initRef(assocDefn);
             }
@@ -91,13 +90,13 @@ public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable, Exe
     }
 
     public NamedElement getNthMember(int idx) {
-        return getDefn().getAllMembers().get(idx);
+        return ((TupleDefn) getDefn()).getAllMembers().get(idx);
     }
 
     /** Get the 0-based ordinal of the specified member */
     private int getMemberIdx(SpaceOid memberOid) {
         int idxMember = -1;
-        List<NamedElement> allMembers = getDefn().getAllMembers();
+        List<NamedElement> allMembers = ((TupleDefn) getDefn()).getAllMembers();
         for (int idx = 0; idx < allMembers.size(); idx++) {
             if (allMembers.get(idx).getOid().equals(memberOid)) {
                 idxMember = idx;
@@ -137,10 +136,6 @@ public class Tuple extends SpaceObject<SpaceTypeDefn> implements Assignable, Exe
             throw new IllegalArgumentException(memberOid + " is not a reference");
 
         return (Reference) assignable;
-    }
-
-    private List<VariableDefn> getVarDefnList() {
-        return getDefn().getVariableDefnList();
     }
 
 }

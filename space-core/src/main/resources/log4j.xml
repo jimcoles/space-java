@@ -27,6 +27,18 @@
         </layout>
     </appender>
 
+    <appender name="dumpFile" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="space-dumps.log"/>
+        <param name="Append" value="false"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%m%n"/>
+        </layout>
+    </appender>
+
+    <logger name="dumpFile">
+        <appender-ref ref="dumpFile" />
+    </logger>
+
     <root>
         <priority value="info"/>
         <appender-ref ref="console"/>

@@ -19,7 +19,7 @@ public class SpacePathExpr extends ModelElement {
 
     private boolean isTypeExpr;  // If true, evaluates to a meta (definition) object.
     private PathOperEnum oper;
-    private String text;
+    private String nodeText;
     private SpacePathExpr nextExpr;
     private SpacePathExpr prevExpr;
 
@@ -27,8 +27,12 @@ public class SpacePathExpr extends ModelElement {
         super(sourceInfo);
         this.isTypeExpr = isTypeExpr;
         this.oper = oper;
-        this.text = text;
+        this.nodeText = text;
         setNextExpr(nextExpr);
+    }
+
+    public boolean isFirst() {
+        return prevExpr == null;
     }
 
     public boolean isTypeExpr() {
@@ -62,10 +66,16 @@ public class SpacePathExpr extends ModelElement {
     }
 
     public String getFullPath() {
-        return "->" + text + (nextExpr != null ? nextExpr.getFullPath() : "");
+        return "->" + nodeText + (nextExpr != null ? nextExpr.getFullPath() : "");
     }
 
-    public String getText() {
-        return text;
+    public String getNodeText() {
+        return nodeText;
     }
+
+    @Override
+    public String getDisplayName() {
+        return getFullPath();
+    }
+
 }

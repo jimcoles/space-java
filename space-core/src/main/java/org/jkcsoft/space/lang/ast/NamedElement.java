@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.util.Collections;
@@ -49,7 +50,7 @@ public abstract class NamedElement extends ModelElement implements Named, Compar
     @Override
     public List<String> getFullNamePath() {
         List<String> forwardList = new LinkedList<>();
-        forwardList.add(this.getName());
+//        forwardList.add(this.getName());
         ModelElement node = this;
         while (node != null) {
             if (node instanceof NamedElement) {
@@ -60,6 +61,10 @@ public abstract class NamedElement extends ModelElement implements Named, Compar
         }
         Collections.reverse(forwardList);
         return forwardList;
+    }
+
+    public String getFQName() {
+        return Strings.buildDelList(getFullNamePath(), Strings.TO_STRING_LISTER, "/");
     }
 
     public abstract MetaType getMetaType();
@@ -86,7 +91,7 @@ public abstract class NamedElement extends ModelElement implements Named, Compar
     }
 
     @Override
-    public String getText() {
+    public String getDisplayName() {
         return getName();
     }
 }

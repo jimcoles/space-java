@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 /**
- * A {@link UniqueKeyStream} is the direct genralization upon which a CharacterStream
+ * A {@link UniqueKeyStream} is the direct generalization upon which a CharacterStream
  * is based, which in turn generalizes.
  *
  * @author Jim Coles

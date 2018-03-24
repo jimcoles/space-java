@@ -29,6 +29,7 @@ public abstract class ModelElement extends SpaceObject {
      * node's parent. */
     private boolean isGroupingNode = false;
     // -------------- redundant collections for fast lookup
+    private NamedElement namedParent;
     private List<ModelElement> children = new LinkedList<>();
     private Map<String, NamedElement> namedChildMap = new TreeMap<>();
     private Set<MetaReference> references = null;
@@ -101,7 +102,7 @@ public abstract class ModelElement extends SpaceObject {
         return namedChildMap.get(name);
     }
 
-    public String getText() {
+    public String getDisplayName() {
         return "";
     }
 
@@ -121,11 +122,19 @@ public abstract class ModelElement extends SpaceObject {
         return groupingNodes;
     }
 
+    public NamedElement getNamedParent() {
+        // lazy init
+        if (namedParent == null)
+            namedParent = AstUtils.getNearestNamedParent(this);
+        return namedParent;
+    }
+
     @Override
     public String toString() {
-        return "[" + this.getClass().getSimpleName() + ":" + this.getOid() + "] " + "\"" + this.getText() + "\""
+        return "[" + this.getClass().getSimpleName() + ":" + this.getOid() + "(" + getSourceInfo() + ")] "
+            + "\"" + this.getDisplayName() + "\""
             + (AstUtils.isGroupingNode(this) ? " GROUP" : "")
-            + " (" + getSourceInfo() + ")";
+            ;
     }
 
 }

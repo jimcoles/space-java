@@ -25,6 +25,8 @@ public class VariableDefn extends NamedElement {
     VariableDefn(SourceInfo sourceInfo, String name, PrimitiveTypeDefn type) {
         super(sourceInfo, name);
         this.type = type;
+        //
+        addChild(type);
     }
 
     @Override

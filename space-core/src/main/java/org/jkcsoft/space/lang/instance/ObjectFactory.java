@@ -9,9 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.AssociationDefn;
-import org.jkcsoft.space.lang.ast.FunctionCallExpr;
-import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
+import org.jkcsoft.space.lang.ast.*;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -44,7 +42,7 @@ public class ObjectFactory {
         return new Space(newOid(), spcContext, spaceTypeDefn);
     }
 
-    public Tuple newTuple(SpaceTypeDefn defn) {
+    public Tuple newTuple(TupleDefn defn) {
         Tuple tuple = new Tuple(newOid(), defn);
         return tuple;
     }
@@ -65,7 +63,8 @@ public class ObjectFactory {
     }
 
     public Space box(Tuple tuple) {
-        return new Space(newOid(), null, tuple.getDefn());
+//        return new Space(newOid(), null, tuple.getDefn());
+        return null;
     }
 
     public CardinalValue newCardinalValue(int i) {
@@ -74,5 +73,9 @@ public class ObjectFactory {
 
     public BooleanValue newBooleanValue(boolean aBoolean) {
         return BooleanValue.getValue(aBoolean);
+    }
+
+    public BlockContext newBlockContext(StatementBlock statementBlock, Tuple tuple) {
+        return new BlockContext(statementBlock, tuple);
     }
 }

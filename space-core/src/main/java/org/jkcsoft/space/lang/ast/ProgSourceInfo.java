@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.ast;
 /**
  * @author Jim Coles
  */
-public class IntrinsicSourceInfo implements SourceInfo {
+public class ProgSourceInfo implements SourceInfo {
 
     @Override
     public FileCoord getStart() {
@@ -26,6 +26,7 @@ public class IntrinsicSourceInfo implements SourceInfo {
 
     @Override
     public String toString() {
-        return "(intrin)";
+        return "(program)";
     }
+
 }

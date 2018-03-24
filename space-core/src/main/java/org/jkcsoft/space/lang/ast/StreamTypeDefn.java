@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
- * In Space, a stream is the generalization controling the notions of
+ * In Space, a stream is the generalization controlling the notions of
  *
  * <ul>
  *     <li>Object Stream</li>
@@ -20,6 +20,16 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  *     <li>Character Stream</li>
  *     <li>Character Sequence</li>
  * </ul>
+ * Notions to reconcile with our model of streams, sequences, strings:
+ * - 'sequence/stream of keys' (references to objects) versus 'sequence/stream of marshalled objects'.
+ * - Keys may be Internal (Space OID), Alternate (user-defined), or External.
+ * - Internal keys are just our SpaceOID's and they are transient.
+ * - 'key' might be one-byte, two-byte, int
+ * - External tables may be 'well known', such as character keys.
+ * - Conventional notion of 'character string' is really a 'string/sequence of well-known keys'
+ *   where those keys correspond to characters/glyphs or abstract objects of abstract semantics.
+ * - Space might maintain internal-to-external keys maps for efficiency of internal rep,
+ *   especially if the external key is a GUID.
  *
  * So, an Object Stream is an indefinite sequence of multi-dimensional objects
  * whereas a Character Sequence is a finite sequence of 1-dimensional primitives.
@@ -28,6 +38,8 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  *
  * <p> So, with Space, the conventional notion of a character string is just a
  * Object Stream where type = 'char' and length=finite.
+ *
+ *
  *
  * @author Jim Coles
  */

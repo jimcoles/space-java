@@ -6,11 +6,11 @@ public type-def MySpace
 */
 {
     // var list
-    card myIntVar = 127;
-    boolean myBoolVar = false;
+    card myIntInstVar = 127;
+    boolean myBoolInstVar = false;
 
     // assoc list
-    CharSequence greeting = "Hello from this reference to a CharSequence.";
+    CharSequence greetingInstSeq = "Hello from this reference to a CharSequence.";
 
     {
         // nested init block
@@ -28,13 +28,13 @@ public type-def MySpace
     // functions
     function-def void main(CharSequence args)
     {   // statement block: may include block-local vars, objects, spaces + any other statement type
-        boolean boolToo = 127;
+        boolean boolTooLocal = true;
         OpSys.println( ["Hello, Space! (string literal)"] );
-        OpSys.println( [greeting] );
+        OpSys.println( [greetingInstSeq] );
 //        OpSys.println( [another] );
-        OpSys.println( [myIntVar] );
-        OpSys.println( [myBoolVar] );
-        OpSys.println( [boolToo] );
+        OpSys.println( [myIntInstVar] );
+        OpSys.println( [myBoolInstVar] );
+        OpSys.println( [boolTooLocal] );
 
         foo( [args] );  // call from within a function
 
@@ -58,7 +58,7 @@ public type-def MySpace
     }
 
     function-def void foo(CharSequence args) {
-        OpSys.println( [myIntVar] );
+        OpSys.println( [args] );
     }
 
     public type-def AnotherType

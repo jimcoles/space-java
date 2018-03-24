@@ -16,12 +16,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 @GroupingNode
+@LexicalNode
 public class SpaceTypeDefnBody extends StatementBlock {
 
     private List<EquationDefn> equations;
     private List<TransformDefn> transformDefns;
     private List<AbstractFunctionDefn> functionDefns = new LinkedList<>();
-    private StatementBlock initBlock;  // holds assignment exprs for var and assoc defns
+//    private StatementBlock initBlock;  // holds assignment exprs for var and assoc defns
 
     SpaceTypeDefnBody(SourceInfo sourceInfo) {
         super(sourceInfo);
@@ -71,19 +72,16 @@ public class SpaceTypeDefnBody extends StatementBlock {
         return actionDefn;
     }
 
-    public StatementBlock setInitBlock(StatementBlock statementBlock) {
-        this.initBlock = statementBlock;
-        //
-        addChild(statementBlock);
-        //
-        return initBlock;
-    }
+//    public StatementBlock setInitBlock(StatementBlock statementBlock) {
+//        this.initBlock = statementBlock;
+//        //
+//        addChild(statementBlock);
+//        //
+//        return initBlock;
+//    }
+//
+//    public StatementBlock getInitBlock() {
+//        return initBlock;
+//    }
 
-    public StatementBlock getInitBlock() {
-        return initBlock;
-    }
-
-    public int getScalarDofs() {
-        return initBlock.getScalarDofs();
-    }
 }

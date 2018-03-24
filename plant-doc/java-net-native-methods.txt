@@ -1,0 +1,201 @@
+Targets
+    Occurrences of 'native' in Directory /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/jre/lib/rt.jar!/java/net with mask '*.java'
+Found Occurrences  (94 usages found)
+    Unclassified occurrence  (76 usages found)
+        < 1.8 >  (76 usages found)
+            java.net  (76 usages found)
+                AbstractPlainDatagramSocketImpl.java  (1 usage found)
+                    nativeConnectDisabled()  (1 usage found)
+                        362 protected boolean nativeConnectDisabled() {
+                DatagramPacket.java  (1 usage found)
+                    init()  (1 usage found)
+                        387 private native static void init();
+                DatagramSocket.java  (1 usage found)
+                    connectInternal(InetAddress, int)  (1 usage found)
+                        148 ((AbstractPlainDatagramSocketImpl)impl).nativeConnectDisabled())) {
+                Inet4Address.java  (1 usage found)
+                    init()  (1 usage found)
+                        379 private static native void init();
+                Inet4AddressImpl.java  (4 usages found)
+                    getHostByAddr(byte[])  (1 usage found)
+                        37 public native String getHostByAddr(byte[] addr) throws UnknownHostException;
+                    getLocalHostName()  (1 usage found)
+                        34 public native String getLocalHostName() throws UnknownHostException;
+                    isReachable0(byte[], int, byte[], int)  (1 usage found)
+                        38 private native boolean isReachable0(byte[] addr, int timeout, byte[] ifaddr, int ttl) throws IOException;
+                    lookupAllHostAddr(String)  (1 usage found)
+                        35 public native InetAddress[]
+                Inet6Address.java  (1 usage found)
+                    init()  (1 usage found)
+                        950 private static native void init();
+                Inet6AddressImpl.java  (4 usages found)
+                    getHostByAddr(byte[])  (1 usage found)
+                        43 public native String getHostByAddr(byte[] addr) throws UnknownHostException;
+                    getLocalHostName()  (1 usage found)
+                        40 public native String getLocalHostName() throws UnknownHostException;
+                    isReachable0(byte[], int, int, byte[], int, int)  (1 usage found)
+                        44 private native boolean isReachable0(byte[] addr, int scope, int timeout, byte[] inf, int ttl, int if_scope) throws IOException;
+                    lookupAllHostAddr(String)  (1 usage found)
+                        41 public native InetAddress[]
+                InetAddress.java  (2 usages found)
+                    init()  (1 usage found)
+                        1523 private static native void init();
+                    isIPv6Supported()  (1 usage found)
+                        1647 static native boolean isIPv6Supported();
+                NetworkInterface.java  (11 usages found)
+                    getAll()  (1 usage found)
+                        366 private native static NetworkInterface[] getAll()
+                    getByIndex0(int)  (1 usage found)
+                        372 private native static NetworkInterface getByIndex0(int index)
+                    getByInetAddress0(InetAddress)  (1 usage found)
+                        375 private native static NetworkInterface getByInetAddress0(InetAddress addr)
+                    getByName0(String)  (1 usage found)
+                        369 private native static NetworkInterface getByName0(String name)
+                    getMacAddr0(byte[], String, int)  (1 usage found)
+                        495 private native static byte[] getMacAddr0(byte[] inAddr, String name, int ind) throws SocketException;
+                    getMTU0(String, int)  (1 usage found)
+                        496 private native static int getMTU0(String name, int ind) throws SocketException;
+                    init()  (1 usage found)
+                        570 private static native void init();
+                    isLoopback0(String, int)  (1 usage found)
+                        492 private native static boolean isLoopback0(String name, int ind) throws SocketException;
+                    isP2P0(String, int)  (1 usage found)
+                        494 private native static boolean isP2P0(String name, int ind) throws SocketException;
+                    isUp0(String, int)  (1 usage found)
+                        491 private native static boolean isUp0(String name, int ind) throws SocketException;
+                    supportsMulticast0(String, int)  (1 usage found)
+                        493 private native static boolean supportsMulticast0(String name, int ind) throws SocketException;
+                PlainDatagramSocketImpl.java  (19 usages found)
+                    bind0(int, InetAddress)  (1 usage found)
+                        81 protected synchronized native void bind0(int lport, InetAddress laddr)
+                    connect0(InetAddress, int)  (1 usage found)
+                        118 protected native void connect0(InetAddress address, int port) throws SocketException;
+                    dataAvailable()  (1 usage found)
+                        122 native int dataAvailable();
+                    datagramSocketClose()  (1 usage found)
+                        111 protected native void datagramSocketClose();
+                    datagramSocketCreate()  (1 usage found)
+                        109 protected native void datagramSocketCreate() throws SocketException;
+                    disconnect0(int)  (1 usage found)
+                        120 protected native void disconnect0(int family);
+                    getTimeToLive()  (1 usage found)
+                        95 protected native int getTimeToLive() throws IOException;
+                    getTTL()  (1 usage found)
+                        101 protected native byte getTTL() throws IOException;
+                    init()  (1 usage found)
+                        127 private native static void init();
+                    join(InetAddress, NetworkInterface)  (1 usage found)
+                        103 protected native void join(InetAddress inetaddr, NetworkInterface netIf)
+                    leave(InetAddress, NetworkInterface)  (1 usage found)
+                        106 protected native void leave(InetAddress inetaddr, NetworkInterface netIf)
+                    peek(InetAddress)  (1 usage found)
+                        86 protected synchronized native int peek(InetAddress i) throws IOException;
+                    peekData(DatagramPacket)  (1 usage found)
+                        88 protected synchronized native int peekData(DatagramPacket p) throws IOException;
+                    receive0(DatagramPacket)  (1 usage found)
+                        90 protected synchronized native void receive0(DatagramPacket p)
+                    send(DatagramPacket)  (1 usage found)
+                        84 protected native void send(DatagramPacket p) throws IOException;
+                    setTimeToLive(int)  (1 usage found)
+                        93 protected native void setTimeToLive(int ttl) throws IOException;
+                    setTTL(byte)  (1 usage found)
+                        98 protected native void setTTL(byte ttl) throws IOException;
+                    socketGetOption(int)  (1 usage found)
+                        116 protected native Object socketGetOption(int opt) throws SocketException;
+                    socketSetOption0(int, Object)  (1 usage found)
+                        113 protected native void socketSetOption0(int opt, Object val)
+                PlainSocketImpl.java  (12 usages found)
+                    initProto()  (1 usage found)
+                        113 static native void initProto();
+                    socketAccept(SocketImpl)  (1 usage found)
+                        105 native void socketAccept(SocketImpl s) throws IOException;
+                    socketAvailable()  (1 usage found)
+                        107 native int socketAvailable() throws IOException;
+                    socketBind(InetAddress, int)  (1 usage found)
+                        100 native void socketBind(InetAddress address, int port)
+                    socketClose0(boolean)  (1 usage found)
+                        109 native void socketClose0(boolean useDeferredClose) throws IOException;
+                    socketConnect(InetAddress, int, int)  (1 usage found)
+                        97 native void socketConnect(InetAddress address, int port, int timeout)
+                    socketCreate(boolean)  (1 usage found)
+                        95 native void socketCreate(boolean isServer) throws IOException;
+                    socketGetOption(int, Object)  (1 usage found)
+                        118 native int socketGetOption(int opt, Object iaContainerObj) throws SocketException;
+                    socketListen(int)  (1 usage found)
+                        103 native void socketListen(int count) throws IOException;
+                    socketSendUrgentData(int)  (1 usage found)
+                        120 native void socketSendUrgentData(int data) throws IOException;
+                    socketSetOption0(int, boolean, Object)  (1 usage found)
+                        115 native void socketSetOption0(int cmd, boolean on, Object value)
+                    socketShutdown(int)  (1 usage found)
+                        111 native void socketShutdown(int howto) throws IOException;
+                SocketInputStream.java  (2 usages found)
+                    init()  (1 usage found)
+                        291 private native static void init();
+                    socketRead0(FileDescriptor, byte[], int, int, int)  (1 usage found)
+                        94 private native int socketRead0(FileDescriptor fd,
+                SocketOptions.java  (15 usages found)
+                    28 import java.lang.annotation.Native;
+                    142 @Native public final static int TCP_NODELAY = 0x0001;
+                    163 @Native public final static int SO_BINDADDR = 0x000F;
+                    171 @Native public final static int SO_REUSEADDR = 0x04;
+                    182 @Native public final static int SO_BROADCAST = 0x0020;
+                    194 @Native public final static int IP_MULTICAST_IF = 0x10;
+                    206 @Native public final static int IP_MULTICAST_IF2 = 0x1f;
+                    214 @Native public final static int IP_MULTICAST_LOOP = 0x12;
+                    222 @Native public final static int IP_TOS = 0x3;
+                    240 @Native public final static int SO_LINGER = 0x0080;
+                    261 @Native public final static int SO_TIMEOUT = 0x1006;
+                    278 @Native public final static int SO_SNDBUF = 0x1001;
+                    296 @Native public final static int SO_RCVBUF = 0x1002;
+                    319 @Native public final static int SO_KEEPALIVE = 0x0008;
+                    330 @Native public final static int SO_OOBINLINE = 0x1003;
+                SocketOutputStream.java  (2 usages found)
+                    init()  (1 usage found)
+                        183 private native static void init();
+                    socketWrite0(FileDescriptor, byte[], int, int)  (1 usage found)
+                        87 private native void socketWrite0(FileDescriptor fd, byte[] b, int off,
+    Usage in comments  (18 usages found)
+        < 1.8 >  (18 usages found)
+            java.net  (18 usages found)
+                AbstractPlainDatagramSocketImpl.java  (2 usages found)
+                    setOption(int, Object)  (1 usage found)
+                        255 /* check type safety b4 going native.  These should never
+                    56 * flag set if the native connect() call not to be used
+                AbstractPlainSocketImpl.java  (2 usages found)
+                    getOption(int)  (1 usage found)
+                        286          * The native socketGetOption() knows about 3 options.
+                    setOption(int, Object)  (1 usage found)
+                        216 /* check type safety b4 going native.  These should never
+                DatagramSocket.java  (1 usage found)
+                    receive(DatagramPacket)  (1 usage found)
+                        775 // the native impl doesn't support connect or the connect
+                DatagramSocketImpl.java  (1 usage found)
+                    connect(InetAddress, int)  (1 usage found)
+                        101 * and received from this destination. This may be overridden to call a native
+                Inet6Address.java  (3 usages found)
+                    73 *   <li><p> An alternative form that is sometimes more convenient
+                    125 *         represent an IPv4 address. It allows the native program to
+                    372 // Perform native initialization
+                InetAddress.java  (1 usage found)
+                    loadImpl(String)  (1 usage found)
+                        1543          * delegate the real work (like native methods).  This
+                PlainDatagramSocketImpl.java  (1 usage found)
+                    35  * On Unix systems we simply delegate to native methods.
+                PlainSocketImpl.java  (1 usage found)
+                    37  * On Unix systems we simply delegate to native methods.
+                ServerSocket.java  (1 usage found)
+                    setPerformancePreferences(int, int, int)  (1 usage found)
+                        882 * may offer alternative protocols which have different performance
+                Socket.java  (1 usage found)
+                    setPerformancePreferences(int, int, int)  (1 usage found)
+                        1690 * may offer alternative protocols which have different performance
+                SocketImpl.java  (1 usage found)
+                    setPerformancePreferences(int, int, int)  (1 usage found)
+                        318 * may offer alternative protocols which have different performance
+                SocketInputStream.java  (1 usage found)
+                    99 // wrap native call to allow instrumentation
+                URI.java  (1 usage found)
+                    2167 // This code is based upon src/solaris/native/java/io/canonicalize_md.c
+                URL.java  (1 usage found)
+                    69 * {@code http} is {@code 80}. An alternative port could be

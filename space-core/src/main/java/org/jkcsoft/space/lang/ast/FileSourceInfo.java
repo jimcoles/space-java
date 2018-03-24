@@ -26,6 +26,10 @@ public class FileSourceInfo implements SourceInfo {
         this.end = end;
     }
 
+    public File getFile() {
+        return file;
+    }
+
     @Override
     public FileCoord getStart() {
         return start;
@@ -38,12 +42,12 @@ public class FileSourceInfo implements SourceInfo {
 
     @Override
     public String toString() {
-        return file.getName() + ":[" + start + ".." + end + "]";
+        return file.getName() + ":" + start + ".." + end + "";
     }
 
     @Override
     public String toBriefString() {
-        return file.getName() + ":[" + start + "]";
+        return file.getName() + ":" + start + "";
     }
 
 }

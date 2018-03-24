@@ -18,7 +18,6 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-@GroupingNode
 public class FunctionCallExpr extends ModelElement implements ValueExpr {
 
     /**
@@ -66,7 +65,7 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
     }
 
     @Override
-    public String getText() {
+    public String getDisplayName() {
         return "" + functionDefnRef;
     }
 }
