@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.runtime;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
@@ -17,8 +18,9 @@ import org.jkcsoft.java.util.Lister;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.*;
+import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.loader.AstLoader;
-import org.jkcsoft.space.lang.runtime.impl.CastTransforms;
+import org.jkcsoft.space.lang.runtime.typecasts.CastTransforms;
 import org.jkcsoft.space.lang.runtime.jnative.math.JnMath;
 import org.jkcsoft.space.lang.runtime.jnative.opsys.JnOpSys;
 import org.jkcsoft.space.lang.runtime.jnative.space.JnSpaceOpers;
@@ -161,6 +163,8 @@ public class Executor extends ExprProcessor implements ExeContext {
         AstLoader astLoader;
         String parserImplClassName = "org.jkcsoft.space.antlr.loaders.G2AntlrParser";
 //            String parserImplClassName = "org.jkcsoft.space.antlr.test.TestGrammarParser";
+
+        // 1. Find loader impl
         try {
             Class<?> aClass = Class.forName(parserImplClassName);
             log.debug(String.format("Found loader provider class [%s]", parserImplClassName));
@@ -169,11 +173,30 @@ public class Executor extends ExprProcessor implements ExeContext {
         } catch (Exception e) {
             throw new SpaceX("can not find or load source loader [" + parserImplClassName + "]", e);
         }
-        List<RuntimeError> errors = new LinkedList<>();
+        // 2. Load (parse and build AST)
+        Schema thisSchema = null;
+        List<AstLoadError> loadErrors;
         try {
-            Schema thisSchema = astLoader.load(file);
-            dirChain.add(thisSchema);
+            loadErrors = new LinkedList<>();
+            thisSchema = astLoader.load(loadErrors, file);
+        }
+        catch (Exception ex) {
+            throw new SpaceX("Failed loading source", ex);
+        }
 
+        Collection syntaxErrors =
+            CollectionUtils.select(loadErrors,
+                                   object -> ((AstLoadError) object).getType() == AstLoadError.Type.SYNTAX);
+
+        if (thisSchema == null || (syntaxErrors != null && syntaxErrors.size() > 0))
+        {
+            System.err.println(Strings.buildNewlineList(syntaxErrors));
+            throw new SpaceX("found "+syntaxErrors.size()+" loader errors");
+        }
+
+        try {
+            List<RuntimeError> runErrors = new LinkedList<>();
+            dirChain.add(thisSchema);
             trackMetaObject(thisSchema);
 
             if (log.isDebugEnabled())
@@ -182,7 +205,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 //            if (log.isDebugEnabled())
 //                dumpAsts();
 
-            linkAndExec(errors, thisSchema);
+            linkAndExec(runErrors, thisSchema);
         } catch (SpaceX ex) {
             throw ex;
         } catch (Exception ex) {
@@ -196,14 +219,14 @@ public class Executor extends ExprProcessor implements ExeContext {
         return copy;
     }
 
-    public void linkAndExec(List<RuntimeError> errors, Schema runSchema) throws Exception {
-        link(errors, runSchema);
-        if (errors.size() == 0) {
+    public void linkAndExec(List<RuntimeError> runErrors, Schema runSchema) throws Exception {
+        link(runErrors, runSchema);
+        if (runErrors.size() == 0) {
             //
             if (log.isDebugEnabled())
                 dumpAsts();
             //
-            typeCheck(errors, runSchema);
+            typeCheck(runErrors, runSchema);
             //
             exec(runSchema);
             //
@@ -220,18 +243,18 @@ public class Executor extends ExprProcessor implements ExeContext {
          */
     }
 
-    private void link(List<RuntimeError> errors, Schema runSchema) throws Exception {
+    private void link(List<RuntimeError> runErrors, Schema runSchema) throws Exception {
         log.debug("linking loaded program");
-        errors = linkRefs(errors, langRootSchema);
-        errors = linkRefs(errors, runSchema);
-        if (errors.size() == 0) {
+        runErrors = linkRefs(runErrors, langRootSchema);
+        runErrors = linkRefs(runErrors, runSchema);
+        if (runErrors.size() == 0) {
             log.info("no linker errors");
         }
         else {
-            String redMsg = "Found [" + errors.size() + "] linker errors";
+            String redMsg = "Found [" + runErrors.size() + "] linker errors";
             log.warn(redMsg + ". See error stream.");
             System.err.println(redMsg + ":");
-            System.err.println(Strings.buildNewlineList(errors));
+            System.err.println(Strings.buildNewlineList(runErrors));
         }
     }
 
@@ -471,7 +494,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             }
             else if (statement instanceof ReturnExpr) {
                 Assignable retVal = eval(evalContext, ((ReturnExpr) statement).getValueExpr());
-                SpaceUtils.assignOper(evalContext, functionCallContext.getReturnValue(), retVal);
+                autoCastAssign(evalContext, functionCallContext.getReturnValue(), retVal);
                 functionCallContext.setPendingReturn(true);
             }
         }
@@ -497,11 +520,47 @@ public class Executor extends ExprProcessor implements ExeContext {
         else if (expression instanceof MetaReference) {
             value = eval(spcContext, ((MetaReference) expression));
         }
+        else if (expression instanceof OperatorExpr) {
+            value = eval(spcContext, ((OperatorExpr) expression));
+        }
         else
             throw new SpaceX("don't know how to evaluate " + expression);
 
         log.debug("eval -> " + value);
         return value;
+    }
+
+
+    private Assignable eval(EvalContext evalContext, OperatorExpr operatorExpr) {
+        log.debug("eval: " + operatorExpr);
+        Assignable value = null;
+        OperEvaluator oper = lookupOperEval(operatorExpr.getOper());
+        if (oper == null)
+            throw new SpaceX(evalContext.newRuntimeError("no operator evaluator for " + operatorExpr.getOper()));
+        Assignable[] argValues = new Assignable[operatorExpr.getArgs().size()];
+        for (int idxArg = 0; idxArg < operatorExpr.getArgs().size(); idxArg++) {
+            argValues[idxArg] = eval(evalContext, operatorExpr.getArgs().get(idxArg));
+        }
+        value = oper.eval(argValues);
+        return value;
+    }
+
+    private static Map<OperEnum, OperEvaluator> operEvalMap = new TreeMap<>();
+
+    static {
+        operEvalMap.put(OperEnum.ADD, JnMath::addNum);
+        operEvalMap.put(OperEnum.SUB, JnMath::subNum);
+        operEvalMap.put(OperEnum.MULT, JnMath::multNum);
+        operEvalMap.put(OperEnum.DIV, JnMath::divNum);
+        //
+        operEvalMap.put(OperEnum.COND_AND, JnMath::condAnd);
+        //
+        operEvalMap.put(OperEnum.EQ, JnMath::equal);
+        operEvalMap.put(OperEnum.LT, JnMath::lt);
+    }
+
+    private OperEvaluator lookupOperEval(OperEnum operEnum) {
+        return operEvalMap.get(operEnum);
     }
 
     private Assignable eval(EvalContext evalContext, FunctionCallExpr functionCallExpr) {
@@ -520,13 +579,16 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         // Arg assignments may be by name or by order (like a SQL update statement), but not both.
         List<ValueExpr> argumentExprs = functionCallExpr.getArgumentExprs();
-        int idxArg = 0;
-        for (ValueExpr argumentExpr : argumentExprs) {
-            Assignable argValue = eval(evalContext, argumentExpr);
-            argValue = castRightSideAsNeeded(((TupleDefn) argTuple.getDefn()).getAllMembers().get(idxArg), argValue);
-            Assignable leftSideHolder = argTuple.get(argTuple.getNthMember(idxArg));
-            SpaceUtils.assignOper(evalContext, leftSideHolder, argValue);
-            idxArg++;
+        if (argumentExprs != null) {
+            int idxArg = 0;
+            for (ValueExpr argumentExpr : argumentExprs) {
+                Assignable argValue = eval(evalContext, argumentExpr);
+                argValue =
+                    autoCast(((TupleDefn) argTuple.getDefn()).getAllMembers().get(idxArg), argValue);
+                Assignable leftSideHolder = argTuple.get(argTuple.getNthMember(idxArg));
+                SpaceUtils.assignNoCast(evalContext, leftSideHolder, argValue);
+                idxArg++;
+            }
         }
 
 //        Tuple callTargetCtxObject = resolvePathObjects(evalContext, functionCallExpr.getFunctionDefnRef().getSpacePathExpr());
@@ -599,7 +661,7 @@ public class Executor extends ExprProcessor implements ExeContext {
     }
 
     /*
-     Must generalize this exec to find values in all possible locations:
+     Find values in all possible locations:
      1. current block
      2. parent block(s)
      3. call args
@@ -644,18 +706,30 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     private Assignable eval(EvalContext evalContext, AssignmentExpr assignmentExpr) {
         log.debug("eval: " + assignmentExpr);
-        NamedElement leftSideDefnObj = assignmentExpr.getMemberRef().getResolvedMetaObj();
         Assignable leftSideHolder = eval(evalContext, assignmentExpr.getMemberRef());
         Assignable rightSideValue = eval(evalContext, assignmentExpr.getValueExpr());
-        rightSideValue = castRightSideAsNeeded(leftSideDefnObj, rightSideValue);
-//        Assignable leftSideHolder = evalContext.peekStack().getCtxObject().get(leftSideDefnObj);
-//        Assignable leftSideHolder = eval(evalContext, leftSideDefnObj);
-        SpaceUtils.assignOper(evalContext, leftSideHolder, rightSideValue);
+        autoCastAssign(evalContext, leftSideHolder, rightSideValue);
         log.debug("eval -> " + leftSideHolder);
         return leftSideHolder;
     }
 
-    private Assignable castRightSideAsNeeded(NamedElement leftSideDefnObj, Assignable rightSideValue) {
+    private void autoCastAssign(EvalContext evalContext, Assignable leftSideHolder, Assignable rightSideValue)
+    {
+        NamedElement leftSideDefnObj =
+            leftSideHolder instanceof Variable ?
+                ((Variable) leftSideHolder).getDefinition()
+                : (leftSideHolder instanceof ScalarValue ?
+                    ((ScalarValue) leftSideHolder).getType()
+                    : (leftSideHolder instanceof Reference ?
+                        ((Reference) leftSideHolder).getDefn()
+                        : null));
+
+        rightSideValue = autoCast(leftSideDefnObj, rightSideValue);
+        SpaceUtils.assignNoCast(evalContext, leftSideHolder, rightSideValue);
+    }
+
+    private Assignable autoCast(NamedElement leftSideDefnObj, Assignable rightSideValue) {
+        Assignable newValue = rightSideValue;
         // TODO Add some notion of 'casting' and 'auto-(un)boxing'.
         if (leftSideDefnObj instanceof AssociationDefn &&
             ((AssociationDefn) leftSideDefnObj).getToType().getOid().equals(Executor.CHAR_SEQ_TYPE_DEF.getOid())
@@ -663,18 +737,26 @@ public class Executor extends ExprProcessor implements ExeContext {
         {
             if (rightSideValue instanceof ScalarValue) {
                 CharacterSequence characterSequence =
-                    newCharacterSequence(((ScalarValue) rightSideValue).getValue().toString());
-                rightSideValue = newReference(characterSequence);
+                    newCharacterSequence(((ScalarValue) rightSideValue).asString());
+                newValue = newReference(characterSequence);
                 log.debug("cast scalar value to CharSequence");
             }
             else if (rightSideValue instanceof Variable) {
                 CharacterSequence characterSequence =
-                    newCharacterSequence(((Variable) rightSideValue).getScalarValue().getValue().toString());
-                rightSideValue = newReference(characterSequence);
+                    newCharacterSequence(((Variable) rightSideValue).getScalarValue().getJvalue().toString());
+                newValue = newReference(characterSequence);
                 log.debug("cast variable (1-D) value to CharSequence");
             }
         }
-        return rightSideValue;
+        else if (leftSideDefnObj instanceof PrimitiveTypeDefn && rightSideValue instanceof ScalarValue) {
+            ScalarValue rsScalarValue = (ScalarValue) rightSideValue;
+            if (leftSideDefnObj == PrimitiveTypeDefn.CARD
+                && rsScalarValue.getType() == PrimitiveTypeDefn.REAL) {
+                newValue = ObjectFactory.getInstance().newCardinalValue(((Double) rsScalarValue.getJvalue()).intValue());
+                log.debug("cast real to card");
+            }
+        }
+        return newValue;
     }
 
 
@@ -702,10 +784,10 @@ public class Executor extends ExprProcessor implements ExeContext {
             value = getObjFactory().newBooleanValue(Boolean.valueOf(primitiveLiteralExpr.getValueExpr()));
         }
         else if (primitiveLiteralExpr.getTypeDefn() == PrimitiveTypeDefn.CHAR) {
-
+            value = getObjFactory().newCharacterValue(primitiveLiteralExpr.getValueExpr().charAt(0));
         }
         else if (primitiveLiteralExpr.getTypeDefn() == PrimitiveTypeDefn.REAL) {
-
+            value = getObjFactory().newRealValue(Double.valueOf(primitiveLiteralExpr.getValueExpr()));
         }
 //       else if (primitiveLiteralExpr.getTypeDefn() ==  RATIONAL) {
 //       }

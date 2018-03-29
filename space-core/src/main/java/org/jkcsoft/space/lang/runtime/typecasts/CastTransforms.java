@@ -7,7 +7,7 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.impl;
+package org.jkcsoft.space.lang.runtime.typecasts;
 
 import org.jkcsoft.space.lang.instance.CharacterSequence;
 

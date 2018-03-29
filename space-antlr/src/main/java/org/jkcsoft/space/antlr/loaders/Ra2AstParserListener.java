@@ -37,10 +37,10 @@ public class Ra2AstParserListener extends SpaceParserBaseListener {
 
     @Override
     public void enterSpaceTypeDefn(SpaceParser.SpaceTypeDefnContext ctx) {
-        astFactory.newProgram(
-                Antrl2AstMapping.toAst(file, ctx),
-                "");
-//        astFactory.getUserAstRoot().addSpaceTypeDefn(new EntityDefn(null, ctx.ge))
+//        astFactory.newProgram(
+//                Antrl2AstMapping.toAst(file, ctx),
+//                "");
+////        astFactory.getUserAstRoot().addSpaceTypeDefn(new EntityDefn(null, ctx.ge))
         super.enterSpaceTypeDefn(ctx);
     }
 

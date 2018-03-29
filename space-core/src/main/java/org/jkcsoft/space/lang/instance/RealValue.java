@@ -16,14 +16,12 @@ import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
  */
 public class RealValue extends ScalarValue<Double> {
 
-    private double jFloatDouble = Double.NaN;
-
-    public RealValue(PrimitiveTypeDefn type, double value) {
-        super(type, value);
+    RealValue(double jValue) {
+        super(PrimitiveTypeDefn.REAL, jValue);
     }
 
     @Override
     public String asString() {
-        return Double.toString(jFloatDouble);
+        return Double.toString(getJvalue());
     }
 }

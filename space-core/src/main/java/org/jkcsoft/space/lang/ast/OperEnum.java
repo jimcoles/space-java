@@ -13,14 +13,20 @@ package org.jkcsoft.space.lang.ast;
  * @author Jim Coles
  */
 public enum OperEnum {
-
-//    ASSOC_NAV,
     //
-    ASSIGN,
-    // numbers
+    // numeric
     ADD,
-    SUBTRACT
+    SUB,
+    MULT,
+    DIV,
     // boolean
-
-    // relational
+    OR,
+    COND_OR,
+    AND,
+    COND_AND,
+    NEGATION,
+    // comparator
+    EQ,
+    LT,
+    GT
 }

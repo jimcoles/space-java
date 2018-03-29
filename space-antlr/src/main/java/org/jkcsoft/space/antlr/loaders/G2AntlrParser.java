@@ -15,13 +15,17 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.tool.ast.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.antlr.SpaceLexer;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.AstFactory;
+import org.jkcsoft.space.lang.ast.FileSourceInfo;
 import org.jkcsoft.space.lang.ast.Schema;
+import org.jkcsoft.space.lang.ast.SourceInfo;
+import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.antlr.AntlrTreePrintListener;
 import org.jkcsoft.space.antlr.AntlrUtil;
@@ -30,10 +34,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.BitSet;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class wraps the ANTLR Scanner (Tokenizer, Lexer) and Parser (Recognizer).
@@ -66,26 +67,24 @@ public class G2AntlrParser implements AstLoader {
     }
 
     @Override
-    public Schema load(File spaceSrcFile) throws Exception {
+    public Schema load(List<AstLoadError> errors, File spaceSrcFile) throws Exception {
         this.srcFile = spaceSrcFile;
         log.info("Parsing file [" + spaceSrcFile.getAbsolutePath() + "]");
         InputStream fileInputStream = new FileInputStream(spaceSrcFile);
         ANTLRInputStream input = new ANTLRInputStream(fileInputStream);
-        return load(input);
+        return load(errors, input);
     }
 
-    private Schema load(ANTLRInputStream aisSpaceSrc) {
+    private Schema load(List<AstLoadError> loadErrors, ANTLRInputStream aisSpaceSrc) {
         AstFactory astFactory = null;
-        List<String> parseErrors = new LinkedList<>();
-        ANTLRErrorListener errorListener;
-        errorListener = new MyANTLRErrorListener(parseErrors);
-
+        ANTLRErrorListener errorListener = new MyANTLRErrorListener(loadErrors);
         //
         SimpleTransListener stl = new SimpleTransListener(SpaceParser.ruleNames);
         log.debug("Trans listener dump: " + JavaHelper.EOL
-                + String.format("%3s %-25s %-25s %6s %-10s %5s", "Id", "Rule", "Wrapper", "Count", "Loadable", "Need")
-                + JavaHelper.EOL
-                + stl.dumpRuleStats());
+                      + String
+            .format("%3s %-25s %-25s %6s %-10s %5s", "Id", "Rule", "Wrapper", "Count", "Loadable", "Need")
+                      + JavaHelper.EOL
+                      + stl.dumpRuleStats());
 
         SpaceLexer srcLexerStream = new SpaceLexer(aisSpaceSrc); // create a buffer of tokens pulled from the lexer
         srcLexerStream.addErrorListener(errorListener);
@@ -99,13 +98,13 @@ public class G2AntlrParser implements AstLoader {
         srcParser.addParseListener(printListener);
         // begin parsing at top-level rule
         SpaceParser.ParseUnitContext parseUnitContext = srcParser.parseUnit();
-        log.info("Parse errors from ANTLR: " + Strings.buildCommaDelList(parseErrors));
+        log.info("Parse errors from ANTLR: " + Strings.buildNewlineList(loadErrors));
 
         // debug / print
         log.debug("ANTLR Util parse dump:" + JavaHelper.EOL
-                + parseUnitContext.toStringTree(srcParser));
+                      + parseUnitContext.toStringTree(srcParser));
         log.debug("ANTLR custom print/dump: " + JavaHelper.EOL
-                + printListener.getSb());
+                      + printListener.getSb());
 
 //        SimpleVisitor astTransVisitor = new SimpleVisitor();
         // accept() just calls back into the Visitor's visitParseUnit() method
@@ -113,10 +112,17 @@ public class G2AntlrParser implements AstLoader {
 //        log.info("attempt visitor pattern for AST transform");
 //        AstFactory accept = parseUnitContext.accept(astTransVisitor);
 
+        Schema schema = null;
+        Collection syntaxErrors =
+            CollectionUtils.select(loadErrors,
+                                   object -> ((AstLoadError) object).getType() == AstLoadError.Type.SYNTAX);
 
-        astFactory = new AstFactory();
-        Ra2AstTransform ra2AstTransform = new Ra2AstTransform(astFactory, srcFile);
-        Schema schema = ra2AstTransform.transform(parseUnitContext);
+        if (syntaxErrors.size() == 0) {
+            astFactory = new AstFactory();
+            Ra2AstTransform ra2AstTransform = new Ra2AstTransform(astFactory, srcFile);
+            schema = ra2AstTransform.transform(parseUnitContext);
+        }
+
         return schema;
     }
 
@@ -136,11 +142,11 @@ public class G2AntlrParser implements AstLoader {
                 String ruleName = AntlrUtil.extractRuleName(rule);
                 String astClassName = Antrl2AstMapping.antlrRuleToAstClassname(ruleName);
                 log.debug(
-                        String.format(
-                                "Rule Name: %25s can load %25s => %5b",
-                                ruleName, astClassName,
-                                Antrl2AstMapping.canLoad(Antrl2AstMapping.computeFQAstClassName(astClassName))
-                        )
+                    String.format(
+                        "Rule Name: %25s can load %25s => %5b",
+                        ruleName, astClassName,
+                        Antrl2AstMapping.canLoad(Antrl2AstMapping.computeFQAstClassName(astClassName))
+                    )
                 );
             }
         }
@@ -157,41 +163,76 @@ public class G2AntlrParser implements AstLoader {
 //            org.antlr.runtime.ANTLRFileStream in = new org.antlr.runtime.ANTLRFileStream(file.getAbsolutePath());
             org.antlr.runtime.ANTLRInputStream antlrInputStream = new org.antlr.runtime.ANTLRInputStream(inputStream);
             spaceGrammarRoot = antlrGrammar.parse(grammarFileName, antlrInputStream);
-        }
-        catch (IOException ioe) {
-            log.error("Could not find Space grammar file ["+grammarFileName+"]", ioe);
+        } catch (IOException ioe) {
+            log.error("Could not find Space grammar file [" + grammarFileName + "]", ioe);
         }
     }
 
-    private static class MyANTLRErrorListener implements ANTLRErrorListener {
-        private final List<String> parseErrors;
+    private class MyANTLRErrorListener implements ANTLRErrorListener {
+        private final List<AstLoadError> parseErrors;
 
-        public MyANTLRErrorListener(List<String> parseErrors) {
+        public MyANTLRErrorListener(List<AstLoadError> parseErrors) {
             this.parseErrors = parseErrors;
         }
 
         @Override
         public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int
-                charPositionInLine, String msg, RecognitionException e) {
-            parseErrors.add(msg);
+            charPositionInLine, String msg, RecognitionException e)
+        {
+            AntrlParseFileCoord start = new AntrlParseFileCoord(line, charPositionInLine, true);
+            parseErrors.add(new AstLoadError(AstLoadError.Type.SYNTAX, new FileSourceInfo(srcFile, start, start), msg));
         }
 
         @Override
         public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact,
-                                    BitSet ambigAlts, ATNConfigSet configs) {
-            parseErrors.add("ambiguity");
+                                    BitSet ambigAlts, ATNConfigSet configs)
+        {
+            // TODO Not sure how to use provied params to inform user
+            parseErrors.add(new AstLoadError(AstLoadError.Type.WARNING, null, "ambiguity"));
         }
 
         @Override
         public void reportAttemptingFullContext(Parser recognizer, DFA dfa, int startIndex, int stopIndex,
-                                                BitSet conflictingAlts, ATNConfigSet configs) {
-            parseErrors.add("attempting full context");
+                                                BitSet conflictingAlts, ATNConfigSet configs)
+        {
+            parseErrors.add(new AstLoadError(AstLoadError.Type.WARNING, null, "attempting full context"));
         }
 
         @Override
         public void reportContextSensitivity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, int
-                prediction, ATNConfigSet configs) {
-            parseErrors.add("context sensitivity");
+            prediction, ATNConfigSet configs)
+        {
+            parseErrors.add(new AstLoadError(AstLoadError.Type.WARNING, null,"context sensitivity"));
+        }
+
+        private class AntrlParseFileCoord implements SourceInfo.FileCoord {
+            private int line, cursorIndexInLine;
+            private boolean isStart;
+            public AntrlParseFileCoord(int line, int charPositionInLine, boolean isStart) {
+                this.line = line;
+                this.cursorIndexInLine = charPositionInLine;
+                this.isStart = isStart;
+            }
+
+            @Override
+            public boolean isStart() {
+                return isStart;
+            }
+
+            @Override
+            public int getLine() {
+                return line;
+            }
+
+            @Override
+            public int getCursorIndexInLine() {
+                return cursorIndexInLine;
+            }
+
+            @Override
+            public String toString() {
+                return getLine() + "," + getCursorIndexInLine();
+            }
         }
     }
 }

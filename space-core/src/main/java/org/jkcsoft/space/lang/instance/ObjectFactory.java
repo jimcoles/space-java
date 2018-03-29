@@ -10,6 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.runtime.Executor;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -75,7 +76,43 @@ public class ObjectFactory {
         return BooleanValue.getValue(aBoolean);
     }
 
+    public Assignable newCharacterValue(Character character) {
+        return new CharacterValue(character);
+    }
+
+    public Assignable newRealValue(Double aDouble) {
+        return new RealValue(aDouble);
+    }
+
     public BlockContext newBlockContext(StatementBlock statementBlock, Tuple tuple) {
         return new BlockContext(statementBlock, tuple);
+    }
+
+    public Assignable newHolder(DatumType datumType) {
+        Assignable holder = null;
+        AstFactory tmpAst = new AstFactory();
+        if (datumType instanceof PrimitiveTypeDefn) {
+//            holder = new Variable(null, tmpAst.newVariableDefn(), null);
+            PrimitiveTypeDefn primType = (PrimitiveTypeDefn) datumType;
+            if (primType == PrimitiveTypeDefn.BOOLEAN) {
+                holder = newBooleanValue(false);
+            }
+            else if (primType == PrimitiveTypeDefn.CHAR) {
+                holder = newCharacterValue(null);
+            }
+            else if (primType == PrimitiveTypeDefn.CARD) {
+                holder = newCardinalValue(Integer.MIN_VALUE);
+            }
+            else if (primType == PrimitiveTypeDefn.REAL) {
+                holder = newRealValue(Double.NaN);
+            }
+        }
+        else if (datumType instanceof SpaceTypeDefn) {
+            holder = newObjectReference(null, null);
+        }
+        else if (datumType instanceof StreamTypeDefn) {
+            holder = newObjectReference(null, null);
+        }
+        return holder;
     }
 }

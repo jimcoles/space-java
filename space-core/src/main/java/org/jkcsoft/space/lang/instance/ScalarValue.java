@@ -18,12 +18,11 @@ import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
 public abstract class ScalarValue<T> implements Assignable {
 
     private PrimitiveTypeDefn type;
-    private T value;
+    private T jvalue;    // the java object value such as int, float, char
 
-    ScalarValue(PrimitiveTypeDefn type, T value) {
-//        super(oid);
+    ScalarValue(PrimitiveTypeDefn type, T jValue) {
         this.type = type;
-        this.value = value;
+        this.jvalue = jValue;
     }
 
     public PrimitiveTypeDefn getType() {
@@ -31,15 +30,15 @@ public abstract class ScalarValue<T> implements Assignable {
     }
 
     public boolean isInit() {
-        return value != null;
+        return jvalue != null;
     }
 
-    public T getValue() {
-        return value;
+    public T getJvalue() {
+        return jvalue;
     }
 
-    public ScalarValue<T> setValue(T value) {
-        this.value = value;
+    public ScalarValue<T> setJvalue(T jvalue) {
+        this.jvalue = jvalue;
         return this;
     }
 
@@ -47,6 +46,6 @@ public abstract class ScalarValue<T> implements Assignable {
 
     @Override
     public String toString() {
-        return "("+type+") " + value;
+        return "ScalarValue("+type.getDisplayName()+") " + jvalue;
     }
 }

@@ -9,7 +9,6 @@
  */
 package org.jkcsoft.space.lang.runtime;
 
-import org.jkcsoft.space.lang.ast.NamedElement;
 import org.jkcsoft.space.lang.instance.*;
 
 /**
@@ -19,14 +18,13 @@ import org.jkcsoft.space.lang.instance.*;
  */
 public class SpaceUtils {
 
-    public static void assignOper(Executor.EvalContext exe, Assignable leftSideHolder, Assignable rightSideValue) {
+    public static void assignNoCast(Executor.EvalContext exe, Assignable leftSideHolder, Assignable rightSideValue) {
         boolean assigned = false;
         RuntimeError error = null;
         if (leftSideHolder instanceof Variable) {
+            Variable lsHolder = (Variable) leftSideHolder;
             if (rightSideValue instanceof ScalarValue) {
-//                Executor.log.debug("setting scalar to scalar");
                 ScalarValue rsScalarValue = (ScalarValue) rightSideValue;
-                Variable lsHolder = (Variable) leftSideHolder;
                 if (rsScalarValue.getType() == lsHolder.getDefinition().getType()) {
                     lsHolder.setScalarValue(rsScalarValue);
                     assigned = true;
@@ -34,6 +32,21 @@ public class SpaceUtils {
                 else {
                     error = exe.newRuntimeError(
                         "type mismatch: cannot assign " + lsHolder.getDefinition().getType() + " <- " +
+                            rsScalarValue.getType());
+                }
+            }
+        }
+        else if (leftSideHolder instanceof ScalarValue) {
+            ScalarValue lsScalarValue = ((ScalarValue) leftSideHolder);
+            if (rightSideValue instanceof ScalarValue) {
+                ScalarValue rsScalarValue = (ScalarValue) rightSideValue;
+                if (rsScalarValue.getType() == lsScalarValue.getType()) {
+                    lsScalarValue.setJvalue(rsScalarValue.getJvalue());
+                    assigned = true;
+                }
+                else {
+                    error = exe.newRuntimeError(
+                        "type mismatch: cannot assign " + lsScalarValue.getType() + " <- " +
                             rsScalarValue.getType());
                 }
             }

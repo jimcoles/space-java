@@ -16,19 +16,35 @@ import org.jkcsoft.space.lang.ast.SourceInfo;
  */
 public class AstLoadError {
 
-    private String message;
-    private SourceInfo sourceInfo;
+    public enum Type {
+        WARNING,
+        SYNTAX
+    }
 
-    public AstLoadError(String message, SourceInfo sourceInfo) {
+    private Type type;
+    private SourceInfo sourceInfo;
+    private String message;
+
+    public AstLoadError(Type type, SourceInfo sourceInfo, String message) {
+        this.type = type;
         this.message = message;
         this.sourceInfo = sourceInfo;
+    }
+
+    public SourceInfo getSourceInfo() {
+        return sourceInfo;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public SourceInfo getSourceInfo() {
-        return sourceInfo;
+    public Type getType() {
+        return type;
+    }
+
+    @Override
+    public String toString() {
+        return type.toString().toLowerCase() + " " + sourceInfo + " " + message;
     }
 }

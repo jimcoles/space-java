@@ -60,32 +60,37 @@ ForEachKeyword : 'foreach';
 InKeyword : 'in';
 ReturnKeyword : 'return';
 
-SpaceDefnType
-    : 'abstract'
+SpaceDefnType :
+    'abstract'
     | 'basis'
     | 'depend'
     | 'native'
     ;
 
-BooleanLiteral
-    : 'true'
+BooleanLiteral :
+    'true'
     | 'false'
     ;
 
-AssignOper  : '=';
+AssignOper  : '=' ;
 
 BooleanBinaryOper :
-    '&' | '|'
+    '&' | '|' | '&&' | '||'
     ;
 
 BooleanUnaryOper :
     '!'
     ;
 
-NumAddOper : '+' ;
-NumSubOper : '-' ;
-NumMultOper : '*' ;
-NumDivOper : '/' ;
+// ------------------ Numerics
+
+NumericBinaryOper :
+    '+' | '-' | '*' | '/'
+    ;
+
+ComparisonOper :
+    '==' | '<' | '>'
+    ;
 
 // Space Path Expressions - reduced syntax
 SPathRoot           : '//' ;

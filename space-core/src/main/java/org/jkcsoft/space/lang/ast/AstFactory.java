@@ -126,4 +126,9 @@ public class AstFactory {
     public StreamTypeDefn newStreamTypeDefn(IntrinsicSourceInfo sourceInfo, String name) {
         return new StreamTypeDefn(sourceInfo, name);
     }
+
+    public OperatorExpr newOperatorExpr(SourceInfo sourceInfo, OperEnum oper, ValueExpr... args) {
+        return new OperatorExpr(sourceInfo, oper, args);
+    }
+
 }

@@ -7,10 +7,14 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.opers.algebra.ints;
+package org.jkcsoft.space.lang.ast;
 
 /**
  * @author Jim Coles
  */
-public class Multiply {
+public enum ScopeKind {
+    BLOCK,
+    ARG,
+    OBJECT,
+    STATIC
 }

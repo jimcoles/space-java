@@ -121,7 +121,7 @@ query-def <queryName> (
 // NOTE: Parse Rule names must start with a lowercase letter.
 
 parseUnit :
-    spaceTypeDefn | equationDefn | functionDefn
+    (spaceTypeDefn | equationDefn | functionDefn)*
     ;
 
 /*
@@ -232,14 +232,6 @@ functionDefn :
 
 parameterDefnList : '(' (parameterDecl (',' parameterDecl)*)? ')' ;
 
-statementBlock :
-    BlockStart
-    variableDefnStmt*
-    associationDefnStmt*
-    statement*
-    BlockEnd
-    ;
-
 statement :
     expression ';'
     | statementBlock
@@ -248,14 +240,44 @@ statement :
     | returnStatement
     ;
 
+statementBlock :
+    BlockStart
+    variableDefnStmt*
+    associationDefnStmt*
+    statement*
+    BlockEnd
+    ;
+
+ifStatement :
+    'if' '(' valueExpr ')'
+    statementBlock
+    ;
+
+forEachStatement :
+    'foreach' identifier 'in' valueExpr
+    statementBlock
+    ;
+
+returnStatement :
+    'return' valueExpr ';'
+    ;
+
 expression :
     variableDefn |
     associationDefn |
     functionCallExpr |
     assignmentExpr |
-    booleanExpr |
-    numericExpr |
+    operatorExpr |
     navCallChainExpr
+    ;
+
+valueExpr :
+    literalExpr
+    | spacePathExpr
+    | functionCallExpr
+    | objectExpr
+    | operatorExpr
+    | navCallChainExpr
     ;
 
 // Important that an action call may be a list of params or a single tuple
@@ -282,55 +304,65 @@ navCallChainExpr :
 ////    expression (numericOper | bo
 //    ;
 
-parenExpr :
+//exprGroup :
+//    '(' expression ')'
+//    ;
+
+//binaryOperExpr :
+//    booleanExpr | numericExpr
+//    ;
+
+// ERR:  1 - 2 / 3
+// OK: (1 - 2) / 3
+// OK: 1 - (2 / 3)
+
+// A Lisp-like syntax for operator-based expressions
+operatorExpr :
+//    '(' (operatorExpr | binaryOperExpr | unaryOperExpr | valueExpr) ')'
+//    '(' (binaryOperExpr | unaryOperExpr | valueExpr) ')'
     '(' binaryOperExpr ')'
     ;
 
+unaryOperExpr :
+    unaryOper valueExpr
+    ;
+
+unaryOper :
+    BooleanUnaryOper
+    ;
+
 binaryOperExpr :
-    booleanExpr | numericExpr
+    valueExpr binaryOper valueExpr
+//    scalarLiteral NumericBinaryOper scalarLiteral
     ;
 
-booleanExpr :
-    booleanMonoExpr
-    | booleanBinaryExpr
-    | booleanMonoExpr BooleanBinaryOper '(' booleanBinaryExpr ')'
-    | '(' booleanBinaryExpr ')' BooleanBinaryOper booleanMonoExpr
+binaryOper :
+    NumericBinaryOper | BooleanBinaryOper | ComparisonOper
     ;
 
-booleanMonoExpr :
-    booleanLiteral
-    | spacePathExpr
-    | functionCallExpr
-    | BooleanUnaryOper booleanMonoExpr
-    ;
+//binBinBool : '(' binaryOperExpr ')' BooleanBinaryOper '(' binaryOperExpr ')' ;
+//
+//binMonoBool : '(' binaryOperExpr ')' BooleanBinaryOper monoOperExpr ;
+//
+//monoBinBool : monoOperExpr BooleanBinaryOper '(' binaryOperExpr ')' ;
+//
+//monoMonoBool : monoOperExpr BooleanBinaryOper monoOperExpr ;
 
-booleanBinaryExpr :
-    booleanMonoExpr BooleanBinaryOper booleanMonoExpr
-    ;
 
-numericOper : '+' | '-' | '*' | NumDivOper;
+//booleanBinaryExpr :
+//    booleanExpr BooleanBinaryOper booleanExpr
+//    ;
 
-numericExpr :
-    integerLiteral
-    | floatLiteral
-    | spacePathExpr
-    | functionCallExpr
-    | numericExpr numericOper numericExpr
-    ;
+//numericOper : '+' | '-' | '*' | NumDivOper;
+//
+//numericExpr :
+//    integerLiteral
+//    | floatLiteral
+//    | spacePathExpr
+//    | functionCallExpr
+//    | numericExpr numericOper numericExpr
+//    ;
 
-ifStatement :
-    'if' '(' booleanExpr ')'
-    statementBlock
-    ;
-
-forEachStatement :
-    'foreach' identifier 'in' valueExpr
-    statementBlock
-    ;
-
-returnStatement :
-    'return' valueExpr ';'
-    ;
 
 // ===============================================================================
 //
@@ -338,13 +370,6 @@ returnStatement :
 
 objectExpr :
     'new' spacePathExpr TupleStart valueOrAssignmentExprList? TupleEnd
-    ;
-
-valueExpr :
-    literalExpr
-    | spacePathExpr
-    | functionCallExpr
-    | objectExpr
     ;
 
 valueOrAssignmentExprList :

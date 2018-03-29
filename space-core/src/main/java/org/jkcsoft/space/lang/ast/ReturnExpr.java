@@ -22,6 +22,8 @@ public class ReturnExpr extends Statement {
     ReturnExpr(SourceInfo sourceInfo, ValueExpr valueExpr) {
         super(sourceInfo);
         this.valueExpr = valueExpr;
+        //
+        addChild((ModelElement) valueExpr);
     }
 
     public ValueExpr getValueExpr() {

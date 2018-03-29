@@ -7,12 +7,16 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.opers.algebra.rel;
+package org.jkcsoft.space.lang.instance;
+
+import org.jkcsoft.space.lang.runtime.Executor;
 
 /**
- * Aka, multiplication.
- *
+ * Used for simple operator evals such as numeric add, sub, comparison, etc.
  * @author Jim Coles
  */
-public class Conjunct {
+public interface OperEvaluator {
+
+    Assignable eval(Assignable ... args);
+
 }

@@ -22,6 +22,6 @@ public abstract class IntegerValue extends ScalarValue<Integer> {
 
     @Override
     public String asString() {
-        return null;
+        return Integer.toString(getJvalue());
     }
 }

@@ -10,27 +10,27 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * Possibly only used by the language itself, i.e., we probably won't
- * allow users to define new operators.
- *
- * An Operator (Defn) is like an Function (Defn) exception that Operator arguments
- * are not named.
+ * Like a {@link FunctionDefn} but applies to Operator like numeric addition and
+ * boolean-valued logic opers AND, and OR.
  *
  * @author Jim Coles
  */
-public abstract class OperatorDefn extends ModelElement {
+public abstract class OperatorDefn {
 
-    private DatumType datumType;
+    private DatumType argType;
+    private DatumType returnType;
     private int minArgs;
     private int maxArgs;
 
-    OperatorDefn(SourceInfo sourceInfo, DatumType datumType, int numArgs) {
-        this(sourceInfo, datumType, numArgs, numArgs);
+    OperatorDefn() {
+        this(1);
     }
 
-    OperatorDefn(SourceInfo sourceInfo, DatumType datumType, int minArgs, int maxArgs) {
-        super(sourceInfo);
-        this.datumType = datumType;
+    OperatorDefn(int maxArgs) {
+        this(1, maxArgs);
+    }
+
+    OperatorDefn(int minArgs, int maxArgs) {
         this.minArgs = minArgs;
         this.maxArgs = maxArgs;
     }
@@ -39,8 +39,12 @@ public abstract class OperatorDefn extends ModelElement {
         return false;
     }
 
-    public DatumType getDatumType() {
-        return datumType;
+    public DatumType getArgType() {
+        return argType;
+    }
+
+    public DatumType getReturnType() {
+        return returnType;
     }
 
     public int getMinArgs() {

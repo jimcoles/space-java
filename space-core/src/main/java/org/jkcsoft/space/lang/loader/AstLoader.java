@@ -12,6 +12,7 @@ package org.jkcsoft.space.lang.loader;
 import org.jkcsoft.space.lang.ast.Schema;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * An AstLoader loads an AST corresponding to a file or files on the file system.
@@ -26,6 +27,6 @@ public interface AstLoader {
     String getName();
 
     /** Loaders should return the root (directory) node */
-    Schema load(File file) throws Exception;
+    Schema load(List<AstLoadError> errors, File file) throws Exception;
 
 }

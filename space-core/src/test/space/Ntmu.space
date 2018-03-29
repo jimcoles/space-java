@@ -1,51 +1,48 @@
 
-public space-def NtmuSpace
+public type-def NtmuSpace
 /*
  This is a smart annotation comment for
   my awesome space.
 */
-(
-    card myIntVar = 1;
-    boolean myBoolVar = true;
-    CharSequence greeting = "Hello from this reference to a CharSequence.";
+{
+    function-def void main(CharSequence args) {
+        Person jim = new Person["Jim", "Coles"];
+        Task task = new Task["Git 'er done, boy!'", jim];
+        Task task2 = new Task["Go play with your Bronster.", jim];
+        //
+        OpSys.println( ["Done with NtmuSpace!"] );
+    }
+}
 
-    void main(CharSequence args;) (
-        JnOpSys.println["Hello, Space!"];
-        JnOpSys.println[greeting];
-    )
-)
-
-space-def Person
-(
+type-def Person {
     CharSequence first;
     CharSequence last;
     CharSequence fullName;
 
-    equation-def FL2Full (Person person) {
-        fullname - (first + last);
-    }
+//    equation-def FL2Full (Person person) {
+//        fullname - (first + last);
+//    }
 
-    function-def A solves FL2Full for (fullname) given (first,last)
-    (
+//    function-def A solves FL2Full for (fullname) given (first,last) {
+//
+//    }
 
-    )
-)
+}
 
-
-space-def Task
-(
+type-def Task {
+    CharSequence description;
     Person assignee;
-
-)
+}
 
 // Equations within a space type
-space-def Triangle (
+type-def Triangle {
     real side1;
     real side2;
     real size3;
     real angle12;
 
-    equation-def() (
+//    equation-def() {
+//
+//    }
 
-    )
-)
+}

@@ -10,20 +10,18 @@
 package org.jkcsoft.space.antlr.loaders;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.log4j.Logger;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.metameta.MetaType;
 import org.jkcsoft.space.lang.runtime.ExecState;
+import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A brute force interrogator of the ANTLR parse tree that I'll use
@@ -67,7 +65,10 @@ public class Ra2AstTransform {
         log.info("transforming ANTLR parse tree to AST starting with root parse node.");
         logTrans(spaceParseUnit);
         Schema schema = astFactory.newAstSchema(Antrl2AstMapping.toAst(srcFile, spaceParseUnit), "user");
-        schema.addSpaceDefn(toAst(spaceParseUnit.spaceTypeDefn()));
+        List<SpaceParser.SpaceTypeDefnContext> spaceTypeDefnContexts = spaceParseUnit.spaceTypeDefn();
+        for (SpaceParser.SpaceTypeDefnContext spaceTypeDefnContext : spaceTypeDefnContexts) {
+            schema.addSpaceDefn(toAst(spaceTypeDefnContext));
+        }
         return schema;
     }
 
@@ -339,7 +340,97 @@ public class Ra2AstTransform {
         else if (expressionCtxt.assignmentExpr() != null) {
             valueExprAST = toAst(expressionCtxt.assignmentExpr());
         }
+        else if (expressionCtxt.operatorExpr() != null) {
+            valueExprAST = toAst(expressionCtxt.operatorExpr());
+        }
+//        else if (expressionCtxt.navCallChainExpr() != null) {
+//
+//        }
+        else {
+            throw new SpaceX("don't know how to transform " + expressionCtxt);
+        }
         return valueExprAST;
+    }
+
+    private ValueExpr toAst(SpaceParser.OperatorExprContext operatorExprContext) {
+        logTrans(operatorExprContext);
+        ValueExpr valueExpr = null;
+        // choice: 1 of
+        SpaceParser.BinaryOperExprContext binaryOperExprContext = operatorExprContext.binaryOperExpr();
+//        SpaceParser.UnaryOperExprContext unaryOperExprContext = operatorExprContext.unaryOperExpr();
+//        SpaceParser.OperatorExprContext nestedOperatorExprContext = operatorExprContext.operatorExpr();
+        //
+//        if (nestedOperatorExprContext != null) {
+//            valueExpr = toAst(nestedOperatorExprContext);
+//        }
+        if (binaryOperExprContext != null) {
+            valueExpr = toAst(binaryOperExprContext);
+        }
+//        else if (unaryOperExprContext != null) {
+//            valueExpr = toAst(unaryOperExprContext);
+//        }
+        return valueExpr;
+    }
+
+    private ValueExpr toAst(SpaceParser.UnaryOperExprContext unaryOperExprContext) {
+        logTrans(unaryOperExprContext);
+        return astFactory.newOperatorExpr(Antrl2AstMapping.toAst(srcFile, unaryOperExprContext),
+                                          toAst(unaryOperExprContext.unaryOper()),
+                                          toAst(unaryOperExprContext.valueExpr()));
+    }
+
+    private OperEnum toAst(SpaceParser.UnaryOperContext unaryOperContext) {
+        return toAstOper(unaryOperContext.BooleanUnaryOper());
+    }
+
+    private ValueExpr toAst(SpaceParser.BinaryOperExprContext binaryOperExprContext) {
+        logTrans(binaryOperExprContext);
+        return astFactory.newOperatorExpr(Antrl2AstMapping.toAst(srcFile, binaryOperExprContext),
+                                          toAst(binaryOperExprContext.binaryOper()),
+                                          toAst(binaryOperExprContext.valueExpr(0)),
+                                          toAst(binaryOperExprContext.valueExpr(1))
+        );
+    }
+
+    private OperEnum toAst(SpaceParser.BinaryOperContext binaryOperContext) {
+        // choice
+        TerminalNode numTermNode = binaryOperContext.NumericBinaryOper();
+        TerminalNode boolTermNode = binaryOperContext.BooleanBinaryOper();
+        TerminalNode compTermNode = binaryOperContext.ComparisonOper();
+        //
+        TerminalNode operatorTermNode = null;
+        if (numTermNode != null)
+            operatorTermNode = numTermNode;
+        else if (boolTermNode != null)
+            operatorTermNode = boolTermNode;
+        else if (compTermNode != null)
+            operatorTermNode = compTermNode;
+        //
+        return toAstOper(operatorTermNode);
+    }
+
+    private Map<String, OperEnum> operSymbolMap = new TreeMap();
+
+    {
+        operSymbolMap.put("+", OperEnum.ADD);
+        operSymbolMap.put("-", OperEnum.SUB);
+        operSymbolMap.put("*", OperEnum.MULT);
+        operSymbolMap.put("/", OperEnum.DIV);
+
+        operSymbolMap.put("&", OperEnum.AND);
+        operSymbolMap.put("&&", OperEnum.COND_AND);
+        operSymbolMap.put("|", OperEnum.OR);
+        operSymbolMap.put("||", OperEnum.COND_OR);
+        operSymbolMap.put("!", OperEnum.NEGATION);
+
+        operSymbolMap.put("==", OperEnum.EQ);
+        operSymbolMap.put("<", OperEnum.LT);
+        operSymbolMap.put(">", OperEnum.GT);
+    }
+
+    private OperEnum toAstOper(TerminalNode terminalNode) {
+        OperEnum operEnumAST = operSymbolMap.get(terminalNode.getSymbol().getText());
+        return operEnumAST;
     }
 
     private SpacePathExpr toSpacePathExpr(SpaceParser.IdentifierContext identifierCtxt) {
@@ -408,6 +499,7 @@ public class Ra2AstTransform {
             SpaceParser.FunctionCallExprContext functionCallExprContext = valueExprContext.functionCallExpr();
             SpaceParser.ObjectExprContext objectExprContext = valueExprContext.objectExpr();
             SpaceParser.SpacePathExprContext spacePathExprContext = valueExprContext.spacePathExpr();
+            SpaceParser.OperatorExprContext operatorExprContext = valueExprContext.operatorExpr();
             if (literalExprContext != null) {
                 if (literalExprContext.scalarLiteral() != null)
                     valueExprAST = toAst(literalExprContext.scalarLiteral());
@@ -421,6 +513,9 @@ public class Ra2AstTransform {
                 valueExprAST = toAst(functionCallExprContext);
             else if (spacePathExprContext != null) {
                 valueExprAST = new MetaReference(toAst(spacePathExprContext), MetaType.DATUM);
+            }
+            else if (operatorExprContext != null) {
+                valueExprAST = toAst(operatorExprContext);
             }
         }
         return valueExprAST;

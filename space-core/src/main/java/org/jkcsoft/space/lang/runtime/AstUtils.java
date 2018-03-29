@@ -107,6 +107,9 @@ public class AstUtils {
             case TYPE:
                 lookup = checkIntrinsics(reference.getSpacePathExpr());
                 if (lookup == null) {
+                    lookup = resolveFromNode(reference.getParent(), reference);
+                }
+                if (lookup == null) {
                     lookup = resolveFromRoot(dirChain, reference);
                 }
                 break;
@@ -119,21 +122,27 @@ public class AstUtils {
                 }
                 break;
             case FUNCTION:
-                if (!reference.getSpacePathExpr().hasNextExpr())
+                lookup = resolveFromRoot(dirChain, reference);
+                if (lookup == null && !reference.getSpacePathExpr().hasNextExpr())
                     lookup = findInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
-                else
-                    lookup = resolveFromRoot(dirChain, reference);
+                else if (lookup == null) {
+                    lookup = resolveFromNode(reference.getParent(), reference);
+                }
                 break;
         }
         return lookup;
     }
 
     private static NamedElement resolveFromRoot(List<Schema> dirChain, MetaReference reference) {
-        NamedElement lookup;
-        lookup = findAsSchemaRoot(dirChain, reference.getSpacePathExpr());
-        if (reference.getSpacePathExpr().hasNextExpr()) {
-            lookup = traverseRest(lookup, reference.getSpacePathExpr().getNextExpr());
-        }
+        NamedElement lookup = findAsSchemaRoot(dirChain, reference.getSpacePathExpr());
+        lookup = traverseRest(lookup, reference.getSpacePathExpr().getNextExpr());
+        return lookup;
+    }
+
+    private static NamedElement resolveFromNode(ModelElement astNode, MetaReference reference) {
+        log.debug("trying to find ["+reference+"] under " + astNode);
+        NamedElement lookup = lookupImmediateChild(astNode, reference.getSpacePathExpr().getNodeText());
+        lookup = traverseRest(lookup, reference.getSpacePathExpr().getNextExpr());
         return lookup;
     }
 
@@ -151,11 +160,14 @@ public class AstUtils {
         return lookup;
     }
 
-    public static NamedElement traverseRest(ModelElement context, SpacePathExpr spacePathExpr) {
-        NamedElement targetChild = lookupImmediateChild(context, spacePathExpr.getNodeText());
-        if (targetChild != null) {
-            if (spacePathExpr.hasNextExpr()) {
-                targetChild = traverseRest(targetChild, spacePathExpr.getNextExpr());
+    public static NamedElement traverseRest(NamedElement context, SpacePathExpr spacePathExpr) {
+        NamedElement targetChild = context;
+        if (context != null && spacePathExpr != null) {
+            targetChild = lookupImmediateChild(context, spacePathExpr.getNodeText());
+            if (targetChild != null) {
+                if (spacePathExpr.hasNextExpr()) {
+                    targetChild = traverseRest(targetChild, spacePathExpr.getNextExpr());
+                }
             }
         }
         // if not first of path list and child not found under current context, return null (error)

@@ -10,14 +10,16 @@
 package org.jkcsoft.space.antlr.test;
 
 import org.jkcsoft.space.lang.ast.Schema;
+import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.loader.AstLoader;
 
 import java.io.File;
+import java.util.List;
 
 public class TestGrammarParser implements AstLoader {
 
     @Override
-    public Schema load(File file) throws Exception {
+    public Schema load(List<AstLoadError> errors, File file) throws Exception {
         return null;
     }
 

@@ -17,12 +17,12 @@ import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
 public class CharacterValue extends ScalarValue<Character> {
 
     /** Limit constructor access to package-only. */
-    CharacterValue(PrimitiveTypeDefn type, char value) {
-        super(type, value);
+    CharacterValue(char value) {
+        super(PrimitiveTypeDefn.CHAR, value);
     }
 
     @Override
     public String asString() {
-        return String.valueOf(getValue());
+        return String.valueOf(getJvalue());
     }
 }

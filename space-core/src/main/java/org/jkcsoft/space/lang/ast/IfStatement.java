@@ -13,7 +13,7 @@ package org.jkcsoft.space.lang.ast;
  */
 public class IfStatement extends Statement {
     // if
-    private BooleanExpr condition;
+    private OperatorExpr condition;
     // then
     private StatementBlock thenBlock;
     // else: optional else block which may contain a nested IfStatement.

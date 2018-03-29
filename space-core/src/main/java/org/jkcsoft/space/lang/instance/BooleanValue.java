@@ -31,6 +31,6 @@ public class BooleanValue extends ScalarValue<Boolean> {
 
     @Override
     public String asString() {
-        return null;
+        return Boolean.toString(getJvalue());
     }
 }

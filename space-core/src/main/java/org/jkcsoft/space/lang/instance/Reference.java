@@ -13,10 +13,8 @@ import org.jkcsoft.space.lang.ast.AssociationDefn;
 import org.jkcsoft.space.lang.ast.SpecInfo;
 
 /**
- * Holds a reference to an "object", which might be a Tuple or a member of a
- * Tuple.
- *
- * Might just as well be named "(Object) Reference".
+ * Holds a reference to a Space "object", which might be a Tuple or any
+ * non-scalar such as a Stream or Sequence.
  *
  * @author Jim Coles
  */

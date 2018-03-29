@@ -10,6 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.AbstractFunctionDefn;
+import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.FunctionCallExpr;
 import org.jkcsoft.space.lang.ast.FunctionDefn;
 
@@ -48,6 +49,8 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
                                      ((FunctionDefn) resolvedFunctionMetaObj).getStatementBlock()));
             addBlockContext(rootBlockContext);
         }
+        this.returnValue = ObjectFactory.getInstance().newHolder(
+            ((DatumType) callExpr.getFunctionDefnRef().getResolvedMetaObj().getReturnTypeRef().getResolvedMetaObj()));
     }
 
     public Tuple getCtxObject() {

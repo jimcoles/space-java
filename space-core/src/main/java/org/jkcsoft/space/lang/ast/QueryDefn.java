@@ -24,7 +24,7 @@ public class QueryDefn extends EquationDefn {
 
     private Space rootSpace;
     private List<SpacePathExpr> variables;
-    private BooleanExpr filter;  // nestable expression
+    private OperatorExpr filter;  // nestable expression
 
     public QueryDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
