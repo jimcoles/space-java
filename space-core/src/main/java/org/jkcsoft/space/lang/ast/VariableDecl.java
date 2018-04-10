@@ -13,16 +13,17 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
- * Definition-level element of a Property.
+ * Definition-level element of a Variable.  Essentially, declares a named 'usage' of
+ * a Primitive by a Type.
  *
  * @author Jim Coles
  * @version 1.0
  */
-public class VariableDefn extends NamedElement {
+public class VariableDecl extends NamedElement implements Declartion {
 
-    private PrimitiveTypeDefn type;
+    private NumPrimitiveTypeDefn type;
 
-    VariableDefn(SourceInfo sourceInfo, String name, PrimitiveTypeDefn type) {
+    VariableDecl(SourceInfo sourceInfo, String name, NumPrimitiveTypeDefn type) {
         super(sourceInfo, name);
         this.type = type;
         //
@@ -34,11 +35,11 @@ public class VariableDefn extends NamedElement {
         return MetaType.DATUM;
     }
 
-    public PrimitiveTypeDefn getType() {
+    public NumPrimitiveTypeDefn getType() {
         return type;
     }
 
-    public void setType(PrimitiveTypeDefn type) {
+    public void setType(NumPrimitiveTypeDefn type) {
         this.type = type;
     }
 

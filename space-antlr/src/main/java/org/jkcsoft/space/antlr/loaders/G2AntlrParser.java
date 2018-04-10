@@ -119,8 +119,8 @@ public class G2AntlrParser implements AstLoader {
 
         if (syntaxErrors.size() == 0) {
             astFactory = new AstFactory();
-            Ra2AstTransform ra2AstTransform = new Ra2AstTransform(astFactory, srcFile);
-            schema = ra2AstTransform.transform(parseUnitContext);
+            Antlr2AstTransform antlr2AstTransform = new Antlr2AstTransform(astFactory, srcFile);
+            schema = antlr2AstTransform.transform(parseUnitContext);
         }
 
         return schema;

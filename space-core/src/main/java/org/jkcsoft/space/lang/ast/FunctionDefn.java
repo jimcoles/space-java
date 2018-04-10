@@ -30,8 +30,8 @@ public class FunctionDefn extends AbstractFunctionDefn implements Callable {
 
     private StatementBlock statementBlock;
 
-    FunctionDefn(SourceInfo sourceInfo, String name, SpacePathExpr returnPathExpr) {
-        super(sourceInfo, name, returnPathExpr);
+    FunctionDefn(SourceInfo sourceInfo, String name, TypeRef returnTypeRef) {
+        super(sourceInfo, name, returnTypeRef);
     }
 
     // ------------------------------------------------------------------------

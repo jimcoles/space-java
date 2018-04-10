@@ -19,13 +19,13 @@ import org.jkcsoft.space.lang.ast.StreamTypeDefn;
  *
  * @author Jim Coles
  */
-public abstract class BinarySequence<T> extends SpaceObject {
+public abstract class BinarySequence<T extends ScalarValue> extends SpaceObject implements Value, Referenceable {
 
     /** Limit constructor access to package-only. */
     BinarySequence(SpaceOid oid, StreamTypeDefn defn) {
         super(oid, defn);
     }
 
-    abstract public T getElement(int index);
+    public abstract T getElement(int index);
 
 }

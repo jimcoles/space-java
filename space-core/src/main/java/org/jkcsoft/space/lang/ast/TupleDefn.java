@@ -16,15 +16,10 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public interface TupleDefn {
+public interface TupleDefn extends DatumType {
 
-    boolean hasVariables();
+    boolean hasDatums();
 
-    List<VariableDefn> getVariableDefnList();
+    List<Declartion> getDatumDeclList();
 
-    boolean hasAssociations();
-
-    List<AssociationDefn> getAssociationDefnList();
-
-    List<NamedElement> getAllMembers();
 }

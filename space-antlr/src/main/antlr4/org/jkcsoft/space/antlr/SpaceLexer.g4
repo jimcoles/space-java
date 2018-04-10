@@ -22,9 +22,6 @@ UserSeqStart   : '(';
 UserSeqEnd     : ')';
 ListSep    : ',';
 
-UserSetStart    : '{';
-UserSetEnd      : '}';
-
 SpaceStart  : '|';
 SpaceEnd    : '|';
 
@@ -46,8 +43,9 @@ QueryDefKeyword : 'query-def';
 RegexDefKeyword : 'regex-def';
 //
 BooleanKeyword  : 'boolean';
+CharKeyword     : 'char';
 OrdinalKeyword  : 'ord';
-CardinalKeyword : 'card';
+CardinalKeyword : 'int';
 RealKeyword     : 'real';
 VoidKeyword     : 'void';
 //
@@ -105,9 +103,10 @@ SPathRefNavOper     : '->' ;
         (except double-quotes, unless it's an escaped double-quote), followed
         by closing double-quote.
 */
+StringDelim : '"' ;
 
 StringLiteral
-    : '"' ( ~'"' | '\\' '"' )* '"'
+    : StringDelim ( ~'"' | '\\' '"' )* StringDelim
     ;
 
 IntegerLiteral : INT;

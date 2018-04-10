@@ -15,7 +15,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  * @param <T> The class of meta object being referenced.
  * @author Jim Coles
  */
-public class MetaReference<T extends NamedElement> extends ModelElement implements ValueExpr {
+public class MetaReference<T extends Named> extends ModelElement implements ValueExpr {
 
     private SpacePathExpr spacePathExpr;
     private MetaType targetMetaType;
@@ -26,13 +26,29 @@ public class MetaReference<T extends NamedElement> extends ModelElement implemen
      * or VariableDefn, etc.. */
     private T resolvedMetaObj;
     private ScopeKind resolvedDatumScope;  // only relevant if target is a datum type.
-
+    private Class<AbstractCollectionTypeDefn> collClass;
     private LoadState state = LoadState.INITIALIZED;
 
-    public MetaReference(SpacePathExpr spacePathExpr, MetaType targetMetaType) {
+
+    MetaReference(SpacePathExpr spacePathExpr, MetaType targetMetaType) {
+        this(spacePathExpr, targetMetaType, null);
+    }
+
+    MetaReference(SpacePathExpr spacePathExpr, Class<AbstractCollectionTypeDefn> collClass) {
+        this(spacePathExpr, MetaType.TYPE, collClass);
+    }
+
+    MetaReference(SpacePathExpr spacePathExpr, MetaType targetMetaType, Class<AbstractCollectionTypeDefn> collClass) {
         super(spacePathExpr.getSourceInfo());
         this.spacePathExpr = spacePathExpr;
         this.targetMetaType = targetMetaType;
+        this.collClass = collClass;
+    }
+
+    public MetaReference(T typeDefn) {
+        super(new ProgSourceInfo());
+        this.resolvedMetaObj = typeDefn;
+        this.state = LoadState.RESOLVED;
     }
 
     public SpacePathExpr getSpacePathExpr() {
@@ -51,14 +67,6 @@ public class MetaReference<T extends NamedElement> extends ModelElement implemen
         this.state = state;
     }
 
-//    public NamedElement getLexicalContext() {
-//        return lexicalContext;
-//    }
-
-//    public void setLexicalContext(NamedElement lexicalContext) {
-//        this.lexicalContext = lexicalContext;
-//    }
-
     public ScopeKind getResolvedDatumScope() {
         return resolvedDatumScope;
     }
@@ -75,18 +83,27 @@ public class MetaReference<T extends NamedElement> extends ModelElement implemen
         this.resolvedMetaObj = resolvedMetaObj;
     }
 
+    public Class<AbstractCollectionTypeDefn> getCollClass() {
+        return collClass;
+    }
+
     public String getDisplayName() {
         return spacePathExpr.toString() + "(" + (state == LoadState.RESOLVED ? "res" : "unres") + ")";
     }
 
     @Override
     public String toString() {
+        String suffix = getSuffix();
         return "<" +
             "fromObj=" + (getNamedParent() != null ? getNamedParent() : "") +
-            " path=" + spacePathExpr + " (" + targetMetaType.toString().substring(0, 3) + ")" +
-//            " " + state.toString().substring(0, 3) +
+            " path=" + spacePathExpr + (suffix != null ? " " + suffix : "") +
+            " (" + targetMetaType.toString().substring(0, 3) + ")" +
             (resolvedDatumScope != null ? " " + resolvedDatumScope.toString().substring(0, 3) : "") +
             " resObj=" + (resolvedMetaObj != null ? resolvedMetaObj : "?") +
             '>';
+    }
+
+    protected String getSuffix() {
+        return null;
     }
 }

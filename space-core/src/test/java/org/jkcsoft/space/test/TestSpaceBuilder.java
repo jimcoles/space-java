@@ -32,12 +32,13 @@ public class TestSpaceBuilder extends TestSourceStub {
 //        testPersonTypeDefn.addVariable(firstName);
 //        VariableDefn lastName = ast.newVariableDefn(new ProgSourceInfo(), "lastName", PrimitiveTypeDefn.TEXT);
 //        testPersonTypeDefn.addVariable(lastName);
-        Space space = objs.newSpace(null, testPersonTypeDefn);
+//        Set space = objs.newSet(null, ast.new(null, "mySet",
+//                                                     ast.newSpacePathExpr(new ProgSourceInfo(), null, "Person", null)));
         //
         Tuple testObjectTuple = objs.newTuple(testPersonTypeDefn);
 //        SpaceUtils.assignOper(testObjectTuple, (NamedElement) firstName, (Assignable) textValue);
 //        SpaceUtils.assignOper(testObjectTuple, (NamedElement) lastName, (Assignable) objs.newTextValue("Coles"));
-        space.addTuple(testObjectTuple);
+//        space.addTuple(testObjectTuple);
         //
     }
 

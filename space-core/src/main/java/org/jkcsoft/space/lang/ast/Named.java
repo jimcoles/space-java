@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public interface Named {
+public interface Named extends Identified {
 
     boolean isNamed();
 

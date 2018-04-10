@@ -19,12 +19,12 @@ import java.nio.channels.SocketChannel;
  * A fledgling attempt to create a Space wrapper over the Java Socket API.
  * @author Jim Coles
  */
-public class JnSocket {
+public class Socket {
 
     public static void setSocketImplFactory(SocketImplFactory fac) throws IOException {
-        Socket.setSocketImplFactory(fac);
+        java.net.Socket.setSocketImplFactory(fac);
     }
-    private Socket jSocket;
+    private java.net.Socket jSocket;
 
     public void connect(SocketAddress endpoint) throws IOException {
         jSocket.connect(endpoint);

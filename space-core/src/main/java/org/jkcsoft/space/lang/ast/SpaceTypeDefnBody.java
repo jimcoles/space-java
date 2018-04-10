@@ -48,10 +48,6 @@ public class SpaceTypeDefnBody extends StatementBlock {
         return functionDefns;
     }
 
-    public AssociationDefn getAssocDefnAt(int index) {
-        return getAssociationDefnList().get(index);
-    }
-
     public FunctionDefn getFunction(String name) {
         NamedElement childWithName = getChildByName(name);
         if (!(childWithName instanceof FunctionDefn))

@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.DatumType;
+
 /**
  * Encapsulates an object identifier used by the Space runtime to identify
  * and reference instance-level 'objects' such as Spaces, Tuples, and
@@ -19,7 +21,7 @@ package org.jkcsoft.space.lang.instance;
  * @author Jim Coles
  * @version 1.0
  */
-public class SpaceOid implements Comparable<SpaceOid> {
+public class SpaceOid implements Comparable<SpaceOid>, Key {
 
     private long longOid = 0;
 
@@ -39,5 +41,10 @@ public class SpaceOid implements Comparable<SpaceOid> {
     @Override
     public int compareTo(SpaceOid o) {
         return Long.compare(this.longOid, o.getLongOid());
+    }
+
+    @Override
+    public DatumType getType() {
+        return null;
     }
 }

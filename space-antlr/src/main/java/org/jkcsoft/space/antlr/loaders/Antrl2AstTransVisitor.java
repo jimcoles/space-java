@@ -133,8 +133,8 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<AstFactory> {
     }
 
     @Override
-    public AstFactory visitObjectExpr(SpaceParser.ObjectExprContext ctx) {
-        return super.visitObjectExpr(ctx);
+    public AstFactory visitNewObjectExpr(SpaceParser.NewObjectExprContext ctx) {
+        return super.visitNewObjectExpr(ctx);
     }
 
     @Override
@@ -150,11 +150,6 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<AstFactory> {
     @Override
     public AstFactory visitValueOrAssignmentExpr(SpaceParser.ValueOrAssignmentExprContext ctx) {
         return super.visitValueOrAssignmentExpr(ctx);
-    }
-
-    @Override
-    public AstFactory visitSetLiteral(SpaceParser.SetLiteralContext ctx) {
-        return super.visitSetLiteral(ctx);
     }
 
     @Override

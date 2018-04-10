@@ -8,13 +8,10 @@
  * Also see the LICENSE file in the repository root directory.
  */
 
-
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -29,11 +26,14 @@ import java.util.List;
 public class SpaceTypeDefn extends NamedElement implements DatumType, TupleDefn {
 
     private boolean isEntity;
-
     private SpaceTypeDefnBody body;
+    private SetTypeDefn setTypeDefn;
+    private SequenceTypeDefn sequenceTypeDefn;
 
     SpaceTypeDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
+        this.setTypeDefn = new SetTypeDefn(sourceInfo, this);
+        sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
     }
 
     @Override
@@ -46,12 +46,21 @@ public class SpaceTypeDefn extends NamedElement implements DatumType, TupleDefn 
         return body.getScalarDofs();
     }
 
+    @Override
+    public SequenceTypeDefn getSequenceOfType() {
+        return sequenceTypeDefn;
+    }
+
     public boolean isComputed() {
         return body.isComputed();
     }
 
     public boolean isEnumerated() {
         return body.isEnumerated();
+    }
+
+    public SetTypeDefn getSetTypeDefn() {
+        return setTypeDefn;
     }
 
     /**
@@ -69,53 +78,16 @@ public class SpaceTypeDefn extends NamedElement implements DatumType, TupleDefn 
         return body.getFunctionDefns();
     }
 
-    @Override
-    public List<VariableDefn> getVariableDefnList() {
-        return body.getVariableDefnList();
+    public VariableDecl addVariable(VariableDecl variableDecl) {
+        return body.addVariableDecl(variableDecl);
     }
 
-    public VariableDefn getVariableDefnAt(int index) {
-        return body.getVariableDefnAt(index);
-    }
-
-    public AssociationDefn getAssocDefnAt(int index) {
-        return body.getAssocDefnAt(index);
-    }
-
-    public FunctionDefn getFunction(String name) {
-        return body.getFunction(name);
-    }
-
-    public VariableDefn addVariable(VariableDefn variableDefn) {
-        return body.addVariable(variableDefn);
-    }
-
-    public AssociationDefn addAssocDefn(AssociationDefn associationDefn) {
-        return body.addAssocDefn(associationDefn);
+    public AssociationDecl addAssocDefn(AssociationDecl associationDecl) {
+        return body.addAssocDecl(associationDecl);
     }
 
     public AbstractFunctionDefn addFunctionDefn(AbstractFunctionDefn functionDefn) {
         return body.addFunctionDefn(functionDefn);
-    }
-
-    @Override
-    public boolean hasVariables() {
-        return body.hasVariables();
-    }
-
-    @Override
-    public boolean hasAssociations() {
-        return body.hasAssociations();
-    }
-
-    @Override
-    public List<AssociationDefn> getAssociationDefnList() {
-        return body.getAssociationDefnList();
-    }
-
-    @Override
-    public List<NamedElement> getAllMembers() {
-        return body.getAllMembers();
     }
 
     public SpaceTypeDefnBody setBody(SpaceTypeDefnBody body) {
@@ -130,13 +102,13 @@ public class SpaceTypeDefn extends NamedElement implements DatumType, TupleDefn 
         return body;
     }
 
-    public boolean hasMembers() {
-        return body.hasVariables() || body.hasAssociations();
+    @Override
+    public boolean hasDatums() {
+        return body.hasDatums();
     }
 
-    public String toLogString() {
-        StringBuilder sb = new StringBuilder("SpaceTypeDefn {" + getName() + ": ");
-        Strings.buildCommaDelList(body.getVariableDefnList());
-        return sb.toString();
+    @Override
+    public List<Declartion> getDatumDeclList() {
+        return body.getDatumDeclList();
     }
 }

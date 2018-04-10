@@ -19,18 +19,18 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class SequenceLiteralExpr extends ModelElement implements ValueExpr {
 
-    private MetaReference<StreamTypeDefn> typeRef;
+    private TypeRef typeRef;
     private String valueExpr;
 
-    SequenceLiteralExpr(SourceInfo sourceInfo, SpacePathExpr pathExpr, String valueExpr) {
+    SequenceLiteralExpr(SourceInfo sourceInfo, TypeRef typeRef, String valueExpr) {
         super(sourceInfo);
-        this.typeRef = new MetaReference<StreamTypeDefn>(pathExpr, MetaType.TYPE);
+        this.typeRef = typeRef;
         this.valueExpr = valueExpr;
         //
         addChild(typeRef);
     }
 
-    public MetaReference<StreamTypeDefn> getTypeRef() {
+    public TypeRef getTypeRef() {
         return typeRef;
     }
 

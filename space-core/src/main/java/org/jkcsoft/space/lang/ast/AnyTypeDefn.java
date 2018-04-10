@@ -16,7 +16,7 @@ package org.jkcsoft.space.lang.ast;
  */
 public class AnyTypeDefn {
 
-    private PrimitiveTypeDefn primitiveTypeDefn;
+    private NumPrimitiveTypeDefn primitiveTypeDefn;
     private DomainDefn domainDefn;
     private SpaceTypeDefn spaceTypeDefn;
     private StreamTypeDefn streamTypeDefn;

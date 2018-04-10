@@ -29,12 +29,7 @@ public abstract class NamedElement extends ModelElement implements Named, Compar
 
     NamedElement(SourceInfo sourceInfo, String name) {
         super(sourceInfo);
-        setName(name);
-    }
-
-    public ModelElement setName(String name) {
         this.name = name;
-        return this;
     }
 
     @Override

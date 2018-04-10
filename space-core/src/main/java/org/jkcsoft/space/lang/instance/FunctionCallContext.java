@@ -10,7 +10,6 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.AbstractFunctionDefn;
-import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.FunctionCallExpr;
 import org.jkcsoft.space.lang.ast.FunctionDefn;
 
@@ -29,15 +28,16 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
     private Tuple ctxObject;
     private Tuple argTuple;
     private LinkedList<BlockContext> blockContexts = new LinkedList<>();
-    private Assignable returnValue;
+    private ValueHolder returnValueHolder;
     private boolean pendingReturn = false;
 
     /**
      * @param callExpr Contains links to function to be evaluated ({@link org.jkcsoft.space.lang.ast.StatementBlock}s
      *                 along with local data definitions.
      * @param argTuple The Tuple of values defined in the target function parameter definition.
+     * @param returnValueHolder
      */
-    FunctionCallContext(Tuple ctxObject, FunctionCallExpr callExpr, Tuple argTuple) {
+    FunctionCallContext(Tuple ctxObject, FunctionCallExpr callExpr, Tuple argTuple, ValueHolder returnValueHolder) {
         super(callExpr);
         this.ctxObject = ctxObject;
         this.argTuple = argTuple;
@@ -49,8 +49,7 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
                                      ((FunctionDefn) resolvedFunctionMetaObj).getStatementBlock()));
             addBlockContext(rootBlockContext);
         }
-        this.returnValue = ObjectFactory.getInstance().newHolder(
-            ((DatumType) callExpr.getFunctionDefnRef().getResolvedMetaObj().getReturnTypeRef().getResolvedMetaObj()));
+        this.returnValueHolder = returnValueHolder;
     }
 
     public Tuple getCtxObject() {
@@ -81,12 +80,12 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
         return blockContexts.pop();
     }
 
-    public Assignable getReturnValue() {
-        return returnValue;
+    public ValueHolder getReturnValueHolder() {
+        return returnValueHolder;
     }
 
-    public void setReturnValue(Assignable returnValue) {
-        this.returnValue = returnValue;
+    public void setReturnValueHolder(ValueHolder returnValueHolder) {
+        this.returnValueHolder = returnValueHolder;
     }
 
     public boolean isPendingReturn() {

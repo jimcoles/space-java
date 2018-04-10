@@ -18,6 +18,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.Tree;
 import org.antlr.v4.tool.ast.GrammarAST;
 import org.jkcsoft.java.util.Strings;
+import org.jkcsoft.space.antlr.loaders.Antrl2AstMapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,8 +71,10 @@ public class AntlrUtil {
     }
 
     public static String toDumpString(RuleContext ruleContext, String ruleName) {
+        String loc = ruleContext instanceof ParserRuleContext ?
+            Antrl2AstMapping.toAst(null, ((ParserRuleContext) ruleContext)).toBriefString() : "?";
         return toDumpString(
-                "rule-type",
+                "rule-type:" + loc,
                 ruleName +
                         ((ruleContext.getAltNumber() != ATN.INVALID_ALT_NUMBER) ?
                                 (":" + ruleContext.getAltNumber()) : ""));

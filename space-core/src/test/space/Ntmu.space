@@ -5,22 +5,49 @@ public type-def NtmuSpace
   my awesome space.
 */
 {
-    function-def void main(CharSequence args) {
-        Person jim = new Person["Jim", "Coles"];
-        Task task = new Task["Git 'er done, boy!'", jim];
-        Task task2 = new Task["Go play with your Bronster.", jim];
+    function-def void main(char[] args) {
+        char[] test = "";
+        char[] appStr = Lang.append(["firstHalf", "lastHalf"]);
+        Person jim = Person[53.75, "Jim", "Coles", "last"];
+//        Person wango = Person[last = "Coles", first = "Jim", last = "last", age = 53.75];
+        Task task = Task[2000.0, "Git 'er done, boy!'", jim];
+        Task task2 = Task[9.0, "Go play with your Bronster.", jim];
+//        Task task3 = Task[9.0, "Do it till ya satisfied", wango];
+
+        // Literal Tuple set (Space)
+        Task{} taskSet = Task {
+            Task[1.0, "Work hard", wango]
+            Task[2.0, "Play hard", jim]
+            Task[3.0, "Rock the boat", jim]
+        };
+
+        // Tuple operations
+//        taskSet.insert(task);
+//        taskSet.delete(task2);
+
+        //
+//        Task[] taskSequence = [task, task2, task3];
+
+        //
+        OpSys.println( [jim] );
+        OpSys.println( [task] );
+        OpSys.println( [task2] );
+        //
+        OpSys.println( [appStr] );
         //
         OpSys.println( ["Done with NtmuSpace!"] );
     }
 }
 
 type-def Person {
-    CharSequence first;
-    CharSequence last;
-    CharSequence fullName;
+    real age;
+
+    char[] first;
+    char[] last;
+    char[] fullName;
 
 //    equation-def FL2Full (Person person) {
-//        fullname - (first + last);
+//        fullname == first.append(last);
 //    }
 
 //    function-def A solves FL2Full for (fullname) given (first,last) {
@@ -30,7 +57,9 @@ type-def Person {
 }
 
 type-def Task {
-    CharSequence description;
+    real estHours;
+
+    char[] description;
     Person assignee;
 }
 

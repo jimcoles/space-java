@@ -12,6 +12,7 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
+ * A named usage of one type by another type.
  * Captures a wide range of relationships such as one-to-many, recursive.
  * Analogous to a foreign key relationship in RDB world or a simple
  * object reference in Java.
@@ -19,26 +20,26 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  * @author Jim Coles
  * @version 1.0
  */
-public class AssociationDefn<T extends NamedElement> extends NamedElement {
+public class AssociationDecl extends NamedElement implements Declartion {
 
-    private MetaReference<SpaceTypeDefn> fromTypeRef;
+    private TypeRef fromTypeRef;
     private int fromMult;   // Defaults to "many" if assoc is declared within a Space Type Defn.
 
-    private MetaReference<T> toTypeRef;
+    private TypeRef toTypeRef;
     private int toMult;     // Defaults to 1 if assoc is declared within a Space Type Defn.
 
-    AssociationDefn(SourceInfo sourceInfo, String name, SpacePathExpr fromPath, SpacePathExpr toPath) {
+    AssociationDecl(SourceInfo sourceInfo, String name, TypeRef fromTypeRef, TypeRef toTypeRef) {
         super(sourceInfo, name);
 
-        if (fromPath != null) {
-            this.fromTypeRef = new MetaReference<>(fromPath, MetaType.TYPE);
-            addChild(fromTypeRef);
+        if (fromTypeRef != null) {
+            this.fromTypeRef = fromTypeRef;
+            addChild(this.fromTypeRef);
         }
 
-        if (toPath == null) throw new RuntimeException("bug: path to class ref cannot be null");
-        this.toTypeRef = new MetaReference<>(toPath, MetaType.TYPE);
+        if (toTypeRef == null) throw new RuntimeException("bug: path to class ref cannot be null");
+        this.toTypeRef = toTypeRef;
         //
-        addChild(toTypeRef);
+        addChild(this.toTypeRef);
     }
 
     @Override
@@ -46,20 +47,21 @@ public class AssociationDefn<T extends NamedElement> extends NamedElement {
         return MetaType.DATUM;
     }
 
-    public MetaReference<SpaceTypeDefn> getFromTypeRef() {
+    public TypeRef getFromTypeRef() {
         return fromTypeRef;
     }
 
-    public MetaReference<T> getToTypeRef() {
+    public TypeRef getToTypeRef() {
         return toTypeRef;
     }
 
-    public SpaceTypeDefn getFromType() {
-        return fromTypeRef.getResolvedMetaObj();
+    public DatumType getToType() {
+        return toTypeRef.getResolvedMetaObj();
     }
 
-    public T getToType() {
-        return toTypeRef.getResolvedMetaObj();
+    @Override
+    public DatumType getType() {
+        return getToType();
     }
 
     public SpacePathExpr getFromPath() {
@@ -84,5 +86,4 @@ public class AssociationDefn<T extends NamedElement> extends NamedElement {
     public boolean isRecursive() {
         return fromTypeRef.getResolvedMetaObj() == toTypeRef.getResolvedMetaObj();
     }
-
 }

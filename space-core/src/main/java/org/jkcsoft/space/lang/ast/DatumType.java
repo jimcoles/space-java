@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 /**
  * Basically, here to lend a polymorphic notion to our various structural
  * declarative notions: Primitives, Domains, and Space Type's.
@@ -17,6 +19,9 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface DatumType extends Named {
 
+    MetaType getMetaType();
+
     int getScalarDofs();
 
+    SequenceTypeDefn getSequenceOfType();
 }

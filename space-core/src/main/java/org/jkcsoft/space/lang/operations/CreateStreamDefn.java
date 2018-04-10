@@ -7,11 +7,9 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.jnative;
+package org.jkcsoft.space.lang.operations;
 /**
  * @author Jim Coles
  */
-@SpaceNative
-public class JnCharSequence {
-
+public class CreateStreamDefn {
 }

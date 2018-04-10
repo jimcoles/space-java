@@ -36,18 +36,18 @@ public class TestAst {
         astSchema
             .addSpaceDefn(spaceTypeDefn)
             .getBody()
-            .addVariable(astFactory.newVariableDefn(new ProgSourceInfo(), "myIntDim", PrimitiveTypeDefn.CARD))
-            .setType(PrimitiveTypeDefn.CHAR);
+            .addVariableDecl(astFactory.newVariableDecl(new ProgSourceInfo(), "myIntDim", NumPrimitiveTypeDefn.CARD))
+            .setType(NumPrimitiveTypeDefn.CHAR);
         spaceTypeDefn
             .setBody(astFactory.newTypeDefnBody(new ProgSourceInfo()))
-            .addVariable(astFactory.newVariableDefn(new ProgSourceInfo(), "myCharDim", PrimitiveTypeDefn.CHAR))
+            .addVariableDecl(astFactory.newVariableDecl(new ProgSourceInfo(), "myCharDim", NumPrimitiveTypeDefn.CHAR))
             ;
         FunctionDefn mainMethod = astFactory.newSpaceFunctionDefn(new ProgSourceInfo(), "main", null);
         spaceTypeDefn.getBody().addFunctionDefn(mainMethod);
 //        CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
 //        astFactory.getUserAstRoot().addObjectInstance(arg1, astFactory);
 
-        ThisExpr thisTupleExpr = astFactory.newThisExpr(new ProgSourceInfo());
+        ThisTupleExpr thisTupleExpr = astFactory.newThisExpr(new ProgSourceInfo());
 
         mainMethod.getStatementBlock().addExpr(
             astFactory.newFunctionCallExpr(new ProgSourceInfo())

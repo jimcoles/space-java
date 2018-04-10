@@ -17,6 +17,6 @@ import org.jkcsoft.space.lang.runtime.Executor;
  */
 public interface OperEvaluator {
 
-    Assignable eval(Assignable ... args);
+    Value eval(Value ... args);
 
 }

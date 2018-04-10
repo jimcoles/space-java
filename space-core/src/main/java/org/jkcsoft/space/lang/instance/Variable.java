@@ -9,22 +9,23 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.VariableDefn;
+import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.VariableDecl;
 
 /**
- * The instance-level counterpart to a {@link org.jkcsoft.space.lang.ast.VariableDefn}.
+ * The instance-level counterpart to a {@link VariableDecl}.
  * A {@link Variable} contains a reference to its definition, a VariableDefn, and
  * zero or one {@link ScalarValue}s.
  */
-public class Variable implements Assignable {
+public class Variable implements ValueHolder {
 
-    private VariableDefn    definition;
+    private VariableDecl declaration;
     private Tuple           parentTuple;
     private ScalarValue     scalarValue;
 
-    public Variable(Tuple parentTuple, VariableDefn definition, ScalarValue scalarValue) {
+    public Variable(Tuple parentTuple, VariableDecl declaration, ScalarValue scalarValue) {
         this.parentTuple = parentTuple;
-        this.definition = definition;
+        this.declaration = declaration;
         this.scalarValue = scalarValue;
     }
 
@@ -32,8 +33,9 @@ public class Variable implements Assignable {
         return parentTuple;
     }
 
-    public VariableDefn getDefinition() {
-        return definition;
+    @Override
+    public VariableDecl getDeclaration() {
+        return declaration;
     }
 
     public void setScalarValue(ScalarValue scalarValue) {
@@ -45,7 +47,18 @@ public class Variable implements Assignable {
     }
 
     @Override
+    public DatumType getType() {
+        return declaration.getType();
+    }
+
+    @Override
+    public Value getValue() {
+        return scalarValue;
+    }
+
+    @Override
     public String toString() {
-        return scalarValue != null ? scalarValue.toString() : "(not initialized)";
+        return ((declaration != null) ? declaration.getName() + "=" : "(anon)")
+            + (scalarValue != null ? scalarValue.toString() : "(not initialized)");
     }
 }

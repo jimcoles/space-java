@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
+import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 
 /**
  * @author Jim Coles
@@ -17,7 +17,7 @@ import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
 public class RealValue extends ScalarValue<Double> {
 
     RealValue(double jValue) {
-        super(PrimitiveTypeDefn.REAL, jValue);
+        super(NumPrimitiveTypeDefn.REAL, jValue);
     }
 
     @Override

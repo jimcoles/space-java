@@ -31,9 +31,9 @@ import java.util.*;
  *
  * @author Jim Coles
  */
-public class Ra2AstTransform {
+public class Antlr2AstTransform {
 
-    private static final Logger log = Logger.getLogger(Ra2AstTransform.class);
+    private static final Logger log = Logger.getLogger(Antlr2AstTransform.class);
     // -------------------------------------------------------------------------
     //
     private Map<Class<? extends ParseTree>, Transformer> transformerMap = new HashMap<>();
@@ -41,13 +41,31 @@ public class Ra2AstTransform {
     private List<AstLoadError> errors = new LinkedList();
     private AstFactory astFactory;
     private File srcFile;
+    private Map<String, OperEnum> operSymbolMap = new TreeMap();
 
-    public Ra2AstTransform(AstFactory astFactory, File srcFile) {
+//    private ObjectFactory objBuilder = ObjectFactory.getInstance();
+
+    {
+        operSymbolMap.put("+", OperEnum.ADD);
+        operSymbolMap.put("-", OperEnum.SUB);
+        operSymbolMap.put("*", OperEnum.MULT);
+        operSymbolMap.put("/", OperEnum.DIV);
+
+        operSymbolMap.put("&", OperEnum.AND);
+        operSymbolMap.put("&&", OperEnum.COND_AND);
+        operSymbolMap.put("|", OperEnum.OR);
+        operSymbolMap.put("||", OperEnum.COND_OR);
+        operSymbolMap.put("!", OperEnum.NEGATION);
+
+        operSymbolMap.put("==", OperEnum.EQ);
+        operSymbolMap.put("<", OperEnum.LT);
+        operSymbolMap.put(">", OperEnum.GT);
+    }
+
+    public Antlr2AstTransform(AstFactory astFactory, File srcFile) {
         this.astFactory = astFactory;
         this.srcFile = srcFile;
     }
-
-//    private ObjectFactory objBuilder = ObjectFactory.getInstance();
 
     public AstFactory transformAndBuild(ParseTree parseTreeRoot) {
 
@@ -109,8 +127,8 @@ public class Ra2AstTransform {
         if (varDefCtxts != null && !varDefCtxts.isEmpty()) {
             for (SpaceParser.VariableDefnStmtContext variableDefnStmtContext : varDefCtxts) {
                 // Add var def
-                VariableDefn variableDefnAST = toAst(variableDefnStmtContext.variableDefn());
-                typeDefnBodyAST.addVariable(variableDefnAST);
+                VariableDecl variableDeclAST = toAst(variableDefnStmtContext.variableDefn());
+                typeDefnBodyAST.addVariableDecl(variableDeclAST);
                 // Add assignment if there is one
                 extractInit(typeDefnBodyAST, variableDefnStmtContext);
             }
@@ -120,7 +138,7 @@ public class Ra2AstTransform {
         if (assocDefCtxts != null && !assocDefCtxts.isEmpty()) {
             for (SpaceParser.AssociationDefnStmtContext assocDefCtx : assocDefCtxts) {
                 // Add declarative element
-                typeDefnBodyAST.addAssocDefn(toAst(assocDefCtx.associationDefn()));
+                typeDefnBodyAST.addAssocDecl(toAst(assocDefCtx.associationDefn()));
                 // Add assignment expr if it exists
                 extractInit(typeDefnBodyAST, assocDefCtx);
             }
@@ -182,70 +200,103 @@ public class Ra2AstTransform {
         return assignmentExprAST;
     }
 
-    private AssociationDefn toAst(SpaceParser.AssociationDefnContext assocDefCtx) {
+    private AssociationDecl toAst(SpaceParser.AssociationDefnContext assocDefCtx) {
         logTrans(assocDefCtx);
-        return astFactory.newAssociationDefn(
+        SpaceParser.ComplexTypeRefContext complexTypeRefContext = assocDefCtx.associationDecl().complexTypeRef();
+        return astFactory.newAssociationDecl(
             Antrl2AstMapping.toAst(srcFile, assocDefCtx),
             toText(assocDefCtx.associationDecl().identifier()),
-            toAst(assocDefCtx.associationDecl().spacePathExpr())
+            toAst(complexTypeRefContext)
         );
     }
 
-    private SpacePathExpr toAst(SpaceParser.SpacePathExprContext spacePathExprContext) {
+    private TypeRef toAst(SpaceParser.ComplexTypeRefContext complexTypeRefContext) {
+        logTrans(complexTypeRefContext);
+        TypeRef typeRefAst = null;
+        if (complexTypeRefContext.spacePathExpr() != null) {
+            typeRefAst = toTypeRefAst(complexTypeRefContext.spacePathExpr());
+        }
+        return typeRefAst;
+    }
+
+    private SpacePathExpr toSpacePathExpr(SpaceParser.PrimitiveTypeNameContext primitiveTypeNameContext) {
+        logTrans(primitiveTypeNameContext);
+        return astFactory.newSpacePathExpr(Antrl2AstMapping.toAst(srcFile, primitiveTypeNameContext),
+                                           PathOperEnum.ASSOC_NAV, primitiveTypeNameContext.getText(), null);
+    }
+
+    private TypeRef.CollectionType toAst(SpaceParser.CollectionMarkerContext collDelimsContext) {
+        logTrans(collDelimsContext);
+        return collDelimsContext.sequenceMarker() != null ? TypeRef.CollectionType.SEQUENCE
+            : collDelimsContext.setMarker() != null ? TypeRef.CollectionType.SET
+            : null;
+    }
+
+    private TypeRef toTypeRefAst(SpaceParser.SpacePathExprContext spacePathExprContext) {
+        logTrans(spacePathExprContext);
+        return astFactory.newTypeRef(toAstPathExpr(spacePathExprContext), null);
+    }
+
+    private SpacePathExpr toAstPathExpr(SpaceParser.SpacePathExprContext spacePathExprContext) {
         logTrans(spacePathExprContext);
         if (spacePathExprContext == null)
             return null;
-//        spacePathExprContext.identifier();
-//        spacePathExprContext.SPathNavAssocToOper();
-//        spacePathExprContext.SPathNavAssocToOper2();
         return astFactory.newSpacePathExpr(
             Antrl2AstMapping.toAst(srcFile, spacePathExprContext.identifier()),
             PathOperEnum.ASSOC_NAV,
             toText(spacePathExprContext.identifier()),
-            toAst(spacePathExprContext.spacePathExpr())
+            toAstPathExpr(spacePathExprContext.spacePathExpr())
         );
     }
 
     private AbstractFunctionDefn toAst(SpaceParser.FunctionDefnContext functionDefnContext) {
         logTrans(functionDefnContext);
         SourceInfo sourceInfo = Antrl2AstMapping.toAst(srcFile, functionDefnContext);
-        FunctionDefn functionDefnAST =
-            astFactory.newSpaceFunctionDefn(sourceInfo, toText(functionDefnContext.identifier()),
-                                            toAst(functionDefnContext.anyTypeRef()));
+        FunctionDefn functionDefnAST = astFactory
+            .newSpaceFunctionDefn(sourceInfo, toText(functionDefnContext.identifier()),
+                                  toAst(functionDefnContext.anyTypeRef()));
         functionDefnAST.setArgSpaceTypeDefn(toAst(functionDefnContext.parameterDefnList()));
         //
         SpaceParser.StatementBlockContext statementBlockContext = functionDefnContext.statementBlock();
         functionDefnAST.setStatementBlock(toAst(statementBlockContext));
         //
-        List<SpaceParser.VariableDefnStmtContext> variableDefnContexts = statementBlockContext.variableDefnStmt();
-        for (SpaceParser.VariableDefnStmtContext variableDefnStmtContext : variableDefnContexts) {
-            functionDefnAST.getStatementBlock().addVariable(toAst(variableDefnStmtContext.variableDefn()));
-        }
-        List<SpaceParser.AssociationDefnStmtContext> associationDefnContexts = statementBlockContext.associationDefnStmt();
-        for (SpaceParser.AssociationDefnStmtContext associationDefnStmtContext : associationDefnContexts) {
-            functionDefnAST.getStatementBlock().addAssocDefn(toAst(associationDefnStmtContext.associationDefn()));
+        List<SpaceParser.DatumDefnStmtContext> datumDefnStmtContexts = statementBlockContext.datumDefnStmt();
+        for (SpaceParser.DatumDefnStmtContext datumDefnStmtContext : datumDefnStmtContexts) {
+            if (datumDefnStmtContext.variableDefnStmt() != null) {
+                functionDefnAST.getStatementBlock().addVariableDecl(
+                    toAst(datumDefnStmtContext.variableDefnStmt().variableDefn()));
+            }
+            else if (datumDefnStmtContext.associationDefnStmt() != null) {
+                functionDefnAST.getStatementBlock().addAssocDecl(
+                    toAst(datumDefnStmtContext.associationDefnStmt().associationDefn()));
+            }
         }
 
         return functionDefnAST;
     }
 
-    private SpacePathExpr toAst(SpaceParser.AnyTypeRefContext anyTypeRefContext) {
+    private TypeRef toAst(SpaceParser.AnyTypeRefContext anyTypeRefContext) {
         logTrans(anyTypeRefContext);
+        TypeRef typeRefAst = null;
         SpacePathExpr pathExpr = null;
-        if (anyTypeRefContext.spacePathExpr() != null) {
-            pathExpr = toAst(anyTypeRefContext.spacePathExpr());
+        if (anyTypeRefContext.complexTypeRef() != null) {
+            typeRefAst = toAst(anyTypeRefContext.complexTypeRef());
         }
         else if (anyTypeRefContext.primitiveTypeName() != null) {
-            pathExpr =
-                astFactory.newSpacePathExpr(Antrl2AstMapping.toAst(srcFile, anyTypeRefContext.primitiveTypeName()),
-                                            null, anyTypeRefContext.primitiveTypeName().getText(), null);
+            typeRefAst = toTypeRefAst(anyTypeRefContext.primitiveTypeName());
         }
-        else if (anyTypeRefContext.voidTypeName() != null) {
-            pathExpr =
-                astFactory.newSpacePathExpr(Antrl2AstMapping.toAst(srcFile, anyTypeRefContext.voidTypeName()),
-                                            null, anyTypeRefContext.voidTypeName().getText(), null);
-        }
-        return pathExpr;
+        return typeRefAst;
+    }
+
+    private TypeRef toAst(SpaceParser.VoidTypeNameContext voidTypeNameContext) {
+        logTrans(voidTypeNameContext);
+        return astFactory.newTypeRef(astFactory.newSpacePathExpr(Antrl2AstMapping.toAst(srcFile, voidTypeNameContext),
+                                                                 null, voidTypeNameContext.getText(), null));
+    }
+
+    private TypeRef toTypeRefAst(SpaceParser.PrimitiveTypeNameContext primitiveTypeNameContext) {
+        logTrans(primitiveTypeNameContext);
+        return astFactory.newTypeRef(toSpacePathExpr(primitiveTypeNameContext));
     }
 
     private SpaceTypeDefn toAst(SpaceParser.ParameterDefnListContext parameterDeclCtxt) {
@@ -264,12 +315,12 @@ public class Ra2AstTransform {
         return typeDefn;
     }
 
-    private AssociationDefn toAst(SpaceParser.AssociationDeclContext assocDeclCtxt) {
+    private AssociationDecl toAst(SpaceParser.AssociationDeclContext assocDeclCtxt) {
         logTrans(assocDeclCtxt);
-        return astFactory.newAssociationDefn(
+        return astFactory.newAssociationDecl(
             Antrl2AstMapping.toAst(srcFile, assocDeclCtxt),
             toText(assocDeclCtxt.identifier()),
-            toAst(assocDeclCtxt.spacePathExpr())
+            toAst(assocDeclCtxt.complexTypeRef())
         );
     }
 
@@ -277,18 +328,18 @@ public class Ra2AstTransform {
         logTrans(statementBlockContext);
         StatementBlock statementBlockAST =
             astFactory.newStatementBlock(Antrl2AstMapping.toAst(srcFile, statementBlockContext));
-        List<SpaceParser.VariableDefnStmtContext> variableDefnStmtContexts = statementBlockContext.variableDefnStmt();
-        List<SpaceParser.AssociationDefnStmtContext> associationDefnStmtContexts = statementBlockContext.associationDefnStmt();
+        List<SpaceParser.DatumDefnStmtContext> datumDefnStmtContexts = statementBlockContext.datumDefnStmt();
         List<SpaceParser.StatementContext> statementContexts = statementBlockContext.statement();
         //
-        for (SpaceParser.VariableDefnStmtContext variableDefnStmtContext : variableDefnStmtContexts) {
-            statementBlockAST.addVariable(toAst(variableDefnStmtContext.variableDefn()));
-            extractInit(statementBlockAST, variableDefnStmtContext);
-        }
-        //
-        for (SpaceParser.AssociationDefnStmtContext associationDefnStmtContext : associationDefnStmtContexts) {
-            statementBlockAST.addAssocDefn(toAst(associationDefnStmtContext.associationDefn()));
-            extractInit(statementBlockAST, associationDefnStmtContext);
+        for (SpaceParser.DatumDefnStmtContext datumDefnStmtContext : datumDefnStmtContexts) {
+            if (datumDefnStmtContext.variableDefnStmt() != null) {
+                statementBlockAST.addVariableDecl(toAst(datumDefnStmtContext.variableDefnStmt().variableDefn()));
+                extractInit(statementBlockAST, datumDefnStmtContext.variableDefnStmt());
+            }
+            else if (datumDefnStmtContext.associationDefnStmt() != null) {
+                statementBlockAST.addAssocDecl(toAst(datumDefnStmtContext.associationDefnStmt().associationDefn()));
+                extractInit(statementBlockAST, datumDefnStmtContext.associationDefnStmt());
+            }
         }
         //
         for (SpaceParser.StatementContext statementContext : statementContexts) {
@@ -409,25 +460,6 @@ public class Ra2AstTransform {
         return toAstOper(operatorTermNode);
     }
 
-    private Map<String, OperEnum> operSymbolMap = new TreeMap();
-
-    {
-        operSymbolMap.put("+", OperEnum.ADD);
-        operSymbolMap.put("-", OperEnum.SUB);
-        operSymbolMap.put("*", OperEnum.MULT);
-        operSymbolMap.put("/", OperEnum.DIV);
-
-        operSymbolMap.put("&", OperEnum.AND);
-        operSymbolMap.put("&&", OperEnum.COND_AND);
-        operSymbolMap.put("|", OperEnum.OR);
-        operSymbolMap.put("||", OperEnum.COND_OR);
-        operSymbolMap.put("!", OperEnum.NEGATION);
-
-        operSymbolMap.put("==", OperEnum.EQ);
-        operSymbolMap.put("<", OperEnum.LT);
-        operSymbolMap.put(">", OperEnum.GT);
-    }
-
     private OperEnum toAstOper(TerminalNode terminalNode) {
         OperEnum operEnumAST = operSymbolMap.get(terminalNode.getSymbol().getText());
         return operEnumAST;
@@ -442,8 +474,9 @@ public class Ra2AstTransform {
     }
 
     private AssignmentExpr toAst(SpaceParser.AssignmentExprContext assignmentExprContext) {
+        logTrans(assignmentExprContext);
         return toAst(
-            toAst(assignmentExprContext.spacePathExpr()),
+            toAstPathExpr(assignmentExprContext.spacePathExpr()),
             assignmentExprContext.rightAssignmentExpr()
         );
     }
@@ -453,30 +486,41 @@ public class Ra2AstTransform {
         FunctionCallExpr functionCallExpr =
             astFactory.newFunctionCallExpr(Antrl2AstMapping.toAst(srcFile, functionCallExprContext));
         //
-        functionCallExpr.setFunctionDefnRef(toAst(functionCallExprContext.spacePathExpr()));
+        functionCallExpr.setFunctionDefnRef(toAstPathExpr(functionCallExprContext.spacePathExpr()));
         //
         if (functionCallExprContext.argTupleOrRef() != null) {
-            SpaceParser.TupleLiteralContext tupleLiteralCtxt =
-                functionCallExprContext.argTupleOrRef().tupleLiteral();
+            SpaceParser.UntypedTupleLiteralContext tupleLiteralCtxt =
+                functionCallExprContext.argTupleOrRef().untypedTupleLiteral();
             SpaceParser.SpacePathExprContext spacePathExprCtxt =
                 functionCallExprContext.argTupleOrRef().spacePathExpr();
-            List<ValueExpr> thisCallArgs = new LinkedList<>();
             if (tupleLiteralCtxt != null) {
-                SpaceParser.ValueOrAssignmentExprListContext callArgExprCtxts =
-                    tupleLiteralCtxt.valueOrAssignmentExprList();
-                int idxArg = 0;
-                for (SpaceParser.ValueOrAssignmentExprContext callArgContext : callArgExprCtxts.valueOrAssignmentExpr())
-                {
-                    ValueExpr rightSide = toAst(callArgContext);
-                    thisCallArgs.add(rightSide);
-                    // TODO Don't assume ordered arg list
-                    idxArg++;
-                }
+                functionCallExpr.setTupleExpr(toAst(tupleLiteralCtxt));
             }
-
-            functionCallExpr.setArgumentExprs(thisCallArgs);
+            else if (spacePathExprCtxt != null) {
+                SpacePathExpr tupleRefPath = toAstPathExpr(spacePathExprCtxt);
+                MetaReference tupleRefExpr =
+                    astFactory.newMetaReference(tupleRefPath, MetaType.DATUM); // TODO handle wrapped tuple ref
+//                functionCallExpr.setTupleExpr(tupleRefExpr);
+            }
         }
         return functionCallExpr;
+    }
+
+    private TupleExpr toAst(SpaceParser.UntypedTupleLiteralContext untypedTupleLiteralCtxt) {
+        logTrans(untypedTupleLiteralCtxt);
+        TupleExpr tupleExpr = astFactory.newTupleExpr(Antrl2AstMapping.toAst(srcFile, untypedTupleLiteralCtxt));
+        List<ValueExpr> tupleArgs = new LinkedList<>();
+        if (untypedTupleLiteralCtxt != null) {
+            SpaceParser.ValueOrAssignmentExprListContext callArgExprCtxts =
+                untypedTupleLiteralCtxt.valueOrAssignmentExprList();
+            for (SpaceParser.ValueOrAssignmentExprContext callArgContext : callArgExprCtxts.valueOrAssignmentExpr()) {
+                ValueExpr rightSide = toAst(callArgContext);
+                tupleArgs.add(rightSide);
+                // TODO Don't assume ordered arg list
+            }
+        }
+        tupleExpr.setValueExprs(tupleArgs);
+        return tupleExpr;
     }
 
     /** Then general translator from ANTLR expression to AST expression.
@@ -497,9 +541,10 @@ public class Ra2AstTransform {
             // choices ...
             SpaceParser.LiteralExprContext literalExprContext = valueExprContext.literalExpr();
             SpaceParser.FunctionCallExprContext functionCallExprContext = valueExprContext.functionCallExpr();
-            SpaceParser.ObjectExprContext objectExprContext = valueExprContext.objectExpr();
+            SpaceParser.NewObjectExprContext objectExprContext = valueExprContext.newObjectExpr();
             SpaceParser.SpacePathExprContext spacePathExprContext = valueExprContext.spacePathExpr();
             SpaceParser.OperatorExprContext operatorExprContext = valueExprContext.operatorExpr();
+            SpaceParser.NewSetExprContext newSetExprContext = valueExprContext.newSetExpr();
             if (literalExprContext != null) {
                 if (literalExprContext.scalarLiteral() != null)
                     valueExprAST = toAst(literalExprContext.scalarLiteral());
@@ -512,17 +557,29 @@ public class Ra2AstTransform {
                 // nested
                 valueExprAST = toAst(functionCallExprContext);
             else if (spacePathExprContext != null) {
-                valueExprAST = new MetaReference(toAst(spacePathExprContext), MetaType.DATUM);
+                valueExprAST = astFactory.newMetaReference(toAstPathExpr(spacePathExprContext), MetaType.DATUM);
             }
             else if (operatorExprContext != null) {
                 valueExprAST = toAst(operatorExprContext);
+            }
+            else if (newSetExprContext != null) {
+                valueExprAST = toAst(newSetExprContext);
             }
         }
         return valueExprAST;
     }
 
-    private ValueExpr toAst(SpaceParser.ObjectExprContext objectExprContext) {
-        return null;
+    private NewSetExpr toAst(SpaceParser.NewSetExprContext newSetExprContext) {
+        return astFactory.newNewSetExpr(Antrl2AstMapping.toAst(srcFile, newSetExprContext),
+                                        toAstPathExpr(newSetExprContext.spacePathExpr()));
+    }
+
+    private NewObjectExpr toAst(SpaceParser.NewObjectExprContext newObjectExprContext) {
+        logTrans(newObjectExprContext);
+        NewObjectExpr newObjectExpr = astFactory.newNewObjectExpr(Antrl2AstMapping.toAst(srcFile, newObjectExprContext),
+                                                                  toAstPathExpr(newObjectExprContext.spacePathExpr()),
+                                                                  toAst(newObjectExprContext.untypedTupleLiteral()));
+        return newObjectExpr;
     }
 
     /**
@@ -532,9 +589,10 @@ public class Ra2AstTransform {
         logTrans(stringLiteralContext);
         SequenceLiteralExpr primitiveLiteralExpr = null;
 
-        primitiveLiteralExpr = astFactory.newSequenceLiteralExpr(
+        String stringWithDelims = stringLiteralContext.StringLiteral().getText();
+        primitiveLiteralExpr = astFactory.newCharSeqLiteralExpr(
             Antrl2AstMapping.toAst(srcFile, stringLiteralContext),
-            stringLiteralContext.StringLiteral().getText()
+            stringWithDelims.substring(1, stringWithDelims.length() - 1)
         );
 
         return primitiveLiteralExpr;
@@ -561,43 +619,43 @@ public class Ra2AstTransform {
 
     private PrimitiveLiteralExpr toAst(SpaceParser.FloatLiteralContext floatLiteralCtxt) {
         logTrans(floatLiteralCtxt);
-        return astFactory.newPrimLiteralExpr(Antrl2AstMapping.toAst(srcFile, floatLiteralCtxt), PrimitiveTypeDefn.REAL,
+        return astFactory.newPrimLiteralExpr(Antrl2AstMapping.toAst(srcFile, floatLiteralCtxt), NumPrimitiveTypeDefn.REAL,
                                              floatLiteralCtxt.FloatLiteral().getSymbol().getText());
     }
 
     private PrimitiveLiteralExpr toAst(SpaceParser.BooleanLiteralContext boolLiteralCtxt) {
         logTrans(boolLiteralCtxt);
-        return astFactory.newPrimLiteralExpr(Antrl2AstMapping.toAst(srcFile, boolLiteralCtxt), PrimitiveTypeDefn.BOOLEAN,
-                                             boolLiteralCtxt.BooleanLiteral().getSymbol().getText());
+        return astFactory
+            .newPrimLiteralExpr(Antrl2AstMapping.toAst(srcFile, boolLiteralCtxt), NumPrimitiveTypeDefn.BOOLEAN,
+                                boolLiteralCtxt.BooleanLiteral().getSymbol().getText());
     }
 
     private PrimitiveLiteralExpr toAst(SpaceParser.IntegerLiteralContext intLiteralCtxt) {
         logTrans(intLiteralCtxt);
-        return astFactory.newPrimLiteralExpr(Antrl2AstMapping.toAst(srcFile, intLiteralCtxt), PrimitiveTypeDefn.CARD,
+        return astFactory.newPrimLiteralExpr(Antrl2AstMapping.toAst(srcFile, intLiteralCtxt), NumPrimitiveTypeDefn.CARD,
                                              intLiteralCtxt.IntegerLiteral().getSymbol().getText());
     }
 
-    private VariableDefn toAst(SpaceParser.VariableDefnContext variableDefnContext) {
+    private VariableDecl toAst(SpaceParser.VariableDefnContext variableDefnContext) {
         logTrans(variableDefnContext);
         SpaceParser.VariableDeclContext varDeclCtxt = variableDefnContext.variableDecl();
-        VariableDefn element = toAst(varDeclCtxt);
-        // TODO handle variableDefnContext.rightAssignmentExpr();
+        VariableDecl element = toAst(varDeclCtxt);
         return element;
     }
 
-    private VariableDefn toAst(SpaceParser.VariableDeclContext varDeclCtxt)
+    private VariableDecl toAst(SpaceParser.VariableDeclContext varDeclCtxt)
     {
         logTrans(varDeclCtxt);
-        return astFactory.newVariableDefn(
+        return astFactory.newVariableDecl(
             Antrl2AstMapping.toAst(srcFile, varDeclCtxt),
             toText(varDeclCtxt.identifier()),
             toAst(varDeclCtxt.primitiveTypeName())
         );
     }
 
-    private PrimitiveTypeDefn toAst(SpaceParser.PrimitiveTypeNameContext primitiveTypeNameContext) {
+    private NumPrimitiveTypeDefn toAst(SpaceParser.PrimitiveTypeNameContext primitiveTypeNameContext) {
         logTrans(primitiveTypeNameContext);
-        return PrimitiveTypeDefn.valueOf(primitiveTypeNameContext.getText());
+        return ((NumPrimitiveTypeDefn) NumPrimitiveTypeDefn.valueOf(primitiveTypeNameContext.getText()));
     }
 
     private void logTrans(ParserRuleContext antlrRuleCtxt) {

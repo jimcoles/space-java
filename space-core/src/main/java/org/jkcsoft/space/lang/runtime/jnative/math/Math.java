@@ -16,12 +16,12 @@ import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;
  * @author Jim Coles
  */
 @SpaceNative
-public class JnMath {
+public class Math {
 
-    public static Assignable addNum(Assignable... args) {
-        Assignable value = null;
-        Assignable left = args[0];
-        Assignable right = args[1];
+    public static Value addNum(Value... args) {
+        Value value = null;
+        Value left = args[0];
+        Value right = args[1];
         if (left instanceof CardinalValue) {
             if (right instanceof CardinalValue)
                 value =getObjFactory().newCardinalValue(
@@ -41,10 +41,10 @@ public class JnMath {
         return value;
     }
 
-    public static Assignable subNum(Assignable... args) {
-        Assignable value = null;
-        Assignable left = args[0];
-        Assignable right = args[1];
+    public static Value subNum(Value... args) {
+        Value value = null;
+        Value left = args[0];
+        Value right = args[1];
         if (left instanceof CardinalValue) {
             if (right instanceof CardinalValue)
                 value =getObjFactory().newCardinalValue(
@@ -64,10 +64,10 @@ public class JnMath {
         return value;
     }
 
-    public static Assignable multNum(Assignable... args) {
-        Assignable value = null;
-        Assignable left = args[0];
-        Assignable right = args[1];
+    public static Value multNum(Value... args) {
+        Value value = null;
+        Value left = args[0];
+        Value right = args[1];
         if (left instanceof CardinalValue) {
             if (right instanceof CardinalValue)
                 value =getObjFactory().newCardinalValue(
@@ -87,10 +87,10 @@ public class JnMath {
         return value;
     }
 
-    public static Assignable divNum(Assignable... args) {
-        Assignable value = null;
-        Assignable left = args[0];
-        Assignable right = args[1];
+    public static Value divNum(Value... args) {
+        Value value = null;
+        Value left = args[0];
+        Value right = args[1];
         if (left instanceof CardinalValue) {
             if (right instanceof CardinalValue)
                 value =getObjFactory().newCardinalValue(
@@ -110,22 +110,22 @@ public class JnMath {
         return value;
     }
     // Boolean
-    public static Assignable and(Assignable... args) {
+    public static Value and(Value... args) {
         return getObjFactory()
             .newBooleanValue(((BooleanValue) args[0]).getJvalue() & ((BooleanValue) args[1]).getJvalue());
     }
-    public static Assignable condAnd(Assignable... args) {
+    public static Value condAnd(Value... args) {
         return getObjFactory()
             .newBooleanValue(((BooleanValue) args[0]).getJvalue() && ((BooleanValue) args[1]).getJvalue());
     }
     // Num comparison returns boolean
-    public static Assignable equal(Assignable... args) {
+    public static Value equal(Value... args) {
         return getObjFactory()
             .newBooleanValue(((ScalarValue) args[0]).getJvalue() == ((ScalarValue) args[1]).getJvalue());
     }
-    public static Assignable lt(Assignable... args) {
-        Assignable left = args[0];
-        Assignable right = args[1];
+    public static Value lt(Value... args) {
+        Value left = args[0];
+        Value right = args[1];
         boolean javaBool = false;
         if (left instanceof CardinalValue) {
             if (right instanceof CardinalValue)

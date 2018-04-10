@@ -9,8 +9,8 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.AssociationDefn;
-import org.jkcsoft.space.lang.ast.SpecInfo;
+import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.Declartion;
 
 /**
  * Holds a reference to a Space "object", which might be a Tuple or any
@@ -18,16 +18,16 @@ import org.jkcsoft.space.lang.ast.SpecInfo;
  *
  * @author Jim Coles
  */
-@SpecInfo(displayName = "reference")
-public class Reference implements Assignable {
+public class Reference implements ValueHolder {
 
+    private Declartion declaration;
     private Tuple           parentTuple;
-    private AssociationDefn defn;
     /** Oid of the referenced 'to' object */
     private SpaceOid toOid;
 
-    Reference(AssociationDefn defn, SpaceOid toOid) {
-        this.defn = defn;
+    Reference(Declartion declaration, Tuple parentTuple, SpaceOid toOid) {
+        this.parentTuple = parentTuple;
+        this.declaration = declaration;
         this.toOid = toOid;
     }
 
@@ -39,8 +39,8 @@ public class Reference implements Assignable {
         return toOid;
     }
 
-    public AssociationDefn getDefn() {
-        return defn;
+    public Declartion getDeclaration() {
+        return declaration;
     }
 
     public Tuple getParentTuple() {
@@ -48,7 +48,17 @@ public class Reference implements Assignable {
     }
 
     @Override
+    public DatumType getType() {
+        return declaration.getType();
+    }
+
+    @Override
+    public Value getValue() {
+        return toOid;
+    }
+
+    @Override
     public String toString() {
-        return "-> " + toOid;
+        return (declaration != null ? declaration.getName() : "(anon)") + " -> " + toOid;
     }
 }

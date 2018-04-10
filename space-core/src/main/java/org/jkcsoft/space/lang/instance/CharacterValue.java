@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
+import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 
 /**
  * @author Jim Coles
@@ -18,7 +18,7 @@ public class CharacterValue extends ScalarValue<Character> {
 
     /** Limit constructor access to package-only. */
     CharacterValue(char value) {
-        super(PrimitiveTypeDefn.CHAR, value);
+        super(NumPrimitiveTypeDefn.CHAR, value);
     }
 
     @Override

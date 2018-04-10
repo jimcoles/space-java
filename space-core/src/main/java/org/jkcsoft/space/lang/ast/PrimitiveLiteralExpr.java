@@ -17,16 +17,16 @@ package org.jkcsoft.space.lang.ast;
  */
 public class PrimitiveLiteralExpr extends ModelElement implements ValueExpr {
 
-    private PrimitiveTypeDefn typeDefn;
+    private NumPrimitiveTypeDefn typeDefn;
     private String valueExpr;
 
-    PrimitiveLiteralExpr(SourceInfo sourceInfo, PrimitiveTypeDefn primitiveTypeDefn, String valueExpr) {
+    PrimitiveLiteralExpr(SourceInfo sourceInfo, NumPrimitiveTypeDefn primitiveTypeDefn, String valueExpr) {
         super(sourceInfo);
         this.typeDefn = primitiveTypeDefn;
         this.valueExpr = valueExpr;
     }
 
-    public PrimitiveTypeDefn getTypeDefn() {
+    public NumPrimitiveTypeDefn getTypeDefn() {
         return typeDefn;
     }
 

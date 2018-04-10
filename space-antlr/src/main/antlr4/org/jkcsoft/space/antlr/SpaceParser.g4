@@ -174,18 +174,17 @@ elementDefnHeader :
 */
 spaceTypeDefnBody :
     BlockStart
-    variableDefnStmt*
-    associationDefnStmt*
-    statementBlock*
-    functionDefn*
-    spaceTypeDefn*
+    ( variableDefnStmt
+      | associationDefnStmt
+      | statementBlock
+      | functionDefn
+      | spaceTypeDefn )*
     BlockEnd
     ;
 
-/* Var seq only important for order-based initialization. */
-//variableDefnList :
-//    SeqStart variableDefn (',' variableDefn)* SeqEnd
-//    ;
+datumDefnStmt :
+    variableDefnStmt | associationDefnStmt
+    ;
 
 variableDefnStmt :
     variableDefn ';'
@@ -212,7 +211,7 @@ associationDefn :
     ;
 
 associationDecl :
-    elementDefnHeader? spacePathExpr identifier
+    elementDefnHeader? complexTypeRef identifier
     ;
 
 parameterDecl :
@@ -225,7 +224,7 @@ parameterDecl :
 //    ;
 
 functionDefn :
-    'function-def' accessModifier? anyTypeRef identifier parameterDefnList
+    'function-def' accessModifier? (anyTypeRef | voidTypeName) identifier parameterDefnList
     elementDefnHeader?
     statementBlock
     ;
@@ -242,9 +241,7 @@ statement :
 
 statementBlock :
     BlockStart
-    variableDefnStmt*
-    associationDefnStmt*
-    statement*
+    (datumDefnStmt | statement)*
     BlockEnd
     ;
 
@@ -275,7 +272,8 @@ valueExpr :
     literalExpr
     | spacePathExpr
     | functionCallExpr
-    | objectExpr
+    | newObjectExpr
+    | newSetExpr
     | operatorExpr
     | navCallChainExpr
     ;
@@ -287,9 +285,7 @@ functionCallExpr :
     spacePathExpr '(' argTupleOrRef? ')'
     ;
 
-argTupleOrRef : (tupleLiteral | spacePathExpr) ;
-
-tupleLiteral : TupleStart valueOrAssignmentExprList? TupleEnd ;
+argTupleOrRef : (untypedTupleLiteral | spacePathExpr) ;
 
 navCallChainExpr :
     (functionCallExpr | spacePathExpr) ('.' navCallChainExpr)?
@@ -300,26 +296,8 @@ navCallChainExpr :
 //    | identifier (spacePathAnyNavOper spacePathExpr)?
 //    ;
 
-//treeExpr :
-////    expression (numericOper | bo
-//    ;
-
-//exprGroup :
-//    '(' expression ')'
-//    ;
-
-//binaryOperExpr :
-//    booleanExpr | numericExpr
-//    ;
-
-// ERR:  1 - 2 / 3
-// OK: (1 - 2) / 3
-// OK: 1 - (2 / 3)
-
 // A Lisp-like syntax for operator-based expressions
 operatorExpr :
-//    '(' (operatorExpr | binaryOperExpr | unaryOperExpr | valueExpr) ')'
-//    '(' (binaryOperExpr | unaryOperExpr | valueExpr) ')'
     '(' binaryOperExpr ')'
     ;
 
@@ -333,44 +311,15 @@ unaryOper :
 
 binaryOperExpr :
     valueExpr binaryOper valueExpr
-//    scalarLiteral NumericBinaryOper scalarLiteral
     ;
 
 binaryOper :
     NumericBinaryOper | BooleanBinaryOper | ComparisonOper
     ;
 
-//binBinBool : '(' binaryOperExpr ')' BooleanBinaryOper '(' binaryOperExpr ')' ;
-//
-//binMonoBool : '(' binaryOperExpr ')' BooleanBinaryOper monoOperExpr ;
-//
-//monoBinBool : monoOperExpr BooleanBinaryOper '(' binaryOperExpr ')' ;
-//
-//monoMonoBool : monoOperExpr BooleanBinaryOper monoOperExpr ;
-
-
-//booleanBinaryExpr :
-//    booleanExpr BooleanBinaryOper booleanExpr
-//    ;
-
-//numericOper : '+' | '-' | '*' | NumDivOper;
-//
-//numericExpr :
-//    integerLiteral
-//    | floatLiteral
-//    | spacePathExpr
-//    | functionCallExpr
-//    | numericExpr numericOper numericExpr
-//    ;
-
-
 // ===============================================================================
 //
 // ===============================================================================
-
-objectExpr :
-    'new' spacePathExpr TupleStart valueOrAssignmentExprList? TupleEnd
-    ;
 
 valueOrAssignmentExprList :
     valueOrAssignmentExpr (',' valueOrAssignmentExpr)*
@@ -388,13 +337,28 @@ comment
 
 //
 singleLineComment : SingleLineComment;
-//multiLineComment : MLC_START MLC_BODY MLC_END;
+
 multiLineComment : BlockComment;
 
 anyTypeRef :
-      voidTypeName
-    | primitiveTypeName
-    | spacePathExpr;
+    primitiveTypeName sequenceMarker*
+    | complexTypeRef collectionMarker*
+    ;
+
+complexTypeRef :
+    spacePathExpr
+    ;
+
+//collectionTypeRef :
+//    (spacePathExpr | primitiveTypeName) collectionMarker
+//    | collectionTypeRef collectionMarker
+//    ;
+
+collectionMarker : (setMarker | sequenceMarker);
+
+setMarker : '{' '}' ;
+
+sequenceMarker : '[' ']' ;
 
 voidTypeName :
     VoidKeyword
@@ -402,6 +366,7 @@ voidTypeName :
 
 primitiveTypeName :
     BooleanKeyword
+    | CharKeyword
     | OrdinalKeyword
     | CardinalKeyword
     | RealKeyword
@@ -429,22 +394,28 @@ literalExpr :
 scalarLiteral :
     integerLiteral
     | floatLiteral
-    | booleanLiteral;
+    | booleanLiteral
+    ;
 
 stringLiteral : StringLiteral;
 integerLiteral : IntegerLiteral;
 floatLiteral : FloatLiteral;
 booleanLiteral : BooleanLiteral;
 
-setLiteral :
-    UserSetStart
-    UserSetEnd
+newObjectExpr :
+    spacePathExpr? untypedTupleLiteral
     ;
 
-spaceLiteralDecl :
-    SpaceStart
+untypedTupleLiteral :
+    TupleStart valueOrAssignmentExprList? TupleEnd
+    ;
 
-    SpaceEnd
+newSetExpr :
+    spacePathExpr? BlockStart newObjectExpr* BlockEnd
+    ;
+
+newSequenceExpr :
+    spacePathExpr? '[' newObjectExpr* ']'
     ;
 
 identifier : Identifier;

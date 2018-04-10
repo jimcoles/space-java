@@ -24,7 +24,7 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
      * The name of some other named design-time thing such as a function.
      */
     private MetaReference<AbstractFunctionDefn> functionDefnRef;
-    private List<ValueExpr> argumentExprs;
+    private TupleExpr tupleExpr;
 
     /**
      * Represents the invocation of a function.
@@ -44,24 +44,18 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
         return this;
     }
 
-    public void setArgumentExprs(List<ValueExpr> argumentExprs) {
-        this.argumentExprs = argumentExprs;
-        //
-        for (ValueExpr argumentExpr : argumentExprs) {
-            addChild((ModelElement) argumentExpr);
-            //
-//            if (argumentExpr instanceof MetaReference) {
-//                addReference((MetaReference) argumentExpr);
-//            }
-        }
-    }
-
     public MetaReference<AbstractFunctionDefn> getFunctionDefnRef() {
         return functionDefnRef;
     }
 
-    public List<ValueExpr> getArgumentExprs() {
-        return argumentExprs;
+    public TupleExpr getTupleExpr() {
+        return tupleExpr;
+    }
+
+    public void setTupleExpr(TupleExpr tupleExpr) {
+        this.tupleExpr = tupleExpr;
+        //
+        addChild(tupleExpr);
     }
 
     @Override

@@ -7,16 +7,18 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.ast;
+package org.jkcsoft.space.lang.runtime.jnative.space;
+
+import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;
 
 /**
- * Evaluates to the current tuple context.
- *
  * @author Jim Coles
  */
-public class ThisExpr extends ModelElement implements ValueExpr {
+@SpaceNative
+public class Lang {
 
-    ThisExpr(SourceInfo sourceInfo) {
-        super(sourceInfo);
+    public String append(String s1Ref, String s2Ref) {
+        return s1Ref + s2Ref;
     }
+
 }

@@ -9,7 +9,11 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.java.util.Strings;
+import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.Declartion;
+import org.jkcsoft.space.lang.ast.Named;
+import org.jkcsoft.space.lang.ast.TupleDefn;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -33,70 +37,48 @@ import java.util.Map;
  * @author Jim Coles
  * @version 1.0
  */
-public class Tuple extends SpaceObject<ModelElement> implements Assignable, ExeContext {
+public class Tuple extends SpaceObject implements Value, ExeContext {
 
-    private List<Assignable>    assignables = new LinkedList<>();
+    private List<ValueHolder> valueHolders = new LinkedList<>();
 //    private List<ScalarValue>   values = new LinkedList<>();
 //    private List<Reference>   associations = new LinkedList<>();
 
     // variables in definition order
 //    private List<Variable> variables = new LinkedList<>();
     // seminal map
-    private Map<SpaceOid, Assignable> indexAllByMemberOid = new HashMap<>();
+    private Map<SpaceOid, ValueHolder> indexAllByMemberOid = new HashMap<>();
     // redundant
 //    private Map<String, ScalarValue> indexValuesByName = new HashMap<>();
 //    private Map<String, Reference> indexRefsByName = new HashMap<>();
 
     Tuple(SpaceOid oid, TupleDefn defn) {
-        super(oid, ((ModelElement) defn));
-        // initialize
-        if (defn.hasVariables()) {
-            List<VariableDefn> varDefnList = ((TupleDefn) getDefn()).getVariableDefnList();
-            for (VariableDefn variableDefn : varDefnList) {
-                initVar(variableDefn);
-            }
-        }
-        if (defn.hasAssociations()) {
-            List<AssociationDefn> assocDefnList = ((TupleDefn) getDefn()).getAssociationDefnList();
-            for (AssociationDefn assocDefn : assocDefnList) {
-                initRef(assocDefn);
-            }
-        }
+        super(oid, defn);
     }
 
-//    Tuple(SpaceOid oid, SpaceTypeDefn defn, Assignable... assignables) {
-//        this(oid, defn);
-//        //
-//        List<NamedElement> allMembers = getDefn().getAllMembers();
-//        if (!getDefn().hasMembers() || assignables.length > allMembers.size())
-//            throw new SpaceX(
-//                "Too many values [" + assignables.length + "] for this space [" + allMembers.size() + "].");
-//        //
-//        for (int idxVar = 0; idxVar < assignables.length; idxVar++) {
-//            SpaceUtils.assignOper(this, allMembers.get(idxVar), assignables[idxVar]);
-//        }
+    @Override
+    public DatumType getType() {
+        return getDefn();
+    }
+
+//    private void initSet(SetDecl datumDecl) {
+//        valueHolders.add(ref);
+//        indexAllByMemberOid.put(ref.getDeclaration().getOid(), ref);
 //    }
 
-    private void initRef(AssociationDefn assocDefn) {
-        Reference ref = new Reference(assocDefn, null);
-        assignables.add(ref);
-        indexAllByMemberOid.put(ref.getDefn().getOid(), ref);
+
+    public void initHolder(ValueHolder valueHolder) {
+        valueHolders.add(valueHolder);
+        indexAllByMemberOid.put(valueHolder.getDeclaration().getOid(), valueHolder);
     }
 
-    private void initVar(VariableDefn variableDefn) {
-        Variable datum = new Variable(this, variableDefn, null);
-        assignables.add(datum);
-        indexAllByMemberOid.put(datum.getDefinition().getOid(), datum);
-    }
-
-    public NamedElement getNthMember(int idx) {
-        return ((TupleDefn) getDefn()).getAllMembers().get(idx);
+    public Declartion getNthMember(int idx) {
+        return ((TupleDefn) getDefn()).getDatumDeclList().get(idx);
     }
 
     /** Get the 0-based ordinal of the specified member */
     private int getMemberIdx(SpaceOid memberOid) {
         int idxMember = -1;
-        List<NamedElement> allMembers = ((TupleDefn) getDefn()).getAllMembers();
+        List<Declartion> allMembers = ((TupleDefn) getDefn()).getDatumDeclList();
         for (int idx = 0; idx < allMembers.size(); idx++) {
             if (allMembers.get(idx).getOid().equals(memberOid)) {
                 idxMember = idx;
@@ -106,36 +88,35 @@ public class Tuple extends SpaceObject<ModelElement> implements Assignable, ExeC
         return idxMember;
     }
 
-    public Assignable get(NamedElement member) {
+    public ValueHolder get(Named member) {
         return indexAllByMemberOid.get(member.getOid());
     }
 
-    public Assignable getAssignableAt(int idx) {
+    public ValueHolder getAssignableAt(int idx) {
         return indexAllByMemberOid.get(getNthMember(idx).getOid());
     }
 
-    public List<Assignable> getValuesHolders() {
-        return assignables;
-    }
-
-    public SpaceOid getToOid(SpaceOid refMemberOid) {
-        Reference reference = getRefByOid(refMemberOid);
-        return reference.getToOid();
+    public List<ValueHolder> getValuesHolders() {
+        return valueHolders;
     }
 
     public int getSize() {
-        return assignables.size();
+        return valueHolders.size();
     }
 
     public Reference getRefByOid(SpaceOid memberOid) {
-        Assignable assignable = indexAllByMemberOid.get(memberOid);
-        if (assignable == null)
+        ValueHolder member = indexAllByMemberOid.get(memberOid);
+        if (member == null)
             throw new IllegalArgumentException(memberOid + " not set");
 
-        if (!(assignable instanceof Reference))
+        if (!(member instanceof Reference))
             throw new IllegalArgumentException(memberOid + " is not a reference");
 
-        return (Reference) assignable;
+        return (Reference) member;
     }
 
+    @Override
+    public String toString() {
+        return "([" + super.toString() + "] " + Strings.buildCommaDelList(getValuesHolders()) + ")";
+    }
 }

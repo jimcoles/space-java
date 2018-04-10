@@ -34,6 +34,7 @@
         <module>space-antlr</module>
         <!-- Aggregators -->
         <module>space-assembly</module>
+        <!--<module>antlr-grammars-examples</module>-->
     </modules>
 
     <dependencyManagement>

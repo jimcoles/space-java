@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.Space;
+import org.jkcsoft.space.lang.instance.Set;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class QueryDefn extends EquationDefn {
 
-    private Space rootSpace;
+    private Set rootSpace;
     private List<SpacePathExpr> variables;
     private OperatorExpr filter;  // nestable expression
 

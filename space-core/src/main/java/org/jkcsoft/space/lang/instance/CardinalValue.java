@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
+import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 
 /**
  * The common notion of a Integer.  Users can set Cardinal numbers but not Ordinal
@@ -21,7 +21,7 @@ public class CardinalValue extends IntegerValue {
 
     /** Limit constructor access to package-only. */
     CardinalValue(Integer value) {
-        super(PrimitiveTypeDefn.CARD, value);
+        super(NumPrimitiveTypeDefn.CARD, value);
     }
 
 }

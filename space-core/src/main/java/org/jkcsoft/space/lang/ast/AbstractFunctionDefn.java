@@ -10,6 +10,7 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.metameta.MetaType;
+import org.jkcsoft.space.lang.runtime.SpaceX;
 
 /**
  * A Function is, in the abstract, a solution to an Equation.  A function
@@ -21,13 +22,15 @@ public abstract class AbstractFunctionDefn extends NamedElement implements Solut
 
     private EquationDefn governingEquation; // TODO
     private SpaceTypeDefn argSpaceTypeDefn;
-    private MetaReference returnTypeRef;
+    private boolean isReturnVoid;
+    private TypeRef returnTypeRef;
 
-    AbstractFunctionDefn(SourceInfo sourceInfo, String name, SpacePathExpr returnTypePath) {
+    AbstractFunctionDefn(SourceInfo sourceInfo, String name, TypeRef returnTypeRef)
+    {
         super(sourceInfo, name);
-        this.returnTypeRef = new MetaReference<>(returnTypePath, MetaType.TYPE);
+        this.returnTypeRef = returnTypeRef;
         //
-        addChild(returnTypeRef);
+        addChild(this.returnTypeRef);
     }
 
     @Override
@@ -50,7 +53,13 @@ public abstract class AbstractFunctionDefn extends NamedElement implements Solut
         return governingEquation;
     }
 
-    public MetaReference getReturnTypeRef() {
+    public boolean isReturnVoid() {
+        return isReturnVoid;
+    }
+
+    public TypeRef getReturnTypeRef() {
+        if (isReturnVoid)
+            throw new SpaceX("Should not call getReturnTypeRef for function with void return.");
         return returnTypeRef;
     }
 

@@ -10,6 +10,7 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.ObjectFactory;
+import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.lang.reflect.Method;
 
@@ -25,6 +26,12 @@ import java.lang.reflect.Method;
  * @author Jim Coles
  */
 public class AstFactory {
+
+    private static final AstFactory instance = new AstFactory();
+
+    public static AstFactory getInstance() {
+        return instance;
+    }
 
     public AstFactory() {
 
@@ -48,22 +55,22 @@ public class AstFactory {
         return spaceTypeDefn;
     }
 
-    public FunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name, SpacePathExpr returnPathExpr) {
-        FunctionDefn element = new FunctionDefn(sourceInfo, name, returnPathExpr);
+    public FunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name, TypeRef returnTypeRef) {
+        FunctionDefn element = new FunctionDefn(sourceInfo, name, returnTypeRef);
         return element;
     }
 
-    public VariableDefn newVariableDefn(SourceInfo sourceInfo, String name, PrimitiveTypeDefn type) {
-        VariableDefn element = new VariableDefn(sourceInfo, name, type);
+    public VariableDecl newVariableDecl(SourceInfo sourceInfo, String name, NumPrimitiveTypeDefn type) {
+        VariableDecl element = new VariableDecl(sourceInfo, name, type);
         return element;
     }
 
     public NativeFunctionDefn newNativeFunctionDefn(SourceInfo sourceInfo, String name, Method jMethod,
                                                     SpaceTypeDefn nativeArgSpaceTypeDefn,
-                                                    SpacePathExpr returnPathExpr)
+                                                    TypeRef returnTypeRef)
     {
         NativeFunctionDefn element = new NativeFunctionDefn(sourceInfo, name, jMethod, nativeArgSpaceTypeDefn,
-                                                            returnPathExpr);
+                                                            returnTypeRef);
         return element;
     }
 
@@ -72,24 +79,21 @@ public class AstFactory {
         return element;
     }
 
-    public AssociationDefn newAssociationDefn(SourceInfo sourceInfo, String name, SpacePathExpr toPath) {
-        AssociationDefn element = new AssociationDefn(sourceInfo, name, null, toPath);
+    public AssociationDecl newAssociationDecl(SourceInfo sourceInfo, String name, TypeRef toTypeRef) {
+        AssociationDecl element = new AssociationDecl(sourceInfo, name, null, toTypeRef);
         return element;
     }
 
-    public PrimitiveLiteralExpr newPrimLiteralExpr(SourceInfo sourceInfo, PrimitiveTypeDefn primitiveTypeDefn, String text) {
+    public PrimitiveLiteralExpr newPrimLiteralExpr(SourceInfo sourceInfo, NumPrimitiveTypeDefn primitiveTypeDefn,
+                                                   String text)
+    {
         PrimitiveLiteralExpr element = new PrimitiveLiteralExpr(sourceInfo, primitiveTypeDefn, text);
         return element;
     }
 
-    public SequenceLiteralExpr newSequenceLiteralExpr(SourceInfo sourceInfo, String text) {
-        SequenceLiteralExpr element =
-            new SequenceLiteralExpr(sourceInfo, newSpacePathExpr(sourceInfo, null, "CharSequence", null), text);
-        return element;
-    }
-
-    public SequenceLiteralExpr newSequenceLiteralExpr(SourceInfo sourceInfo, SpacePathExpr pathToType, String text) {
-        SequenceLiteralExpr element = new SequenceLiteralExpr(sourceInfo, pathToType, text);
+    public SequenceLiteralExpr newCharSeqLiteralExpr(SourceInfo sourceInfo, String text) {
+        SequenceLiteralExpr element = new SequenceLiteralExpr(sourceInfo, newTypeRef(
+            newSpacePathExpr(sourceInfo, null, "char", null), TypeRef.CollectionType.SEQUENCE), text);
         return element;
     }
 
@@ -100,8 +104,8 @@ public class AstFactory {
         return element;
     }
 
-    public ThisExpr newThisExpr(SourceInfo sourceInfo) {
-        ThisExpr element = new ThisExpr(sourceInfo);
+    public ThisTupleExpr newThisExpr(SourceInfo sourceInfo) {
+        ThisTupleExpr element = new ThisTupleExpr(sourceInfo);
         return element;
     }
 
@@ -123,12 +127,40 @@ public class AstFactory {
         return new ReturnExpr(sourceInfo, valueExpr);
     }
 
-    public StreamTypeDefn newStreamTypeDefn(IntrinsicSourceInfo sourceInfo, String name) {
-        return new StreamTypeDefn(sourceInfo, name);
-    }
-
     public OperatorExpr newOperatorExpr(SourceInfo sourceInfo, OperEnum oper, ValueExpr... args) {
         return new OperatorExpr(sourceInfo, oper, args);
+    }
+
+    public TupleExpr newTupleExpr(SourceInfo sourceInfo) {
+        return new TupleExpr(sourceInfo);
+    }
+
+    public NewObjectExpr newNewObjectExpr(SourceInfo sourceInfo, SpacePathExpr typeRefPathExpr, TupleExpr tupleExpr) {
+        return new NewObjectExpr(sourceInfo, typeRefPathExpr, tupleExpr);
+    }
+
+    public NewSetExpr newNewSetExpr(SourceInfo sourceInfo, SpacePathExpr tupleTypeRef) {
+        return new NewSetExpr(sourceInfo, tupleTypeRef);
+    }
+
+    public MetaReference newMetaReference(SpacePathExpr spacePathExpr, MetaType type) {
+        return new MetaReference(spacePathExpr, type);
+    }
+
+    public TypeRef newTypeRef(SpacePathExpr spacePathExpr, TypeRef.CollectionType collectionType) {
+        return new TypeRef(spacePathExpr, collectionType);
+    }
+
+    public TypeRef newTypeRef(SpacePathExpr spacePathExpr) {
+        return new TypeRef(spacePathExpr);
+    }
+
+    public TypeRef newTypeRef(DatumType typeDefn) {
+        return new TypeRef(typeDefn);
+    }
+
+    public TypeRef newTypeRef(DatumType typeDefn, TypeRef.CollectionType collectionType) {
+        return new TypeRef(typeDefn, collectionType);
     }
 
 }

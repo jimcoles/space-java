@@ -9,26 +9,19 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
 /**
  * @author Jim Coles
  */
-public class VoidType extends NamedElement implements DatumType {
+public class VoidType extends PrimitiveTypeDefn {
 
     public static final VoidType VOID = new VoidType(new IntrinsicSourceInfo(), "void");
+
+    static {
+        PrimitiveTypeDefn.addPrimitiveTypeDefn(VOID);
+    }
 
     private VoidType(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
     }
 
-    @Override
-    public int getScalarDofs() {
-        return 0;
-    }
-
-    @Override
-    public MetaType getMetaType() {
-        return MetaType.TYPE;
-    }
 }

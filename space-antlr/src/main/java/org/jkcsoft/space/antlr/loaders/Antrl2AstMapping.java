@@ -101,7 +101,7 @@ public class Antrl2AstMapping {
                 toAst(parserRuleContext.stop, true));
     }
 
-    private static SourceInfo.FileCoord toAst(Token tokenAO, boolean end) {
+    public static SourceInfo.FileCoord toAst(Token tokenAO, boolean end) {
         return new SourceInfo.FileCoord() {
             @Override
             public boolean isStart() {

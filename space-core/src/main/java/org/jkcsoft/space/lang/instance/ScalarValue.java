@@ -9,23 +9,23 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
+import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 
 /**
  * Holds one-dimensional values for primitive types: Ints, Real, Chars
  * @author Jim Coles
  */
-public abstract class ScalarValue<T> implements Assignable {
+public abstract class ScalarValue<T> implements Assignable, Value {
 
-    private PrimitiveTypeDefn type;
+    private NumPrimitiveTypeDefn type;
     private T jvalue;    // the java object value such as int, float, char
 
-    ScalarValue(PrimitiveTypeDefn type, T jValue) {
+    ScalarValue(NumPrimitiveTypeDefn type, T jValue) {
         this.type = type;
         this.jvalue = jValue;
     }
 
-    public PrimitiveTypeDefn getType() {
+    public NumPrimitiveTypeDefn getType() {
         return type;
     }
 
@@ -33,19 +33,18 @@ public abstract class ScalarValue<T> implements Assignable {
         return jvalue != null;
     }
 
-    public T getJvalue() {
-        return jvalue;
+    public void setJvalue(T jvalue) {
+        this.jvalue = jvalue;
     }
 
-    public ScalarValue<T> setJvalue(T jvalue) {
-        this.jvalue = jvalue;
-        return this;
+    public T getJvalue() {
+        return jvalue;
     }
 
     public abstract String asString();
 
     @Override
     public String toString() {
-        return "ScalarValue("+type.getDisplayName()+") " + jvalue;
+        return "("+type.getDisplayName()+") " + jvalue;
     }
 }

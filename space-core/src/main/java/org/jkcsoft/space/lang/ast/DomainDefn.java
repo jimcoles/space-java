@@ -23,8 +23,11 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class DomainDefn extends NamedElement implements DatumType {
 
+    private SequenceTypeDefn sequenceTypeDefn;
+
     DomainDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
+        sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
     }
 
     @Override
@@ -36,4 +39,10 @@ public class DomainDefn extends NamedElement implements DatumType {
     public int getScalarDofs() {
         return 1;
     }
+
+    @Override
+    public SequenceTypeDefn getSequenceOfType() {
+        return sequenceTypeDefn;
+    }
+
 }

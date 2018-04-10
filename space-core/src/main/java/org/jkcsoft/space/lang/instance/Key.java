@@ -7,18 +7,13 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.jnative.opsys;
-
-import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;
+package org.jkcsoft.space.lang.instance;
 
 /**
+ * Base notion of primary key, alternate key, etc.
+ *
  * @author Jim Coles
  */
-@SpaceNative
-public class JnOpSys {
-
-    public void println(String msg) {
-        System.err.println(msg);
-    }
+public interface Key extends Value {
 
 }

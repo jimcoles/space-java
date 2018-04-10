@@ -10,6 +10,9 @@
 package org.jkcsoft.space.lang.runtime.typecasts;
 
 import org.jkcsoft.space.lang.instance.CharacterSequence;
+import org.jkcsoft.space.lang.instance.ObjectFactory;
+import org.jkcsoft.space.lang.instance.Reference;
+import org.jkcsoft.space.lang.runtime.Executor;
 
 /**
  * Implement transforms from one type to another.
@@ -22,4 +25,7 @@ public class CastTransforms {
         return characterSequence.toString();
     }
 
+    public CharacterSequence stringToCharSeq(Executor.EvalContext evalContext, String jString) {
+        return evalContext.newCharSequence(jString);
+    }
 }

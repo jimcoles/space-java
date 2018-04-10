@@ -42,12 +42,16 @@ public class FileSourceInfo implements SourceInfo {
 
     @Override
     public String toString() {
-        return file.getName() + ":" + start + ".." + end + "";
+        return getFileString() + start + ".." + end + "";
     }
 
     @Override
     public String toBriefString() {
-        return file.getName() + ":" + start + "";
+        return getFileString() + start + "";
+    }
+
+    private String getFileString() {
+        return file != null ? file.getName() + ":" : "";
     }
 
 }

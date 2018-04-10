@@ -17,23 +17,27 @@ import java.util.TreeMap;
 /**
  * @author Jim Coles
  */
-public class PrimitiveTypeDefn extends NamedElement implements DatumType {
+public abstract class PrimitiveTypeDefn extends NamedElement implements DatumType {
 
     private static Map<String, PrimitiveTypeDefn> enumsByName = new TreeMap<>();
 
-    public static final PrimitiveTypeDefn BOOLEAN = newPrimitiveTypeDefn("boolean");
-    public static final PrimitiveTypeDefn CHAR = newPrimitiveTypeDefn("char");
-    public static final PrimitiveTypeDefn CARD = newPrimitiveTypeDefn("card");
-    public static final PrimitiveTypeDefn REAL = newPrimitiveTypeDefn("real");
-
-    private static PrimitiveTypeDefn newPrimitiveTypeDefn(String s) {
-        PrimitiveTypeDefn ptDefn = new PrimitiveTypeDefn(new IntrinsicSourceInfo(), s);
+    protected static void addPrimitiveTypeDefn(PrimitiveTypeDefn ptDefn) {
         enumsByName.put(ptDefn.getName(), ptDefn);
-        return ptDefn;
     }
 
-    private PrimitiveTypeDefn(SourceInfo sourceInfo, String name) {
+    public static PrimitiveTypeDefn valueOf(String name) {
+        return enumsByName.get(name);
+    }
+
+    //--------------------------------------------------------------------------
+    //
+    //--------------------------------------------------------------------------
+
+    private SequenceTypeDefn sequenceTypeDefn;
+
+    PrimitiveTypeDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
+        sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
     }
 
     @Override
@@ -42,15 +46,13 @@ public class PrimitiveTypeDefn extends NamedElement implements DatumType {
     }
 
     @Override
+    public SequenceTypeDefn getSequenceOfType() {
+        return sequenceTypeDefn;
+    }
+
+    @Override
     public MetaType getMetaType() {
         return MetaType.TYPE;
     }
 
-    public static PrimitiveTypeDefn valueOf(String name) {
-        return enumsByName.get(name);
-    }
-
-//    VOID {
-//    TEXT,
-//    RATIONAL
 }

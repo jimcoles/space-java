@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,16 +24,29 @@ import java.util.List;
 @LexicalNode
 public class StatementBlock extends Statement implements TupleDefn {
 
-    private List<AssociationDefn> associationDefnList;
+//    private List<AssociationDefn> associationDefnList;
     private List<Statement> statementSequence = new LinkedList<>();  // child statements
-    private List<VariableDefn> variableDefnList;
+//    private List<VariableDefn> variableDefnList;
+    private List<Declartion> datumDeclList;
 
     public StatementBlock(SourceInfo sourceInfo) {
         super(sourceInfo);
+        datumDeclList = new LinkedList<>();
     }
 
+    @Override
+    public MetaType getMetaType() {
+        return null;
+    }
+
+    @Override
     public int getScalarDofs() {
-        return variableDefnList.size();
+        return datumDeclList.size();
+    }
+
+    @Override
+    public SequenceTypeDefn getSequenceOfType() {
+        return null;
     }
 
     public List<Statement> getStatementSequence() {
@@ -56,59 +71,32 @@ public class StatementBlock extends Statement implements TupleDefn {
     }
 
     @Override
-    public boolean hasVariables() {
-        return variableDefnList != null && variableDefnList.size() > 0;
+    public boolean hasDatums() {
+        return datumDeclList != null && datumDeclList.size() > 0;
     }
 
-    @Override
-    public List<VariableDefn> getVariableDefnList() {
-        return variableDefnList;
-    }
-
-    public VariableDefn getVariableDefnAt(int index) {
-        return variableDefnList.get(index);
-    }
-
-    @Override
-    public boolean hasAssociations() {
-        return associationDefnList != null && associationDefnList.size() > 0;
-    }
-
-    @Override
-    public List<AssociationDefn> getAssociationDefnList() {
-        return associationDefnList;
-    }
 
     // ===========================================================
     // Child adders
     //
-    public VariableDefn addVariable(VariableDefn variableDefn) {
-        if (variableDefnList == null)
-            variableDefnList = new LinkedList<>();
-        variableDefnList.add(variableDefn);
+    public VariableDecl addVariableDecl(VariableDecl variableDecl) {
+        datumDeclList.add(variableDecl);
         //
-        addChild(variableDefn);
-        return variableDefn;
+        addChild(variableDecl);
+        return variableDecl;
     }
 
-    public AssociationDefn addAssocDefn(AssociationDefn associationDefn) {
-        if (associationDefnList == null)
-            associationDefnList = new LinkedList<>();
-        associationDefnList.add(associationDefn);
+    public AssociationDecl addAssocDecl(AssociationDecl associationDecl) {
+        datumDeclList.add(associationDecl);
         //
-        addChild(associationDefn);
+        addChild(associationDecl);
         //
-        return associationDefn;
+        return associationDecl;
     }
 
     @Override
-    public List<NamedElement> getAllMembers() {
-        LinkedList<NamedElement> namedElements = new LinkedList<>();
-        if (hasVariables())
-            namedElements.addAll(getVariableDefnList());
-        if (hasAssociations())
-            namedElements.addAll(getAssociationDefnList());
-        return namedElements;
+    public List<Declartion> getDatumDeclList() {
+        return datumDeclList;
     }
 
     @Override
@@ -116,4 +104,18 @@ public class StatementBlock extends Statement implements TupleDefn {
         return "{block}";
     }
 
+    @Override
+    public boolean isNamed() {
+        return false;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    @Override
+    public List<String> getFullNamePath() {
+        return null;
+    }
 }

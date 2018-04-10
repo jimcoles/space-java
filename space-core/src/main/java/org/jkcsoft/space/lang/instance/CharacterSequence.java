@@ -9,6 +9,9 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
+import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
 import org.jkcsoft.space.lang.metameta.CharSequenceNature;
 
 /**
@@ -72,5 +75,10 @@ public class CharacterSequence extends BinarySequence<CharacterValue> implements
     @Override
     public CharacterValue getElement(int index) {
         return characterValues[index];
+    }
+
+    @Override
+    public DatumType getType() {
+        return NumPrimitiveTypeDefn.CHAR.getSequenceOfType();
     }
 }

@@ -20,9 +20,9 @@ public class NativeFunctionDefn extends AbstractFunctionDefn implements Callable
     private final SpaceTypeDefn argSpaceTypeDefn;
 
     NativeFunctionDefn(SourceInfo sourceInfo, String name, Method jMethod, SpaceTypeDefn argSpaceTypeDefn,
-                       SpacePathExpr returnPathExpr)
+                       TypeRef returnTypeRef)
     {
-        super(sourceInfo, name, returnPathExpr);
+        super(sourceInfo, name, returnTypeRef);
         this.jMethod = jMethod;
         this.argSpaceTypeDefn = argSpaceTypeDefn;
         //

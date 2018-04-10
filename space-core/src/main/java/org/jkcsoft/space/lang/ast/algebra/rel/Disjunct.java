@@ -7,8 +7,12 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.instance;
+package org.jkcsoft.space.lang.ast.algebra.rel;
 
-public interface SpaceSet<T> {
-
+/**
+ * Aka, addition.
+ *
+ * @author Jim Coles
+ */
+public class Disjunct {
 }

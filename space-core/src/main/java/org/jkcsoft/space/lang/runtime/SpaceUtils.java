@@ -18,20 +18,20 @@ import org.jkcsoft.space.lang.instance.*;
  */
 public class SpaceUtils {
 
-    public static void assignNoCast(Executor.EvalContext exe, Assignable leftSideHolder, Assignable rightSideValue) {
+    public static void assignNoCast(Executor.EvalContext exe, ValueHolder leftSideHolder, Value rightSideValue) {
         boolean assigned = false;
         RuntimeError error = null;
         if (leftSideHolder instanceof Variable) {
             Variable lsHolder = (Variable) leftSideHolder;
             if (rightSideValue instanceof ScalarValue) {
                 ScalarValue rsScalarValue = (ScalarValue) rightSideValue;
-                if (rsScalarValue.getType() == lsHolder.getDefinition().getType()) {
+                if (rsScalarValue.getType() == lsHolder.getDeclaration().getType()) {
                     lsHolder.setScalarValue(rsScalarValue);
                     assigned = true;
                 }
                 else {
                     error = exe.newRuntimeError(
-                        "type mismatch: cannot assign " + lsHolder.getDefinition().getType() + " <- " +
+                        "type mismatch: cannot assign " + lsHolder.getDeclaration().getType() + " <- " +
                             rsScalarValue.getType());
                 }
             }
@@ -53,8 +53,11 @@ public class SpaceUtils {
         }
         else if (leftSideHolder instanceof Reference) {
             if (rightSideValue instanceof Reference) {
-//                Executor.log.debug("setting reference to reference");
                 ((Reference) leftSideHolder).setToOid(((Reference) rightSideValue).getToOid());
+                assigned = true;
+            }
+            else if(rightSideValue instanceof Tuple) {
+                ((Reference) leftSideHolder).setToOid(((Tuple) rightSideValue).getOid());
                 assigned = true;
             }
         }

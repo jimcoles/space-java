@@ -130,6 +130,9 @@ public class AstUtils {
                 }
                 break;
         }
+        if (reference instanceof TypeRef && ((TypeRef) reference).isCollectionType()) {
+            lookup = ((DatumType) lookup).getSequenceOfType();
+        }
         return lookup;
     }
 
@@ -236,7 +239,7 @@ public class AstUtils {
             lookup = VoidType.VOID;
         }
         else{
-            lookup = PrimitiveTypeDefn.valueOf(spacePathExpr.getNodeText());
+            lookup = NumPrimitiveTypeDefn.valueOf(spacePathExpr.getNodeText());
         }
         return lookup;
     }

@@ -19,8 +19,8 @@ package org.jkcsoft.space.lang.ast;
  */
 public class TransformDefn extends FunctionDefn {
 
-    TransformDefn(SourceInfo sourceInfo, String name, SpacePathExpr returnPathExpr) {
-        super(sourceInfo, name, returnPathExpr);
+    TransformDefn(SourceInfo sourceInfo, String name, TypeRef returnTypeRef) {
+        super(sourceInfo, name, returnTypeRef);
     }
 
 }

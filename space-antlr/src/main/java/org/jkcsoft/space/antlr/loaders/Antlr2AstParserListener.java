@@ -26,12 +26,12 @@ import java.io.File;
  *
  * @author Jim Coles
  */
-public class Ra2AstParserListener extends SpaceParserBaseListener {
+public class Antlr2AstParserListener extends SpaceParserBaseListener {
 
     private AstFactory astFactory = new AstFactory();
     private File file;
 
-    public Ra2AstParserListener(File file) {
+    public Antlr2AstParserListener(File file) {
         this.file = file;
     }
 

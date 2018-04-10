@@ -16,7 +16,7 @@ package org.jkcsoft.space.lang.ast;
  */
 public class ForEachStatement extends Statement {
     // for
-    private VariableDefn loopVariableDefn;
+    private VariableDecl loopVariableDecl;
     private ValueExpr spaceExpression;  // an expression that returns a Space. can be just an Assoc path.
     private StatementBlock statementBlock;
 

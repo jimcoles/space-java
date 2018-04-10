@@ -29,7 +29,7 @@
  * <ul>
  *     <li>SpaceDefn - A Space is a thing, a noun, an entity. A Space has state
  *     described via Variables and Associations.</li>
- *     <li>{@link org.jkcsoft.space.lang.ast.VariableDefn} - A scalar-valued element
+ *     <li>{@link org.jkcsoft.space.lang.ast.VariableDecl} - A scalar-valued element
  *     with some semantic meaning associated with a Space</li>
  *     <li>EquationDefn</li>
  * </ul>
