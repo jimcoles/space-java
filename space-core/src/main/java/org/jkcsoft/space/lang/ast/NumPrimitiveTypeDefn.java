@@ -18,6 +18,7 @@ public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
     public static final NumPrimitiveTypeDefn CHAR = newInstance("char");
     public static final NumPrimitiveTypeDefn CARD = newInstance("int");
     public static final NumPrimitiveTypeDefn REAL = newInstance("real");
+    public static final NumPrimitiveTypeDefn NULL = newInstance("null");
 
     private static NumPrimitiveTypeDefn newInstance(String name) {
         NumPrimitiveTypeDefn ptDefn = new NumPrimitiveTypeDefn(new IntrinsicSourceInfo(), name);
@@ -25,8 +26,29 @@ public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
         return ptDefn;
     }
 
+    // ------------------------------------------------------------------------
+    //
+
+    private int arrayDepth;
+
     private NumPrimitiveTypeDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
     }
 
+    private boolean isArray() {
+        return arrayDepth > 0;
+    }
+
+    public void setArrayDepth(int arrayDepth) {
+        this.arrayDepth = arrayDepth;
+    }
+
+    public int getArrayDepth() {
+        return arrayDepth;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

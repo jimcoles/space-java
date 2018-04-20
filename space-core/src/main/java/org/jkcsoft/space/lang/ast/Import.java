@@ -14,13 +14,8 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public interface Named extends Identified {
+public class Import {
+    private List<SpacePathExpr> imports;
 
-    boolean isNamed();
 
-    String getName();
-
-    List<String> getFullNamePath();
-
-    Named getNamedParent();
 }

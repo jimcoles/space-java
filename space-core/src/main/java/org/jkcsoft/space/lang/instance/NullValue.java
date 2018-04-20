@@ -10,19 +10,24 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.NullType;
+import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 import org.jkcsoft.space.lang.ast.VoidType;
 
 /**
  * @author Jim Coles
  */
-public class NullValue implements Value {
+public class NullValue extends ScalarValue {
 
     public static final NullValue NULL_VALUE = new NullValue();
 
-    private NullValue() {}
+    private NullValue() {
+        super(NumPrimitiveTypeDefn.NULL, null);
+    }
 
     @Override
-    public DatumType getType() {
-        return VoidType.VOID;
+    public String asString() {
+        return null;
     }
+
 }

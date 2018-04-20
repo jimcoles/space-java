@@ -10,6 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
+import org.jkcsoft.space.lang.runtime.SpaceX;
 
 /**
  * Holds one-dimensional values for primitive types: Ints, Real, Chars
@@ -21,6 +22,7 @@ public abstract class ScalarValue<T> implements Assignable, Value {
     private T jvalue;    // the java object value such as int, float, char
 
     ScalarValue(NumPrimitiveTypeDefn type, T jValue) {
+        if (type == null) throw new SpaceX("null type param");
         this.type = type;
         this.jvalue = jValue;
     }

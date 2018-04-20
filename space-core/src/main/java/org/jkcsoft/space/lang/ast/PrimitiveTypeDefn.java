@@ -9,6 +9,9 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.NullValue;
+import org.jkcsoft.space.lang.instance.ScalarValue;
+import org.jkcsoft.space.lang.instance.Value;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.util.Map;
@@ -37,7 +40,6 @@ public abstract class PrimitiveTypeDefn extends NamedElement implements DatumTyp
 
     PrimitiveTypeDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
-        sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
     }
 
     @Override
@@ -47,12 +49,18 @@ public abstract class PrimitiveTypeDefn extends NamedElement implements DatumTyp
 
     @Override
     public SequenceTypeDefn getSequenceOfType() {
+        if (sequenceTypeDefn == null)
+            sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
         return sequenceTypeDefn;
     }
 
     @Override
     public MetaType getMetaType() {
         return MetaType.TYPE;
+    }
+
+    public ScalarValue nullValue() {
+        return NullValue.NULL_VALUE;
     }
 
 }

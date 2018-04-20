@@ -121,6 +121,8 @@ query-def <queryName> (
 // NOTE: Parse Rule names must start with a lowercase letter.
 
 parseUnit :
+    packageStatement?
+    importStatement*
     (spaceTypeDefn | equationDefn | functionDefn)*
     ;
 
@@ -135,6 +137,18 @@ parseUnitRelational :
     anyThing*
     ;
 
+comment
+    : singleLineComment
+    | multiLineComment
+    ;
+
+//
+singleLineComment : SingleLineComment;
+
+multiLineComment : BlockComment;
+
+annotation : '@' newObjectExpr;
+
 anyThing :
     spaceTypeDefn
     | equationDefn
@@ -143,11 +157,17 @@ anyThing :
     | regularExpr
     ;
 
+packageStatement :
+    'package' spacePathExpr ';';
+
+importStatement :
+    'import' spacePathExpr ';';
+
 spaceTypeDefn :
     accessModifier? defnTypeModifier?
     TypeDefKeyword identifier
     (ExtendsKeyword spacePathList)?
-    elementDefnHeader?
+    elementDeclHeader?
     spaceTypeDefnBody
     ;
 
@@ -163,8 +183,9 @@ defnTypeModifier :
     SpaceDefnType
     ;
 
-elementDefnHeader :
-    comment
+elementDeclHeader :
+    comment?
+    annotation+
     ;
 
 /*
@@ -195,7 +216,7 @@ variableDefn :
     ;
 
 variableDecl :
-    elementDefnHeader? primitiveTypeName identifier
+    elementDeclHeader? primitiveOptSeqTypeRef identifier
     ;
 
 //associationDefnList :
@@ -211,7 +232,7 @@ associationDefn :
     ;
 
 associationDecl :
-    elementDefnHeader? complexTypeRef identifier
+    elementDeclHeader? complexOptCollTypeRef identifier
     ;
 
 parameterDecl :
@@ -224,8 +245,8 @@ parameterDecl :
 //    ;
 
 functionDefn :
-    'function-def' accessModifier? (anyTypeRef | voidTypeName) identifier parameterDefnList
-    elementDefnHeader?
+    elementDeclHeader?
+    'function' accessModifier? (anyTypeRef | voidTypeName) identifier parameterDefnList
     statementBlock
     ;
 
@@ -288,7 +309,7 @@ functionCallExpr :
 argTupleOrRef : (untypedTupleLiteral | spacePathExpr) ;
 
 navCallChainExpr :
-    (functionCallExpr | spacePathExpr) ('.' navCallChainExpr)?
+    (functionCallExpr | spacePathExpr) ('.' navCallChainExpr)*
     ;
 
 //spacePathExpr :
@@ -329,21 +350,14 @@ valueOrAssignmentExpr :
     valueExpr | assignmentExpr
     ;
 
-
-comment
-    : singleLineComment
-    | multiLineComment
-    ;
-
-//
-singleLineComment : SingleLineComment;
-
-multiLineComment : BlockComment;
-
 anyTypeRef :
-    primitiveTypeName sequenceMarker*
-    | complexTypeRef collectionMarker*
+    primitiveOptSeqTypeRef
+    | complexOptCollTypeRef
     ;
+
+complexOptCollTypeRef : complexTypeRef anyCollectionMarker* ;
+
+primitiveOptSeqTypeRef : primitiveTypeName sequenceMarker* ;
 
 complexTypeRef :
     spacePathExpr
@@ -354,7 +368,7 @@ complexTypeRef :
 //    | collectionTypeRef collectionMarker
 //    ;
 
-collectionMarker : (setMarker | sequenceMarker);
+anyCollectionMarker : (setMarker | sequenceMarker);
 
 setMarker : '{' '}' ;
 
@@ -423,9 +437,12 @@ identifier : Identifier;
 // ------------ SPACE PATH EXPRESSIONS -----------
 
 spacePathExpr :
-    spacePathRootExpr
-    | identifier (spacePathAnyNavOper spacePathExpr)?
+    languageKey?
+    ( spacePathRootExpr
+     | identifier (spacePathAnyNavOper spacePathExpr)? )
     ;
+
+languageKey : (identifier ':') ;
 
 spacePathRootExpr : SPathRoot ;
 
@@ -440,7 +457,7 @@ spacePathList :
 // ------------ QUERY EXPRESSIONS --------------
 
 queryDefn :
-    'query-def'
+    'query'
     ;
 
 // ------------ GRAMMAR EXPRESSIONS ---------------
@@ -455,5 +472,5 @@ grammarExpression :
 
 // TODO Develop grammar for regular expression notation
 regularExpr :
-    'regex-def'
+    'regex'
     ;

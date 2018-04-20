@@ -10,7 +10,6 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.ObjectFactory;
-import org.jkcsoft.space.lang.instance.SpaceObject;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.util.HashSet;
@@ -33,8 +32,10 @@ import java.util.Set;
  */
 public class Schema extends NamedElement implements ValueExpr {
 
+    public static final Schema ROOT_SCHEMA = new Schema(null, "root");
+
     private List<Schema> childSchemas = new LinkedList<>();
-    private Set<ParseUnitInfo> parseUnitInfos = new HashSet<>();
+    private Set<ParseUnit> parseUnits = new HashSet<>();
     private List<SpaceTypeDefn> spaceTypeDefns = new LinkedList<>();
 
     // ================== The starting point for using Space to execute Space programs
@@ -81,4 +82,9 @@ public class Schema extends NamedElement implements ValueExpr {
         return streamTypeDefn;
     }
 
+    public void addParseUnit(ParseUnit parseUnit) {
+        parseUnits.add(parseUnit);
+        //
+        addChild(parseUnit);
+    }
 }

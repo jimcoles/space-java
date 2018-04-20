@@ -24,10 +24,11 @@ public class TestSpaceBuilder extends TestSourceStub {
 
     public void testSpaceBuilderAPI() {
         AstFactory ast = new AstFactory();
-        ast.newProgram(new ProgSourceInfo(), "");
+        ProgSourceInfo si = new ProgSourceInfo();
+        ast.newProgram(si, "");
         ObjectFactory objs = ObjectFactory.getInstance();
         //
-        SpaceTypeDefn testPersonTypeDefn = ast.newSpaceTypeDefn(new ProgSourceInfo(), "PersonType");
+        SpaceTypeDefn testPersonTypeDefn = ast.newSpaceTypeDefn(si, ast.newTextNode(si, "PersonType"));
 //        VariableDefn firstName = ast.newVariableDefn(new ProgSourceInfo(), "firstName", PrimitiveTypeDefn.TEXT);
 //        testPersonTypeDefn.addVariable(firstName);
 //        VariableDefn lastName = ast.newVariableDefn(new ProgSourceInfo(), "lastName", PrimitiveTypeDefn.TEXT);

@@ -11,49 +11,64 @@ package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.metameta.MetaType;
 
+import java.util.List;
+
 /**
  * @author Jim Coles
  */
 public class TypeRef extends MetaReference<DatumType> {
 
-    private CollectionType collectionType = null;
+    private List<CollectionType> collectionTypes;
     private String suffix = null;
 
     TypeRef(SpacePathExpr path) {
         this(path, null);
     }
 
-    TypeRef(SpacePathExpr path, CollectionType collectionType) {
+    TypeRef(SpacePathExpr path, List<CollectionType> collectionTypes) {
         super(path, MetaType.TYPE);
-        this.collectionType = collectionType;
+        this.collectionTypes = collectionTypes;
     }
 
     TypeRef(DatumType typeDefn) {
         super(typeDefn);
     }
 
-    TypeRef(DatumType typeDefn, CollectionType collectionType) {
+    TypeRef(DatumType typeDefn, List<CollectionType> collectionTypes) {
         super(typeDefn);
-        this.collectionType = collectionType;
+        this.collectionTypes = collectionTypes;
     }
 
     public boolean isCollectionType() {
-        return collectionType != null;
+        return collectionTypes != null && !collectionTypes.isEmpty();
     }
 
-    public CollectionType getCollectionType() {
-        return collectionType;
+    public List<CollectionType> getCollectionTypes() {
+        return collectionTypes;
     }
-    public enum CollectionType {
-        SEQUENCE,
-        SET
 
-    }
     @Override
     protected String getSuffix() {
         if (suffix == null)
-            suffix = collectionType != null ? collectionType.name().substring(0, 3) : "";
+            suffix = collectionTypes != null ?
+                buildSuffix()
+                : "";
         return suffix;
     }
 
+    private String buildSuffix() {
+        StringBuilder suff = new StringBuilder();
+        for (CollectionType collectionType : collectionTypes) {
+            suff.append(collectionType != null ? collectionType.name().substring(0, 3) : "???");
+        }
+        return suff.toString();
+    }
+
+    public enum CollectionType {
+        SEQUENCE,
+        SET
+    }
+
 }
+
+

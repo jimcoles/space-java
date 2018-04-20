@@ -73,7 +73,7 @@ public class ObjectFactory {
         return BooleanValue.getValue(aBoolean);
     }
 
-    public CharacterValue newCharacterValue(Character character) {
+    public CharacterValue newCharacterValue(char character) {
         return new CharacterValue(character);
     }
 

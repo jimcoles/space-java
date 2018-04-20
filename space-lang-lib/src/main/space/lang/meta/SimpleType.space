@@ -1,0 +1,9 @@
+package space.lang.meta;
+
+/**
+ Declares a type simple (one DOF) and provides attrs associated with simple types such
+ as regex for strings, max/min for ints, etc.
+ */
+type SimpleType {
+
+}

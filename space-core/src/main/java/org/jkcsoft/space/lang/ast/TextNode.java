@@ -9,18 +9,19 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import java.util.List;
-
 /**
  * @author Jim Coles
  */
-public interface Named extends Identified {
+public class TextNode extends ModelElement {
 
-    boolean isNamed();
+    private String text;
 
-    String getName();
+    TextNode(SourceInfo sourceInfo, String text) {
+        super(sourceInfo);
+        this.text = text;
+    }
 
-    List<String> getFullNamePath();
-
-    Named getNamedParent();
+    public String getText() {
+        return text;
+    }
 }

@@ -29,6 +29,12 @@ public class Variable implements ValueHolder {
         this.scalarValue = scalarValue;
     }
 
+    public Variable(Tuple parentTuple, VariableDecl declaration) {
+        this.parentTuple = parentTuple;
+        this.declaration = declaration;
+        this.scalarValue = declaration.getType().nullValue();
+    }
+
     public Tuple getParentTuple() {
         return parentTuple;
     }
@@ -58,7 +64,7 @@ public class Variable implements ValueHolder {
 
     @Override
     public String toString() {
-        return ((declaration != null) ? declaration.getName() + "=" : "(anon)")
-            + (scalarValue != null ? scalarValue.toString() : "(not initialized)");
+        return ((declaration != null) ? "("+declaration.getType().getName()+")" + declaration.getName() + "=" : "(anon)")
+            + (scalarValue != NullValue.NULL_VALUE ? scalarValue.toString() : "(not initialized)");
     }
 }

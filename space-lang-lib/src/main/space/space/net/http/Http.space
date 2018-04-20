@@ -1,4 +1,4 @@
-public type-def Http
+public type Http
 /*
   A Space model of the HTTP protocol.
 */

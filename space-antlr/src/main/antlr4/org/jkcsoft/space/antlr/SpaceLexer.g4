@@ -30,17 +30,24 @@ TupleEnd    : ']';
 
 StatementEnd : ';' ;
 
+ColonDelim : ':' ;
+
+AnnotationMarker : '@' ;
+
 NewOper : 'new' ;
 
 AccessKeyword :
     PublicKeyword
     ;
 
-TypeDefKeyword  : 'type-def';
-EquationDefKeyword : 'equation-def';
-FunctionDefKeyword: 'function-def';
-QueryDefKeyword : 'query-def';
-RegexDefKeyword : 'regex-def';
+PackageKeyword : 'package';
+ImportKeyword : 'import';
+//ImportJavaKeyword : 'import-java';
+TypeDefKeyword  : 'type';
+EquationDefKeyword : 'equation';
+FunctionDefKeyword: 'function';
+QueryDefKeyword : 'query';
+RegexDefKeyword : 'regex';
 //
 BooleanKeyword  : 'boolean';
 CharKeyword     : 'char';

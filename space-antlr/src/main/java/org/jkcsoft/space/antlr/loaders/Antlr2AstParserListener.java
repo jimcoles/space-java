@@ -30,6 +30,8 @@ public class Antlr2AstParserListener extends SpaceParserBaseListener {
 
     private AstFactory astFactory = new AstFactory();
     private File file;
+    private int parseRuleCount;
+    private int parseTerminalCount;
 
     public Antlr2AstParserListener(File file) {
         this.file = file;
@@ -37,10 +39,6 @@ public class Antlr2AstParserListener extends SpaceParserBaseListener {
 
     @Override
     public void enterSpaceTypeDefn(SpaceParser.SpaceTypeDefnContext ctx) {
-//        astFactory.newProgram(
-//                Antrl2AstMapping.toAst(file, ctx),
-//                "");
-////        astFactory.getUserAstRoot().addSpaceTypeDefn(new EntityDefn(null, ctx.ge))
         super.enterSpaceTypeDefn(ctx);
     }
 
@@ -67,16 +65,6 @@ public class Antlr2AstParserListener extends SpaceParserBaseListener {
     @Override
     public void exitDefnTypeModifier(SpaceParser.DefnTypeModifierContext ctx) {
         super.exitDefnTypeModifier(ctx);
-    }
-
-    @Override
-    public void enterElementDefnHeader(SpaceParser.ElementDefnHeaderContext ctx) {
-        super.enterElementDefnHeader(ctx);
-    }
-
-    @Override
-    public void exitElementDefnHeader(SpaceParser.ElementDefnHeaderContext ctx) {
-        super.exitElementDefnHeader(ctx);
     }
 
     @Override
@@ -167,14 +155,13 @@ public class Antlr2AstParserListener extends SpaceParserBaseListener {
 
     @Override
     public void exitEveryRule(ParserRuleContext ctx) {
-        ctx.getChild(0);
+        this.parseRuleCount++;
         super.exitEveryRule(ctx);
     }
 
     @Override
     public void visitTerminal(TerminalNode node) {
-        node.getText();
-        node.getSymbol().getText();
+        this.parseTerminalCount++;
         super.visitTerminal(node);
     }
 

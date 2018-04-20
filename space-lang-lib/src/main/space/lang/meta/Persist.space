@@ -1,0 +1,8 @@
+package space.lang.meta;
+
+/**
+ * Describes persistence of this type.
+ */
+type Persist {
+
+}

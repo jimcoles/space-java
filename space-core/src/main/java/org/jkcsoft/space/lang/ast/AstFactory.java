@@ -13,6 +13,8 @@ import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * The AST is built by calling 'new_' methods on this object.  An
@@ -50,8 +52,12 @@ public class AstFactory {
         return schema;
     }
 
-    public SpaceTypeDefn newSpaceTypeDefn(SourceInfo sourceInfo, String name) {
-        SpaceTypeDefn spaceTypeDefn = new SpaceTypeDefn(sourceInfo, name);
+    public TextNode newTextNode(SourceInfo sourceInfo, String name) {
+        return new TextNode(sourceInfo, name);
+    }
+
+    public SpaceTypeDefn newSpaceTypeDefn(SourceInfo sourceInfo, TextNode nameNode) {
+        SpaceTypeDefn spaceTypeDefn = new SpaceTypeDefn(sourceInfo, nameNode);
         return spaceTypeDefn;
     }
 
@@ -92,21 +98,19 @@ public class AstFactory {
     }
 
     public SequenceLiteralExpr newCharSeqLiteralExpr(SourceInfo sourceInfo, String text) {
-        SequenceLiteralExpr element = new SequenceLiteralExpr(sourceInfo, newTypeRef(
-            newSpacePathExpr(sourceInfo, null, "char", null), TypeRef.CollectionType.SEQUENCE), text);
-        return element;
+        return new SequenceLiteralExpr(sourceInfo, newTypeRef(
+            newSpacePathExpr(sourceInfo, null, "char", null),
+            Collections.singletonList(TypeRef.CollectionType.SEQUENCE)), text);
     }
 
     public SpacePathExpr newSpacePathExpr(SourceInfo sourceInfo, PathOperEnum oper, String searchName,
                                           SpacePathExpr nextExpr)
     {
-        SpacePathExpr element = new SpacePathExpr(sourceInfo, true, oper, searchName, nextExpr);
-        return element;
+        return new SpacePathExpr(sourceInfo, true, oper, searchName, nextExpr);
     }
 
     public ThisTupleExpr newThisExpr(SourceInfo sourceInfo) {
-        ThisTupleExpr element = new ThisTupleExpr(sourceInfo);
-        return element;
+        return new ThisTupleExpr(sourceInfo);
     }
 
     public SpaceTypeDefnBody newTypeDefnBody(SourceInfo codeSourceInfo) {
@@ -147,8 +151,8 @@ public class AstFactory {
         return new MetaReference(spacePathExpr, type);
     }
 
-    public TypeRef newTypeRef(SpacePathExpr spacePathExpr, TypeRef.CollectionType collectionType) {
-        return new TypeRef(spacePathExpr, collectionType);
+    public TypeRef newTypeRef(SpacePathExpr spacePathExpr, List<TypeRef.CollectionType> collectionTypes) {
+        return new TypeRef(spacePathExpr, collectionTypes);
     }
 
     public TypeRef newTypeRef(SpacePathExpr spacePathExpr) {
@@ -159,8 +163,7 @@ public class AstFactory {
         return new TypeRef(typeDefn);
     }
 
-    public TypeRef newTypeRef(DatumType typeDefn, TypeRef.CollectionType collectionType) {
-        return new TypeRef(typeDefn, collectionType);
+    public ParseUnit newParseUnit(SourceInfo sourceInfo) {
+        return new ParseUnit(sourceInfo);
     }
-
 }

@@ -35,7 +35,7 @@
         </layout>
     </appender>
 
-    <logger name="dumpFile">
+    <logger name="dumpFile" additivity="false">
         <appender-ref ref="dumpFile" />
     </logger>
 

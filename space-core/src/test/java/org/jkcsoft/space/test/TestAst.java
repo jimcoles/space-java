@@ -27,32 +27,33 @@ public class TestAst {
     @Test
     public void testBuildAndRunProgram() {
         AstFactory astFactory = new AstFactory();
-        astFactory.newProgram(new ProgSourceInfo(), "(API Builder Program)");
+        ProgSourceInfo si = new ProgSourceInfo();
+        astFactory.newProgram(si, "(API Builder Program)");
         //
         ObjectFactory objBuilder = ObjectFactory.getInstance();
-        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(new ProgSourceInfo(), "MyHelloSpace");
+        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(si, astFactory.newTextNode(si, "MyHelloSpace"));
 
-        Schema astSchema = astFactory.newAstSchema(new ProgSourceInfo(), "TestAst");
+        Schema astSchema = astFactory.newAstSchema(si, "TestAst");
         astSchema
             .addSpaceDefn(spaceTypeDefn)
             .getBody()
-            .addVariableDecl(astFactory.newVariableDecl(new ProgSourceInfo(), "myIntDim", NumPrimitiveTypeDefn.CARD))
+            .addVariableDecl(astFactory.newVariableDecl(si, "myIntDim", NumPrimitiveTypeDefn.CARD))
             .setType(NumPrimitiveTypeDefn.CHAR);
         spaceTypeDefn
-            .setBody(astFactory.newTypeDefnBody(new ProgSourceInfo()))
-            .addVariableDecl(astFactory.newVariableDecl(new ProgSourceInfo(), "myCharDim", NumPrimitiveTypeDefn.CHAR))
+            .setBody(astFactory.newTypeDefnBody(si))
+            .addVariableDecl(astFactory.newVariableDecl(si, "myCharDim", NumPrimitiveTypeDefn.CHAR))
             ;
-        FunctionDefn mainMethod = astFactory.newSpaceFunctionDefn(new ProgSourceInfo(), "main", null);
+        FunctionDefn mainMethod = astFactory.newSpaceFunctionDefn(si, "main", null);
         spaceTypeDefn.getBody().addFunctionDefn(mainMethod);
 //        CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
 //        astFactory.getUserAstRoot().addObjectInstance(arg1, astFactory);
 
-        ThisTupleExpr thisTupleExpr = astFactory.newThisExpr(new ProgSourceInfo());
+        ThisTupleExpr thisTupleExpr = astFactory.newThisExpr(si);
 
         mainMethod.getStatementBlock().addExpr(
-            astFactory.newFunctionCallExpr(new ProgSourceInfo())
+            astFactory.newFunctionCallExpr(si)
                 .setFunctionDefnRef(
-                    astFactory.newSpacePathExpr(new ProgSourceInfo(), PathOperEnum.ASSOC_NAV, "", null)
+                    astFactory.newSpacePathExpr(si, PathOperEnum.ASSOC_NAV, "", null)
                 )
         );
 //        astFactory.newMetaObjectRefLiteral(null),

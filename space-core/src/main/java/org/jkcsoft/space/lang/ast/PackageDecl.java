@@ -9,6 +9,17 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-public class ParseUnitInfo {
+/**
+ * Tells the Space runtime which Package a given element belongs to.
+ *
+ * @author Jim Coles
+ */
+public class PackageDecl extends ModelElement {
+
+    private MetaReference<Schema> packageRef;
+
+    PackageDecl(SourceInfo sourceInfo) {
+        super(sourceInfo);
+    }
 
 }

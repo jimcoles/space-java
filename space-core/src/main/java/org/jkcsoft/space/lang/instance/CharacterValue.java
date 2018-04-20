@@ -23,6 +23,10 @@ public class CharacterValue extends ScalarValue<Character> {
 
     @Override
     public String asString() {
+
+//        String myString =(@NotNull String) "";
+
         return String.valueOf(getJvalue());
+
     }
 }

@@ -57,7 +57,7 @@ public abstract class ModelElement extends SpaceObject {
         return isGroupingNode;
     }
 
-    ModelElement addChild(ModelElement child) {
+    public ModelElement addChild(ModelElement child) {
         children.add(child);
         child.setParent(this);
         //

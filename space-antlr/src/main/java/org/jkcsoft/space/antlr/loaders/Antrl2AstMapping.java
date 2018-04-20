@@ -110,15 +110,16 @@ public class Antrl2AstMapping {
 
             @Override
             public int getLine() {
-                return tokenAO.getLine();
+                return tokenAO == null ? -1 : tokenAO.getLine();
             }
 
             @Override
             public int getCursorIndexInLine() {
                 return (
-                    isStart() ?
-                    tokenAO.getCharPositionInLine()
-                    : (tokenAO.getCharPositionInLine() + 1) + (tokenAO.getStopIndex() - tokenAO.getStartIndex())
+                    tokenAO == null ? -1 :
+                        isStart() ?
+                            tokenAO.getCharPositionInLine()
+                            : (tokenAO.getCharPositionInLine() + 1) + (tokenAO.getStopIndex() - tokenAO.getStartIndex())
                 );
             }
 

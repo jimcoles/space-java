@@ -1,0 +1,23 @@
+package space.lang;
+
+import java:java.lang.String;
+import space.lang.meta.SpaceTypeDefn;
+
+/**
+ * Base Object type for all Space objects.
+ */
+type Object {
+
+    SpaceTypeDefn stype;
+    Key oid;
+
+    function Key getOid() {
+        return oid;
+    }
+
+    function String toString() {
+        String jString = stype.toString();
+        return ( jString + Key.toString(oid) );
+    }
+
+}

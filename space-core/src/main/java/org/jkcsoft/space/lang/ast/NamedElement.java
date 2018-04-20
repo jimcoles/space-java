@@ -73,7 +73,7 @@ public abstract class NamedElement extends ModelElement implements Named, Compar
     }
 
     @Override
-    ModelElement addChild(ModelElement child) {
+    public ModelElement addChild(ModelElement child) {
         return super.addChild(child);
     }
 

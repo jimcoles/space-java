@@ -21,10 +21,7 @@ import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.antlr.SpaceLexer;
 import org.jkcsoft.space.antlr.SpaceParser;
-import org.jkcsoft.space.lang.ast.AstFactory;
-import org.jkcsoft.space.lang.ast.FileSourceInfo;
-import org.jkcsoft.space.lang.ast.Schema;
-import org.jkcsoft.space.lang.ast.SourceInfo;
+import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.antlr.AntlrTreePrintListener;
@@ -51,6 +48,7 @@ public class G2AntlrParser implements AstLoader {
     private GrammarRootAST spaceGrammarRoot;
 
     private File srcFile;
+    private AstFactory astFactory = AstFactory.getInstance();
 
     public G2AntlrParser() {
         // Loads the ANTLR grammar for future use
@@ -69,14 +67,49 @@ public class G2AntlrParser implements AstLoader {
     @Override
     public Schema load(List<AstLoadError> errors, File spaceSrcFile) throws Exception {
         this.srcFile = spaceSrcFile;
-        log.info("Parsing file [" + spaceSrcFile.getAbsolutePath() + "]");
-        InputStream fileInputStream = new FileInputStream(spaceSrcFile);
-        ANTLRInputStream input = new ANTLRInputStream(fileInputStream);
-        return load(errors, input);
+        Schema schema = Schema.ROOT_SCHEMA;
+        if (spaceSrcFile.isDirectory()) {
+            loadDirRec(errors, schema, spaceSrcFile);
+        }
+        else {
+            loadSingleFile(errors, schema, spaceSrcFile);
+        }
+        return schema;
     }
 
-    private Schema load(List<AstLoadError> loadErrors, ANTLRInputStream aisSpaceSrc) {
-        AstFactory astFactory = null;
+    private void loadSingleFile(List<AstLoadError> errors, Schema schema, File spaceSrcFile) throws IOException {
+        log.info("Parsing file [" + spaceSrcFile.getAbsolutePath() + "]");
+        this.srcFile = spaceSrcFile;
+        InputStream fileInputStream = new FileInputStream(spaceSrcFile);
+        ANTLRInputStream input = new ANTLRInputStream(fileInputStream);
+        ParseUnit parseUnit = loadFileStream(errors, input);
+        schema.addParseUnit(parseUnit);
+//        for (ModelElement modelElement : parseUnit.getChildren()) {
+//            if (modelElement instanceof SpaceTypeDefn)
+//                schema.addSpaceDefn(((SpaceTypeDefn) modelElement));
+//            else if (modelElement instanceof StreamTypeDefn)
+//                schema.addStreamTypeDefn(((StreamTypeDefn) modelElement));
+//        }
+    }
+
+    private void loadDirRec(List<AstLoadError> errors, Schema parentSchema, File file) throws IOException {
+        log.info("Loading source in dir [" + file.getAbsolutePath() + "]");
+        File[] files = file.listFiles();
+        Schema thisSchema = astFactory.newAstSchema(null, file.getName());
+        parentSchema.addSchema(thisSchema);
+        for (File childFile : files) {
+            if (childFile.isDirectory()) {
+                loadDirRec(errors, thisSchema, childFile);
+            }
+            else {
+                if (childFile.getName().endsWith(Language.SPACE.getFileExt())) {
+                    loadSingleFile(errors, thisSchema, childFile);
+                }
+            }
+        }
+    }
+
+    private ParseUnit loadFileStream(List<AstLoadError> loadErrors, ANTLRInputStream aisSpaceSrc) {
         ANTLRErrorListener errorListener = new MyANTLRErrorListener(loadErrors);
         //
         SimpleTransListener stl = new SimpleTransListener(SpaceParser.ruleNames);
@@ -112,18 +145,17 @@ public class G2AntlrParser implements AstLoader {
 //        log.info("attempt visitor pattern for AST transform");
 //        AstFactory accept = parseUnitContext.accept(astTransVisitor);
 
-        Schema schema = null;
+        ParseUnit parseUnit = null;
         Collection syntaxErrors =
             CollectionUtils.select(loadErrors,
                                    object -> ((AstLoadError) object).getType() == AstLoadError.Type.SYNTAX);
 
         if (syntaxErrors.size() == 0) {
-            astFactory = new AstFactory();
             Antlr2AstTransform antlr2AstTransform = new Antlr2AstTransform(astFactory, srcFile);
-            schema = antlr2AstTransform.transform(parseUnitContext);
+            parseUnit = antlr2AstTransform.transform(parseUnitContext);
         }
 
-        return schema;
+        return parseUnit;
     }
 
     private void checkAstClasses() {

@@ -1,0 +1,7 @@
+public type Hyper
+/*
+  Central type for the Hyper Space protocol.
+*/
+{
+
+}

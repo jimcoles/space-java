@@ -1,0 +1,16 @@
+package space.lang;
+
+import java:java.lang.String;
+
+/**
+ * The Space String type is a convenience wrapper of a Space char sequence.
+ */
+type String {
+
+    char[] charSeq;
+
+    function String append(String inStr) {
+//        native-call java.lang.String.
+    }
+
+}

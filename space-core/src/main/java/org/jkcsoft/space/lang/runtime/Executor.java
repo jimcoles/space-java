@@ -13,6 +13,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
+import org.apache.log4j.RollingFileAppender;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Lister;
 import org.jkcsoft.java.util.Strings;
@@ -254,7 +255,7 @@ public class Executor extends ExprProcessor implements ExeContext {
          */
     }
 
-    private void link(List<RuntimeError> runErrors, Schema runSchema) throws Exception {
+    private void link(List<RuntimeError> runErrors, Schema runSchema) {
         log.debug("linking loaded program");
         runErrors = linkRefs(runErrors, langRootSchema);
         runErrors = linkRefs(runErrors, runSchema);
@@ -325,13 +326,15 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     private SpaceTypeDefn loadNativeType(Class jnClass, Schema rootAstSchema) {
         AstFactory astFactory = getAstFactory();
-        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(new NativeSourceInfo(jnClass),
-                                                                  toSpaceTypeName(jnClass));
+        NativeSourceInfo jSourceInfo = new NativeSourceInfo(jnClass);
+        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(jSourceInfo,
+                                                                  astFactory.newTextNode(jSourceInfo,
+                                                                                         toSpaceTypeName(jnClass)));
         trackMetaObject(spaceTypeDefn);
         //
         rootAstSchema.addSpaceDefn(spaceTypeDefn);
         //
-        spaceTypeDefn.setBody(astFactory.newTypeDefnBody(new NativeSourceInfo(jnClass)));
+        spaceTypeDefn.setBody(astFactory.newTypeDefnBody(jSourceInfo));
         //
         Method[] methods = jnClass.getMethods();
         for (Method jMethod : methods) {
@@ -345,7 +348,8 @@ public class Executor extends ExprProcessor implements ExeContext {
                 jMethodInfo,
                 jMethod.getName(),
                 jMethod,
-                astFactory.newSpaceTypeDefn(jMethodInfo, "_sig_" + jMethod.getName()),
+                astFactory
+                    .newSpaceTypeDefn(jMethodInfo, astFactory.newTextNode(jMethodInfo, "_sig_" + jMethod.getName())),
                 spcRetInfo.getSpaceTypeRef()
             );
             //
@@ -608,6 +612,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     private Tuple eval(EvalContext evalContext, SpaceTypeDefn tupleTypeDefn, TupleExpr tupleExpr)
     {
+        log.debug("eval: new tuple => " + tupleTypeDefn + ", " + tupleExpr);
         Tuple tuple = newTuple(tupleTypeDefn);
         List<ValueExpr> valueExprs = tupleExpr != null ? tupleExpr.getValueExprs() : null;
         // validation
@@ -630,10 +635,6 @@ public class Executor extends ExprProcessor implements ExeContext {
             }
         }
         return tuple;
-    }
-
-    private Value eval(EvalContext evalContext, NamedElement member) {
-        return evalContext.peekStack().getCtxObject().get(member).getValue();
     }
 
     /**
@@ -875,23 +876,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         ValueHolder holder = null;
         ObjectFactory ofact = getObjFactory();
         if (declartion.getType() instanceof PrimitiveTypeDefn) {
-            Variable var = new Variable(tuple, ((VariableDecl) declartion), null);
-            PrimitiveTypeDefn primType = (PrimitiveTypeDefn) declartion;
-            if (primType == NumPrimitiveTypeDefn.BOOLEAN) {
-                var.setScalarValue(ofact.newBooleanValue(false));
-            }
-            else if (primType == NumPrimitiveTypeDefn.CHAR) {
-                var.setScalarValue(ofact.newCharacterValue(null));
-            }
-            else if (primType == NumPrimitiveTypeDefn.CARD) {
-                var.setScalarValue(ofact.newCardinalValue(Integer.MIN_VALUE));
-            }
-            else if (primType == NumPrimitiveTypeDefn.REAL) {
-                var.setScalarValue(ofact.newRealValue(Double.NaN));
-            }
-            else if (primType == VoidType.VOID) {
-//                var.setScalarValue(NullValue.NULL_VALUE);
-            }
+            holder = new Variable(tuple, ((VariableDecl) declartion));
         }
         else if (declartion instanceof SpaceTypeDefn) {
             holder = ofact.newObjectReference(null, null, null);
@@ -947,9 +932,10 @@ public class Executor extends ExprProcessor implements ExeContext {
     }
 
     private void dumpAsts() {
+        log.info("see dump log file for AST dumps");
         for (Schema schema : dirChain) {
             String dump = AstUtils.print(schema);
-            log.debug("AST Root /: " + dump);
+//            log.debug("AST Root /: " + dump);
             Logger.getLogger("dumpFile").info(dump);
         }
     }
@@ -1002,14 +988,14 @@ public class Executor extends ExprProcessor implements ExeContext {
             if (jClass == String.class) {
                 spaceTypeRef = getAstFactory().newTypeRef(
                     getAstFactory().newSpacePathExpr(jSourceInfo, null, NumPrimitiveTypeDefn.CHAR.getName(), null),
-                    TypeRef.CollectionType.SEQUENCE
+                    Collections.singletonList(TypeRef.CollectionType.SEQUENCE)
                 );
             }
             else {
                 String spcTypeRefName = spcPrimType != null ? spcPrimType.getName() : toSpaceTypeName(jClass);
                 spaceTypeRef = getAstFactory().newTypeRef(
                     getAstFactory().newSpacePathExpr(jSourceInfo, null, spcTypeRefName, null),
-                    javaToSpaceCollType(jClass)
+                    Collections.singletonList(javaToSpaceCollType(jClass))
                 );
             }
         }

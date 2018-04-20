@@ -25,9 +25,10 @@ end note
 
 MyTopVisitor -> MyGenVisitor: visitChildren()
 
-group For each child of ParentTreeNode
+group For each unvisited child of ParentTreeNode
     MyGenVisitor -> ChildTreeNodeN: accept(visitor)
     ChildTreeNodeN -> MyTopVisitor: visit__()
+    MyGenVisitor -> MyGenVisitor: aggregateChildResult
 end
 
 note over MyGenVisitor

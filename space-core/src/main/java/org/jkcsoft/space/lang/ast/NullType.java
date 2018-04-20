@@ -9,18 +9,19 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import java.util.List;
-
 /**
  * @author Jim Coles
  */
-public interface Named extends Identified {
+public class NullType extends PrimitiveTypeDefn {
 
-    boolean isNamed();
+    public static final NullType NULL = new NullType(new IntrinsicSourceInfo(), "null");
 
-    String getName();
+    static {
+        PrimitiveTypeDefn.addPrimitiveTypeDefn(NULL);
+    }
 
-    List<String> getFullNamePath();
+    private NullType(SourceInfo sourceInfo, String name) {
+        super(sourceInfo, name);
+    }
 
-    Named getNamedParent();
 }

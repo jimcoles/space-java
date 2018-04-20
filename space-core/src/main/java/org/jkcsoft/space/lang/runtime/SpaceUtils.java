@@ -22,35 +22,35 @@ public class SpaceUtils {
         boolean assigned = false;
         RuntimeError error = null;
         if (leftSideHolder instanceof Variable) {
-            Variable lsHolder = (Variable) leftSideHolder;
+            Variable lsHolderAsVar = (Variable) leftSideHolder;
             if (rightSideValue instanceof ScalarValue) {
                 ScalarValue rsScalarValue = (ScalarValue) rightSideValue;
-                if (rsScalarValue.getType() == lsHolder.getDeclaration().getType()) {
-                    lsHolder.setScalarValue(rsScalarValue);
+                if (rsScalarValue.getType() == lsHolderAsVar.getDeclaration().getType()) {
+                    lsHolderAsVar.setScalarValue(rsScalarValue);
                     assigned = true;
                 }
                 else {
                     error = exe.newRuntimeError(
-                        "type mismatch: cannot assign " + lsHolder.getDeclaration().getType() + " <- " +
+                        "type mismatch: cannot assign " + lsHolderAsVar.getDeclaration().getType() + " <- " +
                             rsScalarValue.getType());
                 }
             }
         }
-        else if (leftSideHolder instanceof ScalarValue) {
-            ScalarValue lsScalarValue = ((ScalarValue) leftSideHolder);
-            if (rightSideValue instanceof ScalarValue) {
-                ScalarValue rsScalarValue = (ScalarValue) rightSideValue;
-                if (rsScalarValue.getType() == lsScalarValue.getType()) {
-                    lsScalarValue.setJvalue(rsScalarValue.getJvalue());
-                    assigned = true;
-                }
-                else {
-                    error = exe.newRuntimeError(
-                        "type mismatch: cannot assign " + lsScalarValue.getType() + " <- " +
-                            rsScalarValue.getType());
-                }
-            }
-        }
+//        else if (leftSideHolder instanceof ScalarValue) {
+//            ScalarValue lsScalarValue = ((ScalarValue) leftSideHolder);
+//            if (rightSideValue instanceof ScalarValue) {
+//                ScalarValue rsScalarValue = (ScalarValue) rightSideValue;
+//                if (rsScalarValue.getType() == lsScalarValue.getType()) {
+//                    lsScalarValue.setJvalue(rsScalarValue.getJvalue());
+//                    assigned = true;
+//                }
+//                else {
+//                    error = exe.newRuntimeError(
+//                        "type mismatch: cannot assign " + lsScalarValue.getType() + " <- " +
+//                            rsScalarValue.getType());
+//                }
+//            }
+//        }
         else if (leftSideHolder instanceof Reference) {
             if (rightSideValue instanceof Reference) {
                 ((Reference) leftSideHolder).setToOid(((Reference) rightSideValue).getToOid());
