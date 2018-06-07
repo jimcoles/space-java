@@ -23,7 +23,7 @@ import java.util.List;
 public class QueryDefn extends EquationDefn {
 
     private Set rootSpace;
-    private List<SpacePathExpr> variables;
+    private List<NamePartExpr> variables;
     private OperatorExpr filter;  // nestable expression
 
     public QueryDefn(SourceInfo sourceInfo, String name) {

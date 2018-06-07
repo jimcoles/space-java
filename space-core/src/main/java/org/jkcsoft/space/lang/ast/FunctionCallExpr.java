@@ -9,10 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
-import java.util.List;
-
 /**
  * The AST's representation of a call to an object.function() along with arguments expressions.
  *
@@ -24,7 +20,8 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
      * The name of some other named design-time thing such as a function.
      */
     private MetaReference<AbstractFunctionDefn> functionDefnRef;
-    private TupleExpr tupleExpr;
+    private TupleExpr argTupleExpr;
+    private MetaReference argTupleRef;
 
     /**
      * Represents the invocation of a function.
@@ -33,13 +30,13 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
         super(sourceInfo);
     }
 
-    public FunctionCallExpr setFunctionDefnRef(SpacePathExpr functionPathExpr)
+    public FunctionCallExpr setFunctionDefnRef(MetaReference functionDefnRef)
     {
-        if (functionPathExpr == null) throw new RuntimeException("bug: function path null");
+        if (functionDefnRef == null) throw new RuntimeException("bug: function path null");
         //
-        this.functionDefnRef = new MetaReference(functionPathExpr, MetaType.FUNCTION);
+        this.functionDefnRef = functionDefnRef;
         //
-        addChild(functionDefnRef);
+        addChild(this.functionDefnRef);
         //
         return this;
     }
@@ -48,14 +45,20 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
         return functionDefnRef;
     }
 
-    public TupleExpr getTupleExpr() {
-        return tupleExpr;
+    public TupleExpr getArgTupleExpr() {
+        return argTupleExpr;
     }
 
-    public void setTupleExpr(TupleExpr tupleExpr) {
-        this.tupleExpr = tupleExpr;
+    public void setArgTupleExpr(TupleExpr argTupleExpr) {
+        this.argTupleExpr = argTupleExpr;
         //
-        addChild(tupleExpr);
+        addChild(argTupleExpr);
+    }
+
+    public void setArgTupleRef(MetaReference argTupleRef) {
+        this.argTupleRef = argTupleRef;
+        //
+        addChild(argTupleRef);
     }
 
     @Override

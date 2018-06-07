@@ -15,9 +15,9 @@ import org.apache.log4j.Logger;
 import org.jkcsoft.apps.Application;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.runtime.Executor;
-import org.jkcsoft.space.lang.runtime.SpaceX;
 
-import java.io.PrintStream;
+import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -40,6 +40,11 @@ public class SpaceMain {
     // -------------------------------------------------------------------------
     //
     private Application app;
+    private Option optMainName = new Option("main", true, "Main to run, dot-separated");
+    private Option optDirLibs = new Option("dirs", true, "Colon-separated sequence of (Space) directory roots");
+    private Option optVersion = new Option("version", "Show Space version info");
+    private Option optVerbose = new Option("verbose", "Print extra runtime info to standard out");
+    private Option optHelp = new Option("help", "Print usage");
 
     private SpaceMain() {
         app = new Application("space");
@@ -50,15 +55,11 @@ public class SpaceMain {
             Options cliOpts = new Options();
             OptionGroup optionGroup = new OptionGroup();
 
-            Option optFileName = new Option("file", true, "File name to run");
-            Option help = new Option("help", "Print usage");
-            Option version = new Option("version", "Show Space version info");
-            Option verbose = new Option("verbose", "Print extra runtime info to standard out");
-
-            cliOpts.addOption(optFileName);
-            cliOpts.addOption(help);
-            cliOpts.addOption(version);
-            cliOpts.addOption(verbose);
+            cliOpts.addOption(optMainName);
+            cliOpts.addOption(optDirLibs);
+            cliOpts.addOption(optHelp);
+            cliOpts.addOption(optVersion);
+            cliOpts.addOption(optVerbose);
 
             // Parse and validate the command line based on options decl ...
             CommandLineParser cliParse = new DefaultParser();
@@ -68,30 +69,19 @@ public class SpaceMain {
             // Interpret and apply the command line options ...
 
             // Opt: help
-            if (commandLine.hasOption(help.getOpt())) {
+            if (commandLine.hasOption(optHelp.getOpt())) {
                 printUsage(cliOpts);
                 return;
             }
 
             // Opt: verbose => set log level to DEBUG
-            if (commandLine.hasOption(verbose.getOpt())) {
+            if (commandLine.hasOption(optVerbose.getOpt())) {
                 Logger.getRootLogger().setLevel(Level.DEBUG);
             }
 
-            // Opt: file - Source file to run
-            String fileName = commandLine.getOptionValue(optFileName.getOpt());
-
-            if (Strings.isEmpty(fileName)) {
-                List<String> restOfArgs = commandLine.getArgList();
-                if (restOfArgs == null || restOfArgs.size() != 1)
-                    throw new IllegalArgumentException("Filename required");
-
-                fileName = restOfArgs.get(0);
-            }
-
             // Exec specified Space code ...
-            Executor exec = new Executor();
-            exec.run(fileName);
+            Executor exec = new Executor(new CliExeSettings(commandLine));
+            exec.run();
         }
         catch (ParseException e) {
             String message = "invalid command line: " + e.getMessage();
@@ -109,4 +99,43 @@ public class SpaceMain {
 
     }
 
+    private class CliExeSettings implements Executor.ExeSettings {
+
+        private String exeMain;
+        private List<File> spaceDirs = new LinkedList<>();
+
+        public CliExeSettings(CommandLine commandLine) {
+            // Opt: verbose => set log level to DEBUG
+            if (commandLine.hasOption(optVerbose.getOpt())) {
+                Logger.getRootLogger().setLevel(Level.DEBUG);
+            }
+
+            // Opt: file - Source file to run
+            exeMain = commandLine.getOptionValue(optMainName.getOpt());
+
+            if (Strings.isEmpty(exeMain)) {
+                List<String> restOfArgs = commandLine.getArgList();
+                if (restOfArgs == null || restOfArgs.size() != 1)
+                    throw new IllegalArgumentException("Filename required");
+
+                exeMain = restOfArgs.get(0);
+            }
+
+            String dirSeqExpr = commandLine.getOptionValue(optDirLibs.getOpt());
+            String[] dirNames = dirSeqExpr.split(":");
+            for (String dirName : dirNames) {
+                spaceDirs.add(new File(dirName));
+            }
+        }
+
+        @Override
+        public String getExeMain() {
+            return exeMain;
+        }
+
+        @Override
+        public List<File> getSpaceDirs() {
+            return spaceDirs;
+        }
+    }
 }

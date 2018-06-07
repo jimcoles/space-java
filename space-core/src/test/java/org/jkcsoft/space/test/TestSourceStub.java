@@ -22,7 +22,7 @@ public class TestSourceStub {
     private Executor getExecutor() {
         Executor exec = null;
         try {
-            exec = new Executor();
+            exec = new Executor(null);
         } catch (Throwable th) {
             log.error("error running", th);
         }
@@ -30,7 +30,7 @@ public class TestSourceStub {
     }
 
     public void runTestSource(String spaceSourcePath) {
-        getExecutor().run(FileUtils.getFile(getRootSrcDir(), spaceSourcePath));
+        getExecutor().loadDir(FileUtils.getFile(getRootSrcDir(), spaceSourcePath));
     }
 
     private File getRootSrcDir() {

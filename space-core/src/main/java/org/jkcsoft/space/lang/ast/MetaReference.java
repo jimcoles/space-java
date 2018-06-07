@@ -12,59 +12,56 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
+ * Top-level notion for holding a full reference to a named element. The reference may be
+ * multi-part (fully qualified).  Holds a chain of MetaRefPart's,
+ * each of which resolves to a single meta object.  The MetaType of the full reference
+ * should be known at parse time.
+ *
  * @param <T> The class of meta object being referenced.
  * @author Jim Coles
  */
 public class MetaReference<T extends Named> extends ModelElement implements ValueExpr {
 
-    private SpacePathExpr spacePathExpr;
     private MetaType targetMetaType;
+    private MetaRefPart firstPart;
 
-    // elements below set by linker
-//    private NamedElement lexicalContext;
-    /** e.g., the SpaceTypeDefn object if this ref resolves to such,
-     * or VariableDefn, etc.. */
-    private T resolvedMetaObj;
     private ScopeKind resolvedDatumScope;  // only relevant if target is a datum type.
     private Class<AbstractCollectionTypeDefn> collClass;
+    private MetaRefPart<T> lastPart;
     private LoadState state = LoadState.INITIALIZED;
 
-
-    MetaReference(SpacePathExpr spacePathExpr, MetaType targetMetaType) {
-        this(spacePathExpr, targetMetaType, null);
+    MetaReference(SourceInfo sourceInfo, MetaType targetMetaType) {
+        this(sourceInfo, targetMetaType, null);
     }
 
-    MetaReference(SpacePathExpr spacePathExpr, Class<AbstractCollectionTypeDefn> collClass) {
-        this(spacePathExpr, MetaType.TYPE, collClass);
+    MetaReference(SourceInfo sourceInfo, Class<AbstractCollectionTypeDefn> collClass) {
+        this(sourceInfo, MetaType.TYPE, collClass);
     }
 
-    MetaReference(SpacePathExpr spacePathExpr, MetaType targetMetaType, Class<AbstractCollectionTypeDefn> collClass) {
-        super(spacePathExpr.getSourceInfo());
-        this.spacePathExpr = spacePathExpr;
+    MetaReference(SourceInfo sourceInfo, MetaType targetMetaType, Class<AbstractCollectionTypeDefn> collClass) {
+        super(sourceInfo);
+        this.firstPart = firstPart;
         this.targetMetaType = targetMetaType;
         this.collClass = collClass;
     }
 
     public MetaReference(T typeDefn) {
-        super(new ProgSourceInfo());
-        this.resolvedMetaObj = typeDefn;
-        this.state = LoadState.RESOLVED;
+        super(new IntrinsicSourceInfo());
+        this.firstPart = new MetaRefPart(this, new NamePartExpr(new IntrinsicSourceInfo(), false, null, typeDefn.getName()));
+        this.firstPart.setState(LoadState.RESOLVED);
+        this.firstPart.setResolvedMetaObj(typeDefn);
     }
 
-    public SpacePathExpr getSpacePathExpr() {
-        return spacePathExpr;
+    public void setFirstPart(MetaRefPart firstPart) {
+        this.firstPart = firstPart;
+    }
+
+    public MetaRefPart getFirstPart() {
+        return firstPart;
     }
 
     public MetaType getTargetMetaType() {
         return targetMetaType;
-    }
-
-    public LoadState getState() {
-        return state;
-    }
-
-    public void setState(LoadState state) {
-        this.state = state;
     }
 
     public ScopeKind getResolvedDatumScope() {
@@ -76,34 +73,58 @@ public class MetaReference<T extends Named> extends ModelElement implements Valu
     }
 
     public T getResolvedMetaObj() {
-        return resolvedMetaObj;
-    }
-
-    public void setResolvedMetaObj(T resolvedMetaObj) {
-        this.resolvedMetaObj = resolvedMetaObj;
+        return getLastPart().getResolvedMetaObj();
     }
 
     public Class<AbstractCollectionTypeDefn> getCollClass() {
         return collClass;
     }
 
+//    public String getDisplayName() {
+//        return getLastPart().toString() + "(" + (getLastPart().getState() == LoadState.RESOLVED ? "res" : "unres") + ")";
+//    }
+
+    public String getFullPath() {
+        return "->" + firstPart + (firstPart.getNextRefPart() != null ? firstPart.getNextRefPart() : "");
+    }
+
+    @Override
     public String getDisplayName() {
-        return spacePathExpr.toString() + "(" + (state == LoadState.RESOLVED ? "res" : "unres") + ")";
+        return getFullPath();
+    }
+
+    protected String getSuffix() {
+        return null;
+    }
+
+    private MetaRefPart<T> getLastPart() {
+        if (lastPart == null) {
+            lastPart = firstPart;
+            while (lastPart.getNextRefPart() != null) {
+                lastPart = lastPart.getNextRefPart();
+            }
+        }
+        return lastPart;
+    }
+
+    public LoadState getState() {
+        return this.state;
+    }
+
+    public void setState(LoadState state) {
+        this.state = state;
     }
 
     @Override
     public String toString() {
         String suffix = getSuffix();
+        MetaRefPart<T> lastPart = getLastPart();
         return "<" +
             "fromObj=" + (getNamedParent() != null ? getNamedParent() : "") +
-            " path=" + spacePathExpr + (suffix != null ? " " + suffix : "") +
+            " path=" + getFullPath() + (suffix != null ? " " + suffix : "") +
             " (" + targetMetaType.toString().substring(0, 3) + ")" +
             (resolvedDatumScope != null ? " " + resolvedDatumScope.toString().substring(0, 3) : "") +
-            " resObj=" + (resolvedMetaObj != null ? resolvedMetaObj : "?") +
+            " resObj=" + (lastPart != null ? lastPart : "?") +
             '>';
-    }
-
-    protected String getSuffix() {
-        return null;
     }
 }

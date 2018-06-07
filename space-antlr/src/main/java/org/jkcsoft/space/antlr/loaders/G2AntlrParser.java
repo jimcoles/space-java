@@ -65,24 +65,30 @@ public class G2AntlrParser implements AstLoader {
     }
 
     @Override
-    public Schema load(List<AstLoadError> errors, File spaceSrcFile) throws Exception {
+    public ParsableChoice load(List<AstLoadError> errors, File spaceSrcFile) throws Exception {
         this.srcFile = spaceSrcFile;
+        ParsableChoice parse = null;
         Schema schema = Schema.ROOT_SCHEMA;
         if (spaceSrcFile.isDirectory()) {
-            loadDirRec(errors, schema, spaceSrcFile);
+            parse = astFactory.newParsableChoice(loadDir(errors, spaceSrcFile));
         }
         else {
-            loadSingleFile(errors, schema, spaceSrcFile);
+            parse = astFactory.newParsableChoice(loadFile(errors, schema, spaceSrcFile));
         }
-        return schema;
+        return parse;
     }
 
-    private void loadSingleFile(List<AstLoadError> errors, Schema schema, File spaceSrcFile) throws IOException {
+    public ParseUnit load(List<AstLoadError> errors, String spaceExpr) {
+        log.info("Parsing expression [" + spaceExpr.substring(0, 25) + "...]");
+        ParseUnit parseUnit = loadInputStream(errors, new ANTLRInputStream(spaceExpr));
+        return parseUnit;
+    }
+
+    private ParseUnit loadFile(List<AstLoadError> errors, Schema schema, File spaceSrcFile) throws IOException {
         log.info("Parsing file [" + spaceSrcFile.getAbsolutePath() + "]");
         this.srcFile = spaceSrcFile;
-        InputStream fileInputStream = new FileInputStream(spaceSrcFile);
-        ANTLRInputStream input = new ANTLRInputStream(fileInputStream);
-        ParseUnit parseUnit = loadFileStream(errors, input);
+        ParseUnit parseUnit = loadInputStream(errors, new ANTLRInputStream(new FileInputStream(spaceSrcFile)));
+        //
         schema.addParseUnit(parseUnit);
 //        for (ModelElement modelElement : parseUnit.getChildren()) {
 //            if (modelElement instanceof SpaceTypeDefn)
@@ -90,26 +96,27 @@ public class G2AntlrParser implements AstLoader {
 //            else if (modelElement instanceof StreamTypeDefn)
 //                schema.addStreamTypeDefn(((StreamTypeDefn) modelElement));
 //        }
+        return parseUnit;
     }
 
-    private void loadDirRec(List<AstLoadError> errors, Schema parentSchema, File file) throws IOException {
+    private Schema loadDir(List<AstLoadError> errors, File file) throws IOException {
         log.info("Loading source in dir [" + file.getAbsolutePath() + "]");
         File[] files = file.listFiles();
         Schema thisSchema = astFactory.newAstSchema(null, file.getName());
-        parentSchema.addSchema(thisSchema);
         for (File childFile : files) {
             if (childFile.isDirectory()) {
-                loadDirRec(errors, thisSchema, childFile);
+                thisSchema.addSchema(loadDir(errors, childFile));
             }
             else {
                 if (childFile.getName().endsWith(Language.SPACE.getFileExt())) {
-                    loadSingleFile(errors, thisSchema, childFile);
+                    thisSchema.addParseUnit(loadFile(errors, thisSchema, childFile));
                 }
             }
         }
+        return thisSchema;
     }
 
-    private ParseUnit loadFileStream(List<AstLoadError> loadErrors, ANTLRInputStream aisSpaceSrc) {
+    private ParseUnit loadInputStream(List<AstLoadError> loadErrors, ANTLRInputStream aisSpaceSrc) {
         ANTLRErrorListener errorListener = new MyANTLRErrorListener(loadErrors);
         //
         SimpleTransListener stl = new SimpleTransListener(SpaceParser.ruleNames);

@@ -16,6 +16,7 @@ import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Utility methods for querying and traversing the Space AST, which can also be thought of as a directory of nodes.
@@ -105,8 +106,8 @@ public class AstUtils {
         NamedElement lookup = null;
         switch (reference.getTargetMetaType()) {
             case TYPE:
-                lookup = checkIntrinsics(reference.getSpacePathExpr());
-                if (lookup == null) {
+                lookup = checkIntrinsics(reference.getFirstPart().getNamePartExpr());
+                if (lookup == null && reference.hasParent()) {
                     lookup = resolveFromNode(reference.getParent(), reference);
                 }
                 if (lookup == null) {
@@ -123,7 +124,7 @@ public class AstUtils {
                 break;
             case FUNCTION:
                 lookup = resolveFromRoot(dirChain, reference);
-                if (lookup == null && !reference.getSpacePathExpr().hasNextExpr())
+                if (lookup == null && !reference.getFirstPart().hasNextExpr())
                     lookup = findInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
                 else if (lookup == null) {
                     lookup = resolveFromNode(reference.getParent(), reference);
@@ -137,39 +138,39 @@ public class AstUtils {
     }
 
     private static NamedElement resolveFromRoot(List<Schema> dirChain, MetaReference reference) {
-        NamedElement lookup = findAsSchemaRoot(dirChain, reference.getSpacePathExpr());
-        lookup = traverseRest(lookup, reference.getSpacePathExpr().getNextExpr());
+        NamedElement lookup = findAsSchemaRoot(dirChain, reference.getFirstPart().getNamePartExpr());
+        lookup = traverseRest(lookup, reference.getFirstPart().getNextRefPart());
         return lookup;
     }
 
     private static NamedElement resolveFromNode(ModelElement astNode, MetaReference reference) {
         log.debug("trying to find ["+reference+"] under " + astNode);
-        NamedElement lookup = lookupImmediateChild(astNode, reference.getSpacePathExpr().getNodeText());
-        lookup = traverseRest(lookup, reference.getSpacePathExpr().getNextExpr());
+        NamedElement lookup = lookupImmediateChild(astNode, reference.getFirstPart().getNamePartExpr().getNameExpr());
+        lookup = traverseRest(lookup, reference.getFirstPart().getNextRefPart());
         return lookup;
     }
 
     /** Scans dir chain. */
-    public static NamedElement findAsSchemaRoot(List<Schema> dirChain, SpacePathExpr spacePathExpr) {
+    public static NamedElement findAsSchemaRoot(List<Schema> dirChain, NamePartExpr namePartExpr) {
         NamedElement lookup = null;
         for (ModelElement tryContext : dirChain) {
-            log.debug("trying to find [" + spacePathExpr + "] under schema [" + tryContext + "]");
-            lookup = lookupImmediateChild(tryContext, spacePathExpr.getNodeText());
+            log.debug("trying to find [" + namePartExpr + "] under schema [" + tryContext + "]");
+            lookup = lookupImmediateChild(tryContext, namePartExpr.getNameExpr());
             if (lookup != null)
                 break;
             else
-                log.debug("could not find [" + spacePathExpr + "] under [" + tryContext + "]");
+                log.debug("could not find [" + namePartExpr + "] under [" + tryContext + "]");
         }
         return lookup;
     }
 
-    public static NamedElement traverseRest(NamedElement context, SpacePathExpr spacePathExpr) {
+    public static NamedElement traverseRest(NamedElement context, MetaRefPart refPart) {
         NamedElement targetChild = context;
-        if (context != null && spacePathExpr != null) {
-            targetChild = lookupImmediateChild(context, spacePathExpr.getNodeText());
+        if (context != null && refPart != null) {
+            targetChild = lookupImmediateChild(context, refPart.getNamePartExpr().getNameExpr());
             if (targetChild != null) {
-                if (spacePathExpr.hasNextExpr()) {
-                    targetChild = traverseRest(targetChild, spacePathExpr.getNextExpr());
+                if (refPart.hasNextExpr()) {
+                    targetChild = traverseRest(targetChild, refPart.getNextRefPart());
                 }
             }
         }
@@ -182,12 +183,12 @@ public class AstUtils {
     {
         if (containerScopeKind == null)
             containerScopeKind = inferScopeKind(context);
-        NamedElement lookup = lookupImmediateChild(context, reference.getSpacePathExpr().getNodeText());
+        NamedElement lookup = lookupImmediateChild(context, reference.getFirstPart().getNamePartExpr().getNameExpr());
         if (lookup != null)
             reference.setResolvedDatumScope(containerScopeKind);
         else {
             if (context instanceof StatementBlock) {
-                if (reference.getSpacePathExpr().isFirst() && context.hasParent()) {
+                if (context.hasParent()) {
                     // not found so just go up the basic tree
                     ModelElement parent = context.getParent();
                     if (parent instanceof StatementBlock)
@@ -233,35 +234,65 @@ public class AstUtils {
         return childByName;
     }
 
-    private static NamedElement checkIntrinsics(SpacePathExpr spacePathExpr) {
+    private static NamedElement checkIntrinsics(NamePartExpr namePartExpr) {
         NamedElement lookup = null;
-        if (spacePathExpr.getNodeText().equals(VoidType.VOID.getName())) {
+        if (namePartExpr.getNameExpr().equals(VoidType.VOID.getName())) {
             lookup = VoidType.VOID;
         }
         else{
-            lookup = NumPrimitiveTypeDefn.valueOf(spacePathExpr.getNodeText());
+            lookup = NumPrimitiveTypeDefn.valueOf(namePartExpr.getNameExpr());
         }
         return lookup;
     }
 
-    public static String print(ModelElement modelElement) {
-        StringBuilder sb = new StringBuilder();
-        appendPrint(sb, modelElement, 0);
-        return sb.toString();
+    public static void walkAst(ModelElement astNode, AstConsumer astAction) {
+        boolean match = astAction.getFilter() == null || astAction.getFilter().test(astNode);
+        if (match)
+            astAction.upon(astNode);
+        List<ModelElement> children = astNode.getChildren();
+        for (ModelElement child : children) {
+            walkAst(child, astAction);
+        }
+        if (match)
+            astAction.after(astNode);
     }
 
-    private static void appendPrint(StringBuilder sb, ModelElement modelElement, int depth) {
-        String indent = Strings.multiplyString("\t", depth);
-        sb.append(JavaHelper.EOL)
-          .append(indent).append("(").append(modelElement.toString());
-        List<ModelElement> children = modelElement.getChildren();
-        for (ModelElement child : children) {
-            appendPrint(sb, child, depth + 1);
+    public static String print(ModelElement modelElement) {
+        PrintAstConsumer astPrinter = new PrintAstConsumer();
+        walkAst(modelElement, astPrinter);
+        return astPrinter.getSb().toString();
+    }
+
+    private static class PrintAstConsumer implements AstConsumer {
+
+        private final StringBuilder sb = new StringBuilder();
+
+        public PrintAstConsumer() {
         }
 
-        if (children.size() > 0)
-            sb.append(JavaHelper.EOL).append(indent);
+        @Override
+        public Predicate<ModelElement> getFilter() {
+            return null;
+        }
 
-        sb.append(")");
+        @Override
+        public void upon(ModelElement astNode) {
+            String indent = Strings.multiplyString("\t", astNode.getTreeDepth());
+            sb.append(JavaHelper.EOL)
+              .append(indent).append("(").append(astNode.toString());
+        }
+
+        @Override
+        public void after(ModelElement astNode) {
+            if (astNode.hasChildren()) {
+                String indent = Strings.multiplyString("\t", astNode.getTreeDepth());
+                sb.append(JavaHelper.EOL).append(indent);
+            }
+            sb.append(")");
+        }
+
+        public StringBuilder getSb() {
+            return sb;
+        }
     }
 }

@@ -10,13 +10,15 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
+ * The simple name portion of a meta object definition.
+ *
  * @author Jim Coles
  */
-public class TextNode extends ModelElement {
+public class NamePart extends ModelElement {
 
     private String text;
 
-    TextNode(SourceInfo sourceInfo, String text) {
+    NamePart(SourceInfo sourceInfo, String text) {
         super(sourceInfo);
         this.text = text;
     }

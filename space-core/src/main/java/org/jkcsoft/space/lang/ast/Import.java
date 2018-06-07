@@ -15,7 +15,7 @@ import java.util.List;
  * @author Jim Coles
  */
 public class Import {
-    private List<SpacePathExpr> imports;
+    private List<NamePartExpr> imports;
 
 
 }

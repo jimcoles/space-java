@@ -18,8 +18,9 @@ public class PackageDecl extends ModelElement {
 
     private MetaReference<Schema> packageRef;
 
-    PackageDecl(SourceInfo sourceInfo) {
+    PackageDecl(SourceInfo sourceInfo, MetaReference<Schema> packageRef) {
         super(sourceInfo);
+        this.packageRef = packageRef;
     }
 
 }

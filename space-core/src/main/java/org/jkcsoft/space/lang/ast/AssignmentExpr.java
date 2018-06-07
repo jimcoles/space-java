@@ -16,20 +16,20 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class AssignmentExpr extends ModelElement implements ValueExpr {
 
-    private MetaReference<NamedElement> memberRef;
+    private MetaReference<Named> memberRef;
     private ValueExpr valueExpr;
 
     public AssignmentExpr(SourceInfo sourceInfo) {
         super(sourceInfo);
     }
 
-    public MetaReference<NamedElement> getMemberRef() {
+    public MetaReference<Named> getMemberRef() {
         return memberRef;
     }
 
     /** The left-side reference. */
-    public void setMemberRef(SpacePathExpr memberPath) {
-        this.memberRef = new MetaReference<>(memberPath, MetaType.DATUM);
+    public void setMemberRef(MetaReference<Named> memberRef) {
+        this.memberRef = memberRef;
         //
         addChild(memberRef);
         //

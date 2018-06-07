@@ -21,10 +21,10 @@ public class SetDecl<T extends NamedElement> extends NamedElement implements Dec
 
     private MetaReference<T> tupleTypeRef;
 
-    SetDecl(SourceInfo sourceInfo, String name, SpacePathExpr tupleTypePathExpr) {
+    SetDecl(SourceInfo sourceInfo, String name, MetaReference tupleTypeRef) {
         super(sourceInfo, name);
 
-        this.tupleTypeRef = new MetaReference<>(tupleTypePathExpr, MetaType.TYPE);
+        this.tupleTypeRef = tupleTypeRef;
         //
         addChild(tupleTypeRef);
     }

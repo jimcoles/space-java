@@ -30,6 +30,7 @@ public abstract class ModelElement extends SpaceObject {
     private boolean isGroupingNode = false;
     // -------------- redundant collections for fast lookup
     private NamedElement namedParent;
+    private int treeDepth = -1;
     private List<ModelElement> children = new LinkedList<>();
     private Map<String, NamedElement> namedChildMap = new TreeMap<>();
     private Set<MetaReference> references = null;
@@ -81,7 +82,7 @@ public abstract class ModelElement extends SpaceObject {
 
     /**
      * Must be called by the adder method for children, e.g., {@link SpaceTypeDefn}.addAssocDefn() should call this for
-     * the {@link SpacePathExpr} associated with it's 'from' and 'to' type definition.
+     * the {@link NamePartExpr} associated with it's 'from' and 'to' type definition.
      */
     private void addReference(MetaReference reference) {
         if (reference == null) throw new IllegalArgumentException("attempt to Add null reference");
@@ -129,6 +130,13 @@ public abstract class ModelElement extends SpaceObject {
         return namedParent;
     }
 
+    public int getTreeDepth() {
+        if (treeDepth == -1)
+            treeDepth = (parent != null) ? 1 + getParent().getTreeDepth() : 0;
+
+        return treeDepth;
+    }
+
     @Override
     public String toString() {
         return "[" + this.getClass().getSimpleName() + ":" + this.getOid() + "(" + getSourceInfo() + ")] "
@@ -137,4 +145,7 @@ public abstract class ModelElement extends SpaceObject {
             ;
     }
 
+    public boolean hasChildren() {
+        return children != null && !children.isEmpty();
+    }
 }

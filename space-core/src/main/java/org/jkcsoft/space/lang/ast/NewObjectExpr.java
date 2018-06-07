@@ -9,29 +9,24 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * Creates new Tuples, Spaces(Sets), Sequences.
  */
 public class NewObjectExpr extends ModelElement implements ValueExpr {
 
-    private MetaReference<SpaceTypeDefn> typeRef;
+    private TypeRef typeRef;
     private TupleExpr tupleExpr;
 
-    public NewObjectExpr(SourceInfo sourceInfo, SpacePathExpr typeRefPathExpr, TupleExpr tupleExpr) {
+    public NewObjectExpr(SourceInfo sourceInfo, TypeRef typeRef, TupleExpr tupleExpr) {
         super(sourceInfo);
-        this.typeRef = new MetaReference<>(typeRefPathExpr, MetaType.TYPE);
+        this.typeRef = typeRef;
         this.tupleExpr = tupleExpr;
         //
         addChild(typeRef);
         addChild(tupleExpr);
     }
 
-    public MetaReference<SpaceTypeDefn> getTypeRef() {
+    public TypeRef getTypeRef() {
         return typeRef;
     }
 

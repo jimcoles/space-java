@@ -10,8 +10,6 @@
 package org.jkcsoft.space.antlr.loaders;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RuleContext;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.antlr.SpaceParserBaseVisitor;
@@ -216,7 +214,7 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<ModelElement> 
 
     @Override
     public ModelElement visitSpaceTypeDefn(SpaceParser.SpaceTypeDefnContext ctx) {
-        currentNode = astFactory.newSpaceTypeDefn(getSourceInfo(ctx), ((TextNode) ctx.identifier().accept(this)));
+        currentNode = astFactory.newSpaceTypeDefn(getSourceInfo(ctx), ((NamePart) ctx.identifier().accept(this)));
         return super.visitSpaceTypeDefn(ctx);
     }
 

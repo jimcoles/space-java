@@ -21,12 +21,8 @@ public class TypeRef extends MetaReference<DatumType> {
     private List<CollectionType> collectionTypes;
     private String suffix = null;
 
-    TypeRef(SpacePathExpr path) {
-        this(path, null);
-    }
-
-    TypeRef(SpacePathExpr path, List<CollectionType> collectionTypes) {
-        super(path, MetaType.TYPE);
+    TypeRef(SourceInfo sourceInfo, List<CollectionType> collectionTypes) {
+        super(sourceInfo, MetaType.TYPE);
         this.collectionTypes = collectionTypes;
     }
 
@@ -50,9 +46,7 @@ public class TypeRef extends MetaReference<DatumType> {
     @Override
     protected String getSuffix() {
         if (suffix == null)
-            suffix = collectionTypes != null ?
-                buildSuffix()
-                : "";
+            suffix = collectionTypes != null ? buildSuffix() : "";
         return suffix;
     }
 

@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.loader;
 
+import org.jkcsoft.space.lang.ast.ParsableChoice;
+import org.jkcsoft.space.lang.ast.ParseUnit;
 import org.jkcsoft.space.lang.ast.Schema;
 
 import java.io.File;
@@ -27,6 +29,6 @@ public interface AstLoader {
     String getName();
 
     /** Loaders should return the root (directory) node */
-    Schema load(List<AstLoadError> errors, File file) throws Exception;
+    ParsableChoice load(List<AstLoadError> errors, File file) throws Exception;
 
 }

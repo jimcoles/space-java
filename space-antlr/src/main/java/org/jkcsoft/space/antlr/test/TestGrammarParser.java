@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.antlr.test;
 
+import org.jkcsoft.space.lang.ast.ParsableChoice;
 import org.jkcsoft.space.lang.ast.Schema;
 import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.loader.AstLoader;
@@ -19,7 +20,7 @@ import java.util.List;
 public class TestGrammarParser implements AstLoader {
 
     @Override
-    public Schema load(List<AstLoadError> errors, File file) throws Exception {
+    public ParsableChoice load(List<AstLoadError> errors, File file) throws Exception {
         return null;
     }
 

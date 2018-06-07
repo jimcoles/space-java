@@ -52,11 +52,11 @@ public class AstFactory {
         return schema;
     }
 
-    public TextNode newTextNode(SourceInfo sourceInfo, String name) {
-        return new TextNode(sourceInfo, name);
+    public NamePart newTextNode(SourceInfo sourceInfo, String name) {
+        return new NamePart(sourceInfo, name);
     }
 
-    public SpaceTypeDefn newSpaceTypeDefn(SourceInfo sourceInfo, TextNode nameNode) {
+    public SpaceTypeDefn newSpaceTypeDefn(SourceInfo sourceInfo, NamePart nameNode) {
         SpaceTypeDefn spaceTypeDefn = new SpaceTypeDefn(sourceInfo, nameNode);
         return spaceTypeDefn;
     }
@@ -98,15 +98,31 @@ public class AstFactory {
     }
 
     public SequenceLiteralExpr newCharSeqLiteralExpr(SourceInfo sourceInfo, String text) {
-        return new SequenceLiteralExpr(sourceInfo, newTypeRef(
-            newSpacePathExpr(sourceInfo, null, "char", null),
-            Collections.singletonList(TypeRef.CollectionType.SEQUENCE)), text);
+        return new SequenceLiteralExpr(sourceInfo, newTypeRef(NumPrimitiveTypeDefn.CHAR), text);
     }
 
-    public SpacePathExpr newSpacePathExpr(SourceInfo sourceInfo, PathOperEnum oper, String searchName,
-                                          SpacePathExpr nextExpr)
+    public MetaRefPart newMetaRefPart(MetaReference parentPath, NamePartExpr namePartExpr) {
+        return new MetaRefPart(parentPath, namePartExpr);
+    }
+
+    public MetaRefPart newMetaRefPart(MetaReference parentPath, SourceInfo sourceInfo, String ... nameExprs) {
+        MetaRefPart firstMetaRefPart = null;
+        MetaRefPart prevMetaRefPart = null;
+        for (String nameExpr : nameExprs) {
+            MetaRefPart metaRefPart = new MetaRefPart(parentPath, newNamePartExpr(sourceInfo, null, nameExpr));
+            if (firstMetaRefPart == null)
+                firstMetaRefPart = metaRefPart;
+            if (prevMetaRefPart != null) {
+                prevMetaRefPart.setNextRefPart(metaRefPart);
+                prevMetaRefPart = metaRefPart;
+            }
+        }
+        return firstMetaRefPart;
+    }
+
+    public NamePartExpr newNamePartExpr(SourceInfo sourceInfo, PathOperEnum oper, String searchName)
     {
-        return new SpacePathExpr(sourceInfo, true, oper, searchName, nextExpr);
+        return new NamePartExpr(sourceInfo, true, oper, searchName);
     }
 
     public ThisTupleExpr newThisExpr(SourceInfo sourceInfo) {
@@ -139,24 +155,21 @@ public class AstFactory {
         return new TupleExpr(sourceInfo);
     }
 
-    public NewObjectExpr newNewObjectExpr(SourceInfo sourceInfo, SpacePathExpr typeRefPathExpr, TupleExpr tupleExpr) {
+    public NewObjectExpr newNewObjectExpr(SourceInfo sourceInfo, TypeRef typeRefPathExpr, TupleExpr tupleExpr) {
         return new NewObjectExpr(sourceInfo, typeRefPathExpr, tupleExpr);
     }
 
-    public NewSetExpr newNewSetExpr(SourceInfo sourceInfo, SpacePathExpr tupleTypeRef) {
+    public NewSetExpr newNewSetExpr(SourceInfo sourceInfo, TypeRef tupleTypeRef) {
         return new NewSetExpr(sourceInfo, tupleTypeRef);
     }
 
-    public MetaReference newMetaReference(SpacePathExpr spacePathExpr, MetaType type) {
-        return new MetaReference(spacePathExpr, type);
+    public MetaReference newMetaReference(SourceInfo sourceInfo, MetaType type) {
+        MetaReference metaReference = new MetaReference(sourceInfo, type);
+        return metaReference;
     }
 
-    public TypeRef newTypeRef(SpacePathExpr spacePathExpr, List<TypeRef.CollectionType> collectionTypes) {
-        return new TypeRef(spacePathExpr, collectionTypes);
-    }
-
-    public TypeRef newTypeRef(SpacePathExpr spacePathExpr) {
-        return new TypeRef(spacePathExpr);
+    public TypeRef newTypeRef(SourceInfo sourceInfo, List<TypeRef.CollectionType> collectionTypes) {
+        return new TypeRef(sourceInfo, collectionTypes);
     }
 
     public TypeRef newTypeRef(DatumType typeDefn) {
@@ -165,5 +178,17 @@ public class AstFactory {
 
     public ParseUnit newParseUnit(SourceInfo sourceInfo) {
         return new ParseUnit(sourceInfo);
+    }
+
+    public PackageDecl newPackageDecl(SourceInfo sourceInfo, MetaReference<Schema> packageRef) {
+        return new PackageDecl(sourceInfo, packageRef);
+    }
+
+    public ParsableChoice newParsableChoice(Schema schema) {
+        return new ParsableChoice(schema);
+    }
+
+    public ParsableChoice newParsableChoice(ParseUnit parseUnit) {
+        return new ParsableChoice(parseUnit);
     }
 }

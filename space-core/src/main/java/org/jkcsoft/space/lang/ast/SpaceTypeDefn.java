@@ -30,7 +30,7 @@ public class SpaceTypeDefn extends NamedElement implements DatumType, TupleDefn 
     private SetTypeDefn setTypeDefn;
     private SequenceTypeDefn sequenceTypeDefn;
 
-    SpaceTypeDefn(SourceInfo sourceInfo, TextNode nameNode) {
+    SpaceTypeDefn(SourceInfo sourceInfo, NamePart nameNode) {
         super(sourceInfo, nameNode.getText());
         this.setTypeDefn = new SetTypeDefn(sourceInfo, this);
         sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);

@@ -9,15 +9,14 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @GroupingNode
 public class ParseUnit extends ModelElement {
 
-//    private File srcFile;
-
     private PackageDecl packageDecl;
-    private List<SpacePathExpr> imports;
+    private List<TypeRef> imports;
 
     ParseUnit(SourceInfo sourceInfo) {
         super(sourceInfo);
@@ -28,7 +27,22 @@ public class ParseUnit extends ModelElement {
         return packageDecl;
     }
 
-//    public File getSrcFile() {
-//        return srcFile;
-//    }
+    public void setPackageDecl(PackageDecl packageDecl) {
+        this.packageDecl = packageDecl;
+    }
+
+    public void addImports(List<TypeRef> imports) {
+        if (imports == null)
+            this.imports = new ArrayList<>(imports);
+        else
+            this.imports.addAll(imports);
+    }
+
+    public List<TypeRef> getImports() {
+        return imports;
+    }
+
+    public boolean hasImports() {
+        return imports != null && !imports.isEmpty();
+    }
 }

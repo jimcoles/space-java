@@ -1,0 +1,26 @@
+package space.model;
+
+type ModelElement
+{
+
+}
+
+type SpaceTypeDefn extends ModelElement
+{
+
+}
+
+type VariableDefn
+{
+
+}
+
+type AssociationDefn
+{
+
+}
+
+type EquationDefn
+{
+
+}

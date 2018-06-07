@@ -1,8 +1,7 @@
 
 public type-def NtmuSpace
 /*
- This is a smart annotation comment for
-  my awesome space.
+ This is a smart annotation comment for my awesome space.
 */
 {
     function-def void main(char[] args) {

@@ -73,7 +73,6 @@ public class Schema extends NamedElement implements ValueExpr {
         spaceTypeDefns.add(spaceTypeDefn);
         //
         addChild(spaceTypeDefn);
-        // TODO: Add type def extends clause as references
         return spaceTypeDefn;
     }
 
@@ -86,5 +85,17 @@ public class Schema extends NamedElement implements ValueExpr {
         parseUnits.add(parseUnit);
         //
         addChild(parseUnit);
+    }
+
+    public List<Schema> getChildSchemas() {
+        return childSchemas;
+    }
+
+    public Set<ParseUnit> getParseUnits() {
+        return parseUnits;
+    }
+
+    public List<SpaceTypeDefn> getTypes() {
+        return spaceTypeDefns;
     }
 }

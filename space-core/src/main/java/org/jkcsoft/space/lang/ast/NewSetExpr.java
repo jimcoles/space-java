@@ -9,8 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,17 +16,17 @@ import java.util.List;
  * @author Jim Coles
  */
 public class NewSetExpr extends ModelElement implements ValueExpr {
-    private MetaReference<SpaceTypeDefn> tupleTypeRef;
+    private TypeRef tupleTypeRef;
     private List<NewObjectExpr> newObjectExprs = new LinkedList<>();
 
-    NewSetExpr(SourceInfo sourceInfo, SpacePathExpr tupleTypeRef) {
+    NewSetExpr(SourceInfo sourceInfo, TypeRef tupleTypeRef) {
         super(sourceInfo);
-        this.tupleTypeRef = new MetaReference<>(tupleTypeRef, MetaType.TYPE);
+        this.tupleTypeRef = tupleTypeRef;
         //
         addChild(tupleTypeRef);
     }
 
-    public MetaReference<SpaceTypeDefn> getTupleTypeRef() {
+    public TypeRef getTupleTypeRef() {
         return tupleTypeRef;
     }
 

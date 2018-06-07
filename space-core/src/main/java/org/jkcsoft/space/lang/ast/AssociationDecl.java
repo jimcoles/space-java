@@ -64,16 +64,16 @@ public class AssociationDecl extends NamedElement implements Declartion {
         return getToType();
     }
 
-    public SpacePathExpr getFromPath() {
-        return fromTypeRef.getSpacePathExpr();
+    public MetaRefPart getFromPath() {
+        return fromTypeRef.getFirstPart();
     }
 
     public int getFromMult() {
         return fromMult;
     }
 
-    public SpacePathExpr getToPath() {
-        return toTypeRef.getSpacePathExpr();
+    public MetaRefPart getToPath() {
+        return toTypeRef.getFirstPart();
     }
 
     public int getToMult() {
