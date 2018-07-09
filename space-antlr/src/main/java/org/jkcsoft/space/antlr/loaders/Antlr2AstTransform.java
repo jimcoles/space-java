@@ -83,7 +83,7 @@ public class Antlr2AstTransform {
             parseUnitAST.addChild(toAst(spaceTypeDefnContext));
         }
 
-        log.info("Parse stats: " + countParseNodes);
+        log.info("Parse stats #parse nodes: " + countParseNodes);
         return parseUnitAST;
     }
 

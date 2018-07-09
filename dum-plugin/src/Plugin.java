@@ -7,21 +7,12 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.ast;
+
+import com.intellij.xml.util.PsiElementPointer;
 
 /**
  * @author Jim Coles
  */
-public class Validator {
-
-    /**
-     * Type checking.  Ensure that referenced things exist and that node types
-     * match.
-     *
-     * @param directory
-     */
-    public void validate(Directory directory) {
-
-    }
-
+public class Plugin {
+    private PsiElementPointer p;
 }

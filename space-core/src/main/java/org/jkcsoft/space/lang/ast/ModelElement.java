@@ -50,12 +50,12 @@ public abstract class ModelElement extends SpaceObject {
         this.parent = parent;
     }
 
-    public void setGroupingNode(boolean groupingNode) {
-        isGroupingNode = groupingNode;
-    }
-
     public boolean isGroupingNode() {
         return isGroupingNode;
+    }
+
+    public void setGroupingNode(boolean groupingNode) {
+        isGroupingNode = groupingNode;
     }
 
     public ModelElement addChild(ModelElement child) {
@@ -74,6 +74,10 @@ public abstract class ModelElement extends SpaceObject {
         }
         //
         return child;
+    }
+
+    public boolean hasChildren() {
+        return children != null && !children.isEmpty();
     }
 
     public List<ModelElement> getChildren() {
@@ -143,9 +147,5 @@ public abstract class ModelElement extends SpaceObject {
             + "\"" + this.getDisplayName() + "\""
             + (AstUtils.isGroupingNode(this) ? " GROUP" : "")
             ;
-    }
-
-    public boolean hasChildren() {
-        return children != null && !children.isEmpty();
     }
 }

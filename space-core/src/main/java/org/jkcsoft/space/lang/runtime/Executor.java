@@ -18,9 +18,10 @@ import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.instance.Set;
-import org.jkcsoft.space.lang.loader.AstLoadError;
+import org.jkcsoft.space.lang.loader.AstErrors;
 import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.lang.metameta.MetaType;
+import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;
 import org.jkcsoft.space.lang.runtime.jnative.math.Math;
 import org.jkcsoft.space.lang.runtime.jnative.opsys.OpSys;
 import org.jkcsoft.space.lang.runtime.jnative.space.Lang;
@@ -105,25 +106,8 @@ public class Executor extends ExprProcessor implements ExeContext {
     private static ObjectFactory getObjFactory() {
         return ObjectFactory.getInstance();
     }
-    /**
-     * Meta objects are loaded as we parse the source code. Intrinsic and native meta
-     * objects are loaded prior to parsing and source files.  Must be able to lookup
-     * a meta object by name or by id.  Some meta object are anonymous.
-     */
-    private final List<Schema> dirChain = new LinkedList<>();
-    /**
-     * A special directory root to hold intrinsic operators.
-     */
-    private Schema langRootSchema;
-    /**
-     * The central meta object table.
-     */
-    private java.util.Set metaObjectNormalTable = new HashSet<>();
-    /**
-     * (not used currently) Idea is to hold redundantly accumulated info useful
-     * for lookup during execution.
-     */
-//    private Map<NamedElement, MetaInfo> metaObjectExtendedInfoMap = new TreeMap<>();
+
+    private NSRegistry nsRegistry = NSRegistry.getInstance();
 
     private ObjectTable objectTable = new ObjectTable();
     private Stack<FunctionCallContext> callStack = new Stack<>();
@@ -138,14 +122,8 @@ public class Executor extends ExprProcessor implements ExeContext {
     }
 
     private void initRuntime() {
-        AstFactory astFactory = getAstFactory();
-
         loadAstLoader("org.jkcsoft.space.antlr.loaders.G2AntlrParser");
-
-        langRootSchema = astFactory.newAstSchema(new ProgSourceInfo(), "lang");
-
-        dirChain.add(langRootSchema);
-        trackMetaObject(langRootSchema);
+        NSRegistry.getInstance();
     }
 
     private void loadAstLoader(String parserImplClassName) {
@@ -162,15 +140,15 @@ public class Executor extends ExprProcessor implements ExeContext {
     public void run() {
         try {
 //            File exeFile = FileUtils.getFile(exeSettings.getExeMain());
-            List<File> spaceDirs = exeSettings.getSpaceDirs();
+            List<File> srcRootDirs = exeSettings.getSpaceDirs();
 //            if (!exeFile.exists()) {
 //                throw new SpaceX("Input file [" + exeFile + "] does not exist.");
 //            }
 
             // Parse all source and load ASTs into memory
             List<ParseUnit> newParseUnits = new LinkedList<>();
-            for (File spaceDir : spaceDirs) {
-                newParseUnits.addAll(queryParseUnits(loadDir(spaceDir)));
+            for (File srcRootDir : srcRootDirs) {
+                newParseUnits.addAll(queryParseUnits(loadDir(srcRootDir)));
             }
 
             // Link all refs within newly loaded ASTs
@@ -178,7 +156,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             try {
 
                 if (log.isDebugEnabled())
-                    dumpSymbolTables();
+                    nsRegistry.dumpSymbolTables();
 
 //            if (log.isDebugEnabled())
 //                dumpAsts();
@@ -202,7 +180,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             }
         }
         catch (SpaceX spex) {
-            dumpAsts();
+            nsRegistry.dumpAsts();
 //            PrintStream ps = System.err;
             PrintStream psOut = System.out;
             StringBuffer sb = new StringBuffer();
@@ -222,63 +200,78 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
     }
 
-    private Collection<ParseUnit> queryParseUnits(Schema schema) {
+    private Collection<ParseUnit> queryParseUnits(Directory directory) {
         QueryAstConsumer<ParseUnit> astAction = new QueryAstConsumer(ParseUnit.class);
-        AstUtils.walkAst(schema, astAction);
+        AstUtils.walkAst(directory, astAction);
         return astAction.getResults();
     }
 
-    public Schema loadDir(File dir) {
-        ParsableChoice parsedItem = null;
-        List<AstLoadError> loadErrors = new LinkedList<>();
+    public Directory loadDir(File srcRootDir) {
+        Directory newSpcRootDir = null;
+        AstErrors loadErrors = new AstErrors(srcRootDir);
         try {
-            parsedItem = astLoader.load(loadErrors, dir);
+            newSpcRootDir = astLoader.loadDir(loadErrors, srcRootDir);
         } catch (Exception ex) {
             throw new SpaceX("Failed loading source", ex);
         }
 
-        checkErrors(loadErrors);
+        if (!newSpcRootDir.isRootDir())
+            throw new SpaceX("AST loader did not return a valid root directory.");
 
-        if (parsedItem.hasSchema())
-            dirChain.add(parsedItem.getParseRootSchema());
+        loadErrors.checkErrors();
 
-        trackMetaObject(parsedItem.getParseRootSchema());
+        mergeNewChildren(nsRegistry.getLangNs().getRootDir(), newSpcRootDir);
 
-        return parsedItem.getParseRootSchema();
+        nsRegistry.trackMetaObject(newSpcRootDir);
+
+        return newSpcRootDir;
     }
 
-    public ParseUnit loadFile(File singleFile) {
+    /**
+     * Both arg dirs have the same name and are at the same tree level, so
+     * add/merge the children of newDir into parentDir.
+     * @param existingParentDir
+     * @param newDir
+     */
+    private void mergeNewChildren(Directory existingParentDir, Directory newDir) {
+        //
+        for (ParseUnit newChildParseUnit : newDir.getParseUnits()) {
+            existingParentDir.addParseUnit(newChildParseUnit);
+        }
+        //
+        for (Directory childOfNewDir : newDir.getChildDirectories()) {
+            Directory existingSubDir = AstUtils.getSubDirByName(existingParentDir, childOfNewDir.getName());
+            if (existingSubDir != null) {
+                mergeNewChildren(existingSubDir, childOfNewDir);
+            }
+            else {
+                existingParentDir.addDir(childOfNewDir);
+            }
+        }
+    }
 
-        ParsableChoice parsedItem = null;
-        List<AstLoadError> loadErrors = new LinkedList<>();
+    public ParseUnit loadFile(Directory spaceDir, File singleFile) {
+
+        ParseUnit parseUnit = null;
+        AstErrors loadErrors = new AstErrors(singleFile);
         try {
-            parsedItem = astLoader.load(loadErrors, singleFile);
+            parseUnit = astLoader.loadFile(loadErrors, spaceDir, singleFile);
         } catch (Exception ex) {
             throw new SpaceX("Failed loading source", ex);
         }
 
-        checkErrors(loadErrors);
+        loadErrors.checkErrors();
 
-        mergeParseUnit(parsedItem.getFileParseUnit());
-        trackMetaObject(parsedItem.getFileParseUnit());
+        mergeParseUnit(parseUnit);
+        nsRegistry.trackMetaObject(parseUnit);
 
-        return parsedItem.getFileParseUnit();
+        return parseUnit;
     }
 
     private void mergeParseUnit(ParseUnit fileParseUnit) {
         // TODO
     }
 
-    private void checkErrors(List<AstLoadError> loadErrors) {
-        Collection syntaxErrors =
-            CollectionUtils.select(loadErrors,
-                                   object -> ((AstLoadError) object).getType() == AstLoadError.Type.SYNTAX);
-
-        if (syntaxErrors != null && syntaxErrors.size() > 0) {
-            System.err.println(Strings.buildNewlineList(syntaxErrors));
-            throw new SpaceX("found " + syntaxErrors.size() + " loader errors");
-        }
-    }
 
     public void linkAndCheck(List<RuntimeError> runErrors, ParseUnit parseUnit) {
         link(runErrors, parseUnit);
@@ -287,7 +280,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
         else {
             if (log.isDebugEnabled())
-                dumpAsts();
+                nsRegistry.dumpAsts();
         }
     }
 
@@ -323,25 +316,26 @@ public class Executor extends ExprProcessor implements ExeContext {
     }
 
     private void loadNativeTypes() {
+        Lang.class.getPackage().getAnnotation(SpaceNative.class);
         // use Java annotations Java-native objects
 //        SpaceNative.class.getAnnotations();
         //
-        loadNativeType(Lang.class, AstUtils.getLangRoot(dirChain));
-        op_sys_type_def = loadNativeType(OpSys.class, AstUtils.getLangRoot(dirChain));
+        loadNativeType(Lang.class, nsRegistry.getLangNs().getRootDir());
+        op_sys_type_def = loadNativeType(OpSys.class, nsRegistry.getLangNs().getRootDir());
 //        MATH_TYPE_DEF = loadNativeType(Math.class, AstUtils.getLangRoot(dirChain));
 //        space_opers_type_def = loadNativeType(SpaceOpers.class, AstUtils.getLangRoot(dirChain));
 
     }
 
-    private SpaceTypeDefn loadNativeType(Class jnClass, Schema rootAstSchema) {
+    private SpaceTypeDefn loadNativeType(Class jnClass, Directory rootAstDirectory) {
         AstFactory astFactory = getAstFactory();
         NativeSourceInfo jSourceInfo = new NativeSourceInfo(jnClass);
         SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(jSourceInfo,
                                                                   astFactory.newTextNode(jSourceInfo,
                                                                                          toSpaceTypeName(jnClass)));
-        trackMetaObject(spaceTypeDefn);
+        nsRegistry.trackMetaObject(spaceTypeDefn);
         //
-        rootAstSchema.addSpaceDefn(spaceTypeDefn);
+        rootAstDirectory.addSpaceDefn(spaceTypeDefn);
         //
         spaceTypeDefn.setBody(astFactory.newTypeDefnBody(jSourceInfo));
         //
@@ -367,7 +361,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             );
             //
             spaceTypeDefn.getBody().addFunctionDefn(functionDefnAST);
-            trackMetaObject(functionDefnAST);
+            nsRegistry.trackMetaObject(functionDefnAST);
             //
             SpaceTypeDefn argSpaceTypeDefn = functionDefnAST.getArgSpaceTypeDefn();
             argSpaceTypeDefn.setBody(astFactory.newTypeDefnBody(jMethodInfo));
@@ -419,11 +413,6 @@ public class Executor extends ExprProcessor implements ExeContext {
         return spaceJavaWrapperClass.getSimpleName();
     }
 
-    private void dumpSymbolTables() {
-        log.debug("normalized meta object table: " + JavaHelper.EOL
-                      + Strings.buildNewlineList(metaObjectNormalTable));
-    }
-
     /**
      * The entry point for 'running a program': exec the 'main' function.
      */
@@ -434,8 +423,8 @@ public class Executor extends ExprProcessor implements ExeContext {
         String[] pathNodes = mainSpacePath.split("/.");
         TypeRef exeTypeRef = getAstFactory().newTypeRef(sourceInfo, null);
         exeTypeRef.setFirstPart(getAstFactory().newMetaRefPart(exeTypeRef, sourceInfo, pathNodes));
-        SpaceTypeDefn bootTypeDefn = (SpaceTypeDefn) AstUtils.resolveAstPath(dirChain, exeTypeRef);
-//        SpaceTypeDefn bootTypeDefn = programSchema.getFirstSpaceDefn();
+        SpaceTypeDefn bootTypeDefn = (SpaceTypeDefn) AstUtils.resolveAstPath(nsRegistry.getRootDirs(), exeTypeRef);
+//        SpaceTypeDefn bootTypeDefn = progSpaceDir.getFirstSpaceDefn();
         Tuple mainTypeTuple = newTuple(bootTypeDefn);
         EvalContext evalContext = new EvalContext();
         FunctionDefn spMainActionDefn = bootTypeDefn.getBody().getFunction("main");
@@ -931,25 +920,6 @@ public class Executor extends ExprProcessor implements ExeContext {
         return copy;
     }
 
-
-    // -------------- Tracking of runtime/instance things ---------------
-    private void trackMetaObject(ModelElement modelElement) {
-        // Add to normalized object table ...
-        metaObjectNormalTable.add(modelElement);
-//        metaObjectIndexByFullPath.put(modelElement.getFullPath(), modelElement);
-
-        // track denormalized info for fast lookup ...
-//        if (modelElement instanceof NamedElement) {
-//            MetaInfo metaInfo = new MetaInfo((NamedElement) modelElement);
-//            metaObjectExtendedInfoMap.put((NamedElement) modelElement, metaInfo);
-//
-//            // if this object has a parent, Add this object to parent's child map
-//            if (modelElement.hasParent()) {
-//                metaObjectExtendedInfoMap.get(modelElement.getParent()).addChild((NamedElement) modelElement);
-//            }
-//        }
-    }
-
     private void trackInstanceObject(SpaceObject spaceObject) {
         objectTable.addObject(spaceObject);
     }
@@ -959,15 +929,6 @@ public class Executor extends ExprProcessor implements ExeContext {
         if (spaceObject == null)
             throw new SpaceX("Space Oid [" + referenceOid + "] not found.");
         return spaceObject;
-    }
-
-    private void dumpAsts() {
-        log.info("see dump log file for AST dumps");
-        for (Schema schema : dirChain) {
-            String dump = AstUtils.print(schema);
-//            log.debug("AST Root /: " + dump);
-            Logger.getLogger("dumpFile").info(dump);
-        }
     }
 
     private void writeSpaceStackTrace(StringBuffer sb, Stack<FunctionCallContext> spaceTrace) {
@@ -1017,6 +978,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         public QueryAstConsumer(Class<T> clazz) {
             this.clazz = clazz;
+            this.filter = modelElement -> this.clazz.isAssignableFrom(modelElement.getClass());
         }
 
         @Override
@@ -1205,7 +1167,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
 
         private void resolveFullPath(MetaReference reference) {
-            NamedElement refElem = AstUtils.resolveAstPath(dirChain, reference);
+            NamedElement refElem = AstUtils.resolveAstPath(nsRegistry.getRootDirs(), reference);
             if (refElem == null) {
                 errors.add(new RuntimeError(reference.getSourceInfo(), 0,
                                             "can not resolve symbol '" + reference + "'"));

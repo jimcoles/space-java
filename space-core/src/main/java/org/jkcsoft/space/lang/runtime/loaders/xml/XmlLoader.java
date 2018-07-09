@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.runtime.loaders.xml;
 
 import org.jkcsoft.space.lang.ast.AstFactory;
-import org.jkcsoft.space.lang.ast.Schema;
+import org.jkcsoft.space.lang.ast.Directory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -31,7 +31,7 @@ import java.io.InputStream;
 public class XmlLoader extends DefaultHandler {
 
     private InputStream _in = null;
-    private Schema _program = null;
+    private Directory _program = null;
     private AstFactory astFactory = new AstFactory();
 
     public XmlLoader(InputStream in) {
@@ -66,11 +66,11 @@ public class XmlLoader extends DefaultHandler {
     //----------------------------------------------------------------------------
     // Package-level methods
     //----------------------------------------------------------------------------
-    public Schema load()
+    public Directory load()
             throws Exception {
 //    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
-        // use a sax parser to build our Schema...
+        // use a sax parser to build our Directory...
 
         SAXParserFactory spf = SAXParserFactory.newInstance();
         SAXParser parser = spf.newSAXParser();

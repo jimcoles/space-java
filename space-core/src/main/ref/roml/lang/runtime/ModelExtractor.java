@@ -10,7 +10,7 @@ package com.jkc.roml.dms;
 /**
  * Abstract base class for model extractors, which are objects that know how to
  * build a .data.model.DataModel graph for a given type of DataSystem, e.g., 
- * from JDBC meta data, from an XML DTD or Schema, etc.
+ * from JDBC meta data, from an XML DTD or Directory, etc.
  * 
  * DataModels built by the extractor are just a first guess at a model.  Data
  * designers can reverse engineer the generated model to build a 'logical' 

@@ -15,13 +15,13 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.tool.ast.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.antlr.SpaceLexer;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.loader.AstErrors;
 import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.antlr.AntlrTreePrintListener;
@@ -65,66 +65,70 @@ public class G2AntlrParser implements AstLoader {
     }
 
     @Override
-    public ParsableChoice load(List<AstLoadError> errors, File spaceSrcFile) throws Exception {
+    public ParseUnit loadFile(AstErrors parentErrors, Directory spaceDir, File spaceSrcFile) throws IOException {
+        log.info("Parsing file [" + spaceSrcFile.getAbsolutePath() + "]");
         this.srcFile = spaceSrcFile;
-        ParsableChoice parse = null;
-        Schema schema = Schema.ROOT_SCHEMA;
-        if (spaceSrcFile.isDirectory()) {
-            parse = astFactory.newParsableChoice(loadDir(errors, spaceSrcFile));
-        }
-        else {
-            parse = astFactory.newParsableChoice(loadFile(errors, schema, spaceSrcFile));
-        }
-        return parse;
+        AstErrors fileErrors = new AstErrors(spaceSrcFile);
+        ParseUnit parseUnit = loadInputStream(fileErrors, new ANTLRInputStream(new FileInputStream(spaceSrcFile)));
+        parentErrors.addChildFileErrors(fileErrors);
+        //
+        if (parseUnit != null)
+            spaceDir.addParseUnit(parseUnit);
+//        for (ModelElement modelElement : parseUnit.getChildren()) {
+//            if (modelElement instanceof SpaceTypeDefn)
+//                directory.addSpaceDefn(((SpaceTypeDefn) modelElement));
+//            else if (modelElement instanceof StreamTypeDefn)
+//                directory.addStreamTypeDefn(((StreamTypeDefn) modelElement));
+//        }
+        return parseUnit;
     }
 
-    public ParseUnit load(List<AstLoadError> errors, String spaceExpr) {
+    @Override
+    public Directory loadDir(AstErrors parentErrors, File srcRootDir) throws IOException {
+        log.info("Loading source in dir [" + srcRootDir.getAbsolutePath() + "]");
+        Namespace tempNs = astFactory.newNamespace(null, "temp");
+        Directory spcRootDir = tempNs.getRootDir();
+        loadChildren(parentErrors, spcRootDir, srcRootDir);
+        return spcRootDir;
+    }
+
+    private void loadChildren(AstErrors parentErrors, Directory spcContainerDir, File srcParentDir) throws IOException {
+        for (File childFile : srcParentDir.listFiles()) {
+            AstErrors childErrors = new AstErrors(childFile);
+            if (childFile.isDirectory()) {
+                Directory spcChildDir = astFactory.newAstDir(null, childFile.getName());
+                // create new space container corresponding to arg src dir
+                spcContainerDir.addDir(spcChildDir);
+                // recurse to add children of arg src dir to new space container
+                loadChildren(childErrors, spcChildDir, childFile);
+            }
+            else {
+                if (childFile.getName().endsWith(Language.SPACE.getFileExt())) {
+                    ParseUnit parseUnit = loadFile(childErrors, spcContainerDir, childFile);
+                    if (parseUnit != null)
+                        spcContainerDir.addParseUnit(parseUnit);
+                }
+            }
+            parentErrors.addChildFileErrors(childErrors);
+        }
+    }
+
+    public ParseUnit parseExpr(AstErrors errors, String spaceExpr) {
         log.info("Parsing expression [" + spaceExpr.substring(0, 25) + "...]");
         ParseUnit parseUnit = loadInputStream(errors, new ANTLRInputStream(spaceExpr));
         return parseUnit;
     }
 
-    private ParseUnit loadFile(List<AstLoadError> errors, Schema schema, File spaceSrcFile) throws IOException {
-        log.info("Parsing file [" + spaceSrcFile.getAbsolutePath() + "]");
-        this.srcFile = spaceSrcFile;
-        ParseUnit parseUnit = loadInputStream(errors, new ANTLRInputStream(new FileInputStream(spaceSrcFile)));
-        //
-        schema.addParseUnit(parseUnit);
-//        for (ModelElement modelElement : parseUnit.getChildren()) {
-//            if (modelElement instanceof SpaceTypeDefn)
-//                schema.addSpaceDefn(((SpaceTypeDefn) modelElement));
-//            else if (modelElement instanceof StreamTypeDefn)
-//                schema.addStreamTypeDefn(((StreamTypeDefn) modelElement));
-//        }
-        return parseUnit;
-    }
-
-    private Schema loadDir(List<AstLoadError> errors, File file) throws IOException {
-        log.info("Loading source in dir [" + file.getAbsolutePath() + "]");
-        File[] files = file.listFiles();
-        Schema thisSchema = astFactory.newAstSchema(null, file.getName());
-        for (File childFile : files) {
-            if (childFile.isDirectory()) {
-                thisSchema.addSchema(loadDir(errors, childFile));
-            }
-            else {
-                if (childFile.getName().endsWith(Language.SPACE.getFileExt())) {
-                    thisSchema.addParseUnit(loadFile(errors, thisSchema, childFile));
-                }
-            }
-        }
-        return thisSchema;
-    }
-
-    private ParseUnit loadInputStream(List<AstLoadError> loadErrors, ANTLRInputStream aisSpaceSrc) {
+    private ParseUnit loadInputStream(AstErrors loadErrors, ANTLRInputStream aisSpaceSrc) {
         ANTLRErrorListener errorListener = new MyANTLRErrorListener(loadErrors);
         //
         SimpleTransListener stl = new SimpleTransListener(SpaceParser.ruleNames);
-        log.debug("Trans listener dump: " + JavaHelper.EOL
-                      + String
-            .format("%3s %-25s %-25s %6s %-10s %5s", "Id", "Rule", "Wrapper", "Count", "Loadable", "Need")
-                      + JavaHelper.EOL
-                      + stl.dumpRuleStats());
+        log.debug("Trans listener dump: (commented out in code)");
+//        log.debug("Trans listener dump: " + JavaHelper.EOL
+//                      + String
+//            .format("%3s %-25s %-25s %6s %-10s %5s", "Id", "Rule", "Wrapper", "Count", "Loadable", "Need")
+//                      + JavaHelper.EOL
+//                      + stl.dumpRuleStats());
 
         SpaceLexer srcLexerStream = new SpaceLexer(aisSpaceSrc); // create a buffer of tokens pulled from the lexer
         srcLexerStream.addErrorListener(errorListener);
@@ -138,7 +142,7 @@ public class G2AntlrParser implements AstLoader {
         srcParser.addParseListener(printListener);
         // begin parsing at top-level rule
         SpaceParser.ParseUnitContext parseUnitContext = srcParser.parseUnit();
-        log.info("Parse errors from ANTLR: " + Strings.buildNewlineList(loadErrors));
+        log.info("Parse errors from ANTLR: " + Strings.buildNewlineList(loadErrors.getAllErrors()));
 
         // debug / print
         log.debug("ANTLR Util parse dump:" + JavaHelper.EOL
@@ -153,11 +157,8 @@ public class G2AntlrParser implements AstLoader {
 //        AstFactory accept = parseUnitContext.accept(astTransVisitor);
 
         ParseUnit parseUnit = null;
-        Collection syntaxErrors =
-            CollectionUtils.select(loadErrors,
-                                   object -> ((AstLoadError) object).getType() == AstLoadError.Type.SYNTAX);
 
-        if (syntaxErrors.size() == 0) {
+        if (!loadErrors.hasSyntaxErrors()) {
             Antlr2AstTransform antlr2AstTransform = new Antlr2AstTransform(astFactory, srcFile);
             parseUnit = antlr2AstTransform.transform(parseUnitContext);
         }
@@ -208,9 +209,9 @@ public class G2AntlrParser implements AstLoader {
     }
 
     private class MyANTLRErrorListener implements ANTLRErrorListener {
-        private final List<AstLoadError> parseErrors;
+        private final AstErrors parseErrors;
 
-        public MyANTLRErrorListener(List<AstLoadError> parseErrors) {
+        public MyANTLRErrorListener(AstErrors parseErrors) {
             this.parseErrors = parseErrors;
         }
 

@@ -7,15 +7,10 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.jnative;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-/**
- * @author Jim Coles
- */
-@Retention(RetentionPolicy.SOURCE)
-public @interface SpaceNative {
-
+public class HelloWorld {
+   public static void main(String[] args) { 
+      System.out.println("Hello, World");
+      int num = 1 + 2 + 3;
+   }
 }
+

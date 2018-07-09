@@ -14,25 +14,25 @@ package org.jkcsoft.space.lang.ast;
  */
 public class ParsableChoice {
 
-    private Schema parseRootSchema;
+    private Directory parseRootDirectory;
     private ParseUnit fileParseUnit;
 
-    ParsableChoice(Schema parseRootSchema) {
-        this.parseRootSchema = parseRootSchema;
+    ParsableChoice(Directory parseRootDirectory) {
+        this.parseRootDirectory = parseRootDirectory;
     }
 
     ParsableChoice(ParseUnit fileParseUnit) {
         this.fileParseUnit = fileParseUnit;
     }
 
-    public boolean hasSchema() {
-        return parseRootSchema != null;
+    public boolean hasParseRootDir() {
+        return parseRootDirectory != null;
     }
 
-    public Schema getParseRootSchema() {
-        if (parseRootSchema == null)
+    public Directory getParseRootDirectory() {
+        if (parseRootDirectory == null)
             throw new IllegalStateException("bad choice");
-        return parseRootSchema;
+        return parseRootDirectory;
     }
 
     public boolean hasParseUnit() {

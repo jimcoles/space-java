@@ -18,25 +18,27 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A Schema is a organizational, namespace, and security mechanism similar
- * to an XML schema.
+ * A Directory is a organizational, namespace, and security mechanism similar
+ * to an XML schema or Java Package.
  *
  * Encapsulates an entire executable system as defined by Space definition elements
  * (ModelElements) and associated instances.
  *
- * A Schema may contain child Schemas or {@link SpaceTypeDefn}'s or other {@link Named}
+ * A Directory may contain child Directories or {@link SpaceTypeDefn}'s or other {@link Named}
  * element types.
  *
  * @author Jim Coles
  * @version 1.0
  */
-public class Schema extends NamedElement implements ValueExpr {
+public class Directory extends NamedElement implements ValueExpr {
 
-    public static final Schema ROOT_SCHEMA = new Schema(null, "root");
+//    public static final Directory ROOT_DIRECTORY = new Directory(new IntrinsicSourceInfo(), "root");
 
-    private List<Schema> childSchemas = new LinkedList<>();
+    private List<Directory> childDirectories = new LinkedList<>();
     private Set<ParseUnit> parseUnits = new HashSet<>();
     private List<SpaceTypeDefn> spaceTypeDefns = new LinkedList<>();
+    private Directory parentDir;
+    private Namespace namespace;
 
     // ================== The starting point for using Space to execute Space programs
 
@@ -45,7 +47,7 @@ public class Schema extends NamedElement implements ValueExpr {
 
     // ==================
 
-    Schema(SourceInfo sourceInfo, String name) {
+    Directory(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
     }
 
@@ -61,12 +63,24 @@ public class Schema extends NamedElement implements ValueExpr {
     // =========================================================================
     // Child adders
 
-    public Schema addSchema(Schema childSchema) {
-        childSchemas.add(childSchema);
+    public Directory addDir(Directory childDirectory) {
+        childDirectories.add(childDirectory);
         //
-        addChild(childSchema);
+        addChild(childDirectory);
         //
-        return childSchema;
+        return childDirectory;
+    }
+
+    public Directory getParentDir() {
+        return parentDir;
+    }
+
+    public Namespace getNamespace() {
+        return namespace;
+    }
+
+    public boolean isRootDir() {
+        return getParentDir() == null;
     }
 
     public SpaceTypeDefn addSpaceDefn(SpaceTypeDefn spaceTypeDefn) {
@@ -87,8 +101,12 @@ public class Schema extends NamedElement implements ValueExpr {
         addChild(parseUnit);
     }
 
-    public List<Schema> getChildSchemas() {
-        return childSchemas;
+    public boolean hasChildDirs() {
+        return childDirectories != null && childDirectories.size() > 0;
+    }
+
+    public List<Directory> getChildDirectories() {
+        return childDirectories;
     }
 
     public Set<ParseUnit> getParseUnits() {
@@ -98,4 +116,17 @@ public class Schema extends NamedElement implements ValueExpr {
     public List<SpaceTypeDefn> getTypes() {
         return spaceTypeDefns;
     }
+
+    @Override
+    void setParent(ModelElement parent) {
+        if (parent instanceof Directory)
+            this.parentDir = (Directory) parent;
+
+        if (parent instanceof Namespace) {
+            this.namespace = ((Namespace) parent);
+        }
+        //
+        super.setParent(parent);
+    }
+
 }

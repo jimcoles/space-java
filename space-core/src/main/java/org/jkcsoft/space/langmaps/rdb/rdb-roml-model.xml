@@ -16,7 +16,7 @@
         "/Users/jcoles/Source/jkc/space-java/space-core/src/main/java/org/jkcsoft/space/lang/roml_dtd.dtd">
 
 <!--
-  Define rdb notions on top of ROML.  This is the 'schema' to which any
+  Define rdb notions on top of ROML.  This is the 'directory' to which any
 -->
 <model-defn code-name="generic-rdb-model">
     <domain-defn code-name="code-name" defn="char" size="64"/>

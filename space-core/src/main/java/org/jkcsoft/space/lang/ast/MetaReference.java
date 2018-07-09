@@ -46,7 +46,7 @@ public class MetaReference<T extends Named> extends ModelElement implements Valu
     }
 
     public MetaReference(T typeDefn) {
-        super(new IntrinsicSourceInfo());
+        this(new IntrinsicSourceInfo(), MetaType.TYPE, null);
         this.firstPart = new MetaRefPart(this, new NamePartExpr(new IntrinsicSourceInfo(), false, null, typeDefn.getName()));
         this.firstPart.setState(LoadState.RESOLVED);
         this.firstPart.setResolvedMetaObj(typeDefn);
@@ -85,7 +85,7 @@ public class MetaReference<T extends Named> extends ModelElement implements Valu
 //    }
 
     public String getFullPath() {
-        return "->" + firstPart + (firstPart.getNextRefPart() != null ? firstPart.getNextRefPart() : "");
+        return "->" + firstPart.getName() + (firstPart.getNextRefPart() != null ? firstPart.getFullNamePath(): "");
     }
 
     @Override
@@ -121,10 +121,10 @@ public class MetaReference<T extends Named> extends ModelElement implements Valu
         MetaRefPart<T> lastPart = getLastPart();
         return "<" +
             "fromObj=" + (getNamedParent() != null ? getNamedParent() : "") +
-            " path=" + getFullPath() + (suffix != null ? " " + suffix : "") +
-            " (" + targetMetaType.toString().substring(0, 3) + ")" +
+            " path=\"" + getFullPath() + (suffix != null ? " " + suffix : "") + "\"" +
+            " (" + ( targetMetaType != null ? targetMetaType.toString().substring(0, 3) : "?" ) + ")" +
             (resolvedDatumScope != null ? " " + resolvedDatumScope.toString().substring(0, 3) : "") +
-            " resObj=" + (lastPart != null ? lastPart : "?") +
+            " resObj=" + (getState() == LoadState.RESOLVED ? lastPart.getResolvedMetaObj() : "?") +
             '>';
     }
 }

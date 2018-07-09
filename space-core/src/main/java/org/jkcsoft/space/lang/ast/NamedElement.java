@@ -26,6 +26,7 @@ public abstract class NamedElement extends ModelElement implements Named, Compar
 
     private String name;
     private String description;
+    private String fqName;
 
     NamedElement(SourceInfo sourceInfo, String name) {
         super(sourceInfo);
@@ -59,7 +60,9 @@ public abstract class NamedElement extends ModelElement implements Named, Compar
     }
 
     public String getFQName() {
-        return Strings.buildDelList(getFullNamePath(), Strings.TO_STRING_LISTER, "/");
+        if (fqName == null)
+            fqName = Strings.buildDelList(getFullNamePath(), Strings.TO_STRING_LISTER, "/");
+        return fqName;
     }
 
     public abstract MetaType getMetaType();
@@ -70,11 +73,6 @@ public abstract class NamedElement extends ModelElement implements Named, Compar
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @Override
-    public ModelElement addChild(ModelElement child) {
-        return super.addChild(child);
     }
 
     @Override

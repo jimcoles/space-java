@@ -46,7 +46,7 @@ public class TypeRef extends MetaReference<DatumType> {
     @Override
     protected String getSuffix() {
         if (suffix == null)
-            suffix = collectionTypes != null ? buildSuffix() : "";
+            suffix = collectionTypes != null ? buildSuffix() : null;
         return suffix;
     }
 

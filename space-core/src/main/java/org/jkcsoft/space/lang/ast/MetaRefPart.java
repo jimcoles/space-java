@@ -9,10 +9,12 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 /**
  * @author Jim Coles
  */
-public class MetaRefPart<T> {
+public class MetaRefPart<T> extends NamedElement {
 
     private MetaReference parentPath;
     private NamePartExpr namePartExpr;
@@ -26,6 +28,7 @@ public class MetaRefPart<T> {
     private MetaRefPart nextRefPart;
 
     public MetaRefPart(MetaReference parentPath, NamePartExpr namePartExpr) {
+        super(namePartExpr.getSourceInfo(), namePartExpr.getNameExpr());
         this.parentPath = parentPath;
         this.namePartExpr = namePartExpr;
     }
@@ -76,4 +79,8 @@ public class MetaRefPart<T> {
         this.prevRefPart = prevRefPart;
     }
 
+    @Override
+    public MetaType getMetaType() {
+        return null;
+    }
 }

@@ -14,7 +14,9 @@ import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.loader.AstLoadError;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -53,15 +55,11 @@ public class AstUtils {
         return lexParent;
     }
 
-    public static Schema getRunSchema(Schema thisSchema) {
-        Schema schema =
-            (Schema) CollectionUtils.find(thisSchema.getChildren(),
-                                          object -> object instanceof Schema);
-        return schema;
-    }
-
-    public static Schema getLangRoot(List<Schema> dirChain) {
-        return dirChain.get(0);
+    public static Directory getRunDir(Directory thisDirectory) {
+        Directory directory =
+            (Directory) CollectionUtils.find(thisDirectory.getChildren(),
+                                          object -> object instanceof Directory);
+        return directory;
     }
 
     public static boolean isGroupingNode(ModelElement child) {
@@ -101,14 +99,14 @@ public class AstUtils {
      * @param reference
      * @return
      */
-    public static NamedElement resolveAstPath(List<Schema> dirChain, MetaReference reference)
+    public static NamedElement resolveAstPath(List<Directory> dirChain, MetaReference reference)
     {
         NamedElement lookup = null;
         switch (reference.getTargetMetaType()) {
             case TYPE:
                 lookup = checkIntrinsics(reference.getFirstPart().getNamePartExpr());
                 if (lookup == null && reference.hasParent()) {
-                    lookup = resolveFromNode(reference.getParent(), reference);
+                    lookup = resolveFromNode(reference.getNamedParent(), reference);
                 }
                 if (lookup == null) {
                     lookup = resolveFromRoot(dirChain, reference);
@@ -127,7 +125,7 @@ public class AstUtils {
                 if (lookup == null && !reference.getFirstPart().hasNextExpr())
                     lookup = findInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
                 else if (lookup == null) {
-                    lookup = resolveFromNode(reference.getParent(), reference);
+                    lookup = resolveFromNode(reference.getNamedParent(), reference);
                 }
                 break;
         }
@@ -137,29 +135,29 @@ public class AstUtils {
         return lookup;
     }
 
-    private static NamedElement resolveFromRoot(List<Schema> dirChain, MetaReference reference) {
-        NamedElement lookup = findAsSchemaRoot(dirChain, reference.getFirstPart().getNamePartExpr());
+    private static NamedElement resolveFromRoot(List<Directory> dirChain, MetaReference reference) {
+        NamedElement lookup = findAsDirRoot(dirChain, reference.getFirstPart().getNamePartExpr());
         lookup = traverseRest(lookup, reference.getFirstPart().getNextRefPart());
         return lookup;
     }
 
-    private static NamedElement resolveFromNode(ModelElement astNode, MetaReference reference) {
-        log.debug("trying to find ["+reference+"] under " + astNode);
+    private static NamedElement resolveFromNode(NamedElement astNode, MetaReference reference) {
+        log.debug("trying to find ["+reference+"] under [" + astNode.getFQName() + "]");
         NamedElement lookup = lookupImmediateChild(astNode, reference.getFirstPart().getNamePartExpr().getNameExpr());
         lookup = traverseRest(lookup, reference.getFirstPart().getNextRefPart());
         return lookup;
     }
 
     /** Scans dir chain. */
-    public static NamedElement findAsSchemaRoot(List<Schema> dirChain, NamePartExpr namePartExpr) {
+    public static NamedElement findAsDirRoot(List<Directory> dirChain, NamePartExpr namePartExpr) {
         NamedElement lookup = null;
-        for (ModelElement tryContext : dirChain) {
-            log.debug("trying to find [" + namePartExpr + "] under schema [" + tryContext + "]");
-            lookup = lookupImmediateChild(tryContext, namePartExpr.getNameExpr());
+        for (Directory dir : dirChain) {
+            log.debug("trying to find [" + namePartExpr + "] under [" + dir.getFQName() + "]");
+            lookup = lookupImmediateChild(dir, namePartExpr.getNameExpr());
             if (lookup != null)
                 break;
             else
-                log.debug("could not find [" + namePartExpr + "] under [" + tryContext + "]");
+                log.debug("could not find [" + namePartExpr + "] under [" + dir.getFQName() + "]");
         }
         return lookup;
     }
@@ -261,6 +259,23 @@ public class AstUtils {
         PrintAstConsumer astPrinter = new PrintAstConsumer();
         walkAst(modelElement, astPrinter);
         return astPrinter.getSb().toString();
+    }
+
+    public static boolean contains(Directory parentDir, String name) {
+        return getSubDirByName(parentDir, name) != null;
+    }
+
+    public static Directory getSubDirByName(Directory parentDir, String name) {
+        Directory subDir = null;
+        if (parentDir.hasChildDirs()) {
+            for (Directory directory : parentDir.getChildDirectories()) {
+                if (directory.getName().equals(name)) {
+                    subDir = directory;
+                    break;
+                }
+            }
+        }
+        return subDir;
     }
 
     private static class PrintAstConsumer implements AstConsumer {

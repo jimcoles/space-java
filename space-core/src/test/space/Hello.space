@@ -1,5 +1,5 @@
 
-public type-def MySpace
+public type MySpace
 /*
  This is a smart annotation comment for
  my awesome space.
@@ -26,7 +26,7 @@ public type-def MySpace
 //    cseq greeting = "Hello from this reference to a CharSequence.";
 
     // functions
-    function-def void main(CharSequence args)
+    function void main(CharSequence args)
     {   // statement block: may include block-local vars, objects, spaces + any other statement type
         boolean boolTooLocal = true;
         OpSys.println( ["Hello, Space! (string literal)"] );
@@ -61,23 +61,23 @@ public type-def MySpace
         }
     }
 
-    function-def void foo(CharSequence args) {
+    function void foo(CharSequence args) {
         OpSys.println( [args] );
     }
 
 }
 
-public type-def AnotherType {
+public type AnotherType {
 
-    function-def card getInt() {
+    function card getInt() {
         return ((((1 + 2) + 3) - 2) / 2);
     }
 
-    function-def real getReal() {
+    function real getReal() {
         return ((((1 + 2.0) + 3) - 2) / 2.0);
     }
 
-    function-def boolean getBool() {
+    function boolean getBool() {
         return ((1 == 1) && (3 < 4));
     }
 

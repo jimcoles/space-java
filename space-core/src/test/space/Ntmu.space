@@ -1,10 +1,10 @@
 
-public type-def NtmuSpace
+public type NtmuSpace
 /*
  This is a smart annotation comment for my awesome space.
 */
 {
-    function-def void main(char[] args) {
+    function void main(char[] args) {
         char[] test = "";
         char[] appStr = Lang.append(["firstHalf", "lastHalf"]);
         Person jim = Person[53.75, "Jim", "Coles", "last"];
@@ -38,24 +38,24 @@ public type-def NtmuSpace
     }
 }
 
-type-def Person {
+type Person {
     real age;
 
     char[] first;
     char[] last;
     char[] fullName;
 
-//    equation-def FL2Full (Person person) {
+//    equation FL2Full (Person person) {
 //        fullname == first.append(last);
 //    }
 
-//    function-def A solves FL2Full for (fullname) given (first,last) {
+//    function A solves FL2Full for (fullname) given (first,last) {
 //
 //    }
 
 }
 
-type-def Task {
+type Task {
     real estHours;
 
     char[] description;
@@ -63,13 +63,13 @@ type-def Task {
 }
 
 // Equations within a space type
-type-def Triangle {
+type Triangle {
     real side1;
     real side2;
     real size3;
     real angle12;
 
-//    equation-def() {
+//    equation() {
 //
 //    }
 

@@ -16,9 +16,9 @@ package org.jkcsoft.space.lang.ast;
  */
 public class PackageDecl extends ModelElement {
 
-    private MetaReference<Schema> packageRef;
+    private MetaReference<Directory> packageRef;
 
-    PackageDecl(SourceInfo sourceInfo, MetaReference<Schema> packageRef) {
+    PackageDecl(SourceInfo sourceInfo, MetaReference<Directory> packageRef) {
         super(sourceInfo);
         this.packageRef = packageRef;
     }

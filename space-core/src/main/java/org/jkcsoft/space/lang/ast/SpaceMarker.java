@@ -9,19 +9,11 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;
+
 /**
  * @author Jim Coles
  */
-public class Validator {
-
-    /**
-     * Type checking.  Ensure that referenced things exist and that node types
-     * match.
-     *
-     * @param directory
-     */
-    public void validate(Directory directory) {
-
-    }
-
+@SpaceNative
+public class SpaceMarker {
 }

@@ -9,11 +9,12 @@
  */
 package org.jkcsoft.space.lang.loader;
 
+import org.jkcsoft.space.lang.ast.Directory;
 import org.jkcsoft.space.lang.ast.ParsableChoice;
 import org.jkcsoft.space.lang.ast.ParseUnit;
-import org.jkcsoft.space.lang.ast.Schema;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public interface AstLoader {
     /** A loader should provide a unique name useful for logging and debugging. */
     String getName();
 
-    /** Loaders should return the root (directory) node */
-    ParsableChoice load(List<AstLoadError> errors, File file) throws Exception;
+    ParseUnit loadFile(AstErrors parentErrors, Directory spaceDir, File spaceSrcFile) throws IOException;
 
+    Directory loadDir(AstErrors parentErrors, File srcDir) throws IOException;
 }

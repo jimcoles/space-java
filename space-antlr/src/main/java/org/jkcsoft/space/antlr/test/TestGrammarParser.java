@@ -9,23 +9,29 @@
  */
 package org.jkcsoft.space.antlr.test;
 
+import org.jkcsoft.space.lang.ast.Directory;
 import org.jkcsoft.space.lang.ast.ParsableChoice;
-import org.jkcsoft.space.lang.ast.Schema;
-import org.jkcsoft.space.lang.loader.AstLoadError;
+import org.jkcsoft.space.lang.ast.ParseUnit;
+import org.jkcsoft.space.lang.loader.AstErrors;
 import org.jkcsoft.space.lang.loader.AstLoader;
 
 import java.io.File;
-import java.util.List;
+import java.io.IOException;
 
 public class TestGrammarParser implements AstLoader {
 
     @Override
-    public ParsableChoice load(List<AstLoadError> errors, File file) throws Exception {
+    public String getName() {
+        return "Dummy Loader";
+    }
+
+    @Override
+    public ParseUnit loadFile(AstErrors parentErrors, Directory spaceDir, File spaceSrcFile) throws IOException {
         return null;
     }
 
     @Override
-    public String getName() {
-        return "Dummy Loader";
+    public Directory loadDir(AstErrors parentErrors, File srcDir) throws IOException {
+        return null;
     }
 }

@@ -13,7 +13,6 @@ import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,13 +42,13 @@ public class AstFactory {
         return ObjectFactory.getInstance();
     }
 
-    public Schema newAstSchema(SourceInfo sourceInfo, String name) {
-        return new Schema(sourceInfo, name);
+    public Directory newAstDir(SourceInfo sourceInfo, String name) {
+        return new Directory(sourceInfo, name);
     }
 
-    public Schema newProgram(SourceInfo sourceInfo, String name) {
-        Schema schema = new Schema(sourceInfo, name);
-        return schema;
+    public Directory newProgram(SourceInfo sourceInfo, String name) {
+        Directory directory = new Directory(sourceInfo, name);
+        return directory;
     }
 
     public NamePart newTextNode(SourceInfo sourceInfo, String name) {
@@ -105,7 +104,7 @@ public class AstFactory {
         return new MetaRefPart(parentPath, namePartExpr);
     }
 
-    public MetaRefPart newMetaRefPart(MetaReference parentPath, SourceInfo sourceInfo, String ... nameExprs) {
+    public MetaRefPart newMetaRefPart(MetaReference parentPath, SourceInfo sourceInfo, String... nameExprs) {
         MetaRefPart firstMetaRefPart = null;
         MetaRefPart prevMetaRefPart = null;
         for (String nameExpr : nameExprs) {
@@ -180,15 +179,20 @@ public class AstFactory {
         return new ParseUnit(sourceInfo);
     }
 
-    public PackageDecl newPackageDecl(SourceInfo sourceInfo, MetaReference<Schema> packageRef) {
+    public PackageDecl newPackageDecl(SourceInfo sourceInfo, MetaReference<Directory> packageRef) {
         return new PackageDecl(sourceInfo, packageRef);
     }
 
-    public ParsableChoice newParsableChoice(Schema schema) {
-        return new ParsableChoice(schema);
+    public ParsableChoice newParsableChoice(Directory directory) {
+        return new ParsableChoice(directory);
     }
 
     public ParsableChoice newParsableChoice(ParseUnit parseUnit) {
         return new ParsableChoice(parseUnit);
     }
+
+    public Namespace newNamespace(SourceInfo sourceInfo, String name) {
+        return new Namespace(sourceInfo, name);
+    }
+
 }

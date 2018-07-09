@@ -27,7 +27,7 @@ public class Im2AstTransform {
         if (astFactory.getUserAstRoot() == null) {
             if (!ImTrees.first(imRoot).getText().equals("space-defn"))
                 errors.Add(new AstLoadError("first ID must be 'space-defn'"));
-//            astFactory.addMetaObject(new Schema());
+//            astFactory.addMetaObject(new Directory());
             astFactory.getUserAstRoot();
         }
 */

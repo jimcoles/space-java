@@ -35,8 +35,8 @@ public class TestAst {
         ObjectFactory objBuilder = ObjectFactory.getInstance();
         SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(si, astFactory.newTextNode(si, "MyHelloSpace"));
 
-        Schema astSchema = astFactory.newAstSchema(si, "TestAst");
-        astSchema
+        Directory astDirectory = astFactory.newAstDir(si, "TestAst");
+        astDirectory
             .addSpaceDefn(spaceTypeDefn)
             .getBody()
             .addVariableDecl(astFactory.newVariableDecl(si, "myIntDim", NumPrimitiveTypeDefn.CARD))
@@ -72,7 +72,7 @@ public class TestAst {
 
         try {
             List<RuntimeError> errors = new LinkedList<>();
-            spex.linkAndCheck(errors, astSchema.getParseUnits().iterator().next());
+            spex.linkAndCheck(errors, astDirectory.getParseUnits().iterator().next());
         }
         catch (Exception e) {
             e.printStackTrace();

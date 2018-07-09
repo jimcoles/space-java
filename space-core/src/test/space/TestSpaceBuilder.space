@@ -1,5 +1,5 @@
 // Syntax: Type definition
-type-def Person {
+type Person {
     // Variables
     CharSequence first = "Jim";
     CharSequence last;
@@ -8,27 +8,26 @@ type-def Person {
     // Associations
 
     // Syntax: Function definition
-    function-def void main(CharSequence args) {
+    function void main(CharSequence args) {
 
         // Syntax: Object creation with ordered variables
-        Person jimTuple1 = new Person ["Jim", "Coles"];
+        Person jimTuple1 = Person ["Jim", "Coles"];
 
         // Syntax: Object creation with named variables
-        Person jimTuple2 = new Person [firstName = "Jim", lastName = "Coles"];
+        Person jimTuple2 = Person [firstName = "Jim", lastName = "Coles"];
 
         // Syntax: Function calls with tuple variables
-        JnOpSys/println jimTuple;
 
-        JnOpSys.println jimTuple2;
+        JnOpSys.println( jimTuple2 );
 
         // Syntax: Function call with anonymous tuple
-        JnOpSys.println ["Elvis", "Presley"];
+        JnOpSys.println( ["Elvis", "Presley"] );
 
     }
 
 }
 
-type-def Address {
+type Address {
 
     // Variables
     CharSequence streetAddr;
@@ -39,13 +38,13 @@ type-def Address {
     card unitNumber;
 
     // Syntax: Equation Definition
-    equation-def streetAddrFormatUSCommon {
+    equation streetAddrFormatUSCommon {
         // Syntax: Equality Constraint as Grammar expression
         streetAddr == { gramex streetNumber streetRoad unitNumber? }
     }
 
     // Syntax: Function Definition
-    function-def streetFromParts solves streetAddrFormatUSCommon for
+    function streetFromParts solves streetAddrFormatUSCommon for
     (streetAddr)
     from
     (streetNumber, streetRoad, unitNumber?) {
@@ -55,12 +54,12 @@ type-def Address {
 
 }
 
-type-def = City {
+type = City {
     string cityKey;
     string cityDefaultName;
 }
 
-assoc-def PersonAddresses = {
+assoc PersonAddresses = {
 
     leftEnd = {
         type = Person,
@@ -75,7 +74,7 @@ assoc-def PersonAddresses = {
 
 }
 
-type-def Triangle (
+type Triangle (
     real a;
     real b;
     real c;
@@ -84,7 +83,7 @@ type-def Triangle (
     real bcAngle;
     real caAngle;
 
-    equation-def sidesAngleAngles (
+    equation sidesAngleAngles (
 
     )
 

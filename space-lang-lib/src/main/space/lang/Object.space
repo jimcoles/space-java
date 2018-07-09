@@ -8,8 +8,8 @@ import space.model.SpaceTypeDefn;
  */
 type Object {
 
-    SpaceTypeDefn stype;
-    Key oid;
+//    SpaceTypeDefn stype;
+//    Key oid;
 
     function Key getOid() {
         return oid;
