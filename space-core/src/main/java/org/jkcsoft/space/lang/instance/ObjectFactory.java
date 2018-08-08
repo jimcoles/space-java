@@ -10,6 +10,8 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.ast.sji.SjiTypeDefn;
+import org.jkcsoft.space.lang.instance.sji.SjiTuple;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -38,8 +40,13 @@ public class ObjectFactory {
         return new SpaceOid(latestOid.incrementAndGet());
     }
 
-    public Tuple newTuple(TupleDefn defn) {
-        Tuple tuple = new Tuple(newOid(), defn);
+    public TupleImpl newTupleImpl(ComplexType defn) {
+        TupleImpl tuple = new TupleImpl(newOid(), defn);
+        return tuple;
+    }
+
+    public SjiTuple newSjiTuple(SjiTypeDefn defn, Object jObject) {
+        SjiTuple tuple = new SjiTuple(newOid(), defn, jObject);
         return tuple;
     }
 
@@ -48,7 +55,7 @@ public class ObjectFactory {
         return characterSequence;
     }
 
-    public FunctionCallContext newFunctionCall(Tuple ctxObject, FunctionCallExpr functionCallExpr, Tuple argTuple,
+    public FunctionCallContext newFunctionCall(Tuple ctxObject, FunctionCallExpr functionCallExpr, TupleImpl argTuple,
                                                ValueHolder retValHolder) {
         FunctionCallContext functionCallContext =
             new FunctionCallContext(ctxObject, functionCallExpr, argTuple, retValHolder);

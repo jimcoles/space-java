@@ -19,7 +19,7 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
     /**
      * The name of some other named design-time thing such as a function.
      */
-    private MetaReference<AbstractFunctionDefn> functionDefnRef;
+    private MetaReference<FunctionDefn> functionDefnRef;
     private TupleExpr argTupleExpr;
     private MetaReference argTupleRef;
 
@@ -41,7 +41,7 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
         return this;
     }
 
-    public MetaReference<AbstractFunctionDefn> getFunctionDefnRef() {
+    public MetaReference<FunctionDefn> getFunctionDefnRef() {
         return functionDefnRef;
     }
 

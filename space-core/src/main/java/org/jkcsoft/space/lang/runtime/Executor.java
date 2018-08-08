@@ -10,29 +10,33 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Lister;
 import org.jkcsoft.java.util.Strings;
+import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.ast.sji.SjiFunctionDefnImpl;
+import org.jkcsoft.space.lang.ast.sji.SjiTypeDefn;
 import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.instance.Set;
+import org.jkcsoft.space.lang.instance.sji.SjiTuple;
 import org.jkcsoft.space.lang.loader.AstErrors;
 import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.lang.metameta.MetaType;
-import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;
 import org.jkcsoft.space.lang.runtime.jnative.math.Math;
 import org.jkcsoft.space.lang.runtime.jnative.opsys.OpSys;
-import org.jkcsoft.space.lang.runtime.jnative.space.Lang;
 import org.jkcsoft.space.lang.runtime.typecasts.CastTransforms;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.stream.Stream;
 
 /**
  * <p> The top-level executive context for loading Space meta objects and running a
@@ -79,9 +83,9 @@ public class Executor extends ExprProcessor implements ExeContext {
 //    private ObjectFactory spaceBuilder = ObjectFactory.getInstance();
 
     // ==================
-    public static SpaceTypeDefn MATH_TYPE_DEF;
-    public static SpaceTypeDefn space_opers_type_def;
-    public static SpaceTypeDefn op_sys_type_def;
+    public static ComplexType MATH_TYPE_DEF;
+    public static ComplexType space_opers_type_def;
+    public static ComplexType op_sys_type_def;
     private static Map<OperEnum, OperEvaluator> operEvalMap = new TreeMap<>();
 
     static {
@@ -119,6 +123,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         this.exeSettings = exeSettings;
         initRuntime();
         loadNativeTypes();
+        loadSpecialOperators();
     }
 
     private void initRuntime() {
@@ -140,6 +145,8 @@ public class Executor extends ExprProcessor implements ExeContext {
     public void run() {
         try {
 //            File exeFile = FileUtils.getFile(exeSettings.getExeMain());
+
+            // Load Space libs and source
             List<File> srcRootDirs = exeSettings.getSpaceDirs();
 //            if (!exeFile.exists()) {
 //                throw new SpaceX("Input file [" + exeFile + "] does not exist.");
@@ -148,7 +155,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             // Parse all source and load ASTs into memory
             List<ParseUnit> newParseUnits = new LinkedList<>();
             for (File srcRootDir : srcRootDirs) {
-                newParseUnits.addAll(queryParseUnits(loadDir(srcRootDir)));
+                newParseUnits.addAll(queryParseUnits(loadSrcRootDir(srcRootDir)));
             }
 
             // Link all refs within newly loaded ASTs
@@ -200,13 +207,49 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
     }
 
+    private void loadNativeTypes() {
+
+        String jClassSeq = System.getProperty("java.class.path");
+        String[] jClassPaths = jClassSeq.split(File.pathSeparator);
+        for (String jClassPath : jClassPaths) {
+            loadJavaClassDir(FileUtils.getFile(jClassPath));
+        }
+
+    }
+
+    private void loadSpecialOperators() {
+        op_sys_type_def =
+            (ComplexType) AstUtils.resolveAstPath(nsRegistry.getRootDirs(), TypeRef.newTypeRef(OpSys.class.getTypeName()));
+//        MATH_TYPE_DEF = loadNativeType(Math.class, AstUtils.getLangRoot(dirChain));
+//        space_opers_type_def = loadNativeType(SpaceOpers.class, AstUtils.getLangRoot(dirChain));
+    }
+
+    private Directory loadJavaClassDir(File jClassPathDir) {
+        Directory newSpcRootDir = null;
+
+        if (jClassPathDir.isFile()) {
+            try {
+                JarFile jarFile = new JarFile(jClassPathDir);
+                Stream<JarEntry> jarEntryStream = jarFile.stream();
+                jarEntryStream.forEach(jarEntry -> {
+                    if (jarEntry.isDirectory()) {
+                        SpaceHome.getSjiBuilder().loadJarDir(jarEntry);
+                    }
+                });
+            } catch (IOException e) {
+                throw new SpaceX("failed loading Java class path", e);
+            }
+        }
+        return newSpcRootDir;
+    }
+
     private Collection<ParseUnit> queryParseUnits(Directory directory) {
         QueryAstConsumer<ParseUnit> astAction = new QueryAstConsumer(ParseUnit.class);
         AstUtils.walkAst(directory, astAction);
         return astAction.getResults();
     }
 
-    public Directory loadDir(File srcRootDir) {
+    public Directory loadSrcRootDir(File srcRootDir) {
         Directory newSpcRootDir = null;
         AstErrors loadErrors = new AstErrors(srcRootDir);
         try {
@@ -220,7 +263,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         loadErrors.checkErrors();
 
-        mergeNewChildren(nsRegistry.getLangNs().getRootDir(), newSpcRootDir);
+        mergeNewChildren(nsRegistry.getSpaceNs().getRootDir(), newSpcRootDir);
 
         nsRegistry.trackMetaObject(newSpcRootDir);
 
@@ -315,106 +358,8 @@ public class Executor extends ExprProcessor implements ExeContext {
         return errors;
     }
 
-    private void loadNativeTypes() {
-        Lang.class.getPackage().getAnnotation(SpaceNative.class);
-        // use Java annotations Java-native objects
-//        SpaceNative.class.getAnnotations();
-        //
-        loadNativeType(Lang.class, nsRegistry.getLangNs().getRootDir());
-        op_sys_type_def = loadNativeType(OpSys.class, nsRegistry.getLangNs().getRootDir());
-//        MATH_TYPE_DEF = loadNativeType(Math.class, AstUtils.getLangRoot(dirChain));
-//        space_opers_type_def = loadNativeType(SpaceOpers.class, AstUtils.getLangRoot(dirChain));
-
-    }
-
-    private SpaceTypeDefn loadNativeType(Class jnClass, Directory rootAstDirectory) {
-        AstFactory astFactory = getAstFactory();
-        NativeSourceInfo jSourceInfo = new NativeSourceInfo(jnClass);
-        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(jSourceInfo,
-                                                                  astFactory.newTextNode(jSourceInfo,
-                                                                                         toSpaceTypeName(jnClass)));
-        nsRegistry.trackMetaObject(spaceTypeDefn);
-        //
-        rootAstDirectory.addSpaceDefn(spaceTypeDefn);
-        //
-        spaceTypeDefn.setBody(astFactory.newTypeDefnBody(jSourceInfo));
-        //
-        Method[] methods = jnClass.getMethods();
-        for (Method jMethod : methods) {
-            if (isExcludedNative(jMethod))
-                continue;
-
-            NativeSourceInfo jMethodInfo = new NativeSourceInfo(jMethod);
-            Class<?> jType = jMethod.getReturnType();
-            SpaceTypeInfo spcRetInfo = new SpaceTypeInfo(jType, jMethodInfo);
-            NativeFunctionDefn functionDefnAST = astFactory.newNativeFunctionDefn(
-                jMethodInfo,
-                jMethod.getName(),
-                jMethod,
-                astFactory.newSpaceTypeDefn(
-                    jMethodInfo,
-                    astFactory.newTextNode(
-                        jMethodInfo,
-                        "_sig_" + jMethod.getName())
-                ),
-                spcRetInfo.getSpaceTypeRef()
-            );
-            //
-            spaceTypeDefn.getBody().addFunctionDefn(functionDefnAST);
-            nsRegistry.trackMetaObject(functionDefnAST);
-            //
-            SpaceTypeDefn argSpaceTypeDefn = functionDefnAST.getArgSpaceTypeDefn();
-            argSpaceTypeDefn.setBody(astFactory.newTypeDefnBody(jMethodInfo));
-            //
-            Parameter[] jParameters = jMethod.getParameters();
-            for (Parameter jParam : jParameters) {
-                NativeSourceInfo jParamInfo = new NativeSourceInfo(jParam);
-                SpaceTypeInfo spcTypeInfo = new SpaceTypeInfo(jParam.getType(), jParamInfo);
-                if (!spcTypeInfo.isSpacePrim()) {
-                    argSpaceTypeDefn.addAssocDefn(
-                        astFactory.newAssociationDecl(
-                            jParamInfo,
-                            jParam.getName(),
-                            spcTypeInfo.getSpaceTypeRef()
-                        )
-                    );
-                }
-                else {
-                    argSpaceTypeDefn.addVariable(
-                        astFactory.newVariableDecl(
-                            new ProgSourceInfo(),
-                            jParam.getName(),
-                            ((NumPrimitiveTypeDefn) spcTypeInfo.getSpacePrimType()))
-                    );
-                }
-            }
-        }
-        return spaceTypeDefn;
-    }
-
-    private TypeRef.CollectionType javaToSpaceCollType(Class clazz) {
-        TypeRef.CollectionType spCollType = null;
-        if (clazz == String.class) {
-            spCollType = TypeRef.CollectionType.SEQUENCE;
-        }
-        else {
-            spCollType = clazz.isArray() ? TypeRef.CollectionType.SEQUENCE : null;
-        }
-        return spCollType;
-    }
-
-    private boolean isExcludedNative(Method jMethod) {
-        Method[] baseMethods = Object.class.getMethods();
-        return ArrayUtils.contains(baseMethods, jMethod);
-    }
-
-    private String toSpaceTypeName(Class spaceJavaWrapperClass) {
-//        return spaceJavaWrapperClass.getSimpleName().substring(2);
-        return spaceJavaWrapperClass.getSimpleName();
-    }
-
     /**
-     * The entry point for 'running a program': exec the 'main' function.
+     * The entry point method for 'running' a Space program. Executes the 'main' function.
      */
     public ModelElement exec(String mainSpacePath) {
         log.debug("exec: " + mainSpacePath);
@@ -425,9 +370,9 @@ public class Executor extends ExprProcessor implements ExeContext {
         exeTypeRef.setFirstPart(getAstFactory().newMetaRefPart(exeTypeRef, sourceInfo, pathNodes));
         SpaceTypeDefn bootTypeDefn = (SpaceTypeDefn) AstUtils.resolveAstPath(nsRegistry.getRootDirs(), exeTypeRef);
 //        SpaceTypeDefn bootTypeDefn = progSpaceDir.getFirstSpaceDefn();
-        Tuple mainTypeTuple = newTuple(bootTypeDefn);
+        Tuple mainTypeTuple = newTupleImpl(bootTypeDefn);
         EvalContext evalContext = new EvalContext();
-        FunctionDefn spMainActionDefn = bootTypeDefn.getBody().getFunction("main");
+        SpaceFunctionDefn spMainActionDefn = bootTypeDefn.getBody().getFunction("main");
 
         ProgSourceInfo progSourceInfo = new ProgSourceInfo();
         FunctionCallExpr bootMainCallExpr = getAstFactory().newFunctionCallExpr(progSourceInfo);
@@ -490,7 +435,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         log.debug("exec: " + statementBlock);
         FunctionCallContext functionCallContext = evalContext.peekStack();
         Tuple blockTuple = statementBlock instanceof SpaceTypeDefnBody ?
-            functionCallContext.getCtxObject() : newTuple(statementBlock);
+            functionCallContext.getCtxObject() : newTupleImpl(statementBlock);
         functionCallContext.addBlockContext(getObjFactory().newBlockContext(statementBlock, blockTuple));
         List<Statement> statementSequence = statementBlock.getStatementSequence();
         for (Statement statement : statementSequence) {
@@ -556,7 +501,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     private Tuple eval(EvalContext evalContext, NewObjectExpr newObjectExpr) {
         log.debug("eval: " + newObjectExpr);
-        Tuple value = eval(evalContext, (SpaceTypeDefn) newObjectExpr.getTypeRef().getResolvedMetaObj(),
+        Tuple value = eval(evalContext, (ComplexType) newObjectExpr.getTypeRef().getResolvedMetaObj(),
                            newObjectExpr.getTupleExpr());
         return value;
     }
@@ -592,11 +537,11 @@ public class Executor extends ExprProcessor implements ExeContext {
         log.debug("eval: " + functionCallExpr);
         Value value = null;
 
-        AbstractFunctionDefn functionDefn = functionCallExpr.getFunctionDefnRef().getResolvedMetaObj();
-        SpaceTypeDefn argSpaceTypeDefn = functionDefn.getArgSpaceTypeDefn();
-        Tuple argTuple = eval(evalContext, argSpaceTypeDefn, functionCallExpr.getArgTupleExpr());
+        FunctionDefn functionDefn = functionCallExpr.getFunctionDefnRef().getResolvedMetaObj();
+        ComplexType argTypeDefn = functionDefn.getArgSpaceTypeDefn();
+        TupleImpl argTuple = eval(evalContext, argTypeDefn, functionCallExpr.getArgTupleExpr());
         ValueHolder retValHolder = functionDefn.isReturnVoid() ? newVoidHolder()
-            : newHolder(null, newAnonDecl(functionDefn.getReturnTypeRef().getResolvedMetaObj()));
+            : newHolder(null, newAnonDecl(functionDefn.getReturnType()));
         FunctionCallContext functionCallContext =
             getObjFactory().newFunctionCall(evalContext.peekStack().getCtxObject(), functionCallExpr, argTuple,
                                             retValHolder);
@@ -604,12 +549,12 @@ public class Executor extends ExprProcessor implements ExeContext {
         callStack.push(functionCallContext);
         log.debug("pushed call stack. size [" + callStack.size() + "]");
         try {
-            if (functionDefn instanceof FunctionDefn) {
-                FunctionDefn targetFunctionDefn =
-                    (FunctionDefn) functionDefn;
+            if (functionDefn instanceof SpaceFunctionDefn) {
+                SpaceFunctionDefn targetFunctionDefn =
+                    (SpaceFunctionDefn) functionDefn;
                 exec(evalContext, targetFunctionDefn.getStatementBlock());
             }
-            else if (functionDefn instanceof NativeFunctionDefn) {
+            else if (functionDefn instanceof SjiFunctionDefnImpl) {
                 evalNative(evalContext, functionCallExpr);
             }
             value = evalContext.peekStack().getReturnValueHolder().getValue();
@@ -622,10 +567,10 @@ public class Executor extends ExprProcessor implements ExeContext {
         return value;
     }
 
-    private Tuple eval(EvalContext evalContext, SpaceTypeDefn tupleTypeDefn, TupleExpr tupleExpr)
+    private TupleImpl eval(EvalContext evalContext, ComplexType tupleTypeDefn, TupleExpr tupleExpr)
     {
         log.debug("eval: new tuple => " + tupleTypeDefn + ", " + tupleExpr);
-        Tuple tuple = newTuple(tupleTypeDefn);
+        TupleImpl tuple = newTupleImpl(tupleTypeDefn);
         List<ValueExpr> valueExprs = tupleExpr != null ? tupleExpr.getValueExprs() : null;
         // validation
         int numValueExprs = valueExprs == null ? 0 : valueExprs.size();
@@ -640,7 +585,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             for (ValueExpr argumentExpr : valueExprs) {
                 Value argValue = eval(evalContext, argumentExpr);
                 argValue =
-                    autoCast(((TupleDefn) tuple.getDefn()).getDatumDeclList().get(idxArg).getType(), argValue);
+                    autoCast(((ComplexType) tuple.getDefn()).getDatumDeclList().get(idxArg).getType(), argValue);
                 ValueHolder leftSideHolder = tuple.get(tuple.getNthMember(idxArg));
                 SpaceUtils.assignNoCast(evalContext, leftSideHolder, argValue);
                 idxArg++;
@@ -677,8 +622,8 @@ public class Executor extends ExprProcessor implements ExeContext {
                 jArgs[idxArg] = jArg;
                 idxArg++;
             }
-            NativeFunctionDefn funcDef =
-                (NativeFunctionDefn) functionCallExpr.getFunctionDefnRef().getResolvedMetaObj();
+            SjiFunctionDefnImpl funcDef =
+                (SjiFunctionDefnImpl) functionCallExpr.getFunctionDefnRef().getResolvedMetaObj();
             Object jObjectDummy =
                 funcDef.getjMethod().getDeclaringClass().newInstance();
             Object jValue = funcDef.getjMethod().invoke(jObjectDummy, jArgs);
@@ -714,10 +659,10 @@ public class Executor extends ExprProcessor implements ExeContext {
                 value = findInBlocksRec(toMember, functionCallContext.getBlockContexts()).getValue();
                 break;
             case ARG:
-                value = functionCallContext.getArgTuple().get(toMember).getValue();
+                value = functionCallContext.getArgTuple().get((Declartion) toMember).getValue();
                 break;
             case OBJECT:
-                value = functionCallContext.getCtxObject().get(toMember).getValue();
+                value = functionCallContext.getCtxObject().get((Declartion) toMember).getValue();
                 break;
             case STATIC:
                 throw new SpaceX(evalContext.newRuntimeError("don't yet eval static datums"));
@@ -736,7 +681,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         Iterator<BlockContext> blockContextIterator = blocks.descendingIterator();
         while (assignable == null && blockContextIterator.hasNext()) {
             BlockContext blockContext = blockContextIterator.next();
-            assignable = blockContext.getDataTuple().get(toMember);
+            assignable = blockContext.getDataTuple().get((Declartion) toMember);
         }
         return assignable;
     }
@@ -847,8 +792,19 @@ public class Executor extends ExprProcessor implements ExeContext {
         return value;
     }
 
-    private Tuple newTuple(TupleDefn defn) {
-        Tuple tuple = getObjFactory().newTuple(defn);
+    private TupleImpl newTupleImpl(ComplexType defn) {
+        TupleImpl tuple = getObjFactory().newTupleImpl(defn);
+        initTrackTuple(defn, tuple);
+        return tuple;
+    }
+
+    private SjiTuple newSjiTuple(SjiTypeDefn defn, Object jObject) {
+        SjiTuple tuple = getObjFactory().newSjiTuple(defn, jObject);
+        initTrackTuple(defn, tuple);
+        return tuple;
+    }
+
+    private void initTrackTuple(ComplexType defn, Tuple tuple) {
         // initialize
         if (defn.hasDatums()) {
             List<Declartion> declList = defn.getDatumDeclList();
@@ -857,8 +813,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             }
         }
 
-        trackInstanceObject(tuple);
-        return tuple;
+        trackInstanceObject((SpaceObject) tuple);
     }
 
     // ---------------------------- New Space Objects ------------------------
@@ -999,62 +954,6 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         public Collection<T> getResults() {
             return results;
-        }
-    }
-
-    private class SpaceTypeInfo {
-        private boolean isSpacePrim = false;
-        private TypeRef spaceTypeRef;
-        private PrimitiveTypeDefn spcPrimType;
-
-        public SpaceTypeInfo(Class jClass, SourceInfo jSourceInfo) {
-            spcPrimType = null;
-            if (jClass == Boolean.TYPE) {
-                spcPrimType = NumPrimitiveTypeDefn.BOOLEAN;
-            }
-            else if (jClass == Integer.TYPE) {
-                spcPrimType = NumPrimitiveTypeDefn.CARD;
-            }
-            else if (jClass == Float.TYPE) {
-                spcPrimType = NumPrimitiveTypeDefn.REAL;
-            }
-            else if (jClass == Void.TYPE) {
-                spcPrimType = VoidType.VOID;
-            }
-
-            this.isSpacePrim = spcPrimType != null && !jClass.isArray();
-
-            // special cases for now: Java java.lang.String -> Space char sequence
-            if (jClass == String.class) {
-                spaceTypeRef =
-                    getAstFactory().newTypeRef(jSourceInfo, Collections.singletonList(TypeRef.CollectionType.SEQUENCE));
-                spaceTypeRef.setFirstPart(
-                    getAstFactory().newMetaRefPart(spaceTypeRef,
-                                                   jSourceInfo,
-                                                   NumPrimitiveTypeDefn.CHAR.getName()));
-            }
-            else {
-                String spcTypeRefName = spcPrimType != null ? spcPrimType.getName() : toSpaceTypeName(jClass);
-                spaceTypeRef =
-                    getAstFactory().newTypeRef(jSourceInfo, Collections.singletonList(javaToSpaceCollType(jClass)));
-                spaceTypeRef.setFirstPart(
-                    getAstFactory().newMetaRefPart(spaceTypeRef,
-                                                   jSourceInfo,
-                                                   spcTypeRefName));
-
-            }
-        }
-
-        public boolean isSpacePrim() {
-            return this.isSpacePrim;
-        }
-
-        public TypeRef getSpaceTypeRef() {
-            return spaceTypeRef;
-        }
-
-        public PrimitiveTypeDefn getSpacePrimType() {
-            return this.spcPrimType;
         }
     }
 

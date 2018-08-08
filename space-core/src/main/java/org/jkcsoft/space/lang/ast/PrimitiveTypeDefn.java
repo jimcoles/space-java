@@ -11,7 +11,7 @@ package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.NullValue;
 import org.jkcsoft.space.lang.instance.ScalarValue;
-import org.jkcsoft.space.lang.instance.Value;
+import org.jkcsoft.space.lang.instance.ValueHolder;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.util.Map;
@@ -20,7 +20,7 @@ import java.util.TreeMap;
 /**
  * @author Jim Coles
  */
-public abstract class PrimitiveTypeDefn extends NamedElement implements DatumType {
+public abstract class PrimitiveTypeDefn extends NamedElement implements SimpleType {
 
     private static Map<String, PrimitiveTypeDefn> enumsByName = new TreeMap<>();
 

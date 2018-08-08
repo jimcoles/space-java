@@ -28,7 +28,7 @@ public class TestSpaceBuilder extends TestSourceStub {
         ast.newProgram(si, "");
         ObjectFactory objs = ObjectFactory.getInstance();
         //
-        SpaceTypeDefn testPersonTypeDefn = ast.newSpaceTypeDefn(si, ast.newTextNode(si, "PersonType"));
+        ComplexType testPersonTypeDefn = ast.newSpaceTypeDefn(si, ast.newNamePart(si, "PersonType"));
 //        VariableDefn firstName = ast.newVariableDefn(new ProgSourceInfo(), "firstName", PrimitiveTypeDefn.TEXT);
 //        testPersonTypeDefn.addVariable(firstName);
 //        VariableDefn lastName = ast.newVariableDefn(new ProgSourceInfo(), "lastName", PrimitiveTypeDefn.TEXT);
@@ -36,7 +36,7 @@ public class TestSpaceBuilder extends TestSourceStub {
 //        Set space = objs.newSet(null, ast.new(null, "mySet",
 //                                                     ast.newSpacePathExpr(new ProgSourceInfo(), null, "Person", null)));
         //
-        Tuple testObjectTuple = objs.newTuple(testPersonTypeDefn);
+        Tuple testObjectTuple = objs.newTupleImpl(testPersonTypeDefn);
 //        SpaceUtils.assignOper(testObjectTuple, (NamedElement) firstName, (Assignable) textValue);
 //        SpaceUtils.assignOper(testObjectTuple, (NamedElement) lastName, (Assignable) objs.newTextValue("Coles"));
 //        space.addTuple(testObjectTuple);

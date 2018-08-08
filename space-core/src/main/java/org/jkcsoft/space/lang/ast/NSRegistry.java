@@ -13,7 +13,6 @@ import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.runtime.AstUtils;
-import org.jkcsoft.space.lang.runtime.Executor;
 
 import java.util.*;
 
@@ -46,20 +45,15 @@ public class NSRegistry {
     /**
      * A special directory root to hold intrinsic operators.
      */
-    private Namespace langNs;
+    private Namespace spaceNs;
+    private Namespace javaNs;
 
-    private Set<Language> langRoots = new HashSet<>();
     private Named root;
     private Map<String, Named> allNamed = new TreeMap<>();
     /**
      * The central meta object table.
      */
     private java.util.Set metaObjectNormalTable = new HashSet<>();
-
-    {
-        langRoots.add(Language.SPACE);
-        langRoots.add(Language.JAVA);
-    }
 
     /**
      * (not used currently) Idea is to hold redundantly accumulated info useful
@@ -68,8 +62,10 @@ public class NSRegistry {
 //    private Map<NamedElement, MetaInfo> metaObjectExtendedInfoMap = new TreeMap<>();
     private NSRegistry() {
         AstFactory astFactory = AstFactory.getInstance();
-        langNs = astFactory.newNamespace(new ProgSourceInfo(), "lang");
-        addNamespace(langNs);
+        spaceNs = astFactory.newNamespace(SourceInfo.INTRINSIC, Language.SPACE.getCodeName());
+        addNamespace(spaceNs);
+        javaNs = astFactory.newNamespace(SourceInfo.INTRINSIC, Language.JAVA.getCodeName());
+        addNamespace(javaNs);
     }
 
     public void addNamespace(Namespace namespace) {
@@ -78,8 +74,12 @@ public class NSRegistry {
         rootDirs.add(namespace.getRootDir());
     }
 
-    public Namespace getLangNs() {
-        return langNs;
+    public Namespace getSpaceNs() {
+        return spaceNs;
+    }
+
+    public Namespace getJavaNs() {
+        return javaNs;
     }
 
     public void addElement(Named newElement) {

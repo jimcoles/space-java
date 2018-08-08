@@ -30,7 +30,7 @@ public class TestSourceStub {
     }
 
     public void runTestSource(String spaceSourcePath) {
-        getExecutor().loadDir(FileUtils.getFile(getRootSrcDir(), spaceSourcePath));
+        getExecutor().loadSrcRootDir(FileUtils.getFile(getRootSrcDir(), spaceSourcePath));
     }
 
     private File getRootSrcDir() {

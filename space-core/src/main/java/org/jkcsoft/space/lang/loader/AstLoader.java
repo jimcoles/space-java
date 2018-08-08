@@ -26,10 +26,42 @@ import java.util.List;
  */
 public interface AstLoader {
 
-    /** A loader should provide a unique name useful for logging and debugging. */
+    /** A unique name suitable for lookup, logging and debugging. No spaces please. */
     String getName();
 
+    /**
+     * Recursively loads the specified source directory as a Space Directory.
+     * Loads any child source files as {@link ParseUnit}s. Recursively loads child
+     * directories, possibly by recursive calls to the same method.
+     * The consumer of this loader is responsible for merging the provied Space
+     * Directories into a final usable form.
+     *
+     * @param parentErrors
+     * @param srcDir A file system directory containing source to load.
+     * @return The Space Directory associated with the source directory.
+     * @throws IOException
+     */
+    Directory loadDir(AstErrors parentErrors, File srcDir) throws IOException;
+
+    /**
+     * Directly load specified file into the spaceDir.
+     *
+     * @param parentErrors
+     * @param spaceDir
+     * @param spaceSrcFile
+     * @return The {@link ParseUnit} associated with spaceSrcFile.
+     * @throws IOException
+     */
     ParseUnit loadFile(AstErrors parentErrors, Directory spaceDir, File spaceSrcFile) throws IOException;
 
-    Directory loadDir(AstErrors parentErrors, File srcDir) throws IOException;
+    /**
+     * The most general load method for loaders that are not file system based, e.g.,
+     * RDB, web service.
+     *
+     * @param path Could be URL-like in whatever format the loader needs to resolve its
+     *             internal storage.
+     * @return
+     */
+    Directory loadFromResource(String path);
+
 }

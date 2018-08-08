@@ -14,9 +14,7 @@ import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
-import org.jkcsoft.space.lang.loader.AstLoadError;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -99,8 +97,7 @@ public class AstUtils {
      * @param reference
      * @return
      */
-    public static NamedElement resolveAstPath(List<Directory> dirChain, MetaReference reference)
-    {
+    public static NamedElement resolveAstPath(List<Directory> dirChain, MetaReference reference) {
         NamedElement lookup = null;
         switch (reference.getTargetMetaType()) {
             case TYPE:
@@ -191,14 +188,15 @@ public class AstUtils {
                     ModelElement parent = context.getParent();
                     if (parent instanceof StatementBlock)
                         lookup = findInNearestScope(parent, reference, ScopeKind.BLOCK);
-                    else if (parent instanceof FunctionDefn)
+                    else if (parent instanceof SpaceFunctionDefn)
                         lookup = findInNearestScope(parent, reference, ScopeKind.ARG);
                 }
             }
             else if (context instanceof FunctionDefn) {
-                lookup = findInNearestScope(((FunctionDefn) context).getArgSpaceTypeDefn(), reference, ScopeKind.ARG);
+                lookup = findInNearestScope((ModelElement) ((FunctionDefn) context).getArgSpaceTypeDefn(), reference,
+                                            ScopeKind.ARG);
                 if (lookup == null)
-                    lookup = findInNearestScope(((FunctionDefn) context).getParent(), reference, ScopeKind.OBJECT);
+                    lookup = findInNearestScope(context.getParent(), reference, ScopeKind.OBJECT);
             }
         }
         return lookup;
@@ -209,7 +207,7 @@ public class AstUtils {
         if (context instanceof StatementBlock
             /* && context.getNamedParent() instanceof FunctionDefn */ )
             scopeKind = ScopeKind.BLOCK;
-        else if (context instanceof FunctionDefn)
+        else if (context instanceof SpaceFunctionDefn)
             scopeKind = ScopeKind.BLOCK;
         else if (context instanceof SpaceTypeDefn)
             scopeKind = ScopeKind.OBJECT;

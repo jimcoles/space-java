@@ -31,6 +31,11 @@ public class TestGrammarParser implements AstLoader {
     }
 
     @Override
+    public Directory loadFromResource(String path) {
+        return null;
+    }
+
+    @Override
     public Directory loadDir(AstErrors parentErrors, File srcDir) throws IOException {
         return null;
     }

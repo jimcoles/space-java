@@ -10,6 +10,10 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
+ * The AST element is not defined in source code, but rather
+ * is created programmatically as part of the language runtime
+ * bootup.
+ *
  * @author Jim Coles
  */
 public class IntrinsicSourceInfo implements SourceInfo {

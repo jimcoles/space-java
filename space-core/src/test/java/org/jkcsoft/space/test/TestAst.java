@@ -33,19 +33,17 @@ public class TestAst {
         astFactory.newProgram(si, "(API Builder Program)");
         //
         ObjectFactory objBuilder = ObjectFactory.getInstance();
-        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(si, astFactory.newTextNode(si, "MyHelloSpace"));
+        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(si, astFactory.newNamePart(si, "MyHelloSpace"));
 
         Directory astDirectory = astFactory.newAstDir(si, "TestAst");
-        astDirectory
-            .addSpaceDefn(spaceTypeDefn)
-            .getBody()
-            .addVariableDecl(astFactory.newVariableDecl(si, "myIntDim", NumPrimitiveTypeDefn.CARD))
-            .setType(NumPrimitiveTypeDefn.CHAR);
+        astDirectory.addSpaceDefn(spaceTypeDefn);
+        spaceTypeDefn
+            .addVariableDecl(astFactory.newVariableDecl(si, "myIntDim", NumPrimitiveTypeDefn.CARD));
         spaceTypeDefn
             .setBody(astFactory.newTypeDefnBody(si))
             .addVariableDecl(astFactory.newVariableDecl(si, "myCharDim", NumPrimitiveTypeDefn.CHAR))
             ;
-        FunctionDefn mainMethod = astFactory.newSpaceFunctionDefn(si, "main", null);
+        SpaceFunctionDefn mainMethod = astFactory.newSpaceFunctionDefn(si, "main", null);
         spaceTypeDefn.getBody().addFunctionDefn(mainMethod);
 //        CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
 //        astFactory.getUserAstRoot().addObjectInstance(arg1, astFactory);

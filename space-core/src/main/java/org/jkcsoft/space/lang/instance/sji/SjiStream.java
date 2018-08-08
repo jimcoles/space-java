@@ -7,19 +7,11 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.ast;
-
-import org.jkcsoft.space.lang.instance.Tuple;
-
-import java.util.List;
+package org.jkcsoft.space.lang.instance.sji;
 
 /**
  * @author Jim Coles
  */
-public interface TupleDefn extends DatumType {
-
-    boolean hasDatums();
-
-    List<Declartion> getDatumDeclList();
+public class SjiStream {
 
 }

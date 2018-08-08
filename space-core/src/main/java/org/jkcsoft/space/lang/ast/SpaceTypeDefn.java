@@ -23,7 +23,7 @@ import java.util.List;
  * @author Jim Coles
  * @version 1.0
  */
-public class SpaceTypeDefn extends NamedElement implements DatumType, TupleDefn {
+public class SpaceTypeDefn extends NamedElement implements ComplexType {
 
     private boolean isEntity;
     private SpaceTypeDefnBody body;
@@ -74,19 +74,19 @@ public class SpaceTypeDefn extends NamedElement implements DatumType, TupleDefn 
         return body.getTransformDefns();
     }
 
-    public List<AbstractFunctionDefn> getFunctionDefns() {
+    public List<FunctionDefn> getFunctionDefns() {
         return body.getFunctionDefns();
     }
 
-    public VariableDecl addVariable(VariableDecl variableDecl) {
+    public VariableDecl addVariableDecl(VariableDeclImpl variableDecl) {
         return body.addVariableDecl(variableDecl);
     }
 
-    public AssociationDecl addAssocDefn(AssociationDecl associationDecl) {
-        return body.addAssocDecl(associationDecl);
+    public AssociationDecl addAssociationDecl(AssociationDeclImpl associationDecl) {
+        return body.addAssociationDecl(associationDecl);
     }
 
-    public AbstractFunctionDefn addFunctionDefn(AbstractFunctionDefn functionDefn) {
+    public FunctionDefn addFunctionDefn(FunctionDefn functionDefn) {
         return body.addFunctionDefn(functionDefn);
     }
 

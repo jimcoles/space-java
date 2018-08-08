@@ -12,7 +12,6 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -51,7 +50,7 @@ public class AstFactory {
         return directory;
     }
 
-    public NamePart newTextNode(SourceInfo sourceInfo, String name) {
+    public NamePart newNamePart(SourceInfo sourceInfo, String name) {
         return new NamePart(sourceInfo, name);
     }
 
@@ -60,22 +59,14 @@ public class AstFactory {
         return spaceTypeDefn;
     }
 
-    public FunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name, TypeRef returnTypeRef) {
-        FunctionDefn element = new FunctionDefn(sourceInfo, name, returnTypeRef);
+
+    public SpaceFunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name, TypeRef returnTypeRef) {
+        SpaceFunctionDefn element = new SpaceFunctionDefn(sourceInfo, name, returnTypeRef);
         return element;
     }
 
-    public VariableDecl newVariableDecl(SourceInfo sourceInfo, String name, NumPrimitiveTypeDefn type) {
-        VariableDecl element = new VariableDecl(sourceInfo, name, type);
-        return element;
-    }
-
-    public NativeFunctionDefn newNativeFunctionDefn(SourceInfo sourceInfo, String name, Method jMethod,
-                                                    SpaceTypeDefn nativeArgSpaceTypeDefn,
-                                                    TypeRef returnTypeRef)
-    {
-        NativeFunctionDefn element = new NativeFunctionDefn(sourceInfo, name, jMethod, nativeArgSpaceTypeDefn,
-                                                            returnTypeRef);
+    public VariableDeclImpl newVariableDecl(SourceInfo sourceInfo, String name, NumPrimitiveTypeDefn type) {
+        VariableDeclImpl element = new VariableDeclImpl(sourceInfo, name, type);
         return element;
     }
 
@@ -84,8 +75,8 @@ public class AstFactory {
         return element;
     }
 
-    public AssociationDecl newAssociationDecl(SourceInfo sourceInfo, String name, TypeRef toTypeRef) {
-        AssociationDecl element = new AssociationDecl(sourceInfo, name, null, toTypeRef);
+    public AssociationDeclImpl newAssociationDecl(SourceInfo sourceInfo, String name, TypeRef toTypeRef) {
+        AssociationDeclImpl element = new AssociationDeclImpl(sourceInfo, name, null, toTypeRef);
         return element;
     }
 

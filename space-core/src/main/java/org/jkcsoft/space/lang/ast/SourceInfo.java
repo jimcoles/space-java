@@ -15,6 +15,8 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface SourceInfo {
 
+    SourceInfo INTRINSIC = new IntrinsicSourceInfo();
+
     FileCoord getStart();
 
     FileCoord getStop();

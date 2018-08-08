@@ -36,7 +36,7 @@ public class Directory extends NamedElement implements ValueExpr {
 
     private List<Directory> childDirectories = new LinkedList<>();
     private Set<ParseUnit> parseUnits = new HashSet<>();
-    private List<SpaceTypeDefn> spaceTypeDefns = new LinkedList<>();
+    private List<ComplexType> typeDefns = new LinkedList<>();
     private Directory parentDir;
     private Namespace namespace;
 
@@ -56,8 +56,8 @@ public class Directory extends NamedElement implements ValueExpr {
         return null;
     }
 
-    public SpaceTypeDefn getFirstSpaceDefn() {
-        return spaceTypeDefns.get(0);
+    public ComplexType getFirstSpaceDefn() {
+        return typeDefns.get(0);
     }
 
     // =========================================================================
@@ -83,10 +83,10 @@ public class Directory extends NamedElement implements ValueExpr {
         return getParentDir() == null;
     }
 
-    public SpaceTypeDefn addSpaceDefn(SpaceTypeDefn spaceTypeDefn) {
-        spaceTypeDefns.add(spaceTypeDefn);
+    public ComplexType addSpaceDefn(ComplexType spaceTypeDefn) {
+        typeDefns.add(spaceTypeDefn);
         //
-        addChild(spaceTypeDefn);
+        addChild((NamedElement) spaceTypeDefn);
         return spaceTypeDefn;
     }
 
@@ -113,8 +113,8 @@ public class Directory extends NamedElement implements ValueExpr {
         return parseUnits;
     }
 
-    public List<SpaceTypeDefn> getTypes() {
-        return spaceTypeDefns;
+    public List<ComplexType> getTypes() {
+        return typeDefns;
     }
 
     @Override

@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public abstract class AbstractCollectionTypeDefn extends NamedElement implements DatumType {
+public abstract class AbstractCollectionTypeDefn extends NamedElement implements CollectionType {
 
     private DatumType containedElementType;
     private SequenceTypeDefn sequenceTypeDefn;

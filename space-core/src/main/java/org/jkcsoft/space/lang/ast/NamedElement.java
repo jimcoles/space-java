@@ -28,7 +28,7 @@ public abstract class NamedElement extends ModelElement implements Named, Compar
     private String description;
     private String fqName;
 
-    NamedElement(SourceInfo sourceInfo, String name) {
+    protected NamedElement(SourceInfo sourceInfo, String name) {
         super(sourceInfo);
         this.name = name;
     }

@@ -22,7 +22,7 @@ import java.util.List;
  * @author Jim Coles
  */
 @LexicalNode
-public class StatementBlock extends Statement implements TupleDefn {
+public class StatementBlock extends Statement implements ComplexType {
 
 //    private List<AssociationDefn> associationDefnList;
     private List<Statement> statementSequence = new LinkedList<>();  // child statements
@@ -79,14 +79,14 @@ public class StatementBlock extends Statement implements TupleDefn {
     // ===========================================================
     // Child adders
     //
-    public VariableDecl addVariableDecl(VariableDecl variableDecl) {
+    public VariableDecl addVariableDecl(VariableDeclImpl variableDecl) {
         datumDeclList.add(variableDecl);
         //
         addChild(variableDecl);
         return variableDecl;
     }
 
-    public AssociationDecl addAssocDecl(AssociationDecl associationDecl) {
+    public AssociationDecl addAssociationDecl(AssociationDeclImpl associationDecl) {
         datumDeclList.add(associationDecl);
         //
         addChild(associationDecl);

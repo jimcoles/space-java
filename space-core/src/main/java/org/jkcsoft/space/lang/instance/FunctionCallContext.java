@@ -9,9 +9,9 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.AbstractFunctionDefn;
 import org.jkcsoft.space.lang.ast.FunctionCallExpr;
 import org.jkcsoft.space.lang.ast.FunctionDefn;
+import org.jkcsoft.space.lang.ast.SpaceFunctionDefn;
 
 import java.util.LinkedList;
 
@@ -26,7 +26,7 @@ import java.util.LinkedList;
 public class FunctionCallContext extends AbstractExeContext implements ExeContext {
 
     private Tuple ctxObject;
-    private Tuple argTuple;
+    private TupleImpl argTuple;
     private LinkedList<BlockContext> blockContexts = new LinkedList<>();
     private ValueHolder returnValueHolder;
     private boolean pendingReturn = false;
@@ -37,16 +37,16 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
      * @param argTuple The Tuple of values defined in the target function parameter definition.
      * @param returnValueHolder
      */
-    FunctionCallContext(Tuple ctxObject, FunctionCallExpr callExpr, Tuple argTuple, ValueHolder returnValueHolder) {
+    FunctionCallContext(Tuple ctxObject, FunctionCallExpr callExpr, TupleImpl argTuple, ValueHolder returnValueHolder) {
         super(callExpr);
         this.ctxObject = ctxObject;
         this.argTuple = argTuple;
-        AbstractFunctionDefn resolvedFunctionMetaObj = callExpr.getFunctionDefnRef().getResolvedMetaObj();
-        if (resolvedFunctionMetaObj instanceof FunctionDefn) {
+        FunctionDefn resolvedFunctionMetaObj = callExpr.getFunctionDefnRef().getResolvedMetaObj();
+        if (resolvedFunctionMetaObj instanceof SpaceFunctionDefn) {
             BlockContext rootBlockContext =
-                new BlockContext(this, ((FunctionDefn) resolvedFunctionMetaObj).getStatementBlock(),
-                                 ObjectFactory.getInstance().newTuple(
-                                     ((FunctionDefn) resolvedFunctionMetaObj).getStatementBlock()));
+                new BlockContext(this, ((SpaceFunctionDefn) resolvedFunctionMetaObj).getStatementBlock(),
+                                 ObjectFactory.getInstance().newTupleImpl(
+                                     ((SpaceFunctionDefn) resolvedFunctionMetaObj).getStatementBlock()));
             addBlockContext(rootBlockContext);
         }
         this.returnValueHolder = returnValueHolder;
@@ -56,7 +56,7 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
         return ctxObject;
     }
 
-    public Tuple getArgTuple() {
+    public TupleImpl getArgTuple() {
         return argTuple;
     }
 

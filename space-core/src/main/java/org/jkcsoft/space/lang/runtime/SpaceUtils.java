@@ -56,8 +56,8 @@ public class SpaceUtils {
                 ((Reference) leftSideHolder).setToOid(((Reference) rightSideValue).getToOid());
                 assigned = true;
             }
-            else if(rightSideValue instanceof Tuple) {
-                ((Reference) leftSideHolder).setToOid(((Tuple) rightSideValue).getOid());
+            else if(rightSideValue instanceof TupleImpl) {
+                ((Reference) leftSideHolder).setToOid(((TupleImpl) rightSideValue).getOid());
                 assigned = true;
             }
         }

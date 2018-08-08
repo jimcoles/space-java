@@ -9,7 +9,7 @@
   ~ Also see the LICENSE file in the repository root directory.
   -->
 
-<xs:directory xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
            targetNamespace="http://jkcsoft.org/2016/space"
            xmlns:spc="http://jkcsoft.org/2016/space" >
 
@@ -151,4 +151,4 @@
     </xs:element>
 
 
-</xs:directory>
+</xs:schema>

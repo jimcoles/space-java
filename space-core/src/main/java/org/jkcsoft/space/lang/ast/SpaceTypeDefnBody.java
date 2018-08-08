@@ -11,7 +11,6 @@ package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.runtime.SpaceX;
 
-import javax.mail.MethodNotSupportedException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class SpaceTypeDefnBody extends StatementBlock {
 
     private List<EquationDefn> equations;
     private List<TransformDefn> transformDefns;
-    private List<AbstractFunctionDefn> functionDefns = new LinkedList<>();
+    private List<FunctionDefn> functionDefns = new LinkedList<>();
 //    private StatementBlock initBlock;  // holds assignment exprs for var and assoc defns
 
     SpaceTypeDefnBody(SourceInfo sourceInfo) {
@@ -44,29 +43,30 @@ public class SpaceTypeDefnBody extends StatementBlock {
         return transformDefns;
     }
 
-    public List<AbstractFunctionDefn> getFunctionDefns() {
+    public List<FunctionDefn> getFunctionDefns() {
         return functionDefns;
     }
 
-    public FunctionDefn getFunction(String name) {
+    public SpaceFunctionDefn getFunction(String name) {
         NamedElement childWithName = getChildByName(name);
-        if (!(childWithName instanceof FunctionDefn))
+        if (!(childWithName instanceof SpaceFunctionDefn))
             throw new SpaceX("reference meta object [" + childWithName + "] is not a function");
 
-        FunctionDefn functionDefn = (FunctionDefn) childWithName;
+        SpaceFunctionDefn functionDefn = (SpaceFunctionDefn) childWithName;
         if (functionDefn == null) {
             throw new SpaceX("function [" + name + "] not found in " + this);
         }
         return functionDefn;
     }
 
-    public AbstractFunctionDefn addFunctionDefn(AbstractFunctionDefn actionDefn) {
+    public FunctionDefn addFunctionDefn(FunctionDefn actionDefn) {
         functionDefns.add(actionDefn);
         //
-        addChild(actionDefn);
+        addChild((ModelElement) actionDefn);
         //
         return actionDefn;
     }
+
 
 //    public StatementBlock setInitBlock(StatementBlock statementBlock) {
 //        this.initBlock = statementBlock;

@@ -11,12 +11,24 @@ package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.metameta.MetaType;
 
+import java.net.URL;
 import java.util.List;
 
 /**
  * @author Jim Coles
  */
 public class TypeRef extends MetaReference<DatumType> {
+
+    /** Somewhat analogous to Java 'new URL(String spec)' */
+    public static TypeRef newTypeRef(String typeName) {
+        if (typeName == null)
+            throw new IllegalArgumentException("type ref name cannot be null");
+
+        TypeRef typeRef = AstFactory.getInstance().newTypeRef(new IntrinsicSourceInfo(), null);
+        String[] nameStrings = typeName.split(".");
+        typeRef.setFirstPart(AstFactory.getInstance().newMetaRefPart(typeRef, new IntrinsicSourceInfo(), nameStrings));
+        return typeRef;
+    }
 
     private List<CollectionType> collectionTypes;
     private String suffix = null;

@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.ValueHolder;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
@@ -24,4 +25,5 @@ public interface DatumType extends Named {
     int getScalarDofs();
 
     SequenceTypeDefn getSequenceOfType();
+
 }

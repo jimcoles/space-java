@@ -7,40 +7,15 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
- * Definition-level element of a Variable.  Essentially, declares a named 'usage' of
- * a Primitive by a Type.
- *
  * @author Jim Coles
- * @version 1.0
  */
-public class VariableDecl extends NamedElement implements Declartion {
+public interface VariableDecl extends Declartion {
+    MetaType getMetaType();
 
-    private NumPrimitiveTypeDefn type;
-
-    VariableDecl(SourceInfo sourceInfo, String name, NumPrimitiveTypeDefn type) {
-        super(sourceInfo, name);
-        this.type = type;
-        //
-        addChild(type);
-    }
-
-    @Override
-    public MetaType getMetaType() {
-        return MetaType.DATUM;
-    }
-
-    public NumPrimitiveTypeDefn getType() {
-        return type;
-    }
-
-    public void setType(NumPrimitiveTypeDefn type) {
-        this.type = type;
-    }
-
+    NumPrimitiveTypeDefn getType();
 }

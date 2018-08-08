@@ -11,9 +11,10 @@ package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.VariableDecl;
+import org.jkcsoft.space.lang.ast.VariableDeclImpl;
 
 /**
- * The instance-level counterpart to a {@link VariableDecl}.
+ * The instance-level counterpart to a {@link VariableDeclImpl}.
  * A {@link Variable} contains a reference to its definition, a VariableDefn, and
  * zero or one {@link ScalarValue}s.
  */

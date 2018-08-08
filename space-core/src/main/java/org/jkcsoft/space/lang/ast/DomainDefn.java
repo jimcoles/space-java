@@ -21,7 +21,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  * @author Jim Coles
  * @version 1.0
  */
-public class DomainDefn extends NamedElement implements DatumType {
+public class DomainDefn extends NamedElement implements SimpleType {
 
     private SequenceTypeDefn sequenceTypeDefn;
 

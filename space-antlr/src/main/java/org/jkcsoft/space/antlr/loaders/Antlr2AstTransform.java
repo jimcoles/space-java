@@ -126,7 +126,7 @@ public class Antlr2AstTransform {
         // TODO: 2/8/17 Not all spaces are Entities?
         spaceTypeDefn = astFactory.newSpaceTypeDefn(
             toSI(spaceTypeDefnContext),
-            astFactory.newTextNode(toSI(spaceTypeDefnContext.identifier()), toText(spaceTypeDefnContext.identifier()))
+            astFactory.newNamePart(toSI(spaceTypeDefnContext.identifier()), toText(spaceTypeDefnContext.identifier()))
         );
 //        spaceTypeDefnContext.accessModifier();
 //        spaceTypeDefnContext.defnTypeModifier();
@@ -157,7 +157,7 @@ public class Antlr2AstTransform {
         if (varDefCtxts != null && !varDefCtxts.isEmpty()) {
             for (SpaceParser.VariableDefnStmtContext variableDefnStmtContext : varDefCtxts) {
                 // Add var def
-                VariableDecl variableDeclAST = toAst(variableDefnStmtContext.variableDefn());
+                VariableDeclImpl variableDeclAST = toAst(variableDefnStmtContext.variableDefn());
                 typeDefnBodyAST.addVariableDecl(variableDeclAST);
                 // Add assignment if there is one
                 extractInit(typeDefnBodyAST, variableDefnStmtContext);
@@ -168,7 +168,7 @@ public class Antlr2AstTransform {
         if (assocDefCtxts != null && !assocDefCtxts.isEmpty()) {
             for (SpaceParser.AssociationDefnStmtContext assocDefCtx : assocDefCtxts) {
                 // Add declarative element
-                typeDefnBodyAST.addAssocDecl(toAst(assocDefCtx.associationDefn()));
+                typeDefnBodyAST.addAssociationDecl(toAst(assocDefCtx.associationDefn()));
                 // Add assignment expr if it exists
                 extractInit(typeDefnBodyAST, assocDefCtx);
             }
@@ -228,7 +228,7 @@ public class Antlr2AstTransform {
         return assignmentExprAST;
     }
 
-    private AssociationDecl toAst(SpaceParser.AssociationDefnContext assocDefCtx) {
+    private AssociationDeclImpl toAst(SpaceParser.AssociationDefnContext assocDefCtx) {
         logTrans(assocDefCtx);
         SpaceParser.ComplexOptCollTypeRefContext complexTypeRefContext = assocDefCtx.associationDecl().complexOptCollTypeRef();
         return astFactory.newAssociationDecl(
@@ -284,10 +284,10 @@ public class Antlr2AstTransform {
         return metaReference;
     }
 
-    private AbstractFunctionDefn toAst(SpaceParser.FunctionDefnContext functionDefnContext) {
+    private SpaceFunctionDefn toAst(SpaceParser.FunctionDefnContext functionDefnContext) {
         logTrans(functionDefnContext);
         SourceInfo sourceInfo = toSI(functionDefnContext);
-        FunctionDefn functionDefnAST = astFactory
+        SpaceFunctionDefn functionDefnAST = astFactory
             .newSpaceFunctionDefn(sourceInfo, toText(functionDefnContext.identifier()),
                                   toAst(functionDefnContext.anyTypeRef()));
         functionDefnAST.setArgSpaceTypeDefn(toAst(functionDefnContext.parameterDefnList()));
@@ -302,7 +302,7 @@ public class Antlr2AstTransform {
                     toAst(datumDefnStmtContext.variableDefnStmt().variableDefn()));
             }
             else if (datumDefnStmtContext.associationDefnStmt() != null) {
-                functionDefnAST.getStatementBlock().addAssocDecl(
+                functionDefnAST.getStatementBlock().addAssociationDecl(
                     toAst(datumDefnStmtContext.associationDefnStmt().associationDefn()));
             }
         }
@@ -362,20 +362,20 @@ public class Antlr2AstTransform {
         logTrans(parameterDeclCtxt);
         SourceInfo sourceInfo = toSI(parameterDeclCtxt);
         SpaceTypeDefn typeDefn =
-            astFactory.newSpaceTypeDefn(sourceInfo, astFactory.newTextNode(sourceInfo, "func args"));
+            astFactory.newSpaceTypeDefn(sourceInfo, astFactory.newNamePart(sourceInfo, "func args"));
         typeDefn.setBody(astFactory.newTypeDefnBody(sourceInfo));
         List<SpaceParser.ParameterDeclContext> parameterDeclContexts = parameterDeclCtxt.parameterDecl();
         for (SpaceParser.ParameterDeclContext parameterDeclContext : parameterDeclContexts) {
             if (parameterDeclContext.variableDecl() != null)
-                typeDefn.addVariable(toAst(parameterDeclContext.variableDecl()));
+                typeDefn.addVariableDecl(toAst(parameterDeclContext.variableDecl()));
             else if (parameterDeclContext.associationDecl() != null) {
-                typeDefn.addAssocDefn(toAst(parameterDeclContext.associationDecl()));
+                typeDefn.addAssociationDecl(toAst(parameterDeclContext.associationDecl()));
             }
         }
         return typeDefn;
     }
 
-    private AssociationDecl toAst(SpaceParser.AssociationDeclContext assocDeclCtxt) {
+    private AssociationDeclImpl toAst(SpaceParser.AssociationDeclContext assocDeclCtxt) {
         logTrans(assocDeclCtxt);
         return astFactory.newAssociationDecl(
             toSI(assocDeclCtxt),
@@ -397,7 +397,8 @@ public class Antlr2AstTransform {
                 extractInit(statementBlockAST, datumDefnStmtContext.variableDefnStmt());
             }
             else if (datumDefnStmtContext.associationDefnStmt() != null) {
-                statementBlockAST.addAssocDecl(toAst(datumDefnStmtContext.associationDefnStmt().associationDefn()));
+                statementBlockAST
+                    .addAssociationDecl(toAst(datumDefnStmtContext.associationDefnStmt().associationDefn()));
                 extractInit(statementBlockAST, datumDefnStmtContext.associationDefnStmt());
             }
         }
@@ -708,14 +709,14 @@ public class Antlr2AstTransform {
                                              intLiteralCtxt.IntegerLiteral().getSymbol().getText());
     }
 
-    private VariableDecl toAst(SpaceParser.VariableDefnContext variableDefnContext) {
+    private VariableDeclImpl toAst(SpaceParser.VariableDefnContext variableDefnContext) {
         logTrans(variableDefnContext);
         SpaceParser.VariableDeclContext varDeclCtxt = variableDefnContext.variableDecl();
-        VariableDecl element = toAst(varDeclCtxt);
+        VariableDeclImpl element = toAst(varDeclCtxt);
         return element;
     }
 
-    private VariableDecl toAst(SpaceParser.VariableDeclContext varDeclCtxt)
+    private VariableDeclImpl toAst(SpaceParser.VariableDeclContext varDeclCtxt)
     {
         logTrans(varDeclCtxt);
         return astFactory.newVariableDecl(

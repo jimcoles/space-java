@@ -65,6 +65,15 @@ public class G2AntlrParser implements AstLoader {
     }
 
     @Override
+    public Directory loadDir(AstErrors parentErrors, File srcRootDir) throws IOException {
+        log.info("Loading source in dir [" + srcRootDir.getAbsolutePath() + "]");
+        Namespace tempNs = astFactory.newNamespace(null, "temp");
+        Directory spcRootDir = tempNs.getRootDir();
+        loadChildren(parentErrors, spcRootDir, srcRootDir);
+        return spcRootDir;
+    }
+
+    @Override
     public ParseUnit loadFile(AstErrors parentErrors, Directory spaceDir, File spaceSrcFile) throws IOException {
         log.info("Parsing file [" + spaceSrcFile.getAbsolutePath() + "]");
         this.srcFile = spaceSrcFile;
@@ -74,22 +83,12 @@ public class G2AntlrParser implements AstLoader {
         //
         if (parseUnit != null)
             spaceDir.addParseUnit(parseUnit);
-//        for (ModelElement modelElement : parseUnit.getChildren()) {
-//            if (modelElement instanceof SpaceTypeDefn)
-//                directory.addSpaceDefn(((SpaceTypeDefn) modelElement));
-//            else if (modelElement instanceof StreamTypeDefn)
-//                directory.addStreamTypeDefn(((StreamTypeDefn) modelElement));
-//        }
         return parseUnit;
     }
 
     @Override
-    public Directory loadDir(AstErrors parentErrors, File srcRootDir) throws IOException {
-        log.info("Loading source in dir [" + srcRootDir.getAbsolutePath() + "]");
-        Namespace tempNs = astFactory.newNamespace(null, "temp");
-        Directory spcRootDir = tempNs.getRootDir();
-        loadChildren(parentErrors, spcRootDir, srcRootDir);
-        return spcRootDir;
+    public Directory loadFromResource(String path) {
+        return null;
     }
 
     private void loadChildren(AstErrors parentErrors, Directory spcContainerDir, File srcParentDir) throws IOException {

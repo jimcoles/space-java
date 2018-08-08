@@ -9,12 +9,6 @@
  */
 package org.jkcsoft.space.lang.runtime.jnative.space;
 
-import org.jkcsoft.space.lang.ast.AssociationDecl;
-import org.jkcsoft.space.lang.instance.*;
-import org.jkcsoft.space.lang.runtime.Executor;
-import org.jkcsoft.space.lang.runtime.SpaceX;
-
-import java.text.MessageFormat;
 import java.util.Map;
 import java.util.TreeMap;
 

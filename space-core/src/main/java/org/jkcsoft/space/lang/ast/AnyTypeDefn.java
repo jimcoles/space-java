@@ -18,7 +18,7 @@ public class AnyTypeDefn {
 
     private NumPrimitiveTypeDefn primitiveTypeDefn;
     private DomainDefn domainDefn;
-    private SpaceTypeDefn spaceTypeDefn;
+    private ComplexType spaceTypeDefn;
     private StreamTypeDefn streamTypeDefn;
 
 }

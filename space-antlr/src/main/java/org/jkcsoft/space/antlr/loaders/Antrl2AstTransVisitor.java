@@ -380,7 +380,7 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<ModelElement> 
 
     @Override
     public ModelElement visitIdentifier(SpaceParser.IdentifierContext ctx) {
-        currentNode = astFactory.newTextNode(getSourceInfo(ctx), ctx.getText());
+        currentNode = astFactory.newNamePart(getSourceInfo(ctx), ctx.getText());
         return super.visitIdentifier(ctx);
     }
 

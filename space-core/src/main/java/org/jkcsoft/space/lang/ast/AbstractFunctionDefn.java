@@ -18,14 +18,14 @@ import org.jkcsoft.space.lang.runtime.SpaceX;
  *
  * @author Jim Coles
  */
-public abstract class AbstractFunctionDefn extends NamedElement implements SolutionExpr {
+public abstract class AbstractFunctionDefn extends NamedElement implements FunctionDefn, SolutionExpr {
 
     private EquationDefn governingEquation; // TODO
-    private SpaceTypeDefn argSpaceTypeDefn;
+    private ComplexType argSpaceTypeDefn;
     private boolean isReturnVoid;
     private TypeRef returnTypeRef;
 
-    AbstractFunctionDefn(SourceInfo sourceInfo, String name, TypeRef returnTypeRef)
+    protected AbstractFunctionDefn(SourceInfo sourceInfo, String name, TypeRef returnTypeRef)
     {
         super(sourceInfo, name);
         this.returnTypeRef = returnTypeRef;
@@ -38,14 +38,14 @@ public abstract class AbstractFunctionDefn extends NamedElement implements Solut
         return MetaType.FUNCTION;
     }
 
-    public void setArgSpaceTypeDefn(SpaceTypeDefn argSpaceTypeDefn) {
+    public void setArgSpaceTypeDefn(ComplexType argSpaceTypeDefn) {
         this.argSpaceTypeDefn = argSpaceTypeDefn;
         this.argSpaceTypeDefn.setGroupingNode(true);
         //
-        addChild(argSpaceTypeDefn);
+        addChild((NamedElement) argSpaceTypeDefn);
     }
 
-    public SpaceTypeDefn getArgSpaceTypeDefn() {
+    public ComplexType getArgSpaceTypeDefn() {
         return argSpaceTypeDefn;
     }
 

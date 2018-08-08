@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * Like a {@link FunctionDefn} but applies to Operator like numeric addition and
+ * Like a {@link SpaceFunctionDefn} but applies to Operator like numeric addition and
  * boolean-valued logic opers AND, and OR.
  *
  * @author Jim Coles

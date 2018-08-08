@@ -17,7 +17,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class SequenceTypeDefn extends AbstractCollectionTypeDefn implements DatumType {
+public class SequenceTypeDefn extends AbstractCollectionTypeDefn {
 
     SequenceTypeDefn(SourceInfo sourceInfo, DatumType containedElementType) {
         super(sourceInfo, containedElementType.getName() + "[]", containedElementType);

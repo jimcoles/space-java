@@ -10,8 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.ModelElement;
-import org.jkcsoft.space.lang.ast.VariableDecl;
+import org.jkcsoft.space.lang.ast.VariableDeclImpl;
 
 /**
  * Something is a {@link SpaceObject} if it is an identifiable thing.
@@ -19,8 +18,8 @@ import org.jkcsoft.space.lang.ast.VariableDecl;
  * <p>
  * <table>
  *     <tr><th>Object Kind</th><th>Dims</th><th>Meta Type</th></tr>
- *     <tr><td>{@link ScalarValue}</td> <td>1x1</td> <td>{@link VariableDecl}</td></tr>
- *     <tr><td>{@link Tuple}</td> <td>1xn</td> <td>{@link org.jkcsoft.space.lang.ast.SpaceTypeDefn} or {@link org.jkcsoft.space.lang.ast.ViewDefn}</td></tr>
+ *     <tr><td>{@link ScalarValue}</td> <td>1x1</td> <td>{@link VariableDeclImpl}</td></tr>
+ *     <tr><td>{@link TupleImpl}</td> <td>1xn</td> <td>{@link org.jkcsoft.space.lang.ast.SpaceTypeDefn} or {@link org.jkcsoft.space.lang.ast.ViewDefn}</td></tr>
  *     <tr><td>{@link Set}</td> <td>nxm</td> <td>{@link org.jkcsoft.space.lang.ast.SpaceTypeDefn}</td></tr>
  *     <tr>
  *         <td>ObjectStream &nbsp&nbsp</td>
