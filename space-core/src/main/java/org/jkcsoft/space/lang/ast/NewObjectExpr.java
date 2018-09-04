@@ -14,10 +14,10 @@ package org.jkcsoft.space.lang.ast;
  */
 public class NewObjectExpr extends ModelElement implements ValueExpr {
 
-    private TypeRef typeRef;
+    private TypeRefImpl typeRef;
     private TupleExpr tupleExpr;
 
-    public NewObjectExpr(SourceInfo sourceInfo, TypeRef typeRef, TupleExpr tupleExpr) {
+    public NewObjectExpr(SourceInfo sourceInfo, TypeRefImpl typeRef, TupleExpr tupleExpr) {
         super(sourceInfo);
         this.typeRef = typeRef;
         this.tupleExpr = tupleExpr;
@@ -26,7 +26,7 @@ public class NewObjectExpr extends ModelElement implements ValueExpr {
         addChild(tupleExpr);
     }
 
-    public TypeRef getTypeRef() {
+    public TypeRefImpl getTypeRef() {
         return typeRef;
     }
 

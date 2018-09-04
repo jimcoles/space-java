@@ -34,11 +34,11 @@ public class Directory extends NamedElement implements ValueExpr {
 
 //    public static final Directory ROOT_DIRECTORY = new Directory(new IntrinsicSourceInfo(), "root");
 
+    private Namespace namespace;
+    private Directory parentDir;
     private List<Directory> childDirectories = new LinkedList<>();
     private Set<ParseUnit> parseUnits = new HashSet<>();
-    private List<ComplexType> typeDefns = new LinkedList<>();
-    private Directory parentDir;
-    private Namespace namespace;
+//    private List<ComplexType> typeDefns = new LinkedList<>();
 
     // ================== The starting point for using Space to execute Space programs
 
@@ -54,10 +54,6 @@ public class Directory extends NamedElement implements ValueExpr {
     @Override
     public MetaType getMetaType() {
         return null;
-    }
-
-    public ComplexType getFirstSpaceDefn() {
-        return typeDefns.get(0);
     }
 
     // =========================================================================
@@ -83,22 +79,24 @@ public class Directory extends NamedElement implements ValueExpr {
         return getParentDir() == null;
     }
 
-    public ComplexType addSpaceDefn(ComplexType spaceTypeDefn) {
-        typeDefns.add(spaceTypeDefn);
-        //
-        addChild((NamedElement) spaceTypeDefn);
-        return spaceTypeDefn;
-    }
+//    public ComplexType addSpaceDefn(ComplexType spaceTypeDefn) {
+//        typeDefns.add(spaceTypeDefn);
+//        //
+//        addChild((NamedElement) spaceTypeDefn);
+//        return spaceTypeDefn;
+//    }
 
-    public StreamTypeDefn addStreamTypeDefn(StreamTypeDefn streamTypeDefn) {
-        addChild(streamTypeDefn);
-        return streamTypeDefn;
-    }
+//    public StreamTypeDefn addStreamTypeDefn(StreamTypeDefn streamTypeDefn) {
+//        addChild(streamTypeDefn);
+//        return streamTypeDefn;
+//    }
 
-    public void addParseUnit(ParseUnit parseUnit) {
+    public ParseUnit addParseUnit(ParseUnit parseUnit) {
         parseUnits.add(parseUnit);
         //
         addChild(parseUnit);
+        //
+        return parseUnit;
     }
 
     public boolean hasChildDirs() {
@@ -113,9 +111,9 @@ public class Directory extends NamedElement implements ValueExpr {
         return parseUnits;
     }
 
-    public List<ComplexType> getTypes() {
-        return typeDefns;
-    }
+//    public List<ComplexType> getTypes() {
+//        return typeDefns;
+//    }
 
     @Override
     void setParent(ModelElement parent) {
@@ -127,6 +125,14 @@ public class Directory extends NamedElement implements ValueExpr {
         }
         //
         super.setParent(parent);
+    }
+
+    public Directory getChildDir(String name) {
+        Directory childDir = null;
+        NamedElement childElem = getChildByName(name);
+        if (childElem instanceof Directory)
+            childDir = ((Directory) childElem);
+        return childDir;
     }
 
 }

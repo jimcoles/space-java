@@ -51,6 +51,11 @@ public class SpaceTypeDefn extends NamedElement implements ComplexType {
         return sequenceTypeDefn;
     }
 
+    @Override
+    public boolean isPrimitive() {
+        return false;
+    }
+
     public boolean isComputed() {
         return body.isComputed();
     }
@@ -108,7 +113,7 @@ public class SpaceTypeDefn extends NamedElement implements ComplexType {
     }
 
     @Override
-    public List<Declartion> getDatumDeclList() {
+    public List<Declaration> getDatumDeclList() {
         return body.getDatumDeclList();
     }
 }

@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.langmaps.javabeans;
 
-import org.jkcsoft.space.lang.instance.Set;
+import org.jkcsoft.space.lang.instance.SetSpace;
 import org.jkcsoft.space.lang.instance.Transform;
 
 /**
@@ -24,7 +24,7 @@ public class SpaceToJavaTransform implements Transform {
 
     }
 
-    public void transform(Set r1, Set r2) throws Exception {
+    public void transform(SetSpace r1, SetSpace r2) throws Exception {
 
     }
 

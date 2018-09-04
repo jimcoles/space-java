@@ -19,7 +19,7 @@ public class NewSetExpr extends ModelElement implements ValueExpr {
     private TypeRef tupleTypeRef;
     private List<NewObjectExpr> newObjectExprs = new LinkedList<>();
 
-    NewSetExpr(SourceInfo sourceInfo, TypeRef tupleTypeRef) {
+    NewSetExpr(SourceInfo sourceInfo, TypeRefImpl tupleTypeRef) {
         super(sourceInfo);
         this.tupleTypeRef = tupleTypeRef;
         //

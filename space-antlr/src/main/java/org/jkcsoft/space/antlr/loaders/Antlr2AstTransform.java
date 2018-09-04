@@ -78,13 +78,22 @@ public class Antlr2AstTransform {
             parseUnitAST.setPackageDecl(toAst(packageStatementCtxt));
 
         List<SpaceParser.ImportStatementContext> importStatementCtxts = spaceParseUnit.importStatement();
+        for (SpaceParser.ImportStatementContext importStatementCtxt : importStatementCtxts) {
+            parseUnitAST.addImportExpr(toAst(importStatementCtxt));
+        }
 
         for (SpaceParser.SpaceTypeDefnContext spaceTypeDefnContext : spaceTypeDefnCtxts) {
-            parseUnitAST.addChild(toAst(spaceTypeDefnContext));
+            parseUnitAST.addTypeDefn(toAst(spaceTypeDefnContext));
         }
 
         log.info("Parse stats #parse nodes: " + countParseNodes);
         return parseUnitAST;
+    }
+
+    private ImportExpr toAst(SpaceParser.ImportStatementContext importStatementCtxt) {
+        return astFactory.newImportExpr(toSI(importStatementCtxt),
+                                        toTypeRef(importStatementCtxt.spacePathExpr()),
+                                        null);
     }
 
     private PackageDecl toAst(SpaceParser.PackageStatementContext packageStatementContext) {
@@ -95,7 +104,7 @@ public class Antlr2AstTransform {
     }
 
     private MetaReference toAst(SpaceParser.SpacePathExprContext spacePathExprContext, MetaType metaType) {
-        MetaReference metaReference = astFactory.newMetaReference(toSI(spacePathExprContext), metaType);
+        MetaReference metaReference = astFactory.newMetaReference(toSI(spacePathExprContext), metaType, null);
         metaReference.setFirstPart(toMetaRefPartList(spacePathExprContext, metaReference));
         return metaReference;
     }
@@ -207,7 +216,7 @@ public class Antlr2AstTransform {
         SpaceParser.RightAssignmentExprContext rightAssignmentExprContext =
             variableDefnStmtContext.variableDefn().rightAssignmentExpr();
         if (rightAssignmentExprContext != null) {
-            MetaReference metaReference = astFactory.newMetaReference(toSI(identifierCtxt), MetaType.DATUM);
+            MetaReference metaReference = astFactory.newMetaReference(toSI(identifierCtxt), MetaType.DATUM, null);
             metaReference.setFirstPart(
                 astFactory.newMetaRefPart(metaReference, toSI(identifierCtxt), toText(identifierCtxt))
             );
@@ -238,16 +247,16 @@ public class Antlr2AstTransform {
         );
     }
 
-    private TypeRef toAst(SpaceParser.ComplexOptCollTypeRefContext complexTypeRefContext) {
+    private TypeRefImpl toAst(SpaceParser.ComplexOptCollTypeRefContext complexTypeRefContext) {
         logTrans(complexTypeRefContext);
-        TypeRef typeRefAst = null;
+        TypeRefImpl typeRefAst = null;
         if (complexTypeRefContext.complexTypeRef().spacePathExpr() != null) {
             typeRefAst = toTypeRef(complexTypeRefContext.complexTypeRef().spacePathExpr());
         }
         if (complexTypeRefContext.anyCollectionMarker()!= null) {
             List<SpaceParser.AnyCollectionMarkerContext> anyCollectionMarkerContexts =
                 complexTypeRefContext.anyCollectionMarker();
-            List<TypeRef.CollectionType> astCollTypes = new LinkedList<>();
+            List<TypeRefImpl.CollectionType> astCollTypes = new LinkedList<>();
             for (SpaceParser.AnyCollectionMarkerContext markerContext : anyCollectionMarkerContexts) {
                 astCollTypes.add(toAst(markerContext));
             }
@@ -261,25 +270,35 @@ public class Antlr2AstTransform {
                                           primitiveTypeNameContext.getText());
     }
 
-    private TypeRef.CollectionType toAst(SpaceParser.AnyCollectionMarkerContext collDelimsContext) {
+    private TypeRefImpl.CollectionType toAst(SpaceParser.AnyCollectionMarkerContext collDelimsContext) {
         logTrans(collDelimsContext);
-        return collDelimsContext.sequenceMarker() != null ? TypeRef.CollectionType.SEQUENCE
-            : collDelimsContext.setMarker() != null ? TypeRef.CollectionType.SET
+        return collDelimsContext.sequenceMarker() != null ? TypeRefImpl.CollectionType.SEQUENCE
+            : collDelimsContext.setMarker() != null ? TypeRefImpl.CollectionType.SET
             : null;
     }
 
-    private TypeRef toTypeRef(SpaceParser.SpacePathExprContext spacePathExprContext) {
+    private TypeRefImpl toTypeRef(SpaceParser.SpacePathExprContext spacePathExprContext) {
         logTrans(spacePathExprContext);
-        TypeRef typeRef = astFactory.newTypeRef(toSI(spacePathExprContext), null);
+        MetaRefPart nsRefPart =
+            spacePathExprContext.languageKey() != null ? toAst(spacePathExprContext.languageKey()) : null;
+        TypeRefImpl typeRef =
+            astFactory.newTypeRef(toSI(spacePathExprContext), null, nsRefPart);
         typeRef.setFirstPart(toMetaRefPartList(spacePathExprContext, typeRef));
         return typeRef;
+    }
+
+    private MetaRefPart toAst(SpaceParser.LanguageKeyContext languageKeyContext) {
+        return astFactory.newMetaRefPart(null, toSI(languageKeyContext), toText(languageKeyContext.identifier()));
     }
 
     private MetaReference toMetaRef(SpaceParser.SpacePathExprContext spacePathExprContext, MetaType metaType) {
         logTrans(spacePathExprContext);
         if (spacePathExprContext == null)
             return null;
-        MetaReference metaReference = astFactory.newMetaReference(toSI(spacePathExprContext), metaType);
+        MetaRefPart nsReference = spacePathExprContext.languageKey() != null ?
+            astFactory.newMetaRefPart(null, toNamePartExpr(spacePathExprContext.languageKey().identifier()))
+            : null;
+        MetaReference metaReference = astFactory.newMetaReference(toSI(spacePathExprContext), metaType, nsReference);
         metaReference.setFirstPart(toMetaRefPartList(spacePathExprContext, metaReference));
         return metaReference;
     }
@@ -310,9 +329,9 @@ public class Antlr2AstTransform {
         return functionDefnAST;
     }
 
-    private TypeRef toAst(SpaceParser.AnyTypeRefContext anyTypeRefContext) {
+    private TypeRefImpl toAst(SpaceParser.AnyTypeRefContext anyTypeRefContext) {
         logTrans(anyTypeRefContext);
-        TypeRef typeRefAst = null;
+        TypeRefImpl typeRefAst = null;
         NamePartExpr pathExpr = null;
         if (anyTypeRefContext.complexOptCollTypeRef() != null) {
             typeRefAst = toAst(anyTypeRefContext.complexOptCollTypeRef());
@@ -326,7 +345,7 @@ public class Antlr2AstTransform {
     private TypeRef toAst(SpaceParser.VoidTypeNameContext voidTypeNameContext) {
         logTrans(voidTypeNameContext);
         SourceInfo sourceInfo = toSI(voidTypeNameContext);
-        TypeRef typeRef = astFactory.newTypeRef(sourceInfo, null);
+        TypeRefImpl typeRef = astFactory.newTypeRef(sourceInfo, null, null);
         typeRef.setFirstPart(
             astFactory.newMetaRefPart(
                 typeRef,
@@ -337,20 +356,20 @@ public class Antlr2AstTransform {
         return typeRef;
     }
 
-    private TypeRef toTypeRef(SpaceParser.PrimitiveOptSeqTypeRefContext primitiveOptSeqTypeRefContext) {
+    private TypeRefImpl toTypeRef(SpaceParser.PrimitiveOptSeqTypeRefContext primitiveOptSeqTypeRefContext) {
         logTrans(primitiveOptSeqTypeRefContext);
-        TypeRef typeRefAst = null;
+        TypeRefImpl typeRefAst = null;
         SourceInfo sourceInfo = toSI(primitiveOptSeqTypeRefContext);
         if (primitiveOptSeqTypeRefContext.sequenceMarker() != null) {
             List<SpaceParser.SequenceMarkerContext> markerContexts = primitiveOptSeqTypeRefContext.sequenceMarker();
-            List<TypeRef.CollectionType> astCollTypes = new LinkedList<>();
+            List<TypeRefImpl.CollectionType> astCollTypes = new LinkedList<>();
             for (SpaceParser.SequenceMarkerContext markerContext : markerContexts) {
-                astCollTypes.add(TypeRef.CollectionType.SEQUENCE);
+                astCollTypes.add(TypeRefImpl.CollectionType.SEQUENCE);
             }
-            typeRefAst = astFactory.newTypeRef(sourceInfo, astCollTypes);
+            typeRefAst = astFactory.newTypeRef(sourceInfo, astCollTypes, null);
         }
         else {
-            typeRefAst = astFactory.newTypeRef(sourceInfo, null);
+            typeRefAst = astFactory.newTypeRef(sourceInfo, null, null);
         }
         typeRefAst.setFirstPart(
             astFactory.newMetaRefPart(typeRefAst,
@@ -533,7 +552,7 @@ public class Antlr2AstTransform {
 
     private MetaReference toMetaRef(SpaceParser.IdentifierContext identifierCtxt) {
         logTrans(identifierCtxt);
-        MetaReference metaReference = astFactory.newMetaReference(toSI(identifierCtxt), MetaType.DATUM);
+        MetaReference metaReference = astFactory.newMetaReference(toSI(identifierCtxt), MetaType.DATUM, null);
         metaReference.setFirstPart(astFactory.newMetaRefPart(metaReference, toNamePartExpr(identifierCtxt)));
         return metaReference;
     }

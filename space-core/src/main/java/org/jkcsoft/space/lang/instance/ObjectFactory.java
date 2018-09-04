@@ -67,7 +67,7 @@ public class ObjectFactory {
         return reference;
     }
 
-    public Set box(Tuple tuple) {
+    public SetSpace box(Tuple tuple) {
 //        return new Space(newOid(), null, tuple.getDefn());
         return null;
     }
@@ -92,8 +92,8 @@ public class ObjectFactory {
         return new BlockContext(statementBlock, tuple);
     }
 
-    public Set newSet(Set contextSpace, SetTypeDefn defn) {
-        return new Set(newOid(), contextSpace, defn);
+    public SetSpace newSet(SetSpace contextSpace, SetTypeDefn defn) {
+        return new SetSpace(newOid(), contextSpace, defn);
     }
 
     public VoidDatum newVoidHolder() {

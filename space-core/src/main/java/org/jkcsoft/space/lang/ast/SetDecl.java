@@ -17,7 +17,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  *
  * @author Jim Coles
  */
-public class SetDecl<T extends NamedElement> extends NamedElement implements Declartion {
+public class SetDecl<T extends NamedElement> extends NamedElement implements Declaration {
 
     private MetaReference<T> tupleTypeRef;
 

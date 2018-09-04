@@ -9,9 +9,11 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
+import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.runtime.AstUtils;
 
 import java.util.*;
@@ -45,7 +47,9 @@ public class NSRegistry {
     /**
      * A special directory root to hold intrinsic operators.
      */
-    private Namespace spaceNs;
+    private Namespace langNs;
+    private Namespace tmpNs;
+    private Namespace userNs;
     private Namespace javaNs;
 
     private Named root;
@@ -61,11 +65,15 @@ public class NSRegistry {
      */
 //    private Map<NamedElement, MetaInfo> metaObjectExtendedInfoMap = new TreeMap<>();
     private NSRegistry() {
-        AstFactory astFactory = AstFactory.getInstance();
-        spaceNs = astFactory.newNamespace(SourceInfo.INTRINSIC, Language.SPACE.getCodeName());
-        addNamespace(spaceNs);
+        AstFactory astFactory = SpaceHome.getAstFactory();
+        langNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "lang");
+        addNamespace(langNs);
+        userNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "user");
+        addNamespace(userNs);
         javaNs = astFactory.newNamespace(SourceInfo.INTRINSIC, Language.JAVA.getCodeName());
         addNamespace(javaNs);
+        tmpNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "tmp");
+        addNamespace(tmpNs);
     }
 
     public void addNamespace(Namespace namespace) {
@@ -74,12 +82,24 @@ public class NSRegistry {
         rootDirs.add(namespace.getRootDir());
     }
 
-    public Namespace getSpaceNs() {
-        return spaceNs;
+    public Namespace getUserNs() {
+        return userNs;
     }
 
     public Namespace getJavaNs() {
         return javaNs;
+    }
+
+    public Namespace getLangNs() {
+        return langNs;
+    }
+
+    public Namespace getTmpNs() {
+        return tmpNs;
+    }
+
+    public Namespace getNamespace(String name) {
+        return (Namespace) CollectionUtils.find(getNsChain(), elem -> ((Namespace) elem).getName().equals(name));
     }
 
     public void addElement(Named newElement) {

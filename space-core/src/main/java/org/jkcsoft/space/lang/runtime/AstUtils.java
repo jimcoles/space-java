@@ -13,9 +13,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
+import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -126,10 +128,27 @@ public class AstUtils {
                 }
                 break;
         }
-        if (reference instanceof TypeRef && ((TypeRef) reference).isCollectionType()) {
+        if (reference instanceof TypeRefImpl && ((TypeRefImpl) reference).isCollectionType()) {
             lookup = ((DatumType) lookup).getSequenceOfType();
         }
         return lookup;
+    }
+
+    public static Set<DatumType> resolveAstPathQuery(List<Directory> dirChain, TypeRefImpl reference) {
+        MetaReference parentRef = getParentRef(reference);
+        NamedElement spcDir = resolveAstPath(dirChain, parentRef);
+        return queryAst(spcDir, new Executor.QueryAstConsumer(ComplexType.class));
+    }
+
+    private static MetaReference getParentRef(TypeRefImpl origRef) {
+        MetaReference parentRefCopy = new MetaReference();
+        parentRefCopy.setFirstPart(origRef.getFirstPart().copy(parentRefCopy));
+        MetaRefPart currPartCopy = parentRefCopy.getFirstPart();
+        for (MetaRefPart origRefPart : origRef.getPartIterable()) {
+            currPartCopy.setNextRefPart(origRefPart.copy(parentRefCopy));
+            currPartCopy = currPartCopy.getNextRefPart();
+        }
+        return parentRefCopy;
     }
 
     private static NamedElement resolveFromRoot(List<Directory> dirChain, MetaReference reference) {
@@ -274,6 +293,30 @@ public class AstUtils {
             }
         }
         return subDir;
+    }
+
+    public static <T extends ModelElement> Set<T> queryAst(ModelElement queryContextElem, Executor.QueryAstConsumer<T> astQueryAction) {
+        walkAst(queryContextElem, astQueryAction);
+        return astQueryAction.getResults();
+    }
+
+    public static Directory ensureDir(Directory nsRootDir, String[] classNameParts, int numParts) {
+        if (!nsRootDir.isRootDir())
+            throw new IllegalArgumentException("specified dir must be a namespace root: ["+nsRootDir+"]");
+
+        Directory leafDir = nsRootDir;
+        for (int idxName = 0; idxName < numParts - 1; idxName++) {
+            String name = classNameParts[idxName];
+            if (contains(leafDir, name)) {
+                leafDir = leafDir.getChildDir(name);
+            }
+            else {
+                leafDir = leafDir.addDir(SpaceHome.getAstFactory().newAstDir(new ProgSourceInfo(), name));
+                log.trace("created new Space dir ["+leafDir+"]");
+            }
+        }
+
+        return leafDir;
     }
 
     private static class PrintAstConsumer implements AstConsumer {

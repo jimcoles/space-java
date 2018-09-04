@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.Declartion;
+import org.jkcsoft.space.lang.ast.Declaration;
 
 /**
  * Variables and References hold values.
@@ -23,5 +23,5 @@ public interface ValueHolder<V extends Value> {
 
     V getValue();
 
-    Declartion getDeclaration();
+    Declaration getDeclaration();
 }

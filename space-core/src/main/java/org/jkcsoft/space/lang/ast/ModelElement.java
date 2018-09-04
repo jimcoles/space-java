@@ -36,7 +36,7 @@ public abstract class ModelElement extends SpaceObject {
     private Set<MetaReference> references = null;
     private List<ModelElement> groupingNodes = new LinkedList<>();
 
-    ModelElement(SourceInfo sourceInfo) {
+    protected ModelElement(SourceInfo sourceInfo) {
         super(ObjectFactory.getInstance().newOid(), null);
         this.sourceInfo = sourceInfo;
     }

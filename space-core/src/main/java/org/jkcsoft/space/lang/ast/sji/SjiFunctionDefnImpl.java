@@ -9,7 +9,11 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
-import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.ast.AbstractFunctionDefn;
+import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.FunctionDefn;
+import org.jkcsoft.space.lang.ast.NativeSourceInfo;
+import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.lang.reflect.Method;
 
@@ -23,11 +27,14 @@ public class SjiFunctionDefnImpl extends AbstractFunctionDefn implements Functio
     private SjiTypeDefn sjiParentTypeDefn;
     //
     private Method jMethod;
+    private boolean isReturnVoid;
+    private TypeRefByClass returnTypeRef;
 
-    SjiFunctionDefnImpl(SjiTypeDefn parentTypeDefn, Method jMethod, String name, TypeRef returnTypeRef) {
-        super(new NativeSourceInfo(jMethod), name, returnTypeRef);
-        this.jMethod = jMethod;
+    SjiFunctionDefnImpl(SjiTypeDefn parentTypeDefn, Method jMethod, String name, TypeRefByClass returnTypeRef) {
+        super(new NativeSourceInfo(jMethod), name);
         this.sjiParentTypeDefn = parentTypeDefn;
+        this.jMethod = jMethod;
+        this.returnTypeRef = returnTypeRef;
     }
 
     @Override
@@ -37,7 +44,7 @@ public class SjiFunctionDefnImpl extends AbstractFunctionDefn implements Functio
 
     @Override
     public DatumType getReturnType() {
-        return null;
+        return returnTypeRef.getResolvedType();
     }
 
     public Method getjMethod() {
@@ -46,5 +53,15 @@ public class SjiFunctionDefnImpl extends AbstractFunctionDefn implements Functio
 
     public SjiTypeDefn getSjiParentTypeDefn() {
         return sjiParentTypeDefn;
+    }
+
+    public boolean isReturnVoid() {
+        return isReturnVoid;
+    }
+
+    public TypeRefByClass getReturnTypeRef() {
+        if (isReturnVoid)
+            throw new SpaceX("Should not call getReturnTypeRef for function with void return.");
+        return returnTypeRef;
     }
 }

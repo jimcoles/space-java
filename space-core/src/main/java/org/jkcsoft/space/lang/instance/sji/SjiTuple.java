@@ -9,15 +9,13 @@
  */
 package org.jkcsoft.space.lang.instance.sji;
 
-import org.jkcsoft.java.util.Beans;
 import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.Declartion;
+import org.jkcsoft.space.lang.ast.Declaration;
 import org.jkcsoft.space.lang.ast.Named;
 import org.jkcsoft.space.lang.ast.sji.SjiPropVarDecl;
 import org.jkcsoft.space.lang.ast.sji.SjiTypeDefn;
 import org.jkcsoft.space.lang.ast.sji.SjiVarDecl;
 import org.jkcsoft.space.lang.instance.*;
-import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -53,7 +51,7 @@ public class SjiTuple extends SpaceObject implements Tuple {
     }
 
     @Override
-    public ValueHolder get(Declartion datumDecl) {
+    public ValueHolder get(Declaration datumDecl) {
         ValueHolder valueHolder = valueHolderMap.get(datumDecl);
         Object jValue = null;
         if (valueHolder == null) {

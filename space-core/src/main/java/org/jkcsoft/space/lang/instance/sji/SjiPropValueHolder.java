@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.instance.sji;
 
 import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.Declartion;
+import org.jkcsoft.space.lang.ast.Declaration;
 import org.jkcsoft.space.lang.ast.sji.SjiPropVarDecl;
 import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.instance.Value;
@@ -27,7 +27,7 @@ public class SjiPropValueHolder implements ValueHolder {
     private SjiPropVarDecl sjiPropVarDecl;
 
     @Override
-    public Declartion getDeclaration() {
+    public Declaration getDeclaration() {
         return sjiPropVarDecl;
     }
 

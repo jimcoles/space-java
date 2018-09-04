@@ -22,13 +22,13 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class AssociationDeclImpl extends NamedElement implements AssociationDecl {
 
-    private TypeRef fromTypeRef;
+    private TypeRefImpl fromTypeRef;
     private int fromMult;   // Defaults to "many" if assoc is declared within a Space Type Defn.
 
-    private TypeRef toTypeRef;
+    private TypeRef     toTypeRef;
     private int toMult;     // Defaults to 1 if assoc is declared within a Space Type Defn.
 
-    AssociationDeclImpl(SourceInfo sourceInfo, String name, TypeRef fromTypeRef, TypeRef toTypeRef) {
+    AssociationDeclImpl(SourceInfo sourceInfo, String name, TypeRefImpl fromTypeRef, TypeRef toTypeRef) {
         super(sourceInfo, name);
 
         if (fromTypeRef != null) {
@@ -39,7 +39,7 @@ public class AssociationDeclImpl extends NamedElement implements AssociationDecl
         if (toTypeRef == null) throw new RuntimeException("bug: path to class ref cannot be null");
         this.toTypeRef = toTypeRef;
         //
-        addChild(this.toTypeRef);
+        addChild((ModelElement) this.toTypeRef);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class AssociationDeclImpl extends NamedElement implements AssociationDecl
 
     @Override
     public DatumType getToType() {
-        return toTypeRef.getResolvedMetaObj();
+        return toTypeRef.getResolvedType();
     }
 
     @Override
@@ -68,18 +68,8 @@ public class AssociationDeclImpl extends NamedElement implements AssociationDecl
     }
 
     @Override
-    public MetaRefPart getFromPath() {
-        return fromTypeRef.getFirstPart();
-    }
-
-    @Override
     public int getFromMult() {
         return fromMult;
-    }
-
-    @Override
-    public MetaRefPart getToPath() {
-        return toTypeRef.getFirstPart();
     }
 
     @Override
@@ -92,6 +82,6 @@ public class AssociationDeclImpl extends NamedElement implements AssociationDecl
      */
     @Override
     public boolean isRecursive() {
-        return fromTypeRef.getResolvedMetaObj() == toTypeRef.getResolvedMetaObj();
+        return fromTypeRef.getResolvedMetaObj() == toTypeRef.getResolvedType();
     }
 }

@@ -9,8 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
 /**
  * A instance of this type is created for every occurrence of a literal string
  * in a source file.
@@ -19,10 +17,10 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class SequenceLiteralExpr extends ModelElement implements ValueExpr {
 
-    private TypeRef typeRef;
+    private TypeRefImpl typeRef;
     private String valueExpr;
 
-    SequenceLiteralExpr(SourceInfo sourceInfo, TypeRef typeRef, String valueExpr) {
+    SequenceLiteralExpr(SourceInfo sourceInfo, TypeRefImpl typeRef, String valueExpr) {
         super(sourceInfo);
         this.typeRef = typeRef;
         this.valueExpr = valueExpr;
@@ -30,7 +28,7 @@ public class SequenceLiteralExpr extends ModelElement implements ValueExpr {
         addChild(typeRef);
     }
 
-    public TypeRef getTypeRef() {
+    public TypeRefImpl getTypeRef() {
         return typeRef;
     }
 

@@ -27,7 +27,7 @@ public class StatementBlock extends Statement implements ComplexType {
 //    private List<AssociationDefn> associationDefnList;
     private List<Statement> statementSequence = new LinkedList<>();  // child statements
 //    private List<VariableDefn> variableDefnList;
-    private List<Declartion> datumDeclList;
+    private List<Declaration> datumDeclList;
 
     public StatementBlock(SourceInfo sourceInfo) {
         super(sourceInfo);
@@ -47,6 +47,11 @@ public class StatementBlock extends Statement implements ComplexType {
     @Override
     public SequenceTypeDefn getSequenceOfType() {
         return null;
+    }
+
+    @Override
+    public boolean isPrimitive() {
+        return false;
     }
 
     public List<Statement> getStatementSequence() {
@@ -95,7 +100,7 @@ public class StatementBlock extends Statement implements ComplexType {
     }
 
     @Override
-    public List<Declartion> getDatumDeclList() {
+    public List<Declaration> getDatumDeclList() {
         return datumDeclList;
     }
 

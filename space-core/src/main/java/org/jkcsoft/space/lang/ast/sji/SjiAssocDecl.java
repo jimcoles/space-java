@@ -42,18 +42,8 @@ public class SjiAssocDecl extends NamedElement implements SjiDeclaration, Associ
     }
 
     @Override
-    public MetaRefPart getFromPath() {
-        return null;
-    }
-
-    @Override
     public int getFromMult() {
         return 0;
-    }
-
-    @Override
-    public MetaRefPart getToPath() {
-        return null;
     }
 
     @Override

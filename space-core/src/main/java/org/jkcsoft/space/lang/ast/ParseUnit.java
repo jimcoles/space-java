@@ -9,14 +9,19 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 @GroupingNode
 public class ParseUnit extends ModelElement {
 
     private PackageDecl packageDecl;
-    private List<TypeRef> imports;
+    private List<ImportExpr> importExprExprs;
+    // redundant list of resolved import types after wildcard expansion
+    private Set<DatumType> allImportedTypes;
+
+    private List<ComplexType> typeDefns = new LinkedList<>();
 
     ParseUnit(SourceInfo sourceInfo) {
         super(sourceInfo);
@@ -31,18 +36,45 @@ public class ParseUnit extends ModelElement {
         this.packageDecl = packageDecl;
     }
 
-    public void addImports(List<TypeRef> imports) {
-        if (imports == null)
-            this.imports = new ArrayList<>(imports);
-        else
-            this.imports.addAll(imports);
-    }
+    public void addImportExpr(ImportExpr importExprExpr) {
+        if (importExprExprs == null)
+            importExprExprs = new LinkedList<>();
 
-    public List<TypeRef> getImports() {
-        return imports;
+        importExprExprs.add(importExprExpr);
+        //
+        addChild(importExprExpr);
     }
 
     public boolean hasImports() {
-        return imports != null && !imports.isEmpty();
+        return importExprExprs != null && !importExprExprs.isEmpty();
     }
+
+    public List<ImportExpr> getImportExprExprs() {
+        return importExprExprs;
+    }
+
+    public void addToImportTable(DatumType datumType) {
+        allImportedTypes.add(datumType);
+    }
+
+    public Set<DatumType> getAllImportedTypes() {
+        return allImportedTypes;
+    }
+
+    public ComplexType addTypeDefn(ComplexType spaceTypeDefn) {
+        typeDefns.add(spaceTypeDefn);
+        //
+        addChild((NamedElement) spaceTypeDefn);
+        return spaceTypeDefn;
+    }
+
+    public StreamTypeDefn addStreamTypeDefn(StreamTypeDefn streamTypeDefn) {
+        addChild(streamTypeDefn);
+        return streamTypeDefn;
+    }
+
+    public List<ComplexType> getTypeDefns() {
+        return typeDefns;
+    }
+
 }

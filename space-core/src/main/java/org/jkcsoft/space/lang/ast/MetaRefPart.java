@@ -12,6 +12,8 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
+ * Encapsulates a single part of a reference path.
+ *
  * @author Jim Coles
  */
 public class MetaRefPart<T> extends NamedElement {
@@ -31,6 +33,10 @@ public class MetaRefPart<T> extends NamedElement {
         super(namePartExpr.getSourceInfo(), namePartExpr.getNameExpr());
         this.parentPath = parentPath;
         this.namePartExpr = namePartExpr;
+    }
+
+    public MetaReference getParentPath() {
+        return parentPath;
     }
 
     public NamePartExpr getNamePartExpr() {
@@ -82,5 +88,13 @@ public class MetaRefPart<T> extends NamedElement {
     @Override
     public MetaType getMetaType() {
         return null;
+    }
+
+    public MetaRefPart copy(MetaReference parentRef) {
+        return new MetaRefPart(parentRef, this.getNamePartExpr());
+    }
+
+    public boolean isWildcard() {
+        return getNamePartExpr().getNameExpr().equals("*");
     }
 }

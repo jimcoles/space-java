@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.runtime.SpaceX;
+
 /**
  * An FunctionDefn is a composite sequence of imperative statements
  * along with local variables and associations.
@@ -29,9 +31,12 @@ package org.jkcsoft.space.lang.ast;
 public class SpaceFunctionDefn extends AbstractFunctionDefn implements FunctionDefn {
 
     private StatementBlock statementBlock;
+    private boolean isReturnVoid;
+    private TypeRefImpl returnTypeRef;
 
-    SpaceFunctionDefn(SourceInfo sourceInfo, String name, TypeRef returnTypeRef) {
-        super(sourceInfo, name, returnTypeRef);
+    SpaceFunctionDefn(SourceInfo sourceInfo, String name, TypeRefImpl returnTypeRef) {
+        super(sourceInfo, name);
+        this.returnTypeRef = returnTypeRef;
     }
 
     @Override
@@ -55,5 +60,15 @@ public class SpaceFunctionDefn extends AbstractFunctionDefn implements FunctionD
 
     public StatementBlock getStatementBlock() {
         return statementBlock;
+    }
+
+    public boolean isReturnVoid() {
+        return isReturnVoid;
+    }
+
+    public TypeRefImpl getReturnTypeRef() {
+        if (isReturnVoid)
+            throw new SpaceX("Should not call getReturnTypeRef for function with void return.");
+        return returnTypeRef;
     }
 }

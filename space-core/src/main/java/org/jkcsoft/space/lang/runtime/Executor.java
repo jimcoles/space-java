@@ -10,7 +10,6 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Lister;
@@ -20,8 +19,7 @@ import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.ast.sji.SjiFunctionDefnImpl;
 import org.jkcsoft.space.lang.ast.sji.SjiTypeDefn;
 import org.jkcsoft.space.lang.instance.*;
-import org.jkcsoft.space.lang.instance.Set;
-import org.jkcsoft.space.lang.instance.sji.SjiTuple;
+import org.jkcsoft.space.lang.instance.SetSpace;
 import org.jkcsoft.space.lang.loader.AstErrors;
 import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.lang.metameta.MetaType;
@@ -30,13 +28,9 @@ import org.jkcsoft.space.lang.runtime.jnative.opsys.OpSys;
 import org.jkcsoft.space.lang.runtime.typecasts.CastTransforms;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.stream.Stream;
 
 /**
  * <p> The top-level executive context for loading Space meta objects and running a
@@ -122,7 +116,7 @@ public class Executor extends ExprProcessor implements ExeContext {
     public Executor(ExeSettings exeSettings) {
         this.exeSettings = exeSettings;
         initRuntime();
-        loadNativeTypes();
+        preLoadSpecialNativeTypes();
         loadSpecialOperators();
     }
 
@@ -145,6 +139,7 @@ public class Executor extends ExprProcessor implements ExeContext {
     public void run() {
         try {
 //            File exeFile = FileUtils.getFile(exeSettings.getExeMain());
+            List<RuntimeError> runErrors = new LinkedList<>();
 
             // Load Space libs and source
             List<File> srcRootDirs = exeSettings.getSpaceDirs();
@@ -153,13 +148,36 @@ public class Executor extends ExprProcessor implements ExeContext {
 //            }
 
             // Parse all source and load ASTs into memory
-            List<ParseUnit> newParseUnits = new LinkedList<>();
             for (File srcRootDir : srcRootDirs) {
-                newParseUnits.addAll(queryParseUnits(loadSrcRootDir(srcRootDir)));
+                loadSrcRootDir(srcRootDir);
             }
 
-            // Link all refs within newly loaded ASTs
-            List<RuntimeError> runErrors = new LinkedList<>();
+            // Load require Java wrappers
+            java.util.Set<ImportExpr> javaImports =
+                AstUtils.queryAst(nsRegistry.getUserNs().getRootDir(),
+                                  new QueryAstConsumer<>(
+                                      ImportExpr.class,
+                                      elem ->
+                                          elem instanceof ImportExpr
+                                              && ((ImportExpr) elem).getTypeRefExpr().getNsRefPart().getNamePartExpr()
+                                                                    .getNameExpr()
+                                                                    .equals(nsRegistry.getJavaNs().getName())
+                                  )
+                );
+            for (ImportExpr javaImport : javaImports) {
+                TypeRefImpl targetJavaTypeRef = javaImport.getTypeRefExpr();
+                try {
+                    SpaceHome.getSjiService().getDeepLoadSpaceWrapper(targetJavaTypeRef.getFullPath());
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            //
+            java.util.Set<ParseUnit> newParseUnits =
+                AstUtils.queryAst(nsRegistry.getUserNs().getRootDir(), new QueryAstConsumer(ParseUnit.class));
+
+            // Link all refs within newly loaded units
             try {
 
                 if (log.isDebugEnabled())
@@ -169,7 +187,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 //                dumpAsts();
 
                 for (ParseUnit parseUnit : newParseUnits) {
-                    linkAndCheck(runErrors, parseUnit);
+                    linkAndCheckUnit(runErrors, parseUnit);
                 }
             }
             catch (SpaceX ex) {
@@ -207,47 +225,46 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
     }
 
-    private void loadNativeTypes() {
+    private void preLoadSpecialNativeTypes() {
 
-        String jClassSeq = System.getProperty("java.class.path");
-        String[] jClassPaths = jClassSeq.split(File.pathSeparator);
-        for (String jClassPath : jClassPaths) {
-            loadJavaClassDir(FileUtils.getFile(jClassPath));
-        }
+        op_sys_type_def = (ComplexType) SpaceHome.getSjiService().getDeepLoadSpaceWrapper(OpSys.class);
+
+        //        String jClassSeq = System.getProperty("java.class.path");
+//        String[] jClassPaths = jClassSeq.split(File.pathSeparator);
+//        for (String jClassPath : jClassPaths) {
+////            loadJavaClassArchive(FileUtils.getFile(jClassPath));
+//        }
+
 
     }
 
     private void loadSpecialOperators() {
-        op_sys_type_def =
-            (ComplexType) AstUtils.resolveAstPath(nsRegistry.getRootDirs(), TypeRef.newTypeRef(OpSys.class.getTypeName()));
+//        op_sys_type_def =
+//            (ComplexType) AstUtils.resolveAstPath(nsRegistry.getRootDirs(), TypeRef.newTypeRef(OpSys.class.getTypeName()));
 //        MATH_TYPE_DEF = loadNativeType(Math.class, AstUtils.getLangRoot(dirChain));
 //        space_opers_type_def = loadNativeType(SpaceOpers.class, AstUtils.getLangRoot(dirChain));
     }
 
-    private Directory loadJavaClassDir(File jClassPathDir) {
-        Directory newSpcRootDir = null;
-
-        if (jClassPathDir.isFile()) {
-            try {
-                JarFile jarFile = new JarFile(jClassPathDir);
-                Stream<JarEntry> jarEntryStream = jarFile.stream();
-                jarEntryStream.forEach(jarEntry -> {
-                    if (jarEntry.isDirectory()) {
-                        SpaceHome.getSjiBuilder().loadJarDir(jarEntry);
-                    }
-                });
-            } catch (IOException e) {
-                throw new SpaceX("failed loading Java class path", e);
-            }
-        }
-        return newSpcRootDir;
-    }
-
-    private Collection<ParseUnit> queryParseUnits(Directory directory) {
-        QueryAstConsumer<ParseUnit> astAction = new QueryAstConsumer(ParseUnit.class);
-        AstUtils.walkAst(directory, astAction);
-        return astAction.getResults();
-    }
+//    private void loadJavaClassArchive(File jClassPathDir) {
+//        if (jClassPathDir.isFile()) try {
+//            JarFile jarFile = new JarFile(jClassPathDir);
+//            Enumeration<JarEntry> jarEntries = jarFile.entries();
+//            while (jarEntries.hasMoreElements()) {
+//                JarEntry jarEntry = jarEntries.nextElement();
+//                String classFileName = jarEntry.getName();
+//                SpaceHome.getSjiService().getOrLoadSpaceWrapper(
+//                    classFileName.substring(0, classFileName.length() - ".class".length())
+//                );
+//            }
+//        } catch (IOException e) {
+//            throw new SpaceX("failed loading Java class path", e);
+//        }
+//        else {
+//            throw new IllegalArgumentException(
+//                "The Space runtime only loads Java libs as JAR files, not exploded directories, " +
+//                    "[" + jClassPathDir + "]");
+//        }
+//    }
 
     public Directory loadSrcRootDir(File srcRootDir) {
         Directory newSpcRootDir = null;
@@ -263,7 +280,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         loadErrors.checkErrors();
 
-        mergeNewChildren(nsRegistry.getSpaceNs().getRootDir(), newSpcRootDir);
+        mergeNewChildren(nsRegistry.getUserNs().getRootDir(), newSpcRootDir);
 
         nsRegistry.trackMetaObject(newSpcRootDir);
 
@@ -316,8 +333,11 @@ public class Executor extends ExprProcessor implements ExeContext {
     }
 
 
-    public void linkAndCheck(List<RuntimeError> runErrors, ParseUnit parseUnit) {
-        link(runErrors, parseUnit);
+    public void linkAndCheckUnit(List<RuntimeError> runErrors, ParseUnit parseUnit) {
+        // link ...
+        linkUnitRefs(parseUnit, runErrors);
+
+        // type check ...
         if (runErrors.size() == 0) {
             typeCheck(runErrors, parseUnit);
         }
@@ -334,9 +354,12 @@ public class Executor extends ExprProcessor implements ExeContext {
          */
     }
 
-    private void link(List<RuntimeError> runErrors, ParseUnit parseUnit) {
-        log.debug("linking loaded program");
-        runErrors = linkRefs(parseUnit, runErrors);
+    private void linkUnitRefs(ParseUnit parseUnit, List<RuntimeError> runErrors) {
+
+        resolveImports(parseUnit, runErrors);
+
+        linkRefs(parseUnit, runErrors);
+
         if (runErrors.size() == 0) {
             log.info("no linker errors");
         }
@@ -353,9 +376,50 @@ public class Executor extends ExprProcessor implements ExeContext {
      have been loaded.  Has the effect of doing semantic validation.
      Could also do some linking while loading.
      */
-    private List<RuntimeError> linkRefs(ParseUnit parseUnit, List<RuntimeError> errors) {
+    private void linkRefs(ParseUnit parseUnit, List<RuntimeError> errors) {
         AstUtils.walkAst(parseUnit, new RefLinker(parseUnit, errors));
-        return errors;
+        return;
+    }
+
+    public void resolveImports(ParseUnit parseUnit, List<RuntimeError> errors) {
+        List<ImportExpr> importExprExprs = parseUnit.getImportExprExprs();
+        for (ImportExpr importExprExpr : importExprExprs) {
+            if (importExprExpr.getTypeRefExpr().getState() != LoadState.RESOLVED) {
+                if (!importExprExpr.getTypeRefExpr().isWildcard()) {
+                    resolveFullPath(importExprExpr.getTypeRefExpr(), errors);
+                    parseUnit.addToImportTable(importExprExpr.getTypeRefExpr().getResolvedMetaObj());
+                }
+                else {
+                    java.util.Set<DatumType> refElems = AstUtils.resolveAstPathQuery(nsRegistry.getRootDirs(),
+                                                                                     importExprExpr.getTypeRefExpr());
+                    parseUnit.getAllImportedTypes().addAll(refElems);
+
+                    // add all types local to this parse unit's directory
+                    parseUnit.getAllImportedTypes().addAll(
+                        AstUtils.queryAst(parseUnit.getParent(), new QueryAstConsumer<>(SpaceTypeDefn.class))
+                    );
+                }
+            }
+        }
+        return;
+    }
+
+    private void resolveFullPath(MetaReference reference, List<RuntimeError> errors) {
+        NamedElement refElem = AstUtils.resolveAstPath(nsRegistry.getRootDirs(), reference);
+        if (refElem == null) {
+            errors.add(new RuntimeError(reference.getSourceInfo(), 0,
+                                        "can not resolve symbol '" + reference + "'"));
+        }
+        else {
+            if (reference.getTargetMetaType() == refElem.getMetaType()) {
+                reference.setState(LoadState.RESOLVED);
+                log.debug("resolved ref [" + reference + "]");
+            }
+            else
+                errors.add(new RuntimeError(reference.getSourceInfo(), 0,
+                                            "expression '" + reference + "' must reference a " +
+                                                reference.getTargetMetaType()));
+        }
     }
 
     /**
@@ -366,7 +430,9 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         IntrinsicSourceInfo sourceInfo = new IntrinsicSourceInfo();
         String[] pathNodes = mainSpacePath.split("/.");
-        TypeRef exeTypeRef = getAstFactory().newTypeRef(sourceInfo, null);
+        MetaRefPart userNsRefPart = getAstFactory()
+            .newMetaRefPart(null, sourceInfo, nsRegistry.getUserNs().getName());
+        TypeRefImpl exeTypeRef = getAstFactory().newTypeRef(sourceInfo, null, userNsRefPart);
         exeTypeRef.setFirstPart(getAstFactory().newMetaRefPart(exeTypeRef, sourceInfo, pathNodes));
         SpaceTypeDefn bootTypeDefn = (SpaceTypeDefn) AstUtils.resolveAstPath(nsRegistry.getRootDirs(), exeTypeRef);
 //        SpaceTypeDefn bootTypeDefn = progSpaceDir.getFirstSpaceDefn();
@@ -376,7 +442,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         ProgSourceInfo progSourceInfo = new ProgSourceInfo();
         FunctionCallExpr bootMainCallExpr = getAstFactory().newFunctionCallExpr(progSourceInfo);
-        MetaReference mainFuncRef = getAstFactory().newMetaReference(sourceInfo, MetaType.FUNCTION);
+        MetaReference mainFuncRef = getAstFactory().newMetaReference(sourceInfo, MetaType.FUNCTION, userNsRefPart);
         mainFuncRef.setFirstPart(
             getAstFactory().newMetaRefPart(mainFuncRef, getAstFactory().newNamePartExpr(sourceInfo, null, "main")));
         bootMainCallExpr.setFunctionDefnRef(mainFuncRef);
@@ -404,8 +470,8 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     //
 
-    private Declartion newAnonDecl(DatumType datumType) {
-        Declartion decl = null;
+    private Declaration newAnonDecl(DatumType datumType) {
+        Declaration decl = null;
         DatumType rootType = getRootType(datumType);
         if (rootType instanceof NumPrimitiveTypeDefn) {
             decl = getAstFactory().newVariableDecl(
@@ -508,7 +574,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     private Value eval(EvalContext evalContext, NewSetExpr newSetExpr) {
         log.debug("eval: " + newSetExpr);
-        Set value = newSet(null, null);
+        SetSpace value = newSet(null, null);
         newSetExpr.getNewObjectExprs().forEach(
             newObjectExpr -> value.addTuple(eval(evalContext, newObjectExpr))
         );
@@ -659,10 +725,10 @@ public class Executor extends ExprProcessor implements ExeContext {
                 value = findInBlocksRec(toMember, functionCallContext.getBlockContexts()).getValue();
                 break;
             case ARG:
-                value = functionCallContext.getArgTuple().get((Declartion) toMember).getValue();
+                value = functionCallContext.getArgTuple().get((Declaration) toMember).getValue();
                 break;
             case OBJECT:
-                value = functionCallContext.getCtxObject().get((Declartion) toMember).getValue();
+                value = functionCallContext.getCtxObject().get((Declaration) toMember).getValue();
                 break;
             case STATIC:
                 throw new SpaceX(evalContext.newRuntimeError("don't yet eval static datums"));
@@ -681,7 +747,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         Iterator<BlockContext> blockContextIterator = blocks.descendingIterator();
         while (assignable == null && blockContextIterator.hasNext()) {
             BlockContext blockContext = blockContextIterator.next();
-            assignable = blockContext.getDataTuple().get((Declartion) toMember);
+            assignable = blockContext.getDataTuple().get((Declaration) toMember);
         }
         return assignable;
     }
@@ -798,8 +864,8 @@ public class Executor extends ExprProcessor implements ExeContext {
         return tuple;
     }
 
-    private SjiTuple newSjiTuple(SjiTypeDefn defn, Object jObject) {
-        SjiTuple tuple = getObjFactory().newSjiTuple(defn, jObject);
+    private Tuple newSjiTuple(SjiTypeDefn defn, Object jObject) {
+        Tuple tuple = getObjFactory().newSjiTuple(defn, jObject);
         initTrackTuple(defn, tuple);
         return tuple;
     }
@@ -807,8 +873,8 @@ public class Executor extends ExprProcessor implements ExeContext {
     private void initTrackTuple(ComplexType defn, Tuple tuple) {
         // initialize
         if (defn.hasDatums()) {
-            List<Declartion> declList = defn.getDatumDeclList();
-            for (Declartion datumDecl : declList) {
+            List<Declaration> declList = defn.getDatumDeclList();
+            for (Declaration datumDecl : declList) {
                 tuple.initHolder(newHolder(tuple, datumDecl));
             }
         }
@@ -818,10 +884,10 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     // ---------------------------- New Space Objects ------------------------
 
-    private Set newSet(Set contextSpace, SetTypeDefn setTypeDefn) {
-        Set set = getObjFactory().newSet(contextSpace, setTypeDefn);
-        trackInstanceObject(set);
-        return set;
+    private SetSpace newSet(SetSpace contextSpace, SetTypeDefn setTypeDefn) {
+        SetSpace setSpace = getObjFactory().newSet(contextSpace, setTypeDefn);
+        trackInstanceObject(setSpace);
+        return setSpace;
     }
 
     private Reference newReference(AssociationDecl assocDecl, Tuple tuple, SpaceObject toObject) {
@@ -839,22 +905,22 @@ public class Executor extends ExprProcessor implements ExeContext {
     }
 
 
-    public ValueHolder newHolder(Tuple tuple, Declartion declartion) {
+    public ValueHolder newHolder(Tuple tuple, Declaration declaration) {
         ValueHolder holder = null;
         ObjectFactory ofact = getObjFactory();
-        if (declartion.getType() instanceof PrimitiveTypeDefn) {
-            holder = new Variable(tuple, ((VariableDecl) declartion));
+        if (declaration.getType() instanceof PrimitiveTypeDefn) {
+            holder = new Variable(tuple, ((VariableDecl) declaration));
         }
-        else if (declartion instanceof SpaceTypeDefn) {
+        else if (declaration instanceof SpaceTypeDefn) {
             holder = ofact.newObjectReference(null, null, null);
         }
-        else if (declartion instanceof StreamTypeDefn) {
+        else if (declaration instanceof StreamTypeDefn) {
             holder = ofact.newObjectReference(null, null, null);
         }
-        else if (declartion instanceof SequenceTypeDefn) {
+        else if (declaration instanceof SequenceTypeDefn) {
             holder = ofact.newObjectReference(null, null, null);
         }
-        else if (declartion instanceof SetTypeDefn) {
+        else if (declaration instanceof SetTypeDefn) {
             holder = ofact.newObjectReference(null, null, null);
         }
         return holder;
@@ -920,9 +986,9 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     }
 
-    private static class QueryAstConsumer<T extends ModelElement> implements AstConsumer {
+    public static class QueryAstConsumer<T extends ModelElement> implements AstConsumer {
 
-        private Collection<T> results = new LinkedList<>();
+        private java.util.Set<T> results = new HashSet<>();
         private Class<T> clazz;
         private Predicate<ModelElement> filter = modelElement -> false;
 
@@ -952,7 +1018,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         }
 
-        public Collection<T> getResults() {
+        public java.util.Set<T> getResults() {
             return results;
         }
     }
@@ -978,49 +1044,6 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
     }
 
-    private class ImportLinker implements AstConsumer {
-
-        private List<RuntimeError> errors;
-
-        public ImportLinker(List<RuntimeError> errors) {
-            this.errors = errors;
-        }
-
-        @Override
-        public Predicate<ModelElement> getFilter() {
-            return testNode -> testNode instanceof ParseUnit;
-        }
-
-        @Override
-        public void upon(ModelElement astNode) {
-            resolveImports(((ParseUnit) astNode));
-            RefLinker refLinker = new RefLinker(((ParseUnit) astNode), errors);
-            AstUtils.walkAst(astNode, refLinker);
-        }
-
-        @Override
-        public void after(ModelElement astNode) {
-
-        }
-
-        /**
-         * Import statements are references to other meta definitions, mostly type defs.
-         * This method resolves those references as a prep for subsequent linking.
-         *
-         * @param parseUnit
-         * @return
-         */
-        public List<TypeRef> resolveImports(ParseUnit parseUnit) {
-            List<TypeRef> imports = null;
-            List<TypeRef> importExprs = parseUnit.getImports();
-            for (TypeRef importExpr : importExprs) {
-                if (importExpr.getState() != LoadState.RESOLVED) {
-                    imports.add(importExpr);
-                }
-            }
-            return imports;
-        }
-    }
 
     private class RefLinker implements AstConsumer {
 
@@ -1059,28 +1082,27 @@ public class Executor extends ExprProcessor implements ExeContext {
             // NOTE: using unresolvedRefs from the predicate test function
             for (MetaReference reference : unresolvedRefs) {
                 log.debug("resolving reference [" + reference + "]");
-                resolveFullPath(reference);
+                if (reference.isUQ()) {
+                    Object importedTypeDefn = CollectionUtils.find(parseUnit.getAllImportedTypes(),
+                                                       object -> ((DatumType) object).getName().equals(
+                                                           reference.getFirstPart().getName()));
+                    if (importedTypeDefn != null) {
+                        // we have an import match
+                        reference.getFirstPart().setResolvedMetaObj(importedTypeDefn);
+                        reference.setImportMatch(true);
+                        reference.setState(LoadState.RESOLVED);
+                    }
+                    else {
+                        errors.add(new RuntimeError(reference.getSourceInfo(), 0,
+                                                    "can not resolve symbol '" + reference + "'"));
+                    }
+                }
+                else {
+                    resolveFullPath(reference, errors);
+                }
             }
             // Null out instance-level field reused across AST nodes
             this.unresolvedRefs = null;
-        }
-
-        private void resolveFullPath(MetaReference reference) {
-            NamedElement refElem = AstUtils.resolveAstPath(nsRegistry.getRootDirs(), reference);
-            if (refElem == null) {
-                errors.add(new RuntimeError(reference.getSourceInfo(), 0,
-                                            "can not resolve symbol '" + reference + "'"));
-            }
-            else {
-                if (reference.getTargetMetaType() == refElem.getMetaType()) {
-                    reference.setState(LoadState.RESOLVED);
-                    log.debug("resolved ref [" + reference + "]");
-                }
-                else
-                    errors.add(new RuntimeError(reference.getSourceInfo(), 0,
-                                                "expression '" + reference + "' must reference a " +
-                                                    reference.getTargetMetaType()));
-            }
         }
 
         @Override

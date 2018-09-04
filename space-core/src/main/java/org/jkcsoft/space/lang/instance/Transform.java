@@ -27,6 +27,6 @@ public interface Transform {
      * All Transforms will implement this, eventually all through model-driven
      * approach, but in the mean time, directly.
      */
-    public void transform(Set r1, Set r2) throws Exception;
+    public void transform(SetSpace r1, SetSpace r2) throws Exception;
 
 }

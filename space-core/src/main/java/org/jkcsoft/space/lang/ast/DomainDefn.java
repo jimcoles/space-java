@@ -45,4 +45,9 @@ public class DomainDefn extends NamedElement implements SimpleType {
         return sequenceTypeDefn;
     }
 
+    @Override
+    public boolean isPrimitive() {
+        return false;
+    }
+
 }

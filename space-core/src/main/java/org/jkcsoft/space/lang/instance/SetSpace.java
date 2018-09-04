@@ -33,20 +33,20 @@ import java.util.function.Consumer;
  * @author Jim Coles
  * @version 1.0
  */
-public class Set extends SpaceObject implements Value, Space, Iterable<Tuple> {
+public class SetSpace extends SpaceObject implements Value, Space, Iterable<Tuple> {
 
     /** Can be an EntityDefn or a ViewDefn */
-    private Set contextSpace;
+    private SetSpace contextSpace;
 
     /** The backing list maintains the sequence of tuples as they are added */
     private List<Tuple> tuples = new LinkedList<>();
 
-    Set(SpaceOid oid, Set contextSpace, SetTypeDefn setTypeDefn) {
+    SetSpace(SpaceOid oid, SetSpace contextSpace, SetTypeDefn setTypeDefn) {
         super(oid, setTypeDefn);
         this.contextSpace = contextSpace;
     }
 
-    public Set addTuple(Tuple tuple) {
+    public SetSpace addTuple(Tuple tuple) {
         tuples.add(tuple);
         validate(tuple);
         return this;
@@ -60,7 +60,7 @@ public class Set extends SpaceObject implements Value, Space, Iterable<Tuple> {
 
     }
 
-    public Set getContextSpace() {
+    public SetSpace getContextSpace() {
         return contextSpace;
     }
 

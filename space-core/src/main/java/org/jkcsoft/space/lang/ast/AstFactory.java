@@ -60,7 +60,7 @@ public class AstFactory {
     }
 
 
-    public SpaceFunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name, TypeRef returnTypeRef) {
+    public SpaceFunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name, TypeRefImpl returnTypeRef) {
         SpaceFunctionDefn element = new SpaceFunctionDefn(sourceInfo, name, returnTypeRef);
         return element;
     }
@@ -145,25 +145,27 @@ public class AstFactory {
         return new TupleExpr(sourceInfo);
     }
 
-    public NewObjectExpr newNewObjectExpr(SourceInfo sourceInfo, TypeRef typeRefPathExpr, TupleExpr tupleExpr) {
+    public NewObjectExpr newNewObjectExpr(SourceInfo sourceInfo, TypeRefImpl typeRefPathExpr, TupleExpr tupleExpr) {
         return new NewObjectExpr(sourceInfo, typeRefPathExpr, tupleExpr);
     }
 
-    public NewSetExpr newNewSetExpr(SourceInfo sourceInfo, TypeRef tupleTypeRef) {
+    public NewSetExpr newNewSetExpr(SourceInfo sourceInfo, TypeRefImpl tupleTypeRef) {
         return new NewSetExpr(sourceInfo, tupleTypeRef);
     }
 
-    public MetaReference newMetaReference(SourceInfo sourceInfo, MetaType type) {
-        MetaReference metaReference = new MetaReference(sourceInfo, type);
+    public MetaReference newMetaReference(SourceInfo sourceInfo, MetaType type, MetaRefPart nsRefPart) {
+        MetaReference metaReference = new MetaReference(sourceInfo, type, nsRefPart);
         return metaReference;
     }
 
-    public TypeRef newTypeRef(SourceInfo sourceInfo, List<TypeRef.CollectionType> collectionTypes) {
-        return new TypeRef(sourceInfo, collectionTypes);
+    public TypeRefImpl newTypeRef(SourceInfo sourceInfo, List<TypeRefImpl.CollectionType> collectionTypes,
+                                  MetaRefPart nsRefPart)
+    {
+        return new TypeRefImpl(sourceInfo, collectionTypes, nsRefPart);
     }
 
-    public TypeRef newTypeRef(DatumType typeDefn) {
-        return new TypeRef(typeDefn);
+    public TypeRefImpl newTypeRef(DatumType typeDefn) {
+        return new TypeRefImpl(typeDefn);
     }
 
     public ParseUnit newParseUnit(SourceInfo sourceInfo) {
@@ -186,4 +188,7 @@ public class AstFactory {
         return new Namespace(sourceInfo, name);
     }
 
+    public ImportExpr newImportExpr(SourceInfo sourceInfo, TypeRefImpl metaReference, String alias) {
+        return new ImportExpr(sourceInfo, metaReference, alias);
+    }
 }

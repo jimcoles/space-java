@@ -15,16 +15,20 @@ import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.loader.AstErrors;
 import org.jkcsoft.space.lang.loader.AstLoader;
+import org.jkcsoft.space.lang.runtime.AstUtils;
+import org.jkcsoft.space.lang.runtime.Executor;
+import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.jar.JarEntry;
+import java.util.Set;
 
 import static org.jkcsoft.space.SpaceHome.getAstFactory;
 
@@ -35,9 +39,11 @@ public class SjiService implements AstLoader {
 
     private NSRegistry nsRegistry = SpaceHome.getNsRegistry();
 
-    private Map<Class, SjiTypeMapping> sjiMappings = new TreeMap<>();
+    private Map<Class, SjiTypeMapping> sjiMappingByClass = new HashMap<>();
+    private Map<String, SjiTypeMapping> sjiMappingByName = new HashMap<>();
 
     public SjiService() {
+
     }
 
     @Override
@@ -60,35 +66,108 @@ public class SjiService implements AstLoader {
         return null;
     }
 
-    public DatumType getNativeType(Class jnClass) {
-        DatumType spcDatumType = null;
-        SjiTypeMapping sjiTypeMapping = getSjiMapping(jnClass);
-        if (sjiTypeMapping == null)
-            throw new IllegalStateException("A Space type could not be created for Java type ["+jnClass+"]");
-        return spcDatumType;
+    /**
+     * Loads Space wrapper of Java class into the Java NS.
+     *
+     * Called after the list of needed Java
+     * classes has been extracted from Space source, but prior to exec-time.
+     * At exec-time, wrapper types will be looked up via the same Namespace lookup
+     * methods used to find pure Space types.
+     *
+     * @param className Standard Java fully-qualified class name "java.lang.String".
+     */
+    public DatumType getDeepLoadSpaceWrapper(String className) throws ClassNotFoundException {
+        Class<?> jnClass = Class.forName(className);
+        return getDeepLoadSpaceWrapper(jnClass);
     }
 
-    public SjiTypeMapping getSjiMapping(Class jnClass) {
-        SjiTypeMapping sjiTypeMapping = sjiMappings.get(jnClass);
+    public DatumType getDeepLoadSpaceWrapper(Class<?> jnClass) {
+        SjiTypeMapping sjiTypeMapping = sjiMappingByClass.get(jnClass);
         if (sjiTypeMapping == null) {
-            sjiTypeMapping = buildNativeType(jnClass);
-            sjiMappings.put(jnClass, sjiTypeMapping);
+            sjiTypeMapping = createSjiTypeMapping(jnClass);
+            deepLoadSpaceWrapper(sjiTypeMapping);
+        }
+        else {
+            if (sjiTypeMapping.getState() != LoadState.RESOLVED) {
+                throw new SpaceX("space wrapper type is not loaded for ["+jnClass+"]");
+            }
+        }
+        return sjiTypeMapping.getSpaceWrapper();
+    }
+
+    private void deepLoadSpaceWrapper(SjiTypeMapping sjiTypeMapping) {
+        String[] classNameParts = splitClassName(sjiTypeMapping.getJavaClass().getName());
+        Directory parentDir =
+            AstUtils.ensureDir(nsRegistry.getJavaNs().getRootDir(), classNameParts, classNameParts.length - 1);
+        //
+        // Build wrappers for this class and any required classes
+        //
+        ParseUnit newParseUnit = buildShallowNativeType(sjiTypeMapping.getJavaClass());
+        //
+        parentDir.addParseUnit(newParseUnit);
+
+//        nsRegistry.trackMetaObject(sjiTypeDefn);
+
+        // load dependencies ...
+        Set<TypeRefByClass> unresolvedRefs = AstUtils.queryAst(newParseUnit,
+                                                              new Executor.QueryAstConsumer<>(
+                                                                  TypeRefByClass.class, modelElement ->
+                                                                  modelElement instanceof TypeRefByClass &&
+                                                                      ((TypeRefByClass) modelElement).getState() !=
+                                                                          LoadState.RESOLVED)
+        );
+        for (TypeRefByClass unresolvedRef : unresolvedRefs) {
+            if (unresolvedRef.getMapping().getState() == LoadState.INITIALIZED) {
+                DatumType spaceWrapper = getDeepLoadSpaceWrapper(unresolvedRef.getWrappedClass());
+                if (spaceWrapper != null) {
+                    unresolvedRef.getMapping().setSpaceWrapper(spaceWrapper);
+                    unresolvedRef.getMapping().setState(LoadState.RESOLVED);
+                }
+            }
+        }
+    }
+
+    public PrimitiveTypeDefn getPrimitiveTypeDefn(Class jnClass) {
+        SjiTypeMapping sjiTypeMapping = getOrCreateSjiMapping(jnClass);
+        if (sjiTypeMapping == null)
+            throw new IllegalStateException("A Space type could not be created for Java type ["+jnClass+"]");
+        if (!sjiTypeMapping.isPrimitive())
+            throw new IllegalArgumentException("Java class ["+jnClass+"] does not map to a Space primitive type");
+        return (PrimitiveTypeDefn) sjiTypeMapping.getSpaceWrapper();
+    }
+
+    SjiTypeMapping getOrCreateSjiMapping(Class jnClass) {
+        SjiTypeMapping sjiTypeMapping = sjiMappingByClass.get(jnClass);
+        if (sjiTypeMapping == null) {
+            sjiTypeMapping = createSjiTypeMapping(jnClass);
         }
         return sjiTypeMapping;
     }
 
-    private SjiTypeMapping buildNativeType(Class jnClass) {
-        SjiTypeMapping sjiTypeMapping = new SjiTypeMapping(jnClass);
-        SjiTypeDefn sjiTypeDefn = newNativeTypeDefn(jnClass);
+    private SjiTypeMapping createSjiTypeMapping(Class jnClass) {
+        SjiTypeMapping sjiTypeMapping;
+        sjiTypeMapping = new SjiTypeMapping(jnClass);
+        sjiMappingByClass.put(jnClass, sjiTypeMapping);
+        sjiMappingByName.put(jnClass.getName(), sjiTypeMapping);
+        return sjiTypeMapping;
+    }
 
-        nsRegistry.trackMetaObject(sjiTypeDefn);
+    private ParseUnit buildShallowNativeType(Class jnClass) {
+        SjiTypeDefn sjiTypeDefn = newNativeTypeDefn(jnClass);
         //
-        nsRegistry.getJavaNs().getRootDir().addSpaceDefn(sjiTypeDefn);
+        ParseUnit parseUnit = getAstFactory().newParseUnit(new NativeSourceInfo(jnClass));
+        parseUnit.addTypeDefn(sjiTypeDefn);
 
         // Add datums
         PropertyDescriptor[] jPropDescriptors = Beans.getPropertyDescriptors(jnClass);
         for (PropertyDescriptor jPropDescriptor : jPropDescriptors) {
-            jPropDescriptor.getReadMethod();
+            if (isExcludeNative(jPropDescriptor))
+                sjiTypeDefn.addVariableDecl(new SjiPropVarDecl(sjiTypeDefn, jPropDescriptor));
+        }
+        Field[] jFields = jnClass.getDeclaredFields();
+        for (Field jField : jFields) {
+            if (isExcludeNative(jField))
+            sjiTypeDefn.addVariableDecl(new SjiFieldVarDecl(sjiTypeDefn, jField));
         }
 
         // Add functions
@@ -97,19 +176,23 @@ public class SjiService implements AstLoader {
             if (isExcludedNative(jMethod))
                 continue;
 
-            Class<?> jType = jMethod.getReturnType();
-            SjiTypeMapping spiRetTypeInfo = getSjiMapping(jType);
-
+            SjiTypeMapping sjiRetTypeInfo = getOrCreateSjiMapping(jMethod.getReturnType());
+            TypeRefByClass retTypeRef = new TypeRefByClass(jMethod.getReturnType());
             // build arg type defn
             SjiTypeDefn argTypeDefn = newNativeTypeDefn(null);
             Parameter[] jParameters = jMethod.getParameters();
             for (Parameter jParam : jParameters) {
-                SjiTypeMapping sjiMapping = getSjiMapping(jParam.getType());
-                if (!sjiMapping.isSpacePrim()) {
-                    argTypeDefn.addAssociationDecl(newAssociationDecl(jParam, sjiMapping));
+                SjiTypeMapping sjiParamTypeMapping = getOrCreateSjiMapping(jParam.getType());
+                TypeRefByClass paramTypeRef = new TypeRefByClass(jParam.getType());
+                if (!sjiParamTypeMapping.isPrimitive()) {
+                    argTypeDefn.addAssociationDecl(
+//                        newAssociationDecl(jParam, sjiParamTypeInfo)
+                        getAstFactory()
+                            .newAssociationDecl(paramTypeRef.getSourceInfo(), jParam.getName(), paramTypeRef)
+                    );
                 }
                 else {
-                    argTypeDefn.addVariableDecl(newVariableDecl(jParam, sjiMapping.getSpacePrimType()));
+                    argTypeDefn.addVariableDecl(newVariableDecl(jParam, argTypeDefn));
                 }
             }
 
@@ -118,119 +201,78 @@ public class SjiService implements AstLoader {
                 jMethod.getName(),
                 jMethod,
                 argTypeDefn,
-                spiRetTypeInfo.getSpaceTypeRef()
+                retTypeRef
             );
             //
             sjiTypeDefn.addFunctionDefn(sjiFunctionDefnImpl);
             nsRegistry.trackMetaObject(sjiFunctionDefnImpl);
             //
         }
-        return sjiTypeMapping;
+        return parseUnit;
     }
 
-    private SjiVarDecl newVariableDecl(Parameter jParam, PrimitiveTypeDefn spacePrimType) {
-        return null;
+    private SjiVarDecl newVariableDecl(Parameter jParam, SjiTypeDefn sjiTypeDefn) {
+        return new SjiParamVarDecl(jParam, sjiTypeDefn);
     }
 
-    private SjiAssocDecl newAssociationDecl(Parameter jParam, SjiTypeMapping sjiTypeMapping) {
-        return null;
-    }
 
-    private SjiVarDecl newNativeVarDecl(Class<?> jParamType, String s) {
-        return null;
-    }
-
+//    private SjiAssocDecl newAssociationDecl(Parameter jParam, SjiTypeMapping sjiTypeMapping) {
     public SjiTypeDefn newNativeTypeDefn(Class jClass) {
         return new SjiTypeDefn(jClass);
     }
 
+    //    }
     public SjiFunctionDefnImpl newNativeFunctionDefn(SjiTypeDefn parentTypeDefn, String name, Method jMethod,
-                                                     SjiTypeDefn argTypeDefn, TypeRef returnTypeRef)
+                                                     SjiTypeDefn argTypeDefn, TypeRefByClass returnTypeRef)
     {
         SjiFunctionDefnImpl element = new SjiFunctionDefnImpl(parentTypeDefn, jMethod, name, returnTypeRef);
         element.setArgSpaceTypeDefn(argTypeDefn);
         return element;
     }
 
-    private static TypeRef.CollectionType javaToSpaceCollType(Class clazz) {
-        TypeRef.CollectionType spCollType = null;
+    //        return null;
+    static TypeRefImpl.CollectionType javaToSpaceCollType(Class clazz) {
+        TypeRefImpl.CollectionType spCollType = null;
         if (clazz == String.class) {
-            spCollType = TypeRef.CollectionType.SEQUENCE;
+            spCollType = TypeRefImpl.CollectionType.SEQUENCE;
         }
         else {
-            spCollType = clazz.isArray() ? TypeRef.CollectionType.SEQUENCE : null;
+            spCollType = clazz.isArray() ? TypeRefImpl.CollectionType.SEQUENCE : null;
         }
         return spCollType;
     }
 
+    private String[] splitClassName(String className) {
+        return className.split("\\.");
+    }
+
     private boolean isExcludedNative(Method jMethod) {
-        Method[] baseMethods = Object.class.getMethods();
-        return ArrayUtils.contains(baseMethods, jMethod);
+        boolean exclude = !isPublicMethod(jMethod);
+        exclude = exclude || ArrayUtils.contains(Object.class.getMethods(), jMethod);
+        return exclude;
     }
 
-    private static String toSpaceTypeName(Class sjiClass) {
-//        return spaceJavaWrapperClass.getSimpleName().substring(2);
-        return sjiClass.getSimpleName();
+    private boolean isExcludeNative(Field jField) {
+        boolean exclude = !Modifier.isPublic(jField.getModifiers()) ;
+        exclude = exclude || ArrayUtils.contains(Object.class.getFields(), jField);
+        return exclude;
     }
 
-    public void loadJarDir(JarEntry jarEntry) {
-
+    private boolean isExcludeNative(PropertyDescriptor jPropDescriptor) {
+        // exclude if prop is not readable and not writable
+        boolean exclude =
+            !(isPublicMethod(jPropDescriptor.getReadMethod())
+                || isPublicMethod(jPropDescriptor.getWriteMethod())
+            );
+        return exclude;
     }
 
-    public static class SjiTypeMapping {
-        private boolean isSpacePrim = false;
-        private TypeRef spaceTypeRef;
-        private PrimitiveTypeDefn spcPrimType;
-        private SourceInfo jSourceInfo;
+    private boolean isPublicMethod(Method jMethod) {
+        return jMethod != null && Modifier.isPublic(jMethod.getModifiers());
+    }
 
-        public SjiTypeMapping(Class jClass) {
-            this.jSourceInfo = new NativeSourceInfo(jClass);
-            spcPrimType = null;
-            if (jClass == Boolean.TYPE) {
-                spcPrimType = NumPrimitiveTypeDefn.BOOLEAN;
-            }
-            else if (jClass == Integer.TYPE) {
-                spcPrimType = NumPrimitiveTypeDefn.CARD;
-            }
-            else if (jClass == Float.TYPE) {
-                spcPrimType = NumPrimitiveTypeDefn.REAL;
-            }
-            else if (jClass == Void.TYPE) {
-                spcPrimType = VoidType.VOID;
-            }
-
-            this.isSpacePrim = spcPrimType != null && !jClass.isArray();
-
-            // special cases for now: Java java.lang.String -> Space char sequence
-            if (jClass == String.class) {
-                spaceTypeRef =
-                    getAstFactory().newTypeRef(jSourceInfo, Collections.singletonList(TypeRef.CollectionType.SEQUENCE));
-                spaceTypeRef.setFirstPart(
-                    getAstFactory().newMetaRefPart(spaceTypeRef, jSourceInfo, NumPrimitiveTypeDefn.CHAR.getName()));
-            }
-            else {
-                String spcTypeRefName = spcPrimType != null ? spcPrimType.getName() : toSpaceTypeName(jClass);
-                spaceTypeRef =
-                    getAstFactory().newTypeRef(jSourceInfo, Collections.singletonList(javaToSpaceCollType(jClass)));
-                spaceTypeRef.setFirstPart(
-                    getAstFactory().newMetaRefPart(spaceTypeRef,
-                                                   jSourceInfo,
-                                                   spcTypeRefName));
-
-            }
-        }
-
-        public boolean isSpacePrim() {
-            return this.isSpacePrim;
-        }
-
-        public TypeRef getSpaceTypeRef() {
-            return spaceTypeRef;
-        }
-
-        public PrimitiveTypeDefn getSpacePrimType() {
-            return this.spcPrimType;
-        }
+    static String toSpaceTypeFQName(Class sjiClass) {
+        return sjiClass.getName();
     }
 
 }

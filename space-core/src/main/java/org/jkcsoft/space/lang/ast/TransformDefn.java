@@ -19,7 +19,7 @@ package org.jkcsoft.space.lang.ast;
  */
 public class TransformDefn extends SpaceFunctionDefn {
 
-    TransformDefn(SourceInfo sourceInfo, String name, TypeRef returnTypeRef) {
+    TransformDefn(SourceInfo sourceInfo, String name, TypeRefImpl returnTypeRef) {
         super(sourceInfo, name, returnTypeRef);
     }
 

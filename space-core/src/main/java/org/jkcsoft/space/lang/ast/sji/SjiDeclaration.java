@@ -9,10 +9,10 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
-import org.jkcsoft.space.lang.ast.Declartion;
+import org.jkcsoft.space.lang.ast.Declaration;
 
 /**
  * @author Jim Coles
  */
-public interface SjiDeclaration extends Declartion {
+public interface SjiDeclaration extends Declaration {
 }

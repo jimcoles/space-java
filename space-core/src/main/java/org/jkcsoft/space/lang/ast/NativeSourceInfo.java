@@ -40,12 +40,14 @@ public class NativeSourceInfo implements SourceInfo {
     @Override
     public String toString() {
         return "(native)"
-            +
-            (jMetaObject instanceof Class ? ((Class) jMetaObject).getSimpleName()
-                : (jMetaObject instanceof Method ? ((Method) jMetaObject).getName()
-                    : (jMetaObject instanceof Parameter ? ((Parameter) jMetaObject).getName()
-                        : "("+jMetaObject.getClass().getSimpleName()+")")
+            + (jMetaObject == null ? "()" :
+                (jMetaObject instanceof Class ? ((Class) jMetaObject).getSimpleName()
+                    : (jMetaObject instanceof Method ? ((Method) jMetaObject).getName()
+                        : (jMetaObject instanceof Parameter ? ((Parameter) jMetaObject).getName()
+                            : "(" + jMetaObject.getClass().getSimpleName() + ")")
+                       )
                 )
-            );
+              )
+            ;
     }
 }

@@ -10,10 +10,8 @@
 package org.jkcsoft.space.lang.ast.sji;
 
 import org.jkcsoft.space.SpaceHome;
-import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.NativeSourceInfo;
 import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
-import org.jkcsoft.space.lang.ast.SourceInfo;
 
 import java.beans.PropertyDescriptor;
 
@@ -32,7 +30,7 @@ public class SjiPropVarDecl extends SjiVarDecl {
 
     @Override
     public NumPrimitiveTypeDefn getType() {
-        return (NumPrimitiveTypeDefn) SpaceHome.getSjiBuilder().getNativeType(jPropDesc.getPropertyType());
+        return (NumPrimitiveTypeDefn) SpaceHome.getSjiService().getPrimitiveTypeDefn(jPropDesc.getPropertyType());
     }
 
     public PropertyDescriptor getjPropDesc() {

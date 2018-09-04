@@ -10,7 +10,8 @@
 package org.jkcsoft.space.lang.instance;
 
 /**
- *
+ * Not sure how I'm going to use this but it seems like we should have
+ * an abstraction called 'Space'.
  */
 public interface Space {
 

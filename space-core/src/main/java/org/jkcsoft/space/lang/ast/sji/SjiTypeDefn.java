@@ -12,10 +12,8 @@ package org.jkcsoft.space.lang.ast.sji;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Wraps Java Class to implement an AST Type Defn.
@@ -27,11 +25,11 @@ public class SjiTypeDefn extends NamedElement implements ComplexType {
     // wrapped element
     private Class jClass;
 
-    private List<Declartion> datumDecls = new LinkedList<>();
+    private List<Declaration> datumDecls = new LinkedList<>();
     private List<SjiFunctionDefnImpl> functionDefns = new LinkedList<>();
 
     SjiTypeDefn(Class jClass) {
-        super(new NativeSourceInfo(jClass), jClass.getSimpleName());
+        super(new NativeSourceInfo(jClass), jClass == null ? "(method args)" : jClass.getSimpleName());
         this.jClass = jClass;
     }
 
@@ -51,29 +49,40 @@ public class SjiTypeDefn extends NamedElement implements ComplexType {
     }
 
     @Override
+    public boolean isPrimitive() {
+        return false;
+    }
+
+    @Override
     public boolean hasDatums() {
         return false;
     }
 
     @Override
-    public List<Declartion> getDatumDeclList() {
+    public List<Declaration> getDatumDeclList() {
         return datumDecls;
     }
 
-    public void addAssociationDecl(SjiAssocDecl associationDecl) {
+    public void addAssociationDecl(AssociationDecl associationDecl) {
         addDatum(associationDecl);
+        //
+        addChild((ModelElement) associationDecl);
     }
 
     public void addVariableDecl(SjiVarDecl variableDecl) {
         addDatum(variableDecl);
+        //
+        addChild(variableDecl);
     }
 
-    private void addDatum(SjiDeclaration declartion) {
-        datumDecls.add(declartion);
+    private void addDatum(Declaration declaration) {
+        datumDecls.add(declaration);
     }
 
     public void addFunctionDefn(SjiFunctionDefnImpl sjiFunctionDefnImpl) {
         functionDefns.add(sjiFunctionDefnImpl);
+        //
+        addChild(sjiFunctionDefnImpl);
     }
 
 }

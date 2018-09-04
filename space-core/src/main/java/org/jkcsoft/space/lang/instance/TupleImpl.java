@@ -11,8 +11,7 @@ package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.Declartion;
-import org.jkcsoft.space.lang.ast.Named;
+import org.jkcsoft.space.lang.ast.Declaration;
 import org.jkcsoft.space.lang.ast.ComplexType;
 
 import java.util.HashMap;
@@ -59,14 +58,14 @@ public class TupleImpl extends SpaceObject implements ExeContext, Tuple {
         indexAllByMemberOid.put(valueHolder.getDeclaration().getOid(), valueHolder);
     }
 
-    public Declartion getNthMember(int idx) {
+    public Declaration getNthMember(int idx) {
         return ((ComplexType) getDefn()).getDatumDeclList().get(idx);
     }
 
     /** Get the 0-based ordinal of the specified member */
     private int getMemberIdx(SpaceOid memberOid) {
         int idxMember = -1;
-        List<Declartion> allMembers = ((ComplexType) getDefn()).getDatumDeclList();
+        List<Declaration> allMembers = ((ComplexType) getDefn()).getDatumDeclList();
         for (int idx = 0; idx < allMembers.size(); idx++) {
             if (allMembers.get(idx).getOid().equals(memberOid)) {
                 idxMember = idx;
@@ -77,7 +76,7 @@ public class TupleImpl extends SpaceObject implements ExeContext, Tuple {
     }
 
     @Override
-    public ValueHolder get(Declartion member) {
+    public ValueHolder get(Declaration member) {
         return indexAllByMemberOid.get(member.getOid());
     }
 

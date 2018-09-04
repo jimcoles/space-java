@@ -18,7 +18,7 @@ public interface ComplexType extends DatumType {
 
     boolean hasDatums();
 
-    List<Declartion> getDatumDeclList();
+    List<Declaration> getDatumDeclList();
 
     void setGroupingNode(boolean isGroupingNode);
 

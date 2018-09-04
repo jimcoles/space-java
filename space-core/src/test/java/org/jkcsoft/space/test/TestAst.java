@@ -9,6 +9,7 @@
 */
 package org.jkcsoft.space.test;
 
+import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.ast.ProgSourceInfo;
@@ -36,7 +37,7 @@ public class TestAst {
         SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(si, astFactory.newNamePart(si, "MyHelloSpace"));
 
         Directory astDirectory = astFactory.newAstDir(si, "TestAst");
-        astDirectory.addSpaceDefn(spaceTypeDefn);
+        astDirectory.addParseUnit(astFactory.newParseUnit(si)).addTypeDefn(spaceTypeDefn);
         spaceTypeDefn
             .addVariableDecl(astFactory.newVariableDecl(si, "myIntDim", NumPrimitiveTypeDefn.CARD));
         spaceTypeDefn
@@ -50,7 +51,16 @@ public class TestAst {
 
         ThisTupleExpr thisTupleExpr = astFactory.newThisExpr(si);
 
-        MetaReference functionDefnRef = astFactory.newMetaReference(si, MetaType.FUNCTION);
+        MetaReference functionDefnRef =
+            astFactory.newMetaReference(si,
+                                        MetaType.FUNCTION,
+                                        astFactory.newMetaRefPart(
+                                            null,
+                                            si,
+                                            SpaceHome.getNsRegistry().getTmpNs().getName()
+                                        )
+            );
+
         functionDefnRef.setFirstPart(astFactory.newMetaRefPart(functionDefnRef, si, ""));
         mainMethod.getStatementBlock()
                   .addExpr(astFactory.newFunctionCallExpr(si).setFunctionDefnRef(functionDefnRef));
@@ -70,7 +80,7 @@ public class TestAst {
 
         try {
             List<RuntimeError> errors = new LinkedList<>();
-            spex.linkAndCheck(errors, astDirectory.getParseUnits().iterator().next());
+            spex.linkAndCheckUnit(errors, astDirectory.getParseUnits().iterator().next());
         }
         catch (Exception e) {
             e.printStackTrace();

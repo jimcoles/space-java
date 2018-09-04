@@ -63,4 +63,8 @@ public abstract class PrimitiveTypeDefn extends NamedElement implements SimpleTy
         return NullValue.NULL_VALUE;
     }
 
+    @Override
+    public boolean isPrimitive() {
+        return true;
+    }
 }

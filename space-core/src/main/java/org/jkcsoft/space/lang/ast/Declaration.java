@@ -9,13 +9,12 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import java.util.List;
-
 /**
  * @author Jim Coles
  */
-public class Import {
-    private List<NamePartExpr> imports;
+public interface Declaration extends Identified, Named {
 
+    DatumType getType();
 
 }
+

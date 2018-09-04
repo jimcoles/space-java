@@ -26,4 +26,6 @@ public interface DatumType extends Named {
 
     SequenceTypeDefn getSequenceOfType();
 
+    boolean isPrimitive();
+
 }

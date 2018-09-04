@@ -67,4 +67,10 @@ public abstract class AbstractCollectionTypeDefn extends NamedElement implements
             sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
         return sequenceTypeDefn;
     }
+
+    @Override
+    public boolean isPrimitive() {
+        return false;
+    }
+
 }

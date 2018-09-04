@@ -14,7 +14,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 /**
  * @author Jim Coles
  */
-public interface AssociationDecl extends Declartion {
+public interface AssociationDecl extends Declaration {
     MetaType getMetaType();
 
     TypeRef getFromTypeRef();
@@ -26,11 +26,7 @@ public interface AssociationDecl extends Declartion {
     @Override
     DatumType getType();
 
-    MetaRefPart getFromPath();
-
     int getFromMult();
-
-    MetaRefPart getToPath();
 
     int getToMult();
 

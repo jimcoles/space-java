@@ -10,8 +10,8 @@
 package org.jkcsoft.space.lang.ast.sji;
 
 import org.jkcsoft.space.SpaceHome;
-import org.jkcsoft.space.lang.ast.*;
-import org.jkcsoft.space.lang.metameta.MetaType;
+import org.jkcsoft.space.lang.ast.NativeSourceInfo;
+import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 
 import java.lang.reflect.Field;
 
@@ -23,8 +23,8 @@ public class SjiFieldVarDecl extends SjiVarDecl {
     // OR direct field access ...
     private Field jField;
 
-    SjiFieldVarDecl(SourceInfo sourceInfo, SjiTypeDefn sjiTypeDefn, Field jField) {
-        super(sourceInfo, sjiTypeDefn, jField.getName());
+    SjiFieldVarDecl(SjiTypeDefn sjiTypeDefn, Field jField) {
+        super(new NativeSourceInfo(jField), sjiTypeDefn, jField.getName());
         this.jField = jField;
     }
 
@@ -35,6 +35,6 @@ public class SjiFieldVarDecl extends SjiVarDecl {
     @Override
     public NumPrimitiveTypeDefn getType() {
         return (NumPrimitiveTypeDefn)
-            SpaceHome.getSjiBuilder().getSjiMapping(jField.getType()).getSpaceTypeRef().getResolvedMetaObj();
+            SpaceHome.getSjiService().getOrCreateSjiMapping(jField.getType()).getSpaceWrapper();
     }
 }

@@ -1,4 +1,4 @@
-package space.lang;
+package space.lang; // a reference, not a defn
 
 import java:java.lang.String;
 

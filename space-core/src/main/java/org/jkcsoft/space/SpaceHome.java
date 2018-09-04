@@ -32,7 +32,7 @@ public class SpaceHome {
         return nsRegistry;
     }
 
-    public static SjiService getSjiBuilder() {
+    public static SjiService getSjiService() {
         return sjiBuilder;
     }
 }

@@ -10,8 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.Declartion;
-import org.jkcsoft.space.lang.ast.Named;
+import org.jkcsoft.space.lang.ast.Declaration;
 
 /**
  * @author Jim Coles
@@ -22,7 +21,7 @@ public interface Tuple extends Value {
 
     void initHolder(ValueHolder valueHolder);
 
-    ValueHolder get(Declartion member);
+    ValueHolder get(Declaration member);
 
     Reference getRefByOid(SpaceOid memberOid);
 

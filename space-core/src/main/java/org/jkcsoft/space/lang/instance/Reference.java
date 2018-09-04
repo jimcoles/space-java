@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.Declartion;
+import org.jkcsoft.space.lang.ast.Declaration;
 
 /**
  * Holds a reference to a Space "object", which might be a Tuple or any
@@ -20,12 +20,12 @@ import org.jkcsoft.space.lang.ast.Declartion;
  */
 public class Reference implements ValueHolder {
 
-    private Declartion declaration;
+    private Declaration declaration;
     private Tuple           parentTuple;
     /** Oid of the referenced 'to' object */
     private SpaceOid toOid;
 
-    Reference(Declartion declaration, Tuple parentTuple, SpaceOid toOid) {
+    Reference(Declaration declaration, Tuple parentTuple, SpaceOid toOid) {
         this.parentTuple = parentTuple;
         this.declaration = declaration;
         this.toOid = toOid;
@@ -39,7 +39,7 @@ public class Reference implements ValueHolder {
         return toOid;
     }
 
-    public Declartion getDeclaration() {
+    public Declaration getDeclaration() {
         return declaration;
     }
 
