@@ -1,3 +1,4 @@
+import java:java.lang.CharSequence;
 
 public type MySpace
 /*
@@ -6,7 +7,7 @@ public type MySpace
 */
 {
     // var list
-    card myIntInstVar = 127;
+    int myIntInstVar = 127;
     boolean myBoolInstVar = false;
 
     // assoc list
@@ -69,7 +70,7 @@ public type MySpace
 
 public type AnotherType {
 
-    function card getInt() {
+    function int getInt() {
         return ((((1 + 2) + 3) - 2) / 2);
     }
 

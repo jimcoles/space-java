@@ -16,9 +16,26 @@ import org.jkcsoft.space.lang.ast.SourceInfo;
  */
 public class AstLoadError {
 
+    public enum Level {
+        WARN,
+        ERROR
+    }
+
     public enum Type {
-        WARNING,
-        SYNTAX
+        PARSE_WARNING(Level.WARN),
+        SYNTAX(Level.ERROR),
+        LINK(Level.ERROR),
+        SEMANTIC(Level.ERROR);
+
+        private Level level;
+
+        Type(Level level) {
+            this.level = level;
+        }
+
+        public Level getLevel() {
+            return level;
+        }
     }
 
     private Type type;
@@ -45,6 +62,6 @@ public class AstLoadError {
 
     @Override
     public String toString() {
-        return type.toString().toLowerCase() + " " + sourceInfo + " " + message;
+        return type.getLevel().toString() + " " + type.toString().toLowerCase() + " " + sourceInfo + " " + message;
     }
 }

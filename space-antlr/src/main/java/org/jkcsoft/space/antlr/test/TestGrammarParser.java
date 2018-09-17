@@ -10,10 +10,11 @@
 package org.jkcsoft.space.antlr.test;
 
 import org.jkcsoft.space.lang.ast.Directory;
-import org.jkcsoft.space.lang.ast.ParsableChoice;
 import org.jkcsoft.space.lang.ast.ParseUnit;
-import org.jkcsoft.space.lang.loader.AstErrors;
+import org.jkcsoft.space.lang.loader.AstFileLoadErrorSet;
 import org.jkcsoft.space.lang.loader.AstLoader;
+import org.jkcsoft.space.lang.loader.DirLoadResults;
+import org.jkcsoft.space.lang.loader.FileLoadResults;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +27,12 @@ public class TestGrammarParser implements AstLoader {
     }
 
     @Override
-    public ParseUnit loadFile(AstErrors parentErrors, Directory spaceDir, File spaceSrcFile) throws IOException {
+    public DirLoadResults loadDir(File srcDir) throws IOException {
+        return null;
+    }
+
+    @Override
+    public FileLoadResults loadFile(Directory spaceDir, File spaceSrcFile) throws IOException {
         return null;
     }
 
@@ -35,8 +41,4 @@ public class TestGrammarParser implements AstLoader {
         return null;
     }
 
-    @Override
-    public Directory loadDir(AstErrors parentErrors, File srcDir) throws IOException {
-        return null;
-    }
 }

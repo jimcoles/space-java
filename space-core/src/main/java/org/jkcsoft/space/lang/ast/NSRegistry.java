@@ -68,11 +68,11 @@ public class NSRegistry {
         AstFactory astFactory = SpaceHome.getAstFactory();
         langNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "lang");
         addNamespace(langNs);
-        userNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "user");
+        userNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "user", langNs);
         addNamespace(userNs);
         javaNs = astFactory.newNamespace(SourceInfo.INTRINSIC, Language.JAVA.getCodeName());
         addNamespace(javaNs);
-        tmpNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "tmp");
+        tmpNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "tmp", userNs);
         addNamespace(tmpNs);
     }
 

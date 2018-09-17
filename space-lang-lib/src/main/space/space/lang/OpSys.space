@@ -1,0 +1,14 @@
+package space.lang;
+
+import java:space.jnative.opsys.*;
+
+/**
+ * Basic O/S operations like accessing standard i/o streams.
+ */
+type OpSys {
+
+    public void println(char[] msg) {
+        java:space.jnative.opsys.OpSys.print(msg);
+    }
+
+}

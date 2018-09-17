@@ -8,13 +8,12 @@
  * Also see the LICENSE file in the repository root directory.
  */
 package org.jkcsoft.space.lang.ast;
-
 /**
+ *
  * @author Jim Coles
  */
-public interface TypeRef {
-
-    DatumType getResolvedType();
-
-    LinkState getState();
+public enum TypeCheckState {
+    UNCHECKED,
+    VALID,
+    INVAVLID
 }

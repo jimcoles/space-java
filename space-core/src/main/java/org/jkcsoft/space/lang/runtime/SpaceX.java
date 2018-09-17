@@ -30,6 +30,10 @@ public class SpaceX extends RuntimeException {
         super(message, cause);
     }
 
+    public boolean hasError() {
+        return error != null;
+    }
+
     public RuntimeError getError() {
         return error;
     }

@@ -9,15 +9,13 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @GroupingNode
 public class ParseUnit extends ModelElement {
 
     private PackageDecl packageDecl;
-    private List<ImportExpr> importExprExprs;
+    private List<ImportExpr> importExprs;
     // redundant list of resolved import types after wildcard expansion
     private Set<DatumType> allImportedTypes;
 
@@ -37,23 +35,28 @@ public class ParseUnit extends ModelElement {
     }
 
     public void addImportExpr(ImportExpr importExprExpr) {
-        if (importExprExprs == null)
-            importExprExprs = new LinkedList<>();
+        if (importExprs == null)
+            importExprs = new LinkedList<>();
 
-        importExprExprs.add(importExprExpr);
+        importExprs.add(importExprExpr);
         //
         addChild(importExprExpr);
     }
 
     public boolean hasImports() {
-        return importExprExprs != null && !importExprExprs.isEmpty();
+        return importExprs != null && !importExprs.isEmpty();
     }
 
-    public List<ImportExpr> getImportExprExprs() {
-        return importExprExprs;
+    public List<ImportExpr> getImportExprs() {
+        if (importExprs == null)
+            importExprs = Collections.emptyList();
+        return importExprs;
     }
 
-    public void addToImportTable(DatumType datumType) {
+    public void addToAllImportedTypes(DatumType datumType) {
+        if (allImportedTypes == null)
+            allImportedTypes = new HashSet<>();
+
         allImportedTypes.add(datumType);
     }
 

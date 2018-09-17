@@ -20,26 +20,26 @@ public class TypeRefByClass extends ModelElement implements TypeRef {
 
     private SjiTypeMapping mapping;
 
-    public TypeRefByClass(Class jClass) {
-        super(new NativeSourceInfo(jClass));
+    public TypeRefByClass(Object jParent, SjiTypeMapping sjiTypeMapping) {
+        super(new NativeSourceInfo(jParent));
 
-        this.mapping = new SjiTypeMapping(jClass);
+        this.mapping = sjiTypeMapping;
 
-        if (jClass == Boolean.TYPE) {
+        if (sjiTypeMapping.getJavaClass() == Boolean.TYPE) {
             mapping.setSpaceWrapper(NumPrimitiveTypeDefn.BOOLEAN);
         }
-        else if (jClass == Integer.TYPE) {
+        else if (sjiTypeMapping.getJavaClass() == Integer.TYPE) {
             mapping.setSpaceWrapper(NumPrimitiveTypeDefn.CARD);
         }
-        else if (jClass == Float.TYPE) {
+        else if (sjiTypeMapping.getJavaClass() == Float.TYPE) {
             mapping.setSpaceWrapper(NumPrimitiveTypeDefn.REAL);
         }
-        else if (jClass == Void.TYPE) {
+        else if (sjiTypeMapping.getJavaClass() == Void.TYPE) {
             mapping.setSpaceWrapper(VoidType.VOID);
         }
 
-        if (getResolvedType() != null)
-            mapping.setState(LoadState.RESOLVED);
+        if (mapping.getSpaceWrapper() != null)
+            mapping.setState(LinkState.RESOLVED);
 
     }
 
@@ -57,8 +57,17 @@ public class TypeRefByClass extends ModelElement implements TypeRef {
     }
 
     @Override
-    public LoadState getState() {
+    public LinkState getState() {
         return mapping.getState();
+    }
+
+    @Override
+    public String toString() {
+        return "<SJIRef" +
+            "fromObj=" + (getNamedParent() != null ? getNamedParent() : "") +
+            " path=\"" + mapping.getJavaClass().getName() + "\"" +
+            " resObj=" + (getState() == LinkState.RESOLVED ? getResolvedType() : "?") +
+            '>';
     }
 
 }

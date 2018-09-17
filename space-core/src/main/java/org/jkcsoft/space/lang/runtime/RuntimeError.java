@@ -27,16 +27,9 @@ public class RuntimeError {
     private SourceInfo sourceInfo;
     private String message;
 
-    public RuntimeError(Stack<FunctionCallContext> stackTrace, int errorCode, String message) {
+    public RuntimeError(Stack<FunctionCallContext> stackTrace, String message) {
         this.stackTrace = stackTrace;
         this.message = message;
-        this.errorCode = errorCode;
-    }
-
-    public RuntimeError(SourceInfo sourceInfo, int errorCode, String message) {
-        this.sourceInfo = sourceInfo;
-        this.message = message;
-        this.errorCode = errorCode;
     }
 
     /** Future best practice: use error code to lookup the message text which is templated to

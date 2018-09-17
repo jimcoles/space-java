@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.ast.sji;
 
 import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.LoadState;
+import org.jkcsoft.space.lang.ast.LinkState;
 
 /**
  * @author Jim Coles
@@ -19,7 +19,7 @@ public class SjiTypeMapping {
 
     private Class javaClass; // the key
     private DatumType spaceWrapper; // the target
-    private LoadState state;
+    private LinkState state = LinkState.INITIALIZED;
 
     public SjiTypeMapping(Class javaClass) {
         this.javaClass = javaClass;
@@ -37,11 +37,11 @@ public class SjiTypeMapping {
         this.spaceWrapper = resolvedType;
     }
 
-    public LoadState getState() {
+    public LinkState getState() {
         return state;
     }
 
-    public void setState(LoadState state) {
+    public void setState(LinkState state) {
         this.state = state;
     }
 
@@ -49,4 +49,8 @@ public class SjiTypeMapping {
         return spaceWrapper != null && spaceWrapper.isPrimitive();
     }
 
+    @Override
+    public String toString() {
+        return "SJI mapping for Java class ["+javaClass+"] state=" + getState();
+    }
 }

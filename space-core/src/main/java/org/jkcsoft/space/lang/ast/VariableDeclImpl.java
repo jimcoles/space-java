@@ -21,13 +21,13 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class VariableDeclImpl extends NamedElement implements VariableDecl {
 
-    private NumPrimitiveTypeDefn type;
+    private TypeRef typeRef;
 
-    VariableDeclImpl(SourceInfo sourceInfo, String name, NumPrimitiveTypeDefn type) {
+    VariableDeclImpl(SourceInfo sourceInfo, String name, TypeRef typeRef) {
         super(sourceInfo, name);
-        this.type = type;
+        this.typeRef = typeRef;
         //
-        addChild(type);
+        addChild(((ModelElement) typeRef));
     }
 
     @Override
@@ -37,11 +37,11 @@ public class VariableDeclImpl extends NamedElement implements VariableDecl {
 
     @Override
     public NumPrimitiveTypeDefn getType() {
-        return type;
+        return ((NumPrimitiveTypeDefn) typeRef.getResolvedType());
     }
 
-    public void setType(NumPrimitiveTypeDefn type) {
-        this.type = type;
+    public void setType(TypeRef typeRef) {
+        this.typeRef = typeRef;
     }
 
 }

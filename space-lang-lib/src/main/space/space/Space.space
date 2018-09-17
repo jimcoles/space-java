@@ -1,3 +1,5 @@
+import java:java.lang.CharSequence;
+
 /**
 * The start of the ultimate attempt to run the Space executor upon another
 * Space executor.  To do this we must load a *.space program into Space-based

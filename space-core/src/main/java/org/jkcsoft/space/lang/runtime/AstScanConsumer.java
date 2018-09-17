@@ -17,11 +17,11 @@ import java.util.function.Predicate;
 /**
  * @author Jim Coles
  */
-public interface AstConsumer {
+public interface AstScanConsumer {
 
     Predicate<ModelElement> getFilter();
 
-    void upon(ModelElement astNode);
+    boolean upon(ModelElement astNode);
 
     void after(ModelElement astNode);
 

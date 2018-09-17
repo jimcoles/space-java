@@ -9,9 +9,12 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.java.util.Lister;
+import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
-import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Top-level notion for holding a full reference to a named element. The reference may be
@@ -24,60 +27,80 @@ import java.util.Iterator;
  * @param <T> The class of meta object being referenced.
  * @author Jim Coles
  */
-public class MetaReference<T extends Named> extends ModelElement implements ValueExpr {
+public class MetaReference<T extends NamedElement> extends ModelElement implements ValueExpr {
 
     private MetaType targetMetaType;
     private MetaRefPart<Namespace> nsRefPart;
-    private MetaRefPart firstPart;
+    private List<MetaRefPart> pathParts = new LinkedList<>();
+//    private MetaRefPart firstPart;
     // redundant lazy init fields ...
-    private MetaRefPart<T> lastPart;
-    private int pathLength;
+//    private MetaRefPart<T> lastPart;
+//    private int pathLength;
 
     private ScopeKind resolvedDatumScope;  // only relevant if target is a datum type.
     private boolean isImportMatch = false;
     private Class<AbstractCollectionTypeDefn> collClass;
+    private TypeCheckState typeCheckState = TypeCheckState.UNCHECKED;
 
-    private LoadState state = LoadState.INITIALIZED;
+//    private LinkState state = null;
 
-    MetaReference(SourceInfo sourceInfo, MetaType targetMetaType, MetaRefPart<Namespace> nsRefPart,
-                  Class<AbstractCollectionTypeDefn> collClass)
+    MetaReference(SourceInfo sourceInfo, MetaType targetMetaType, Class<AbstractCollectionTypeDefn> collClass)
     {
         super(sourceInfo);
-        this.nsRefPart = nsRefPart;
         this.targetMetaType = targetMetaType;
         this.collClass = collClass;
     }
 
-    MetaReference(SourceInfo sourceInfo, MetaType targetMetaType, MetaRefPart<Namespace> nsRefPart) {
-        this(sourceInfo, targetMetaType, nsRefPart, null);
+    MetaReference(SourceInfo sourceInfo, MetaType targetMetaType) {
+        this(sourceInfo, targetMetaType, null);
     }
 
     MetaReference(SourceInfo sourceInfo, Class<AbstractCollectionTypeDefn> collClass) {
-        this(sourceInfo, MetaType.TYPE, null, collClass);
+        this(sourceInfo, MetaType.TYPE, collClass);
     }
 
-    public MetaReference(T typeDefn) {
-        this(new IntrinsicSourceInfo(), MetaType.TYPE, null, null);
-        this.firstPart =
-            new MetaRefPart(this, new NamePartExpr(new IntrinsicSourceInfo(), false, null, typeDefn.getName()));
-        this.firstPart.setState(LoadState.RESOLVED);
-        this.firstPart.setResolvedMetaObj(typeDefn);
+    public MetaReference(SourceInfo sourceInfo, T typeDefn) {
+        this(sourceInfo, MetaType.TYPE, null);
+        MetaRefPart<T> firstPart =
+            new MetaRefPart(new NamePartExpr(sourceInfo, false, null, typeDefn.getName()));
+        firstPart.setState(LinkState.RESOLVED);
+        firstPart.setResolvedMetaObj(typeDefn);
+        this.typeCheckState = TypeCheckState.VALID;
+        //
+        pathParts.add(firstPart);
     }
 
     public MetaReference() {
         super(new ProgSourceInfo());
     }
 
+    public TypeCheckState getTypeCheckState() {
+        return typeCheckState;
+    }
+
+    public void setTypeCheckState(TypeCheckState typeCheckState) {
+        this.typeCheckState = typeCheckState;
+    }
+
+    public boolean hasNs() {
+        return nsRefPart != null;
+    }
+
     public MetaRefPart<Namespace> getNsRefPart() {
         return nsRefPart;
     }
 
-    public MetaRefPart getFirstPart() {
-        return firstPart;
+    public MetaReference<T> setNsRefPart(MetaRefPart<Namespace> nsRefPart) {
+        this.nsRefPart = nsRefPart;
+        return this;
     }
 
-    public void setFirstPart(MetaRefPart firstPart) {
-        this.firstPart = firstPart;
+    public List<MetaRefPart> getPathParts() {
+        return pathParts;
+    }
+
+    public MetaRefPart getFirstPart() {
+        return pathParts.get(0);
     }
 
     public MetaType getTargetMetaType() {
@@ -104,23 +127,26 @@ public class MetaReference<T extends Named> extends ModelElement implements Valu
         isImportMatch = importMatch;
     }
 
-    public Class<AbstractCollectionTypeDefn> getCollClass() {
-        return collClass;
-    }
-
 //    public String getDisplayName() {
 //        return getLastPart().toString() + "(" + (getLastPart().getState() == LoadState.RESOLVED ? "res" : "unres") + ")";
 //    }
 
-    public String getFullPath() {
-        return ( nsRefPart != null ? nsRefPart.getName() + ":" : "")
-            + firstPart.getName()
-            + (firstPart.getNextRefPart() != null ? firstPart.getFullNamePath() : "");
+    public Class<AbstractCollectionTypeDefn> getCollClass() {
+        return collClass;
+    }
+
+    public String getFullUrlSpec() {
+        return (nsRefPart != null ? nsRefPart.getName() + ":" : "")
+            + getUrlPathSpec();
+    }
+
+    public String getUrlPathSpec() {
+        return Strings.buildDelList(pathParts, (Lister<MetaRefPart>) obj -> obj.getName(), ".");
     }
 
     @Override
     public String getDisplayName() {
-        return getFullPath();
+        return getUrlPathSpec();
     }
 
     protected String getSuffix() {
@@ -128,28 +154,39 @@ public class MetaReference<T extends Named> extends ModelElement implements Valu
     }
 
     public MetaRefPart<T> getLastPart() {
-        if (lastPart == null) {
-            lastPart = firstPart;
-            while (lastPart.getNextRefPart() != null) {
-                lastPart = lastPart.getNextRefPart();
-            }
-        }
-        return lastPart;
+        return pathParts.get(pathParts.size() - 1);
     }
 
     public int getPathLength() {
-        if (pathLength == 0) {
-            getPartIterable().forEach(part -> pathLength++);
-        }
-        return pathLength;
+        return pathParts.size();
     }
 
-    public LoadState getState() {
-        return this.state;
+    public void addNextPart(MetaRefPart nextPart) {
+        pathParts.add(nextPart);
     }
 
-    public void setState(LoadState state) {
-        this.state = state;
+    public boolean isSinglePart() {
+        return getPathLength() == 1;
+    }
+
+    public boolean isMultiPart() {
+        return getPathLength() > 1;
+    }
+
+    public LinkState getState() {
+        return getLastPart().getState();
+    }
+
+    public boolean isInitialized() {
+        return getState() == LinkState.INITIALIZED;
+    }
+
+    public boolean isResolved() {
+        return getState() == LinkState.RESOLVED;
+    }
+
+    public boolean isResolvedValid() {
+        return getState() == LinkState.RESOLVED && this.typeCheckState == TypeCheckState.VALID;
     }
 
     @Override
@@ -157,36 +194,12 @@ public class MetaReference<T extends Named> extends ModelElement implements Valu
         String suffix = getSuffix();
         MetaRefPart<T> lastPart = getLastPart();
         return "<" +
-            "fromObj=" + (getNamedParent() != null ? getNamedParent() : "") +
-            " path=\"" + getFullPath() + (suffix != null ? " " + suffix : "") + "\"" +
+            "fromObj=" + (getParent() != null ? getParent() : "") +
+            " path=\"" + getFullUrlSpec() + (suffix != null ? " " + suffix : "") + "\"" +
             " (" + (targetMetaType != null ? targetMetaType.toString().substring(0, 3) : "?") + ")" +
             (resolvedDatumScope != null ? " " + resolvedDatumScope.toString().substring(0, 3) : "") +
-            " resObj=" + (getState() == LoadState.RESOLVED ? lastPart.getResolvedMetaObj() : "?") +
+            " resObj=" + (getState() == LinkState.RESOLVED ? lastPart.getResolvedMetaObj() : "?") +
             '>';
-    }
-
-    public Iterable<MetaRefPart> getPartIterable() {
-        return () -> new MetaRefPartIterator();
-    }
-
-    public boolean isUQ() {
-        return getPathLength() == 1;
-    }
-
-    private class MetaRefPartIterator implements Iterator<MetaRefPart> {
-        MetaRefPart currentPart = firstPart;
-
-        @Override
-        public boolean hasNext() {
-            return currentPart.hasNextExpr();
-        }
-
-        @Override
-        public MetaRefPart next() {
-            MetaRefPart nextRefPart = currentPart.getNextRefPart();
-            currentPart = nextRefPart;
-            return nextRefPart;
-        }
 
     }
 }

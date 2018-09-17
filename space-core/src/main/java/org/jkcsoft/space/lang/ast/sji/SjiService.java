@@ -10,18 +10,15 @@
 package org.jkcsoft.space.lang.ast.sji;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.Beans;
 import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
-import org.jkcsoft.space.lang.loader.AstErrors;
-import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.lang.runtime.AstUtils;
 import org.jkcsoft.space.lang.runtime.Executor;
 import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.beans.PropertyDescriptor;
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -35,7 +32,9 @@ import static org.jkcsoft.space.SpaceHome.getAstFactory;
 /**
  * @author Jim Coles
  */
-public class SjiService implements AstLoader {
+public class SjiService {
+
+    private static final Logger log = Logger.getLogger(SjiService.class);
 
     private NSRegistry nsRegistry = SpaceHome.getNsRegistry();
 
@@ -44,26 +43,6 @@ public class SjiService implements AstLoader {
 
     public SjiService() {
 
-    }
-
-    @Override
-    public String getName() {
-        return "SjiLoader";
-    }
-
-    @Override
-    public ParseUnit loadFile(AstErrors parentErrors, Directory spaceDir, File spaceSrcFile) throws IOException {
-        return null;
-    }
-
-    @Override
-    public Directory loadFromResource(String path) {
-        return null;
-    }
-
-    @Override
-    public Directory loadDir(AstErrors parentErrors, File srcDir) throws IOException {
-        return null;
     }
 
     /**
@@ -77,8 +56,16 @@ public class SjiService implements AstLoader {
      * @param className Standard Java fully-qualified class name "java.lang.String".
      */
     public DatumType getDeepLoadSpaceWrapper(String className) throws ClassNotFoundException {
-        Class<?> jnClass = Class.forName(className);
-        return getDeepLoadSpaceWrapper(jnClass);
+        DatumType wrapper = null;
+        SjiTypeMapping sjiTypeMapping = sjiMappingByName.get(className);
+        if (sjiTypeMapping == null) {
+            Class<?> jnClass = Class.forName(className);
+            wrapper = getDeepLoadSpaceWrapper(jnClass);
+        }
+        else {
+            wrapper = sjiTypeMapping.getSpaceWrapper();
+        }
+        return wrapper;
     }
 
     public DatumType getDeepLoadSpaceWrapper(Class<?> jnClass) {
@@ -88,7 +75,7 @@ public class SjiService implements AstLoader {
             deepLoadSpaceWrapper(sjiTypeMapping);
         }
         else {
-            if (sjiTypeMapping.getState() != LoadState.RESOLVED) {
+            if (sjiTypeMapping.getState() != LinkState.RESOLVED) {
                 throw new SpaceX("space wrapper type is not loaded for ["+jnClass+"]");
             }
         }
@@ -103,6 +90,8 @@ public class SjiService implements AstLoader {
         // Build wrappers for this class and any required classes
         //
         ParseUnit newParseUnit = buildShallowNativeType(sjiTypeMapping.getJavaClass());
+        sjiTypeMapping.setSpaceWrapper(newParseUnit.getTypeDefns().get(0));
+        sjiTypeMapping.setState(LinkState.RESOLVED);
         //
         parentDir.addParseUnit(newParseUnit);
 
@@ -114,15 +103,20 @@ public class SjiService implements AstLoader {
                                                                   TypeRefByClass.class, modelElement ->
                                                                   modelElement instanceof TypeRefByClass &&
                                                                       ((TypeRefByClass) modelElement).getState() !=
-                                                                          LoadState.RESOLVED)
+                                                                          LinkState.RESOLVED)
         );
         for (TypeRefByClass unresolvedRef : unresolvedRefs) {
-            if (unresolvedRef.getMapping().getState() == LoadState.INITIALIZED) {
-                DatumType spaceWrapper = getDeepLoadSpaceWrapper(unresolvedRef.getWrappedClass());
-                if (spaceWrapper != null) {
-                    unresolvedRef.getMapping().setSpaceWrapper(spaceWrapper);
-                    unresolvedRef.getMapping().setState(LoadState.RESOLVED);
+            if (unresolvedRef.getState() == LinkState.INITIALIZED) {
+                deepLoadSpaceWrapper(unresolvedRef.getMapping());
+//                DatumType spaceWrapper = getDeepLoadSpaceWrapper(unresolvedRef.getWrappedClass());
+                if (unresolvedRef.getState() != LinkState.RESOLVED) {
+                    log.error("space wrapper for Java class " +
+                                  "[" + unresolvedRef.getWrappedClass().getName() + "]" +
+                                  " did not load properly");
                 }
+            }
+            else {
+                log.info("skipping load of previously unresolved ref");
             }
         }
     }
@@ -145,8 +139,7 @@ public class SjiService implements AstLoader {
     }
 
     private SjiTypeMapping createSjiTypeMapping(Class jnClass) {
-        SjiTypeMapping sjiTypeMapping;
-        sjiTypeMapping = new SjiTypeMapping(jnClass);
+        SjiTypeMapping sjiTypeMapping = new SjiTypeMapping(jnClass);
         sjiMappingByClass.put(jnClass, sjiTypeMapping);
         sjiMappingByName.put(jnClass.getName(), sjiTypeMapping);
         return sjiTypeMapping;
@@ -176,23 +169,22 @@ public class SjiService implements AstLoader {
             if (isExcludedNative(jMethod))
                 continue;
 
-            SjiTypeMapping sjiRetTypeInfo = getOrCreateSjiMapping(jMethod.getReturnType());
-            TypeRefByClass retTypeRef = new TypeRefByClass(jMethod.getReturnType());
+            TypeRefByClass retTypeRef = new TypeRefByClass(jMethod, getOrCreateSjiMapping(jMethod.getReturnType()));
             // build arg type defn
-            SjiTypeDefn argTypeDefn = newNativeTypeDefn(null);
+            SjiTypeDefn argTupleTypeDefn = newNativeTypeDefn(null);
             Parameter[] jParameters = jMethod.getParameters();
             for (Parameter jParam : jParameters) {
                 SjiTypeMapping sjiParamTypeMapping = getOrCreateSjiMapping(jParam.getType());
-                TypeRefByClass paramTypeRef = new TypeRefByClass(jParam.getType());
+                TypeRefByClass paramTypeRef = new TypeRefByClass(jParam, sjiParamTypeMapping);
                 if (!sjiParamTypeMapping.isPrimitive()) {
-                    argTypeDefn.addAssociationDecl(
+                    argTupleTypeDefn.addAssociationDecl(
 //                        newAssociationDecl(jParam, sjiParamTypeInfo)
                         getAstFactory()
                             .newAssociationDecl(paramTypeRef.getSourceInfo(), jParam.getName(), paramTypeRef)
                     );
                 }
                 else {
-                    argTypeDefn.addVariableDecl(newVariableDecl(jParam, argTypeDefn));
+                    argTupleTypeDefn.addVariableDecl(newVariableDecl(jParam, argTupleTypeDefn));
                 }
             }
 
@@ -200,7 +192,7 @@ public class SjiService implements AstLoader {
                 sjiTypeDefn,
                 jMethod.getName(),
                 jMethod,
-                argTypeDefn,
+                argTupleTypeDefn,
                 retTypeRef
             );
             //

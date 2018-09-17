@@ -16,6 +16,7 @@ import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -71,134 +72,169 @@ public class AstUtils {
     }
 
     /**
-     * Entry point for resolving static references by the linker prior to execution.
+     * <p>Entry point for resolving static references by the linker prior to execution.
      * Rules for resolution vary depending on the type of object referenced:
      *
-     * Ref -> Type: must be fully qualified, possibly via an 'import'.
-     * - Linker: Simple locate from root of AST.
+     * <p>Ref -> Type: must be either fully qualified, possibly via an 'import', or unqualified.
+     * <p>
+     *     - Linker:<br>
+     *    1. If UQ ref, look in current parse unit or current package.<br>
+     *    2. Otherwise resolve FQ ref via imports.<br>
+     *         Then locate from root of AST.
+     * <p>
      * - Exe: (no need)
      *
-     * Ref -> Datum:
+     * <p>Ref -> Datum:
      *  - Linker: If first node in path (including a 1-length path), resolve
      *  according to this search order (precedence):
-     *
+     * <p>
      *  1. block local -> parent blocks(s)
      *  2. function args (if ref is inside function body)
      *  3. object member datums
      *  4. static/shared datums, fully qualified
-     *
+     *<p>
      *    If not first in chain, resolve with respect to type of preceding object.
-     *
+     *<p>
      *  - Exe: resolves to value or ref.
      *
-     * Ref -> Function:
+     * <p>Ref -> Function:
+     * <p>
      *  1. "context object" member functions
      *  2. static functions, fully qualified
      *
-     * @param dirChain
      * @param reference
      * @return
      */
-    public static NamedElement resolveAstPath(List<Directory> dirChain, MetaReference reference) {
-        NamedElement lookup = null;
+    public static void resolveAstPath(MetaReference reference) {
+        Namespace refNs = getNs(reference);
+
         switch (reference.getTargetMetaType()) {
             case TYPE:
-                lookup = checkIntrinsics(reference.getFirstPart().getNamePartExpr());
-                if (lookup == null && reference.hasParent()) {
-                    lookup = resolveFromNode(reference.getNamedParent(), reference);
+                if (reference.isSinglePart()) {
+                    resolveIntrinsics(reference.getFirstPart());
+                    // check for 'siblings': in same parse unit or directory
+                    if (reference.isInitialized()) {
+                        ParseUnit parentParseUnit = findParentParseUnit(reference, parseUnitFinderAction);
+                        resolveFromNode(parentParseUnit, reference);
+                        if (reference.isInitialized()) {
+                            Directory parentDir = findParentDir(reference, dirFinderAction);
+                            resolveFromNode(parentDir, reference);
+                        }
+                    }
                 }
-                if (lookup == null) {
-                    lookup = resolveFromRoot(dirChain, reference);
+                // check as full path from root
+                if (reference.isInitialized()) {
+                    resolveFromRoot(refNs.getRootDirLookupChain(), reference);
                 }
                 break;
             case DATUM:
-                lookup = findInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
-                if (lookup == null) {
-                    lookup = resolveFromRoot(dirChain, reference);
-                    if (lookup != null)
+                resolveInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
+                if (reference.isInitialized()) {
+                    resolveFromRoot(refNs.getRootDirLookupChain(), reference);
+                    if (reference.isResolved())
                         reference.setResolvedDatumScope(ScopeKind.STATIC);
                 }
                 break;
             case FUNCTION:
-                lookup = resolveFromRoot(dirChain, reference);
-                if (lookup == null && !reference.getFirstPart().hasNextExpr())
-                    lookup = findInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
-                else if (lookup == null) {
-                    lookup = resolveFromNode(reference.getNamedParent(), reference);
+//                resolveFromRoot(refNs.getRootDirLookupChain(), reference);
+                if (reference.isInitialized() ) {
+                    if (!reference.isMultiPart()) {
+                        resolveInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
+                    }
+                    else {
+                        resolveFromNode(reference.getNamedParent(), reference);
+                    }
                 }
                 break;
         }
-        if (reference instanceof TypeRefImpl && ((TypeRefImpl) reference).isCollectionType()) {
-            lookup = ((DatumType) lookup).getSequenceOfType();
+    }
+
+    private static void checkSetResolve(MetaRefPart refPart, NamedElement lookup) {
+        if (lookup != null) {
+            refPart.setResolvedMetaObj(lookup);
+            refPart.setState(LinkState.RESOLVED);
         }
-        return lookup;
     }
 
-    public static Set<DatumType> resolveAstPathQuery(List<Directory> dirChain, TypeRefImpl reference) {
-        MetaReference parentRef = getParentRef(reference);
-        NamedElement spcDir = resolveAstPath(dirChain, parentRef);
-        return queryAst(spcDir, new Executor.QueryAstConsumer(ComplexType.class));
+    public static Namespace getNs(MetaReference reference) {
+        Namespace ns = null;
+        if (reference.hasNs())
+            ns = SpaceHome.getNsRegistry().getNamespace(reference.getNsRefPart().getNamePartExpr().getNameExpr());
+        else
+            ns = AstUtils.findParentNs(reference);
+
+        return ns;
     }
 
-    private static MetaReference getParentRef(TypeRefImpl origRef) {
-        MetaReference parentRefCopy = new MetaReference();
-        parentRefCopy.setFirstPart(origRef.getFirstPart().copy(parentRefCopy));
-        MetaRefPart currPartCopy = parentRefCopy.getFirstPart();
-        for (MetaRefPart origRefPart : origRef.getPartIterable()) {
-            currPartCopy.setNextRefPart(origRefPart.copy(parentRefCopy));
-            currPartCopy = currPartCopy.getNextRefPart();
-        }
-        return parentRefCopy;
+    private static Namespace findParentNs(ModelElement astNode) {
+        return findFirstParent(astNode, nsFinderAction);
     }
 
-    private static NamedElement resolveFromRoot(List<Directory> dirChain, MetaReference reference) {
-        NamedElement lookup = findAsDirRoot(dirChain, reference.getFirstPart().getNamePartExpr());
-        lookup = traverseRest(lookup, reference.getFirstPart().getNextRefPart());
-        return lookup;
+    public static <T extends ModelElement> T findFirstParent(ModelElement astNode, Executor.FindFirstAstConsumer<T> finderAction) {
+        finderAction.clearResult();
+        AstUtils.iterateParents(astNode, finderAction);
+        return finderAction.getResult();
     }
 
-    private static NamedElement resolveFromNode(NamedElement astNode, MetaReference reference) {
-        log.debug("trying to find ["+reference+"] under [" + astNode.getFQName() + "]");
-        NamedElement lookup = lookupImmediateChild(astNode, reference.getFirstPart().getNamePartExpr().getNameExpr());
-        lookup = traverseRest(lookup, reference.getFirstPart().getNextRefPart());
-        return lookup;
+    public static Directory findParentDir(ModelElement astNode, Executor.FindFirstAstConsumer<Directory> finderAction) {
+        return findFirstParent(astNode, finderAction);
     }
 
-    /** Scans dir chain. */
-    public static NamedElement findAsDirRoot(List<Directory> dirChain, NamePartExpr namePartExpr) {
-        NamedElement lookup = null;
-        for (Directory dir : dirChain) {
-            log.debug("trying to find [" + namePartExpr + "] under [" + dir.getFQName() + "]");
-            lookup = lookupImmediateChild(dir, namePartExpr.getNameExpr());
-            if (lookup != null)
+    public static ParseUnit findParentParseUnit(ModelElement astNode, Executor.FindFirstAstConsumer<ParseUnit> finderAction) {
+        return findFirstParent(astNode, finderAction);
+    }
+
+    public static Set<DatumType> querySiblingTypes(TypeRefImpl reference) {
+        MetaRefPart parentRefPart = getParentRefPart(reference);
+        return queryAst(((Directory) parentRefPart.getResolvedMetaObj()), new Executor.QueryAstConsumer(ComplexType.class));
+    }
+
+    private static MetaRefPart getParentRefPart(TypeRefImpl fullRef) {
+        List<MetaRefPart> pathParts = fullRef.getPathParts();
+        return pathParts.get(pathParts.size() - 2);
+    }
+
+    private static void resolveFromRoot(Directory[] dirChain, MetaReference reference) {
+        for (Directory rootDir : dirChain) {
+            log.debug("trying to find [" + reference + "] under [" + rootDir.getFQName() + "]");
+            resolveRest(rootDir, reference.getPathParts().iterator());
+            if (reference.isResolved()) {
                 break;
-            else
-                log.debug("could not find [" + namePartExpr + "] under [" + dir.getFQName() + "]");
+            }
+            else {
+                log.debug("could not find [" + reference + "] under [" + rootDir.getFQName() + "]");
+            }
         }
-        return lookup;
     }
 
-    public static NamedElement traverseRest(NamedElement context, MetaRefPart refPart) {
-        NamedElement targetChild = context;
-        if (context != null && refPart != null) {
-            targetChild = lookupImmediateChild(context, refPart.getNamePartExpr().getNameExpr());
-            if (targetChild != null) {
-                if (refPart.hasNextExpr()) {
-                    targetChild = traverseRest(targetChild, refPart.getNextRefPart());
+    private static void resolveFromNode(ModelElement astNode, MetaReference reference) {
+        log.debug("trying to find ["+reference+"] under [" + astNode + "]");
+        NamedElement lookup = lookupImmediateChild(astNode, reference.getFirstPart().getNamePartExpr().getNameExpr());
+        checkSetResolve(reference.getFirstPart(), lookup);
+        resolveRest(lookup, reference.getPathParts().iterator());
+    }
+
+    public static void resolveRest(NamedElement context, Iterator<MetaRefPart> refPartsIter) {
+        if (context != null && refPartsIter.hasNext()) {
+            MetaRefPart refPart = refPartsIter.next();
+            NamedElement targetChild = lookupImmediateChild(context, refPart.getNamePartExpr().getNameExpr());
+            checkSetResolve(refPart, targetChild);
+            if (refPart.isResolved()) {
+                if (refPartsIter.hasNext()) {
+                    resolveRest((NamedElement) refPart.getResolvedMetaObj(), refPartsIter);
                 }
             }
         }
-        // if not first of path list and child not found under current context, return null (error)
-        return targetChild;
     }
 
-    public static NamedElement findInNearestScope(ModelElement context, MetaReference reference,
-                                                  ScopeKind containerScopeKind)
+    public static void resolveInNearestScope(ModelElement context, MetaReference reference,
+                                                     ScopeKind containerScopeKind)
     {
         if (containerScopeKind == null)
             containerScopeKind = inferScopeKind(context);
         NamedElement lookup = lookupImmediateChild(context, reference.getFirstPart().getNamePartExpr().getNameExpr());
-        if (lookup != null)
+        checkSetResolve(reference.getFirstPart(), lookup);
+        if (reference.isResolved())
             reference.setResolvedDatumScope(containerScopeKind);
         else {
             if (context instanceof StatementBlock) {
@@ -206,19 +242,18 @@ public class AstUtils {
                     // not found so just go up the basic tree
                     ModelElement parent = context.getParent();
                     if (parent instanceof StatementBlock)
-                        lookup = findInNearestScope(parent, reference, ScopeKind.BLOCK);
+                        resolveInNearestScope(parent, reference, ScopeKind.BLOCK);
                     else if (parent instanceof SpaceFunctionDefn)
-                        lookup = findInNearestScope(parent, reference, ScopeKind.ARG);
+                        resolveInNearestScope(parent, reference, ScopeKind.ARG);
                 }
             }
             else if (context instanceof FunctionDefn) {
-                lookup = findInNearestScope((ModelElement) ((FunctionDefn) context).getArgSpaceTypeDefn(), reference,
-                                            ScopeKind.ARG);
-                if (lookup == null)
-                    lookup = findInNearestScope(context.getParent(), reference, ScopeKind.OBJECT);
+                resolveInNearestScope((ModelElement) ((FunctionDefn) context).getArgSpaceTypeDefn(), reference,
+                                               ScopeKind.ARG);
+                if (reference.isInitialized())
+                    resolveInNearestScope(context.getParent(), reference, ScopeKind.OBJECT);
             }
         }
-        return lookup;
     }
 
     private static ScopeKind inferScopeKind(ModelElement context) {
@@ -249,32 +284,44 @@ public class AstUtils {
         return childByName;
     }
 
-    private static NamedElement checkIntrinsics(NamePartExpr namePartExpr) {
+    private static void resolveIntrinsics(MetaRefPart refPart) {
         NamedElement lookup = null;
-        if (namePartExpr.getNameExpr().equals(VoidType.VOID.getName())) {
+        if (refPart.getNamePartExpr().getNameExpr().equals(VoidType.VOID.getName())) {
             lookup = VoidType.VOID;
         }
-        else{
-            lookup = NumPrimitiveTypeDefn.valueOf(namePartExpr.getNameExpr());
+        else {
+            lookup = NumPrimitiveTypeDefn.valueOf(refPart.getNamePartExpr().getNameExpr());
         }
-        return lookup;
+        checkSetResolve(refPart, lookup);
     }
 
-    public static void walkAst(ModelElement astNode, AstConsumer astAction) {
+    public static void walkAstDepthFirst(ModelElement astNode, AstScanConsumer astAction) {
         boolean match = astAction.getFilter() == null || astAction.getFilter().test(astNode);
         if (match)
             astAction.upon(astNode);
         List<ModelElement> children = astNode.getChildren();
         for (ModelElement child : children) {
-            walkAst(child, astAction);
+            walkAstDepthFirst(child, astAction);
         }
+        if (match)
+            astAction.after(astNode);
+    }
+
+    public static void iterateParents(ModelElement astNode, AstScanConsumer astAction) {
+        boolean match = astAction.getFilter() == null || astAction.getFilter().test(astNode);
+        if (match)
+            astAction.upon(astNode);
+
+        if (astNode.hasParent())
+            iterateParents(astNode.getParent(), astAction);
+
         if (match)
             astAction.after(astNode);
     }
 
     public static String print(ModelElement modelElement) {
         PrintAstConsumer astPrinter = new PrintAstConsumer();
-        walkAst(modelElement, astPrinter);
+        walkAstDepthFirst(modelElement, astPrinter);
         return astPrinter.getSb().toString();
     }
 
@@ -296,7 +343,7 @@ public class AstUtils {
     }
 
     public static <T extends ModelElement> Set<T> queryAst(ModelElement queryContextElem, Executor.QueryAstConsumer<T> astQueryAction) {
-        walkAst(queryContextElem, astQueryAction);
+        walkAstDepthFirst(queryContextElem, astQueryAction);
         return astQueryAction.getResults();
     }
 
@@ -305,7 +352,7 @@ public class AstUtils {
             throw new IllegalArgumentException("specified dir must be a namespace root: ["+nsRootDir+"]");
 
         Directory leafDir = nsRootDir;
-        for (int idxName = 0; idxName < numParts - 1; idxName++) {
+        for (int idxName = 0; idxName < numParts; idxName++) {
             String name = classNameParts[idxName];
             if (contains(leafDir, name)) {
                 leafDir = leafDir.getChildDir(name);
@@ -319,7 +366,29 @@ public class AstUtils {
         return leafDir;
     }
 
-    private static class PrintAstConsumer implements AstConsumer {
+    public static boolean isJavaNs(ImportExpr importExpr) {
+        MetaRefPart<Namespace> nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
+        return nsRefPart != null &&
+            nsRefPart.getNamePartExpr().getNameExpr().equals(SpaceHome.getNsRegistry().getJavaNs().getName());
+    }
+
+    public static void addNewMetaRefParts(MetaReference parentPath, SourceInfo sourceInfo, String... nameExprs) {
+        for (String nameExpr : nameExprs) {
+            parentPath.addNextPart(SpaceHome.getAstFactory().newMetaRefPart(sourceInfo, nameExpr));
+        }
+        return;
+    }
+
+    private static Executor.FindFirstAstConsumer<Directory> dirFinderAction =
+        new Executor.FindFirstAstConsumer<>(Directory.class);
+
+    private static Executor.FindFirstAstConsumer<ParseUnit> parseUnitFinderAction =
+        new Executor.FindFirstAstConsumer<>(ParseUnit.class);
+
+    private static Executor.FindFirstAstConsumer<Namespace> nsFinderAction =
+        new Executor.FindFirstAstConsumer<>(Namespace.class);
+
+    private static class PrintAstConsumer implements AstScanConsumer {
 
         private final StringBuilder sb = new StringBuilder();
 
@@ -332,10 +401,11 @@ public class AstUtils {
         }
 
         @Override
-        public void upon(ModelElement astNode) {
+        public boolean upon(ModelElement astNode) {
             String indent = Strings.multiplyString("\t", astNode.getTreeDepth());
             sb.append(JavaHelper.EOL)
               .append(indent).append("(").append(astNode.toString());
+            return true;
         }
 
         @Override

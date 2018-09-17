@@ -9,7 +9,9 @@
  */
 package org.jkcsoft.space.lang.loader;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.jkcsoft.java.util.Strings;
+import org.jkcsoft.space.lang.ast.FileSourceInfo;
 import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.io.File;
@@ -19,22 +21,34 @@ import java.util.*;
  *
  * @author Jim Coles
  */
-public class AstErrors {
+public class AstFileLoadErrorSet {
 
-    private File parseFile;
-    private Set<AstErrors> nestedErrors;
+    private File parseFileOrDir;
+//    private Set<AstFileLoadErrors> childNodes;
 
     private List<AstLoadError> allLoadErrors;
     private List<AstLoadError> syntaxErrors;
+    private int[] counts = new int[AstLoadError.Level.values().length];
 
-    public AstErrors(File parseFile) {
-        this.parseFile = parseFile;
+    {
+        for (AstLoadError.Level level : AstLoadError.Level.values()) {
+            counts[level.ordinal()] = 0;
+        }
+    }
+
+    public AstFileLoadErrorSet(File parseFileOrDir) {
+        this.parseFileOrDir = parseFileOrDir;
+    }
+
+    public File getParseFileOrDir() {
+        return parseFileOrDir;
     }
 
     public void add(AstLoadError astLoadError) {
-        if (allLoadErrors == null)
-            allLoadErrors = new LinkedList<>();
+        initAllErrorsList();
+        //
         allLoadErrors.add(astLoadError);
+        counts[astLoadError.getType().getLevel().ordinal()]++;
         //
         if (astLoadError.getType() == AstLoadError.Type.SYNTAX) {
             if (syntaxErrors == null)
@@ -42,6 +56,11 @@ public class AstErrors {
 
             syntaxErrors.add(astLoadError);
         }
+    }
+
+    private void initAllErrorsList() {
+        if (allLoadErrors == null)
+            allLoadErrors = new LinkedList<>();
     }
 
     public boolean hasSyntaxErrors() {
@@ -52,12 +71,6 @@ public class AstErrors {
         return syntaxErrors;
     }
 
-    public void addChildFileErrors(AstErrors child) {
-        if (nestedErrors == null)
-            nestedErrors = new HashSet<>();
-        nestedErrors.add(child);
-    }
-
     public void checkErrors() {
         if (hasSyntaxErrors()) {
             System.err.println(Strings.buildNewlineList(syntaxErrors));
@@ -66,6 +79,20 @@ public class AstErrors {
     }
 
     public List<AstLoadError> getAllErrors() {
+        initAllErrorsList();
         return allLoadErrors;
+    }
+
+    public boolean hasErrors() {
+        return allLoadErrors != null && allLoadErrors.size() > 0;
+    }
+
+    public String getSummary() {
+        return "errors (" + counts[AstLoadError.Level.ERROR.ordinal()] + ") warnings (" +
+            counts[AstLoadError.Level.WARN.ordinal()] + ")";
+    }
+
+    public Collection getErrorsAtLevel(AstLoadError.Level errorLevel) {
+        return CollectionUtils.select(allLoadErrors, err -> ((AstLoadError) err).getType().getLevel() == errorLevel);
     }
 }

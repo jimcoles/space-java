@@ -54,7 +54,7 @@
 
         <dependency>
             <groupId>org.jkcsoft</groupId>
-            <artifactId>java-core</artifactId>
+            <artifactId>java-utils</artifactId>
         </dependency>
 
         <dependency>

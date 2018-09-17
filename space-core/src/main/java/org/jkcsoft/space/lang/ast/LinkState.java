@@ -12,7 +12,8 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public enum LoadState {
-    INITIALIZED,  // unresolved
-    RESOLVED  // linked and type checked
+public enum LinkState {
+    INITIALIZED,  // No attempt to resolve yet
+    NOT_FOUND,    // Broken link. Attempted resolution but failed
+    RESOLVED // Found an object of spec'd name; no type checking yet done
 }

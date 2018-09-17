@@ -13,9 +13,10 @@ import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.ast.ProgSourceInfo;
+import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.metameta.MetaType;
+import org.jkcsoft.space.lang.runtime.AstUtils;
 import org.jkcsoft.space.lang.runtime.Executor;
-import org.jkcsoft.space.lang.runtime.RuntimeError;
 import org.junit.Test;
 
 import java.io.File;
@@ -39,11 +40,12 @@ public class TestAst {
         Directory astDirectory = astFactory.newAstDir(si, "TestAst");
         astDirectory.addParseUnit(astFactory.newParseUnit(si)).addTypeDefn(spaceTypeDefn);
         spaceTypeDefn
-            .addVariableDecl(astFactory.newVariableDecl(si, "myIntDim", NumPrimitiveTypeDefn.CARD));
+            .addVariableDecl(
+                astFactory.newVariableDecl(si, "myIntDim", astFactory.newTypeRef(si, NumPrimitiveTypeDefn.CARD)));
         spaceTypeDefn
             .setBody(astFactory.newTypeDefnBody(si))
-            .addVariableDecl(astFactory.newVariableDecl(si, "myCharDim", NumPrimitiveTypeDefn.CHAR))
-            ;
+            .addVariableDecl(astFactory.newVariableDecl(si, "myCharDim",
+                                                        astFactory.newTypeRef(si, NumPrimitiveTypeDefn.CHAR)));
         SpaceFunctionDefn mainMethod = astFactory.newSpaceFunctionDefn(si, "main", null);
         spaceTypeDefn.getBody().addFunctionDefn(mainMethod);
 //        CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
@@ -51,19 +53,12 @@ public class TestAst {
 
         ThisTupleExpr thisTupleExpr = astFactory.newThisExpr(si);
 
-        MetaReference functionDefnRef =
-            astFactory.newMetaReference(si,
-                                        MetaType.FUNCTION,
-                                        astFactory.newMetaRefPart(
-                                            null,
-                                            si,
-                                            SpaceHome.getNsRegistry().getTmpNs().getName()
-                                        )
-            );
+        MetaReference functionDefnRef = astFactory.newMetaReference(si, MetaType.FUNCTION, astFactory
+            .newMetaRefPart(si, SpaceHome.getNsRegistry().getTmpNs().getName()));
 
-        functionDefnRef.setFirstPart(astFactory.newMetaRefPart(functionDefnRef, si, ""));
+        AstUtils.addNewMetaRefParts(functionDefnRef, si, "test", "TestType", "testFunc");
         mainMethod.getStatementBlock()
-                  .addExpr(astFactory.newFunctionCallExpr(si).setFunctionDefnRef(functionDefnRef));
+                  .addExpr(astFactory.newFunctionCallExpr(si).setFunctionRef(functionDefnRef));
 
 //        astFactory.newMetaObjectRefLiteral(null),
 //            astFactory.newPrimLiteralExpr("Hello, Space!")
@@ -79,8 +74,8 @@ public class TestAst {
         Executor spex = new Executor(new TestExeSettings());
 
         try {
-            List<RuntimeError> errors = new LinkedList<>();
-            spex.linkAndCheckUnit(errors, astDirectory.getParseUnits().iterator().next());
+            List<AstLoadError> errors = new LinkedList<>();
+            spex.linkAndCheckUnit(astDirectory.getParseUnits().iterator().next(), errors);
         }
         catch (Exception e) {
             e.printStackTrace();

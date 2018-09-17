@@ -41,7 +41,7 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
         super(callExpr);
         this.ctxObject = ctxObject;
         this.argTuple = argTuple;
-        FunctionDefn resolvedFunctionMetaObj = callExpr.getFunctionDefnRef().getResolvedMetaObj();
+        FunctionDefn resolvedFunctionMetaObj = (FunctionDefn) callExpr.getFunctionRef().getResolvedMetaObj();
         if (resolvedFunctionMetaObj instanceof SpaceFunctionDefn) {
             BlockContext rootBlockContext =
                 new BlockContext(this, ((SpaceFunctionDefn) resolvedFunctionMetaObj).getStatementBlock(),

@@ -18,10 +18,22 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 public class Namespace extends NamedElement {
 
     private Directory rootDir;
+    private Namespace[] nsLookupChain;
+    private Directory[] rootDirLookupChain;
 
-    Namespace(SourceInfo sourceInfo, String name) {
+    Namespace(SourceInfo sourceInfo, String name, Namespace ... nsLookupChain) {
         super(sourceInfo, name);
-        rootDir = AstFactory.getInstance().newAstDir(new IntrinsicSourceInfo(), "/");
+        this.rootDir = AstFactory.getInstance().newAstDir(new IntrinsicSourceInfo(), "/");
+        this.nsLookupChain = new Namespace[nsLookupChain.length + 1];
+        this.nsLookupChain[0] = this;
+        for (int idxExtraLookup = 0; idxExtraLookup < nsLookupChain.length; idxExtraLookup++) {
+            this.nsLookupChain[idxExtraLookup + 1] = nsLookupChain[idxExtraLookup];
+        }
+        this.rootDirLookupChain = new Directory[this.nsLookupChain.length];
+        for (int idxChain = 0; idxChain < this.nsLookupChain.length; idxChain++) {
+            this.rootDirLookupChain[idxChain] = this.nsLookupChain[idxChain].getRootDir();
+        }
+        //
         this.addChild(rootDir);
     }
 
@@ -32,6 +44,14 @@ public class Namespace extends NamedElement {
 
     public Directory getRootDir() {
         return rootDir;
+    }
+
+    public Namespace[] getNsLookupChain() {
+        return nsLookupChain;
+    }
+
+    public Directory[] getRootDirLookupChain() {
+        return rootDirLookupChain;
     }
 
     @Override

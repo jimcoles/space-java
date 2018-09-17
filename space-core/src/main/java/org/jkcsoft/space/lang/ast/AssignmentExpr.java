@@ -16,19 +16,19 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class AssignmentExpr extends ModelElement implements ValueExpr {
 
-    private MetaReference<Named> memberRef;
+    private MetaReference<NamedElement> memberRef;
     private ValueExpr valueExpr;
 
     public AssignmentExpr(SourceInfo sourceInfo) {
         super(sourceInfo);
     }
 
-    public MetaReference<Named> getMemberRef() {
+    public MetaReference<NamedElement> getMemberRef() {
         return memberRef;
     }
 
     /** The left-side reference. */
-    public void setMemberRef(MetaReference<Named> memberRef) {
+    public void setMemberRef(MetaReference<NamedElement> memberRef) {
         this.memberRef = memberRef;
         //
         addChild(memberRef);

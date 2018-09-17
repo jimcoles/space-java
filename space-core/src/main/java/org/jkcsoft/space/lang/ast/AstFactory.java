@@ -65,8 +65,8 @@ public class AstFactory {
         return element;
     }
 
-    public VariableDeclImpl newVariableDecl(SourceInfo sourceInfo, String name, NumPrimitiveTypeDefn type) {
-        VariableDeclImpl element = new VariableDeclImpl(sourceInfo, name, type);
+    public VariableDeclImpl newVariableDecl(SourceInfo sourceInfo, String name, TypeRef typeRef) {
+        VariableDeclImpl element = new VariableDeclImpl(sourceInfo, name, typeRef);
         return element;
     }
 
@@ -88,26 +88,15 @@ public class AstFactory {
     }
 
     public SequenceLiteralExpr newCharSeqLiteralExpr(SourceInfo sourceInfo, String text) {
-        return new SequenceLiteralExpr(sourceInfo, newTypeRef(NumPrimitiveTypeDefn.CHAR), text);
+        return new SequenceLiteralExpr(sourceInfo, newTypeRef(sourceInfo, NumPrimitiveTypeDefn.CHAR), text);
     }
 
-    public MetaRefPart newMetaRefPart(MetaReference parentPath, NamePartExpr namePartExpr) {
-        return new MetaRefPart(parentPath, namePartExpr);
+    public MetaRefPart newMetaRefPart(NamePartExpr namePartExpr) {
+        return new MetaRefPart(namePartExpr);
     }
 
-    public MetaRefPart newMetaRefPart(MetaReference parentPath, SourceInfo sourceInfo, String... nameExprs) {
-        MetaRefPart firstMetaRefPart = null;
-        MetaRefPart prevMetaRefPart = null;
-        for (String nameExpr : nameExprs) {
-            MetaRefPart metaRefPart = new MetaRefPart(parentPath, newNamePartExpr(sourceInfo, null, nameExpr));
-            if (firstMetaRefPart == null)
-                firstMetaRefPart = metaRefPart;
-            if (prevMetaRefPart != null) {
-                prevMetaRefPart.setNextRefPart(metaRefPart);
-                prevMetaRefPart = metaRefPart;
-            }
-        }
-        return firstMetaRefPart;
+    public MetaRefPart newMetaRefPart(SourceInfo sourceInfo, String nameExpr) {
+        return new MetaRefPart(newNamePartExpr(sourceInfo, null, nameExpr));
     }
 
     public NamePartExpr newNamePartExpr(SourceInfo sourceInfo, PathOperEnum oper, String searchName)
@@ -154,18 +143,21 @@ public class AstFactory {
     }
 
     public MetaReference newMetaReference(SourceInfo sourceInfo, MetaType type, MetaRefPart nsRefPart) {
-        MetaReference metaReference = new MetaReference(sourceInfo, type, nsRefPart);
+        MetaReference metaReference = new MetaReference(sourceInfo, type);
+        metaReference.setNsRefPart(nsRefPart);
         return metaReference;
     }
 
     public TypeRefImpl newTypeRef(SourceInfo sourceInfo, List<TypeRefImpl.CollectionType> collectionTypes,
                                   MetaRefPart nsRefPart)
     {
-        return new TypeRefImpl(sourceInfo, collectionTypes, nsRefPart);
+        TypeRefImpl typeRef = new TypeRefImpl(sourceInfo, collectionTypes);
+        typeRef.setNsRefPart(nsRefPart);
+        return typeRef;
     }
 
-    public TypeRefImpl newTypeRef(DatumType typeDefn) {
-        return new TypeRefImpl(typeDefn);
+    public TypeRefImpl newTypeRef(SourceInfo sourceInfo, DatumType typeDefn) {
+        return new TypeRefImpl(sourceInfo, typeDefn);
     }
 
     public ParseUnit newParseUnit(SourceInfo sourceInfo) {
@@ -184,8 +176,8 @@ public class AstFactory {
         return new ParsableChoice(parseUnit);
     }
 
-    public Namespace newNamespace(SourceInfo sourceInfo, String name) {
-        return new Namespace(sourceInfo, name);
+    public Namespace newNamespace(SourceInfo sourceInfo, String name, Namespace ... nsLookupChain) {
+        return new Namespace(sourceInfo, name, nsLookupChain);
     }
 
     public ImportExpr newImportExpr(SourceInfo sourceInfo, TypeRefImpl metaReference, String alias) {

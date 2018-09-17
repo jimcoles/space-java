@@ -21,9 +21,7 @@ import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.antlr.SpaceLexer;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.*;
-import org.jkcsoft.space.lang.loader.AstErrors;
-import org.jkcsoft.space.lang.loader.AstLoadError;
-import org.jkcsoft.space.lang.loader.AstLoader;
+import org.jkcsoft.space.lang.loader.*;
 import org.jkcsoft.space.antlr.AntlrTreePrintListener;
 import org.jkcsoft.space.antlr.AntlrUtil;
 
@@ -65,25 +63,33 @@ public class G2AntlrParser implements AstLoader {
     }
 
     @Override
-    public Directory loadDir(AstErrors parentErrors, File srcRootDir) throws IOException {
+    public DirLoadResults loadDir(File srcRootDir) throws IOException {
         log.info("Loading source in dir [" + srcRootDir.getAbsolutePath() + "]");
+        DirLoadResults results = new DirLoadResults(srcRootDir);
         Namespace tempNs = astFactory.newNamespace(null, "temp");
         Directory spcRootDir = tempNs.getRootDir();
-        loadChildren(parentErrors, spcRootDir, srcRootDir);
-        return spcRootDir;
+        loadChildren(results, spcRootDir, srcRootDir);
+        results.setSpaceRootDir(spcRootDir);
+        return results;
     }
 
     @Override
-    public ParseUnit loadFile(AstErrors parentErrors, Directory spaceDir, File spaceSrcFile) throws IOException {
+    public FileLoadResults loadFile(Directory spaceDir, File spaceSrcFile) throws IOException {
         log.info("Parsing file [" + spaceSrcFile.getAbsolutePath() + "]");
         this.srcFile = spaceSrcFile;
-        AstErrors fileErrors = new AstErrors(spaceSrcFile);
+        AstFileLoadErrorSet fileErrors = new AstFileLoadErrorSet(spaceSrcFile);
+        FileLoadResults results = new FileLoadResults();
         ParseUnit parseUnit = loadInputStream(fileErrors, new ANTLRInputStream(new FileInputStream(spaceSrcFile)));
-        parentErrors.addChildFileErrors(fileErrors);
         //
-        if (parseUnit != null)
+        if (parseUnit != null) {
             spaceDir.addParseUnit(parseUnit);
-        return parseUnit;
+        }
+        //
+        results.setParseUnit(parseUnit);
+        if (fileErrors.hasErrors())
+            results.getErrors().addAll(fileErrors.getAllErrors());
+        //
+        return results;
     }
 
     @Override
@@ -91,34 +97,33 @@ public class G2AntlrParser implements AstLoader {
         return null;
     }
 
-    private void loadChildren(AstErrors parentErrors, Directory spcContainerDir, File srcParentDir) throws IOException {
+    private void loadChildren(DirLoadResults dirResults, Directory spcContainerDir, File srcParentDir) throws IOException {
         for (File childFile : srcParentDir.listFiles()) {
-            AstErrors childErrors = new AstErrors(childFile);
             if (childFile.isDirectory()) {
                 Directory spcChildDir = astFactory.newAstDir(null, childFile.getName());
                 // create new space container corresponding to arg src dir
                 spcContainerDir.addDir(spcChildDir);
                 // recurse to add children of arg src dir to new space container
-                loadChildren(childErrors, spcChildDir, childFile);
+                loadChildren(dirResults, spcChildDir, childFile);
             }
             else {
                 if (childFile.getName().endsWith(Language.SPACE.getFileExt())) {
-                    ParseUnit parseUnit = loadFile(childErrors, spcContainerDir, childFile);
-                    if (parseUnit != null)
-                        spcContainerDir.addParseUnit(parseUnit);
+                    FileLoadResults fileResults = loadFile(spcContainerDir, childFile);
+                    if (fileResults.getParseUnit() != null)
+                        spcContainerDir.addParseUnit(fileResults.getParseUnit());
+                    dirResults.getErrorList().addAll(fileResults.getErrors());
                 }
             }
-            parentErrors.addChildFileErrors(childErrors);
         }
     }
 
-    public ParseUnit parseExpr(AstErrors errors, String spaceExpr) {
+    public ParseUnit parseExpr(AstFileLoadErrorSet errors, String spaceExpr) {
         log.info("Parsing expression [" + spaceExpr.substring(0, 25) + "...]");
         ParseUnit parseUnit = loadInputStream(errors, new ANTLRInputStream(spaceExpr));
         return parseUnit;
     }
 
-    private ParseUnit loadInputStream(AstErrors loadErrors, ANTLRInputStream aisSpaceSrc) {
+    private ParseUnit loadInputStream(AstFileLoadErrorSet loadErrors, ANTLRInputStream aisSpaceSrc) {
         ANTLRErrorListener errorListener = new MyANTLRErrorListener(loadErrors);
         //
         SimpleTransListener stl = new SimpleTransListener(SpaceParser.ruleNames);
@@ -144,9 +149,9 @@ public class G2AntlrParser implements AstLoader {
         log.info("Parse errors from ANTLR: " + Strings.buildNewlineList(loadErrors.getAllErrors()));
 
         // debug / print
-        log.debug("ANTLR Util parse dump:" + JavaHelper.EOL
+        log.trace("ANTLR Util parse dump:" + JavaHelper.EOL
                       + parseUnitContext.toStringTree(srcParser));
-        log.debug("ANTLR custom print/dump: " + JavaHelper.EOL
+        log.trace("ANTLR custom print/dump: " + JavaHelper.EOL
                       + printListener.getSb());
 
 //        SimpleVisitor astTransVisitor = new SimpleVisitor();
@@ -208,9 +213,9 @@ public class G2AntlrParser implements AstLoader {
     }
 
     private class MyANTLRErrorListener implements ANTLRErrorListener {
-        private final AstErrors parseErrors;
+        private final AstFileLoadErrorSet parseErrors;
 
-        public MyANTLRErrorListener(AstErrors parseErrors) {
+        public MyANTLRErrorListener(AstFileLoadErrorSet parseErrors) {
             this.parseErrors = parseErrors;
         }
 
@@ -226,22 +231,22 @@ public class G2AntlrParser implements AstLoader {
         public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact,
                                     BitSet ambigAlts, ATNConfigSet configs)
         {
-            // TODO Not sure how to use provied params to inform user
-            parseErrors.add(new AstLoadError(AstLoadError.Type.WARNING, null, "ambiguity"));
+            // TODO Not sure how to use provided params to inform user
+            parseErrors.add(new AstLoadError(AstLoadError.Type.PARSE_WARNING, new FileSourceInfo(srcFile, null, null), "ambiguity"));
         }
 
         @Override
         public void reportAttemptingFullContext(Parser recognizer, DFA dfa, int startIndex, int stopIndex,
                                                 BitSet conflictingAlts, ATNConfigSet configs)
         {
-            parseErrors.add(new AstLoadError(AstLoadError.Type.WARNING, null, "attempting full context"));
+            parseErrors.add(new AstLoadError(AstLoadError.Type.PARSE_WARNING, new FileSourceInfo(srcFile, null, null), "attempting full context"));
         }
 
         @Override
         public void reportContextSensitivity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, int
             prediction, ATNConfigSet configs)
         {
-            parseErrors.add(new AstLoadError(AstLoadError.Type.WARNING, null,"context sensitivity"));
+            parseErrors.add(new AstLoadError(AstLoadError.Type.PARSE_WARNING, new FileSourceInfo(srcFile, null, null), "context sensitivity"));
         }
 
         private class AntrlParseFileCoord implements SourceInfo.FileCoord {

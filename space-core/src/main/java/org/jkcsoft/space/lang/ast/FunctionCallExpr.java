@@ -19,7 +19,7 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
     /**
      * The name of some other named design-time thing such as a function.
      */
-    private MetaReference<FunctionDefn> functionDefnRef;
+    private MetaReference<SpaceFunctionDefn> functionRef;
     private TupleExpr argTupleExpr;
     private MetaReference argTupleRef;
 
@@ -30,19 +30,19 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
         super(sourceInfo);
     }
 
-    public FunctionCallExpr setFunctionDefnRef(MetaReference functionDefnRef)
+    public FunctionCallExpr setFunctionRef(MetaReference functionRef)
     {
-        if (functionDefnRef == null) throw new RuntimeException("bug: function path null");
+        if (functionRef == null) throw new RuntimeException("bug: function path null");
         //
-        this.functionDefnRef = functionDefnRef;
+        this.functionRef = functionRef;
         //
-        addChild(this.functionDefnRef);
+        addChild(this.functionRef);
         //
         return this;
     }
 
-    public MetaReference<FunctionDefn> getFunctionDefnRef() {
-        return functionDefnRef;
+    public MetaReference getFunctionRef() {
+        return functionRef;
     }
 
     public TupleExpr getArgTupleExpr() {
@@ -63,6 +63,6 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
 
     @Override
     public String getDisplayName() {
-        return "" + functionDefnRef;
+        return functionRef.getDisplayName();
     }
 }

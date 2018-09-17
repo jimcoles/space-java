@@ -28,13 +28,15 @@ public abstract class ModelElement extends SpaceObject {
     /** If true, when resolving names, treat this node as if it's children were directly under this
      * node's parent. */
     private boolean isGroupingNode = false;
-    // -------------- redundant collections for fast lookup
-    private NamedElement namedParent;
+
+    // -------------- <start> redundant collections and state for fast lookup
     private int treeDepth = -1;
+    private NamedElement namedParent;
     private List<ModelElement> children = new LinkedList<>();
     private Map<String, NamedElement> namedChildMap = new TreeMap<>();
     private Set<MetaReference> references = null;
     private List<ModelElement> groupingNodes = new LinkedList<>();
+    // -------------- <end> redundant collections
 
     protected ModelElement(SourceInfo sourceInfo) {
         super(ObjectFactory.getInstance().newOid(), null);

@@ -10,7 +10,6 @@
 package org.jkcsoft.space.lang.loader;
 
 import org.jkcsoft.space.lang.ast.Directory;
-import org.jkcsoft.space.lang.ast.ParsableChoice;
 import org.jkcsoft.space.lang.ast.ParseUnit;
 
 import java.io.File;
@@ -36,23 +35,21 @@ public interface AstLoader {
      * The consumer of this loader is responsible for merging the provied Space
      * Directories into a final usable form.
      *
-     * @param parentErrors
      * @param srcDir A file system directory containing source to load.
      * @return The Space Directory associated with the source directory.
      * @throws IOException
      */
-    Directory loadDir(AstErrors parentErrors, File srcDir) throws IOException;
+    DirLoadResults loadDir(File srcDir) throws IOException;
 
     /**
      * Directly load specified file into the spaceDir.
      *
-     * @param parentErrors
      * @param spaceDir
      * @param spaceSrcFile
      * @return The {@link ParseUnit} associated with spaceSrcFile.
      * @throws IOException
      */
-    ParseUnit loadFile(AstErrors parentErrors, Directory spaceDir, File spaceSrcFile) throws IOException;
+    FileLoadResults loadFile(Directory spaceDir, File spaceSrcFile) throws IOException;
 
     /**
      * The most general load method for loaders that are not file system based, e.g.,

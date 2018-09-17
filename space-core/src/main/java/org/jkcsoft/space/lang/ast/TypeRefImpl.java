@@ -10,13 +10,14 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.metameta.MetaType;
+import org.jkcsoft.space.lang.runtime.AstUtils;
 
 import java.util.List;
 
 /**
  * @author Jim Coles
  */
-public class TypeRefImpl extends MetaReference<DatumType> implements TypeRef {
+public class TypeRefImpl extends MetaReference implements TypeRef {
 
     /** Somewhat analogous to Java 'new URL(String spec)' */
     public static TypeRef newTypeRef(String typeNameSpec) {
@@ -25,26 +26,26 @@ public class TypeRefImpl extends MetaReference<DatumType> implements TypeRef {
         String[] topSplits = typeNameSpec.split(":");
         String nsName = null;
         AstFactory astFactory = AstFactory.getInstance();
-        TypeRefImpl typeRef = astFactory.newTypeRef(new IntrinsicSourceInfo(), null, astFactory.newMetaRefPart(null, null, nsName));
-        String[] nameStrings = typeNameSpec.split(".");
-        typeRef.setFirstPart(astFactory.newMetaRefPart(typeRef, new IntrinsicSourceInfo(), nameStrings));
+        TypeRefImpl typeRef = astFactory.newTypeRef(new IntrinsicSourceInfo(), null, astFactory.newMetaRefPart(null, nsName));
+        String[] nameStrings = typeNameSpec.split("\\.");
+        AstUtils.addNewMetaRefParts(typeRef, new IntrinsicSourceInfo(), nameStrings);
         return typeRef;
     }
 
     private List<CollectionType> collectionTypes;
     private String suffix = null;
 
-    TypeRefImpl(SourceInfo sourceInfo, List<CollectionType> collectionTypes, MetaRefPart nsRefPart) {
-        super(sourceInfo, MetaType.TYPE, nsRefPart);
+    TypeRefImpl(SourceInfo sourceInfo, List<CollectionType> collectionTypes) {
+        super(sourceInfo, MetaType.TYPE);
         this.collectionTypes = collectionTypes;
     }
 
-    TypeRefImpl(DatumType typeDefn) {
-        super(typeDefn);
+    TypeRefImpl(SourceInfo sourceInfo, DatumType typeDefn) {
+        super(sourceInfo, (NamedElement) typeDefn);
     }
 
-    TypeRefImpl(DatumType typeDefn, List<CollectionType> collectionTypes) {
-        super(typeDefn);
+    TypeRefImpl(SourceInfo sourceInfo, DatumType typeDefn, List<CollectionType> collectionTypes) {
+        this(sourceInfo, typeDefn);
         this.collectionTypes = collectionTypes;
     }
 
@@ -75,9 +76,13 @@ public class TypeRefImpl extends MetaReference<DatumType> implements TypeRef {
         return getLastPart().isWildcard();
     }
 
+    public boolean isSingleton() {
+        return !getLastPart().isWildcard();
+    }
+
     @Override
     public DatumType getResolvedType() {
-        return getResolvedMetaObj();
+        return (DatumType) getResolvedMetaObj();
     }
 
     public enum CollectionType {

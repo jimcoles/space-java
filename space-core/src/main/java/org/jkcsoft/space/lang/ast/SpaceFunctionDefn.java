@@ -46,7 +46,7 @@ public class SpaceFunctionDefn extends AbstractFunctionDefn implements FunctionD
 
     @Override
     public DatumType getReturnType() {
-        return getReturnTypeRef().getResolvedMetaObj();
+        return (DatumType) getReturnTypeRef().getResolvedMetaObj();
     }
 
     public StatementBlock setStatementBlock(StatementBlock statementBlock) {
