@@ -136,12 +136,12 @@ public class MetaReference<T extends NamedElement> extends ModelElement implemen
     }
 
     public String getFullUrlSpec() {
-        return (nsRefPart != null ? nsRefPart.getName() + ":" : "")
+        return (nsRefPart != null ? nsRefPart.getNamePartExpr().getNameExpr() + ":" : "")
             + getUrlPathSpec();
     }
 
     public String getUrlPathSpec() {
-        return Strings.buildDelList(pathParts, (Lister<MetaRefPart>) obj -> obj.getName(), ".");
+        return Strings.buildDelList(pathParts, (Lister<MetaRefPart>) obj -> obj.getNamePartExpr().getNameExpr(), ".");
     }
 
     @Override
@@ -177,7 +177,7 @@ public class MetaReference<T extends NamedElement> extends ModelElement implemen
         return getLastPart().getState();
     }
 
-    public boolean isInitialized() {
+    public boolean isAtInitState() {
         return getState() == LinkState.INITIALIZED;
     }
 

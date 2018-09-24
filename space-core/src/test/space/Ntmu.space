@@ -27,6 +27,7 @@ public type NtmuSpace
         //
 //        Task[] taskSequence = [task, task2, task3];
 
+        char[] aName = task.getAssignee().first;
         //
         OpSys.println( [jim] );
         OpSys.println( [task] );
@@ -60,6 +61,10 @@ type Task {
 
     char[] description;
     Person assignee;
+
+    getAssignee() {
+        return assignee;
+    }
 }
 
 // Equations within a space type

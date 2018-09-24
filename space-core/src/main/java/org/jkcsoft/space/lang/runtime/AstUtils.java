@@ -16,6 +16,7 @@ import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -74,11 +75,36 @@ public class AstUtils {
     /**
      * <p>Entry point for resolving static references by the linker prior to execution.
      * Rules for resolution vary depending on the type of object referenced:
+     * <br>
+     * Valid paths by meta type:
+     *
+     *  Type
+     *  Type.Type[... Type]
+     *  dir.dir.dir.Type
+     *
+     *  Datum
+     *  this.Datum
+     *  Type.Datum (static)
+     *  dir.dir.Type.Datum
+     *  Func.Datum
+     *
+     *  Func
+     *  dir.dir.Type.Func
+     *  Type.Func
+     *  this.Func
+     *  Func.Func
+     *
+     * <p>Ref -> (all meta types)
+     * <p>
+     *    1. Look for first part<br>
+     *    1.1 In current parse unit<br>
+     *    1.2 In current directory<br>
+     *    1.3 In implicit import dir<br>
+     *    1.4 In explicit import sequence<br>
      *
      * <p>Ref -> Type: must be either fully qualified, possibly via an 'import', or unqualified.
-     * <p>
+     * <p>Multi-part Type ref must be [dir. ...]dir.Type[.Type]
      *     - Linker:<br>
-     *    1. If UQ ref, look in current parse unit or current package.<br>
      *    2. Otherwise resolve FQ ref via imports.<br>
      *         Then locate from root of AST.
      * <p>
@@ -113,23 +139,23 @@ public class AstUtils {
                 if (reference.isSinglePart()) {
                     resolveIntrinsics(reference.getFirstPart());
                     // check for 'siblings': in same parse unit or directory
-                    if (reference.isInitialized()) {
+                    if (reference.isAtInitState()) {
                         ParseUnit parentParseUnit = findParentParseUnit(reference, parseUnitFinderAction);
                         resolveFromNode(parentParseUnit, reference);
-                        if (reference.isInitialized()) {
+                        if (reference.isAtInitState()) {
                             Directory parentDir = findParentDir(reference, dirFinderAction);
                             resolveFromNode(parentDir, reference);
                         }
                     }
                 }
                 // check as full path from root
-                if (reference.isInitialized()) {
+                if (reference.isAtInitState()) {
                     resolveFromRoot(refNs.getRootDirLookupChain(), reference);
                 }
                 break;
             case DATUM:
                 resolveInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
-                if (reference.isInitialized()) {
+                if (reference.isAtInitState()) {
                     resolveFromRoot(refNs.getRootDirLookupChain(), reference);
                     if (reference.isResolved())
                         reference.setResolvedDatumScope(ScopeKind.STATIC);
@@ -137,7 +163,7 @@ public class AstUtils {
                 break;
             case FUNCTION:
 //                resolveFromRoot(refNs.getRootDirLookupChain(), reference);
-                if (reference.isInitialized() ) {
+                if (reference.isAtInitState() ) {
                     if (!reference.isMultiPart()) {
                         resolveInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
                     }
@@ -149,7 +175,7 @@ public class AstUtils {
         }
     }
 
-    private static void checkSetResolve(MetaRefPart refPart, NamedElement lookup) {
+    static void checkSetResolve(MetaRefPart refPart, NamedElement lookup) {
         if (lookup != null) {
             refPart.setResolvedMetaObj(lookup);
             refPart.setState(LinkState.RESOLVED);
@@ -184,9 +210,15 @@ public class AstUtils {
         return findFirstParent(astNode, finderAction);
     }
 
-    public static Set<DatumType> querySiblingTypes(TypeRefImpl reference) {
+    public static Set<DatumType> getSiblingTypes(TypeRefImpl reference) {
         MetaRefPart parentRefPart = getParentRefPart(reference);
-        return queryAst(((Directory) parentRefPart.getResolvedMetaObj()), new Executor.QueryAstConsumer(ComplexType.class));
+        return getChildTypes((Directory) parentRefPart.getResolvedMetaObj());
+    }
+
+    public static Set<DatumType> getChildTypes(Directory dir) {
+        Set<DatumType> childTypes = new HashSet<>();
+        dir.getParseUnits().forEach(parseUnit -> childTypes.addAll(parseUnit.getTypeDefns()));
+        return childTypes;
     }
 
     private static MetaRefPart getParentRefPart(TypeRefImpl fullRef) {
@@ -250,7 +282,7 @@ public class AstUtils {
             else if (context instanceof FunctionDefn) {
                 resolveInNearestScope((ModelElement) ((FunctionDefn) context).getArgSpaceTypeDefn(), reference,
                                                ScopeKind.ARG);
-                if (reference.isInitialized())
+                if (reference.isAtInitState())
                     resolveInNearestScope(context.getParent(), reference, ScopeKind.OBJECT);
             }
         }
@@ -347,12 +379,12 @@ public class AstUtils {
         return astQueryAction.getResults();
     }
 
-    public static Directory ensureDir(Directory nsRootDir, String[] classNameParts, int numParts) {
+    public static Directory ensureDir(Directory nsRootDir, String[] classNameParts) {
         if (!nsRootDir.isRootDir())
             throw new IllegalArgumentException("specified dir must be a namespace root: ["+nsRootDir+"]");
 
         Directory leafDir = nsRootDir;
-        for (int idxName = 0; idxName < numParts; idxName++) {
+        for (int idxName = 0; idxName < classNameParts.length; idxName++) {
             String name = classNameParts[idxName];
             if (contains(leafDir, name)) {
                 leafDir = leafDir.getChildDir(name);

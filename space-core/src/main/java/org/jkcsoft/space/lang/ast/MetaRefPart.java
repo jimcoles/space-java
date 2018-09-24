@@ -17,7 +17,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  *
  * @author Jim Coles
  */
-public class MetaRefPart<T extends NamedElement> extends NamedElement {
+public class MetaRefPart<T extends NamedElement> extends ModelElement {
 
 //    private MetaReference parentPath;
     private NamePartExpr namePartExpr;
@@ -31,17 +31,21 @@ public class MetaRefPart<T extends NamedElement> extends NamedElement {
 //    private MetaRefPart nextRefPart;
 
     public MetaRefPart(NamePartExpr namePartExpr) {
-        super(namePartExpr.getSourceInfo(), namePartExpr.getNameExpr());
+        super(namePartExpr.getSourceInfo());
 //        this.parentPath = parentPath;
         this.namePartExpr = namePartExpr;
     }
 
-//    public MetaReference getParentPath() {
-//        return parentPath;
-//    }
+    public boolean isWildcard() {
+        return getNamePartExpr().getNameExpr().equals("*");
+    }
 
     public NamePartExpr getNamePartExpr() {
         return namePartExpr;
+    }
+
+    public String getNameExpr() {
+        return namePartExpr != null ? namePartExpr.getNameExpr() : "";
     }
 
     public T getResolvedMetaObj() {
@@ -60,46 +64,15 @@ public class MetaRefPart<T extends NamedElement> extends NamedElement {
         this.state = state;
     }
 
-//    public boolean isFirst() {
-//        return prevRefPart == null;
-//    }
-//
-//    public boolean hasNextExpr() {
-//        return nextRefPart != null;
-//    }
-//
-//    public MetaRefPart getNextRefPart() {
-//        return nextRefPart;
-//    }
+    public boolean isResolved() {
+        return state == LinkState.RESOLVED;
+    }
 
-//    public void setNextRefPart(MetaRefPart nextRefPart) {
-//        this.nextRefPart = nextRefPart;
-//        if (nextRefPart != null)
-//            nextRefPart.setPrevRefPart(this);
-//    }
-
-//    public MetaRefPart getPrevRefPart() {
-//        return prevRefPart;
-//    }
-
-//    public void setPrevRefPart(MetaRefPart prevRefPart) {
-//        this.prevRefPart = prevRefPart;
-//    }
-
-    @Override
-    public MetaType getMetaType() {
-        return null;
+    public MetaType getResolvedMetaType() {
+        return resolvedMetaObj != null ? resolvedMetaObj.getMetaType() : null;
     }
 
     public MetaRefPart copy(MetaReference parentRef) {
         return new MetaRefPart(this.getNamePartExpr());
-    }
-
-    public boolean isWildcard() {
-        return getNamePartExpr().getNameExpr().equals("*");
-    }
-
-    public boolean isResolved() {
-        return state == LinkState.RESOLVED;
     }
 }

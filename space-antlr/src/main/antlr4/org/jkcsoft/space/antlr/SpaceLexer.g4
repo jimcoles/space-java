@@ -44,9 +44,23 @@ PackageKeyword : 'package';
 ImportKeyword : 'import';
 //ImportJavaKeyword : 'import-java';
 TypeDefKeyword  : 'type';
+ExtendsKeyword  : 'extends';
+//
 EquationDefKeyword : 'equation';
-FunctionDefKeyword: 'function';
+//
+FunctionDefKeyword  : 'function';
+SolvesKeyword       : 'solves';
+//
 QueryDefKeyword : 'query';
+AssocsKeyword   : 'assocs';
+VarsKeyword     : 'vars';
+FilterKeyword   : 'filter';
+AsKeyword       : 'as';
+//
+KeyKeyword      : 'key';
+PrimaryKeyword  : 'primary';
+AltKeyword      : 'alternate';
+//
 RegexDefKeyword : 'regex';
 //
 BooleanKeyword  : 'boolean';
@@ -57,7 +71,7 @@ RealKeyword     : 'real';
 VoidKeyword     : 'void';
 //
 PublicKeyword   : 'public';
-ExtendsKeyword  : 'extends';
+
 
 IfKeyword : 'if';
 ThenKeyword : 'then';

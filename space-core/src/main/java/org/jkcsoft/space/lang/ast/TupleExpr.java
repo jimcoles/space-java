@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public class TupleExpr extends ModelElement {
+public class TupleExpr extends ModelElement implements ValueExpr {
 
     private List<ValueExpr> valueExprs;
 

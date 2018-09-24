@@ -32,6 +32,12 @@ public class RunResults {
         return errorsBySrcFile;
     }
 
+    public int[] getLevelCounts() {
+        int[] levelCounts = new int[AstLoadError.Level.values().length];
+        allErrors.forEach(err -> levelCounts[err.getType().getLevel().ordinal()]++);
+        return levelCounts;
+    }
+
     public List<AstLoadError> getAllErrors() {
         return allErrors;
     }

@@ -21,7 +21,7 @@ import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.loader.*;
 import org.jkcsoft.space.lang.metameta.MetaType;
 import org.jkcsoft.space.lang.runtime.jnative.math.Math;
-import org.jkcsoft.space.lang.runtime.jnative.opsys.OpSys;
+import org.jkcsoft.space.lang.runtime.jnative.opsys.JOpSys;
 import org.jkcsoft.space.lang.runtime.typecasts.CastTransforms;
 
 import java.io.File;
@@ -113,12 +113,16 @@ public class Executor extends ExprProcessor implements ExeContext {
     private Map<String, ExprProcessor> exprProcessors = null;
     private ExeSettings exeSettings;
     private AstLoader astLoader;
+    private Directory spaceLangDir;
+    private Set<DatumType> implicitImportTypes;
 
     public Executor(ExeSettings exeSettings) {
         this.exeSettings = exeSettings;
         initRuntime();
         preLoadSpecialNativeTypes();
         loadSpecialOperators();
+        spaceLangDir = nsRegistry.getLangNs().getRootDir().getChildDir("space").getChildDir("lang");
+        implicitImportTypes = AstUtils.getChildTypes(spaceLangDir);
     }
 
     private void initRuntime() {
@@ -221,7 +225,8 @@ public class Executor extends ExprProcessor implements ExeContext {
             }
 
             if (runResults.getAllErrors().size() > 0) {
-                log.warn("skipping exec due to [" + runResults.getAllErrors().size() + "] link errors.");
+                int[] levelCounts = runResults.getLevelCounts();
+                log.warn("skipping exec due to [" + levelCounts[AstLoadError.Level.ERROR.ordinal()] + "] errors.");
                 presentAllErrors(runResults);
             }
             else {
@@ -278,7 +283,20 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     private void preLoadSpecialNativeTypes() {
 
-        op_sys_type_def = (ComplexType) SpaceHome.getSjiService().getDeepLoadSpaceWrapper(OpSys.class);
+        Class[] jNativeTypes = new Class[] {
+            JOpSys.class
+        };
+
+        for (Class jNativeType : jNativeTypes) {
+            SpaceHome.getSjiService().getDeepLoadSpaceWrapper(jNativeType, "space", "native", "opsys");
+        }
+
+        TypeRefImpl opSysRef = TypeRefImpl.newTypeRef(JOpSys.class.getName());
+        AstUtils.resolveAstPath(opSysRef);
+        if (opSysRef.isResolvedValid())
+            op_sys_type_def = (ComplexType) opSysRef.getResolvedType();
+        else
+            log.fatal("could not resolve ["+opSysRef+"]");
 
         //        String jClassSeq = System.getProperty("java.class.path");
 //        String[] jClassPaths = jClassSeq.split(File.pathSeparator);
@@ -297,13 +315,14 @@ public class Executor extends ExprProcessor implements ExeContext {
     }
 
 //    private void loadJavaClassArchive(File jClassPathDir) {
-//        if (jClassPathDir.isFile()) try {
+//        if (jClassPathDir.isFile())
+//            try {
 //            JarFile jarFile = new JarFile(jClassPathDir);
 //            Enumeration<JarEntry> jarEntries = jarFile.entries();
 //            while (jarEntries.hasMoreElements()) {
 //                JarEntry jarEntry = jarEntries.nextElement();
 //                String classFileName = jarEntry.getName();
-//                SpaceHome.getSjiService().getOrLoadSpaceWrapper(
+//                SpaceHome.getSjiService().getDeepLoadSpaceWrapper(
 //                    classFileName.substring(0, classFileName.length() - ".class".length())
 //                );
 //            }
@@ -424,7 +443,7 @@ public class Executor extends ExprProcessor implements ExeContext {
     public void resolveImports(ParseUnit parseUnit, List<AstLoadError> unitErrors) {
         List<ImportExpr> importExprExprs = parseUnit.getImportExprs();
         for (ImportExpr importTypeRefExpr : importExprExprs) {
-            if (importTypeRefExpr.getTypeRefExpr().isInitialized()) {
+            if (importTypeRefExpr.getTypeRefExpr().isAtInitState()) {
                 resolveAstPath(importTypeRefExpr.getTypeRefExpr(), unitErrors);
                 if (importTypeRefExpr.getTypeRefExpr().isSingleton()) {
                     if (importTypeRefExpr.getTypeRefExpr().isResolvedValid())
@@ -434,7 +453,7 @@ public class Executor extends ExprProcessor implements ExeContext {
                         log.warn("import reference not fully resolved ["+importTypeRefExpr+"]");
                 }
                 else {
-                    Set<DatumType> refElems = AstUtils.querySiblingTypes(importTypeRefExpr.getTypeRefExpr());
+                    Set<DatumType> refElems = AstUtils.getSiblingTypes(importTypeRefExpr.getTypeRefExpr());
                     parseUnit.getAllImportedTypes().addAll(refElems);
 
                     // add all types local to this parse unit's directory
@@ -493,7 +512,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         bootMainCallExpr.getFunctionRef().setTypeCheckState(TypeCheckState.VALID);
         LinkedList<ValueExpr> argExprList = new LinkedList<>();
         argExprList.add(getAstFactory().newCharSeqLiteralExpr(progSourceInfo, "(put CLI here)"));
-        bootMainCallExpr.setArgTupleExpr(getAstFactory().newTupleExpr(progSourceInfo).setValueExprs(argExprList));
+        bootMainCallExpr.setArgValueExpr(getAstFactory().newTupleExpr(progSourceInfo).setValueExprs(argExprList));
         ParseUnit synthParseUnit = getAstFactory().newParseUnit(sourceInfo);
         synthParseUnit.addChild(bootTypeDefn);
         //
@@ -637,21 +656,17 @@ public class Executor extends ExprProcessor implements ExeContext {
         return value;
     }
 
-    private OperEvaluator lookupOperEval(OperEnum operEnum) {
-        return operEvalMap.get(operEnum);
-    }
-
     private Value eval(EvalContext evalContext, FunctionCallExpr functionCallExpr) {
         log.debug("eval: " + functionCallExpr);
         Value value = null;
 
         FunctionDefn functionDefn = (FunctionDefn) functionCallExpr.getFunctionRef().getResolvedMetaObj();
         ComplexType argTypeDefn = functionDefn.getArgSpaceTypeDefn();
-        TupleImpl argTuple = eval(evalContext, argTypeDefn, functionCallExpr.getArgTupleExpr());
+        TupleImpl argTupleValue = (TupleImpl) eval(evalContext, functionCallExpr.getArgValueExpr());
         ValueHolder retValHolder = functionDefn.isReturnVoid() ? newVoidHolder()
             : newHolder(null, newAnonDecl(functionDefn.getReturnType()));
         FunctionCallContext functionCallContext =
-            getObjFactory().newFunctionCall(evalContext.peekStack().getCtxObject(), functionCallExpr, argTuple,
+            getObjFactory().newFunctionCall(evalContext.peekStack().getCtxObject(), functionCallExpr, argTupleValue,
                                             retValHolder);
         // push call onto stack
         callStack.push(functionCallContext);
@@ -675,7 +690,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         return value;
     }
 
-    private TupleImpl eval(EvalContext evalContext, ComplexType tupleTypeDefn, TupleExpr tupleExpr)
+    private Tuple eval(EvalContext evalContext, ComplexType tupleTypeDefn, TupleExpr tupleExpr)
     {
         log.debug("eval: new tuple => " + tupleTypeDefn + ", " + tupleExpr);
         TupleImpl tuple = newTupleImpl(tupleTypeDefn);
@@ -784,6 +799,15 @@ public class Executor extends ExprProcessor implements ExeContext {
         return value;
     }
 
+    private Value eval(EvalContext evalContext, AssignmentExpr assignmentExpr) {
+        log.debug("eval: " + assignmentExpr);
+        ValueHolder leftSideHolder = (ValueHolder) eval(evalContext, assignmentExpr.getMemberRef());
+        Value rightSideValue = eval(evalContext, assignmentExpr.getValueExpr());
+        autoCastAssign(evalContext, leftSideHolder, rightSideValue);
+        log.debug("eval -> " + leftSideHolder);
+        return leftSideHolder.getValue();
+    }
+
     private ValueHolder findInBlocksRec(Named toMember, LinkedList<BlockContext> blocks) {
         ValueHolder assignable = null;
         Iterator<BlockContext> blockContextIterator = blocks.descendingIterator();
@@ -794,13 +818,8 @@ public class Executor extends ExprProcessor implements ExeContext {
         return assignable;
     }
 
-    private Value eval(EvalContext evalContext, AssignmentExpr assignmentExpr) {
-        log.debug("eval: " + assignmentExpr);
-        ValueHolder leftSideHolder = (ValueHolder) eval(evalContext, assignmentExpr.getMemberRef());
-        Value rightSideValue = eval(evalContext, assignmentExpr.getValueExpr());
-        autoCastAssign(evalContext, leftSideHolder, rightSideValue);
-        log.debug("eval -> " + leftSideHolder);
-        return leftSideHolder.getValue();
+    private OperEvaluator lookupOperEval(OperEnum operEnum) {
+        return operEvalMap.get(operEnum);
     }
 
     private void autoCastAssign(EvalContext evalContext, ValueHolder leftSideHolder, Value rightSideValue) {
@@ -1175,28 +1194,39 @@ public class Executor extends ExprProcessor implements ExeContext {
             for (MetaReference reference : unresolvedRefs) {
                 log.debug("resolving reference [" + reference + "]");
                 if (reference.getTargetMetaType() == MetaType.TYPE && reference.isSinglePart()) {
-                    DatumType importedTypeDefn = (DatumType) CollectionUtils.find(
-                        parseUnit.getAllImportedTypes(),
-                        object -> ((DatumType) object).getName().equals(reference.getFirstPart().getName())
-                    );
-                    if (importedTypeDefn != null) {
-                        // we have an import match
-                        reference.getFirstPart().setResolvedMetaObj((NamedElement) importedTypeDefn);
-                        reference.setImportMatch(true);
-                        reference.getFirstPart().setState(LinkState.RESOLVED);
+
+                    checkImplicitImports(reference);
+                    //
+                    if (reference.isAtInitState()) {
+                        checkUnitImports(reference);
                     }
-                    else {
-                        errors.add(new AstLoadError(AstLoadError.Type.LINK, reference.getSourceInfo(),
-                                                 "can not resolve symbol '" + reference + "'"));
+                    if (reference.isResolved()) {
+                        reference.setImportMatch(true);
+                        log.debug("resolved [" + reference + "] as imported type");
                     }
                 }
                 else {
                     resolveAstPath(reference, errors);
+                    if (reference.isResolved())
+                        log.debug("resolved ["+reference+"] as full path usage");
+                }
+                //
+                if (reference.isAtInitState()) {
+                    errors.add(new AstLoadError(AstLoadError.Type.LINK, reference.getSourceInfo(),
+                                                "can not resolve symbol '" + reference + "'"));
                 }
             }
             // Null out instance-level field reused across AST nodes
             this.unresolvedRefs = null;
             return true;
+        }
+
+        private void checkUnitImports(MetaReference reference) {
+            DatumType importedTypeMatch =
+                (DatumType) CollectionUtils.find(parseUnit.getAllImportedTypes(),
+                                                  object -> ((DatumType) object).getName().equals(
+                                                                 reference.getFirstPart().getNameExpr()) );
+            AstUtils.checkSetResolve(reference.getFirstPart(), (NamedElement) importedTypeMatch);
         }
 
         @Override
@@ -1207,6 +1237,14 @@ public class Executor extends ExprProcessor implements ExeContext {
         public List<AstLoadError> getErrors() {
             return errors;
         }
+    }
+
+    private void checkImplicitImports(MetaReference reference) {
+        DatumType importedTypeMatch = (DatumType) CollectionUtils.find(
+            implicitImportTypes,
+            object -> ((DatumType) object).getName().equals(reference.getFirstPart().getNameExpr())
+        );
+        AstUtils.checkSetResolve(reference.getFirstPart(), (NamedElement) importedTypeMatch);
     }
 
 }

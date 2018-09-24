@@ -40,7 +40,7 @@ type Address {
     // Syntax: Equation Definition
     equation streetAddrFormatUSCommon {
         // Syntax: Equality Constraint as Grammar expression
-        streetAddr == { gramex streetNumber streetRoad unitNumber? }
+//        streetAddr ==  gramex streetNumber streetRoad unitNumber? }
     }
 
     // Syntax: Function Definition

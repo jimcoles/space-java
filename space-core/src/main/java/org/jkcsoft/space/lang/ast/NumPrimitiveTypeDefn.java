@@ -14,10 +14,24 @@ package org.jkcsoft.space.lang.ast;
  */
 public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
 
-    public static final NumPrimitiveTypeDefn BOOLEAN = newInstance("boolean");
+    //--------------------------------------------------------------------------
+    // basic physical / representational notions
+
+    public static final NumPrimitiveTypeDefn BIT = newInstance("bit");
+    // TODO: describe a 'byte' as a sequence of 8 bits.
+    public static final NumPrimitiveTypeDefn BYTE = newInstance("byte");
+
+    // TODO: a char is a 2-byte 'key' to a finite well-known external abstract table
     public static final NumPrimitiveTypeDefn CHAR = newInstance("char");
+
+    //--------------------------------------------------------------------------
+    // Logical notions, idealizations
+
+    public static final NumPrimitiveTypeDefn BOOLEAN = newInstance("boolean");
+    //
     public static final NumPrimitiveTypeDefn CARD = newInstance("int");
     public static final NumPrimitiveTypeDefn REAL = newInstance("real");
+    //
     public static final NumPrimitiveTypeDefn NULL = newInstance("null");
 
     private static NumPrimitiveTypeDefn newInstance(String name) {

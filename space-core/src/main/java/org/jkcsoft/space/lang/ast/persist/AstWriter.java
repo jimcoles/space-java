@@ -7,18 +7,15 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.jnative.opsys;
+package org.jkcsoft.space.lang.ast.persist;
 
-import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;
+import org.jkcsoft.space.lang.ast.ModelElement;
 
 /**
  * @author Jim Coles
  */
-@SpaceNative
-public class OpSys {
+public interface AstWriter {
 
-    public void println(String msg) {
-        System.err.println(msg);
-    }
+    void writeAst(ModelElement rootElem);
 
 }

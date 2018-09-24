@@ -20,7 +20,7 @@ import java.util.List;
 public class TypeRefImpl extends MetaReference implements TypeRef {
 
     /** Somewhat analogous to Java 'new URL(String spec)' */
-    public static TypeRef newTypeRef(String typeNameSpec) {
+    public static TypeRefImpl newTypeRef(String typeNameSpec) {
         if (typeNameSpec == null)
             throw new IllegalArgumentException("type ref name cannot be null");
         String[] topSplits = typeNameSpec.split(":");

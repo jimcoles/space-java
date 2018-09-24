@@ -92,9 +92,12 @@ public class Antlr2AstTransform {
     }
 
     private ImportExpr toAst(SpaceParser.ImportStatementContext importStatementCtxt) {
+        SpaceParser.AliasedSpacePathExprContext aliasedSpacePathExprContext =
+            importStatementCtxt.aliasedSpacePathExpr();
+        SpaceParser.AliasContext alias = aliasedSpacePathExprContext.alias();
         return astFactory.newImportExpr(toSI(importStatementCtxt),
-                                        toTypeRef(importStatementCtxt.spacePathExpr()),
-                                        null);
+                                        toTypeRef(aliasedSpacePathExprContext.spacePathExpr()),
+                                        alias != null ? toText(alias.identifier()) : null);
     }
 
     private PackageDecl toAst(SpaceParser.PackageStatementContext packageStatementContext) {
@@ -466,8 +469,8 @@ public class Antlr2AstTransform {
         else if (expressionCtxt.assignmentExpr() != null) {
             valueExprAST = toAst(expressionCtxt.assignmentExpr());
         }
-        else if (expressionCtxt.operatorExpr() != null) {
-            valueExprAST = toAst(expressionCtxt.operatorExpr());
+        else if (expressionCtxt.symbolicExpr() != null) {
+            valueExprAST = toAst(expressionCtxt.symbolicExpr());
         }
 //        else if (expressionCtxt.navCallChainExpr() != null) {
 //
@@ -478,11 +481,11 @@ public class Antlr2AstTransform {
         return valueExprAST;
     }
 
-    private ValueExpr toAst(SpaceParser.OperatorExprContext operatorExprContext) {
-        logTrans(operatorExprContext);
+    private ValueExpr toAst(SpaceParser.SymbolicExprContext symbolicExprContext) {
+        logTrans(symbolicExprContext);
         ValueExpr valueExpr = null;
         // choice: 1 of
-        SpaceParser.BinaryOperExprContext binaryOperExprContext = operatorExprContext.binaryOperExpr();
+        SpaceParser.BinaryOperExprContext binaryOperExprContext = symbolicExprContext.binaryOperExpr();
 //        SpaceParser.UnaryOperExprContext unaryOperExprContext = operatorExprContext.unaryOperExpr();
 //        SpaceParser.OperatorExprContext nestedOperatorExprContext = operatorExprContext.operatorExpr();
         //
@@ -574,20 +577,9 @@ public class Antlr2AstTransform {
         //
         functionCallExpr.setFunctionRef(toMetaRef(functionCallExprContext.spacePathExpr(), MetaType.FUNCTION));
         //
-        if (functionCallExprContext.argTupleOrRef() != null) {
-            SpaceParser.UntypedTupleLiteralContext tupleLiteralCtxt =
-                functionCallExprContext.argTupleOrRef().untypedTupleLiteral();
-            SpaceParser.SpacePathExprContext spacePathExprCtxt =
-                functionCallExprContext.argTupleOrRef().spacePathExpr();
-            if (tupleLiteralCtxt != null) {
+        if (functionCallExprContext.valueExpr() != null) {
                 // more common
-                functionCallExpr.setArgTupleExpr(toAst(tupleLiteralCtxt));
-            }
-            else if (spacePathExprCtxt != null) {
-                // argument as wrapped object
-                MetaReference tupleRef = toMetaRef(spacePathExprCtxt, MetaType.DATUM);
-                functionCallExpr.setArgTupleRef(tupleRef);
-            }
+                functionCallExpr.setArgValueExpr(toAst(functionCallExprContext.valueExpr()));
         }
         return functionCallExpr;
     }
@@ -626,44 +618,60 @@ public class Antlr2AstTransform {
         ValueExpr valueExprAST = null;
         if (valueExprContext != null) {
             // choices ...
-            SpaceParser.LiteralExprContext literalExprContext = valueExprContext.literalExpr();
-            SpaceParser.FunctionCallExprContext functionCallExprContext = valueExprContext.functionCallExpr();
-            SpaceParser.NewObjectExprContext objectExprContext = valueExprContext.newObjectExpr();
-            SpaceParser.SpacePathExprContext spacePathExprContext = valueExprContext.spacePathExpr();
-            SpaceParser.OperatorExprContext operatorExprContext = valueExprContext.operatorExpr();
-            SpaceParser.NewSetExprContext newSetExprContext = valueExprContext.newSetExpr();
-            if (literalExprContext != null) {
-                if (literalExprContext.scalarLiteral() != null)
-                    valueExprAST = toAst(literalExprContext.scalarLiteral());
-                else if (literalExprContext.stringLiteral() != null)
-                    valueExprAST = toAst(literalExprContext.stringLiteral());
+            if (valueExprContext.atomicValueExpr().size() > 1) {
+                ValueExprChain astChain = new ValueExprChain();
+                List<SpaceParser.AtomicValueExprContext> atomicValueExprContexts = valueExprContext.atomicValueExpr();
+                for (SpaceParser.AtomicValueExprContext atomicValueExprContext : atomicValueExprContexts) {
+                    astChain.addValueExpr(toAst(atomicValueExprContext));
+                }
+                valueExprAST = astChain;
             }
-            else if (objectExprContext != null)
-                valueExprAST = toAst(objectExprContext);
-            else if (functionCallExprContext != null)
-                // nested
-                valueExprAST = toAst(functionCallExprContext);
-            else if (spacePathExprContext != null) {
-                valueExprAST = toMetaRef(spacePathExprContext, MetaType.DATUM);
-            }
-            else if (operatorExprContext != null) {
-                valueExprAST = toAst(operatorExprContext);
-            }
-            else if (newSetExprContext != null) {
-                valueExprAST = toAst(newSetExprContext);
+            else {
+                valueExprAST = toAst(valueExprContext.atomicValueExpr(0));
             }
         }
         return valueExprAST;
     }
 
+    private ValueExpr toAst(SpaceParser.AtomicValueExprContext atomicValueExprContext) {
+        ValueExpr valueExprAST = null;
+        SpaceParser.LiteralExprContext literalExprContext = atomicValueExprContext.literalExpr();
+        SpaceParser.FunctionCallExprContext functionCallExprContext = atomicValueExprContext.functionCallExpr();
+        SpaceParser.NewObjectExprContext objectExprContext = atomicValueExprContext.newObjectExpr();
+        SpaceParser.SpacePathExprContext spacePathExprContext = atomicValueExprContext.spacePathExpr();
+        SpaceParser.SymbolicExprContext operatorExprContext = atomicValueExprContext.symbolicExpr();
+        SpaceParser.NewSetExprContext newSetExprContext = atomicValueExprContext.newSetExpr();
+        if (literalExprContext != null) {
+            if (literalExprContext.scalarLiteral() != null)
+                valueExprAST = toAst(literalExprContext.scalarLiteral());
+            else if (literalExprContext.stringLiteral() != null)
+                valueExprAST = toAst(literalExprContext.stringLiteral());
+        }
+        else if (objectExprContext != null)
+            valueExprAST = toAst(objectExprContext);
+        else if (functionCallExprContext != null)
+            // nested
+            valueExprAST = toAst(functionCallExprContext);
+        else if (spacePathExprContext != null) {
+            valueExprAST = toMetaRef(spacePathExprContext, MetaType.DATUM);
+        }
+        else if (operatorExprContext != null) {
+            valueExprAST = toAst(operatorExprContext);
+        }
+        else if (newSetExprContext != null) {
+            valueExprAST = toAst(newSetExprContext);
+        }
+        return valueExprAST;
+    }
+
     private NewSetExpr toAst(SpaceParser.NewSetExprContext newSetExprContext) {
-        return astFactory.newNewSetExpr(toSI(newSetExprContext), toTypeRef(newSetExprContext.spacePathExpr()));
+        return astFactory.newNewSetExpr(toSI(newSetExprContext), toAst(newSetExprContext.anyTypeRef()));
     }
 
     private NewObjectExpr toAst(SpaceParser.NewObjectExprContext newObjectExprContext) {
         logTrans(newObjectExprContext);
         NewObjectExpr newObjectExpr = astFactory.newNewObjectExpr(toSI(newObjectExprContext),
-                                                                  toTypeRef(newObjectExprContext.spacePathExpr()),
+                                                                  toAst(newObjectExprContext.anyTypeRef()),
                                                                   toAst(newObjectExprContext.untypedTupleLiteral()));
         return newObjectExpr;
     }

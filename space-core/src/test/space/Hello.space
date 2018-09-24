@@ -1,4 +1,5 @@
 import java:java.lang.CharSequence;
+import space.lang.OpSys;
 
 public type MySpace
 /*

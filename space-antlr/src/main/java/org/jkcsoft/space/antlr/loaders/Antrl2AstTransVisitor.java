@@ -110,15 +110,6 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<ModelElement> 
         return super.visitArgTupleOrRef(ctx);
     }
 
-    @Override
-    public ModelElement visitNavCallChainExpr(SpaceParser.NavCallChainExprContext ctx) {
-        return super.visitNavCallChainExpr(ctx);
-    }
-
-    @Override
-    public ModelElement visitOperatorExpr(SpaceParser.OperatorExprContext ctx) {
-        return super.visitOperatorExpr(ctx);
-    }
 
     @Override
     public ModelElement visitUnaryOperExpr(SpaceParser.UnaryOperExprContext ctx) {

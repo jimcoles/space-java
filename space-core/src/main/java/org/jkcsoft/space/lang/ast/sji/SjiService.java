@@ -55,12 +55,14 @@ public class SjiService {
      *
      * @param className Standard Java fully-qualified class name "java.lang.String".
      */
-    public DatumType getDeepLoadSpaceWrapper(String className) throws ClassNotFoundException {
+    public DatumType getDeepLoadSpaceWrapper(String className, String ... overrideDirNames)
+        throws ClassNotFoundException
+    {
         DatumType wrapper = null;
         SjiTypeMapping sjiTypeMapping = sjiMappingByName.get(className);
         if (sjiTypeMapping == null) {
             Class<?> jnClass = Class.forName(className);
-            wrapper = getDeepLoadSpaceWrapper(jnClass);
+            wrapper = getDeepLoadSpaceWrapper(jnClass, overrideDirNames);
         }
         else {
             wrapper = sjiTypeMapping.getSpaceWrapper();
@@ -68,11 +70,11 @@ public class SjiService {
         return wrapper;
     }
 
-    public DatumType getDeepLoadSpaceWrapper(Class<?> jnClass) {
+    public DatumType getDeepLoadSpaceWrapper(Class<?> jnClass, String ... overrideDirNames) {
         SjiTypeMapping sjiTypeMapping = sjiMappingByClass.get(jnClass);
         if (sjiTypeMapping == null) {
             sjiTypeMapping = createSjiTypeMapping(jnClass);
-            deepLoadSpaceWrapper(sjiTypeMapping);
+            deepLoadSpaceWrapper(sjiTypeMapping, overrideDirNames);
         }
         else {
             if (sjiTypeMapping.getState() != LinkState.RESOLVED) {
@@ -82,10 +84,19 @@ public class SjiService {
         return sjiTypeMapping.getSpaceWrapper();
     }
 
-    private void deepLoadSpaceWrapper(SjiTypeMapping sjiTypeMapping) {
+    private void deepLoadSpaceWrapper(SjiTypeMapping sjiTypeMapping, String[] overrideDirNames) {
         String[] classNameParts = splitClassName(sjiTypeMapping.getJavaClass().getName());
+        String[] packageNameParts;
+        if (overrideDirNames != null)
+            packageNameParts = overrideDirNames;
+        else {
+            packageNameParts = new String[classNameParts.length - 1];
+            System.arraycopy(classNameParts, 0, packageNameParts, 0, packageNameParts.length);
+        }
+
         Directory parentDir =
-            AstUtils.ensureDir(nsRegistry.getJavaNs().getRootDir(), classNameParts, classNameParts.length - 1);
+            AstUtils.ensureDir(nsRegistry.getJavaNs().getRootDir(), packageNameParts);
+
         //
         // Build wrappers for this class and any required classes
         //
@@ -107,7 +118,7 @@ public class SjiService {
         );
         for (TypeRefByClass unresolvedRef : unresolvedRefs) {
             if (unresolvedRef.getState() == LinkState.INITIALIZED) {
-                deepLoadSpaceWrapper(unresolvedRef.getMapping());
+                deepLoadSpaceWrapper(unresolvedRef.getMapping(), overrideDirNames);
 //                DatumType spaceWrapper = getDeepLoadSpaceWrapper(unresolvedRef.getWrappedClass());
                 if (unresolvedRef.getState() != LinkState.RESOLVED) {
                     log.error("space wrapper for Java class " +
