@@ -151,7 +151,7 @@ anyThing :
     ;
 
 packageStatement :
-    'package' spacePathExpr ';';
+    'package' metaRefExpr ';';
 
 importStatement :
     'import' aliasedSpacePathExpr ';';
@@ -297,9 +297,45 @@ equationExpr :
 /*------------------------------------------------------------------------------
   QUERY EXPRESSIONS
 
-  Our query model, "QuerEx" (pronounced 'check'), is more like object-oriented
+  Our query model, is more like object-oriented
   query model like JQL or any of the models used by persistence engines like
   Hibernate.
+
+  A query can be:
+   1. An algebraic "Projection" from (x1, x2, ...) to some subset of
+    (x3, x7, ...)
+    2.
+
+  Differentiate:
+
+      'view' - A static 'View' definition Query that describes a new Type as an algebraic variation
+      of existing Types using Projection. Can be a Denormalizing Query. Mapping Query. Used
+      in mapping base Types to some Interface (or other Space) or as a means of defining
+      new Types or Interfaces. Used to define Type 'extension'.
+
+      'type MyNewType extends BaseType { ... }'
+
+        equivalent
+
+      'view MyNewType { BaseType vars *}'
+
+  Things to reconcile:
+
+      Type
+      Equation
+      Function
+      Space - An identified set of Types and related Equations (and related Functions, etc)
+      Interface - Is this the same as a View?
+      Query
+      View
+
+      Transform - Space, S1, to Space, S2
+      Cast - Type, T1, to Type, T2
+
+      Path Expression
+      Projection (var subset)
+      Selection (filter)
+
 ------------------------------------------------------------------------------*/
 
 queryDefn :
@@ -320,15 +356,55 @@ queryRootExpr:
 /*------------------------------------------------------------------------------
   SPACE PATH EXPRESSIONS
 
-  Space paths expressions are analogous to XPath expressions: From a starting
-  contextual Space object, one access one or multiple associated objects
-  using the path expression language. Should be applicable to both
-  user objects and meta objects.
+  At this point Space Paths are just paths through the AST namepace used to
+  specify types. Space Paths can be followed prior to runtime with no
+  dynamic evaluation.
 
-  Also similar to queries.
+  At some point, Space paths expressions might become more like XPath
+  expressions: From a starting contextual Space object, one accesses one or
+  multiple associated objects using the path expression language. Should be
+  applicable to both user objects and meta objects.
+
+  Similar to QueryExpr
+  Similar to ValueExpr
+
+  Semantically valid pairs:
+
+    [dir].[dir]
+    [dir].[type]
+    [type].[assoc]
+    [type].[var]
+    [valueExpr].[func name ()]
+
+    [literal of complex type].[assoc name]
+    [literal of complex type].[func name ()]
+
+    [literal of type]
+
+    [symbolic expr (scalar-valued or tuple-valued)]
+
+  Syntactically valid pairs:
+
+    [identifier].[identifier]
+    [identifier].[identifier ()]
+    [identifier ()].[identifier]
+    [identifier ()].[identifier ()]
+    [object literal].[identifier]
+    [object literal].[identifier ()]
+
+  [ns]:[]
+
+  Path Operators:
+
+    '->' - asssociation nav (1-for-1)
+    '<-' - reverse nav (many-for-1)
+    '.'  - member name (tuple variable or function ref)
+    '/'  - (derived) tree nav (including the AST)
+
 ------------------------------------------------------------------------------*/
-spacePathExpr :
-    languageKey? spacePathRootExpr? identifier (spacePathAnyNavOper spacePathExpr)?
+
+metaRefExpr :
+    languageKey? spacePathRootExpr? identifier (spacePathAnyNavOper identifier)*
     ;
 
 alias :
@@ -344,11 +420,11 @@ spacePathAnyNavOper :
     ;
 
 spacePathList :
-    spacePathExpr (',' spacePathExpr)*
+    metaRefExpr (',' metaRefExpr)*
     ;
 
 aliasedSpacePathExpr:
-    spacePathExpr alias?
+    metaRefExpr alias?
     ;
 
 aliasedSpacePathExprList :
@@ -365,7 +441,7 @@ complexOptCollTypeRef : complexTypeRef anyCollectionMarker* ;
 primitiveOptSeqTypeRef : primitiveTypeName sequenceMarker* ;
 
 complexTypeRef :
-    spacePathExpr
+    metaRefExpr
     ;
 
 //collectionTypeRef :
@@ -460,7 +536,7 @@ treePathExpr :
 functionDefn :
     elementDeclHeader?
     'function' accessModifier? (anyTypeRef | voidTypeName) identifier parameterDefnList
-    ('solves' spacePathExpr)? // ref to equation
+    ('solves' metaRefExpr)? // ref to equation
     statementBlock
     ;
 
@@ -503,36 +579,43 @@ returnStatement :
  VALUE EXPRESSIONS and related
 ------------------------------------------------------------------------------*/
 
-expression :
-    variableDefn |
-    associationDefn |
-    functionCallExpr |
-    assignmentExpr |
-    symbolicExpr |
-    valueExpr
-    ;
-
-atomicValueExpr :
-    literalExpr
-    | spacePathExpr
-    | functionCallExpr
-    | newObjectExpr
-    | newSetExpr
-    | symbolicExpr
-    ;
-
 // NOTE: A 'function call' may be a list of params or a single tuple
 // object holding parameters.  The language runtime knows the names/paths of
 // all elements in a Tuple.
 
 functionCallExpr :
-    spacePathExpr '(' valueExpr ')'
+    metaRefExpr '(' valueExpr? ')'
     ;
 
-argTupleOrRef : (untypedTupleLiteral | spacePathExpr) ;
+expression :
+    variableDefn |
+    associationDefn |
+    functionCallExpr |
+    assignmentExpr |
+    valueExpr
+    ;
+
+atomicValueExpr :
+    literalExpr
+    | newObjectExpr
+    | newSetExpr
+    | symbolicExpr
+    | namedRefValueExpr
+    ;
+
+namedRefValueExpr :
+    metaRefExpr
+    | functionCallExpr
+    ;
+
+//argTupleOrRef : (untypedTupleLiteral | spacePathExpr) ;
+
+// A valueExpr is like a metaRefExpr except that the latter is a simple
+// dot-seperated list of identifiers, whereas the former may start
+// with literals or symbolic expressions and may contain function calls
 
 valueExpr :
-    atomicValueExpr ('.' atomicValueExpr)*
+    atomicValueExpr ('.' namedRefValueExpr)*
     ;
 
 valueOrAssignmentExprList :
@@ -643,7 +726,7 @@ rightAssignmentExpr :
     ;
 
 assignmentExpr :
-    spacePathExpr rightAssignmentExpr
+    metaRefExpr rightAssignmentExpr
     ;
 
 //rightSide :

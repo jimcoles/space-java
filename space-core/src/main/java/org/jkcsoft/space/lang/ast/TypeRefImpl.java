@@ -24,7 +24,7 @@ public class TypeRefImpl extends MetaReference implements TypeRef {
         if (typeNameSpec == null)
             throw new IllegalArgumentException("type ref name cannot be null");
         String[] topSplits = typeNameSpec.split(":");
-        String nsName = null;
+        String nsName = topSplits.length == 2 ? topSplits[0] : null;
         AstFactory astFactory = AstFactory.getInstance();
         TypeRefImpl typeRef = astFactory.newTypeRef(new IntrinsicSourceInfo(), null, astFactory.newMetaRefPart(null, nsName));
         String[] nameStrings = typeNameSpec.split("\\.");

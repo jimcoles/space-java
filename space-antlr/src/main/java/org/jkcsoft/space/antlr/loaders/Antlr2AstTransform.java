@@ -96,38 +96,38 @@ public class Antlr2AstTransform {
             importStatementCtxt.aliasedSpacePathExpr();
         SpaceParser.AliasContext alias = aliasedSpacePathExprContext.alias();
         return astFactory.newImportExpr(toSI(importStatementCtxt),
-                                        toTypeRef(aliasedSpacePathExprContext.spacePathExpr()),
+                                        toTypeRef(aliasedSpacePathExprContext.metaRefExpr()),
                                         alias != null ? toText(alias.identifier()) : null);
     }
 
     private PackageDecl toAst(SpaceParser.PackageStatementContext packageStatementContext) {
         PackageDecl packageDecl = astFactory.newPackageDecl(toSI(packageStatementContext),
-                                                            toAst(packageStatementContext.spacePathExpr(),
+                                                            toAst(packageStatementContext.metaRefExpr(),
                                                                   MetaType.PACKAGE));
         return packageDecl;
     }
 
-    private MetaReference toAst(SpaceParser.SpacePathExprContext spacePathExprContext, MetaType metaType) {
-        MetaReference metaReference = astFactory.newMetaReference(toSI(spacePathExprContext), metaType, null);
-        addMetaRefPartsRec(spacePathExprContext, metaReference);
-        return metaReference;
+    private MetaReference toAst(SpaceParser.MetaRefExprContext metaRefExprContext, MetaType metaType) {
+        MetaReference metaRefAST = astFactory.newMetaReference(toSI(metaRefExprContext), metaType, null);
+        addMetaRefPartsRec(metaRefExprContext, metaRefAST);
+        return metaRefAST;
     }
 
-    private void addMetaRefPartsRec(SpaceParser.SpacePathExprContext spacePathExprContext, MetaReference metaReference)
+    private void addMetaRefPartsRec(SpaceParser.MetaRefExprContext metaRefExprContext, MetaReference metaRefAST)
     {
-        if (spacePathExprContext == null)
+        if (metaRefExprContext == null)
             return;
 
         // do the add of new part
-        metaReference.addNextPart(toSingleMetaRefPart(spacePathExprContext));
-        // recursive calll
-        addMetaRefPartsRec(spacePathExprContext.spacePathExpr(), metaReference);
+        for (SpaceParser.IdentifierContext identifierContext : metaRefExprContext.identifier()) {
+            metaRefAST.addNextPart(toSingleMetaRefPart(identifierContext));
+        }
         return;
     }
 
-    private MetaRefPart toSingleMetaRefPart(SpaceParser.SpacePathExprContext spacePathExprContext)
+    private MetaRefPart toSingleMetaRefPart(SpaceParser.IdentifierContext identifierContext)
     {
-        return astFactory.newMetaRefPart(toNamePartExpr(spacePathExprContext.identifier()));
+        return astFactory.newMetaRefPart(toNamePartExpr(identifierContext));
     }
 
     public SpaceTypeDefn toAst(SpaceParser.SpaceTypeDefnContext spaceTypeDefnContext) {
@@ -249,8 +249,8 @@ public class Antlr2AstTransform {
     private TypeRefImpl toAst(SpaceParser.ComplexOptCollTypeRefContext complexTypeRefContext) {
         logTrans(complexTypeRefContext);
         TypeRefImpl typeRefAst = null;
-        if (complexTypeRefContext.complexTypeRef().spacePathExpr() != null) {
-            typeRefAst = toTypeRef(complexTypeRefContext.complexTypeRef().spacePathExpr());
+        if (complexTypeRefContext.complexTypeRef().metaRefExpr() != null) {
+            typeRefAst = toTypeRef(complexTypeRefContext.complexTypeRef().metaRefExpr());
         }
         if (complexTypeRefContext.anyCollectionMarker()!= null) {
             List<SpaceParser.AnyCollectionMarkerContext> anyCollectionMarkerContexts =
@@ -276,7 +276,7 @@ public class Antlr2AstTransform {
             : null;
     }
 
-    private TypeRefImpl toTypeRef(SpaceParser.SpacePathExprContext spacePathExprContext) {
+    private TypeRefImpl toTypeRef(SpaceParser.MetaRefExprContext spacePathExprContext) {
         logTrans(spacePathExprContext);
         MetaRefPart nsRefPart =
             spacePathExprContext.languageKey() != null ? toAst(spacePathExprContext.languageKey()) : null;
@@ -290,7 +290,7 @@ public class Antlr2AstTransform {
         return astFactory.newMetaRefPart(toSI(languageKeyContext), toText(languageKeyContext.identifier()));
     }
 
-    private MetaReference toMetaRef(SpaceParser.SpacePathExprContext spacePathExprContext, MetaType metaType) {
+    private MetaReference toMetaRef(SpaceParser.MetaRefExprContext spacePathExprContext, MetaType metaType) {
         logTrans(spacePathExprContext);
         if (spacePathExprContext == null)
             return null;
@@ -469,12 +469,9 @@ public class Antlr2AstTransform {
         else if (expressionCtxt.assignmentExpr() != null) {
             valueExprAST = toAst(expressionCtxt.assignmentExpr());
         }
-        else if (expressionCtxt.symbolicExpr() != null) {
-            valueExprAST = toAst(expressionCtxt.symbolicExpr());
+        else if (expressionCtxt.valueExpr() != null) {
+            valueExprAST = toAst(expressionCtxt.valueExpr());
         }
-//        else if (expressionCtxt.navCallChainExpr() != null) {
-//
-//        }
         else {
             throw new SpaceX("don't know how to transform " + expressionCtxt);
         }
@@ -565,7 +562,7 @@ public class Antlr2AstTransform {
     private AssignmentExpr toAst(SpaceParser.AssignmentExprContext assignmentExprContext) {
         logTrans(assignmentExprContext);
         return toAst(
-            toMetaRef(assignmentExprContext.spacePathExpr(), MetaType.DATUM),
+            toMetaRef(assignmentExprContext.metaRefExpr(), MetaType.DATUM),
             assignmentExprContext.rightAssignmentExpr()
         );
     }
@@ -575,11 +572,11 @@ public class Antlr2AstTransform {
         FunctionCallExpr functionCallExpr =
             astFactory.newFunctionCallExpr(toSI(functionCallExprContext));
         //
-        functionCallExpr.setFunctionRef(toMetaRef(functionCallExprContext.spacePathExpr(), MetaType.FUNCTION));
+        functionCallExpr.setFunctionRef(toMetaRef(functionCallExprContext.metaRefExpr(), MetaType.FUNCTION));
         //
         if (functionCallExprContext.valueExpr() != null) {
-                // more common
-                functionCallExpr.setArgValueExpr(toAst(functionCallExprContext.valueExpr()));
+            // more common
+            functionCallExpr.setArgValueExpr(toAst(functionCallExprContext.valueExpr()));
         }
         return functionCallExpr;
     }
@@ -617,17 +614,17 @@ public class Antlr2AstTransform {
         logTrans(valueExprContext);
         ValueExpr valueExprAST = null;
         if (valueExprContext != null) {
-            // choices ...
-            if (valueExprContext.atomicValueExpr().size() > 1) {
-                ValueExprChain astChain = new ValueExprChain();
-                List<SpaceParser.AtomicValueExprContext> atomicValueExprContexts = valueExprContext.atomicValueExpr();
-                for (SpaceParser.AtomicValueExprContext atomicValueExprContext : atomicValueExprContexts) {
-                    astChain.addValueExpr(toAst(atomicValueExprContext));
+            valueExprAST = toAst(valueExprContext.atomicValueExpr());
+            // 2 thru last
+            if (valueExprContext.namedRefValueExpr().size() > 0) {
+                ValueExprChain astChain = astFactory.newValueExprChain(toSI(valueExprContext));
+                astChain.addValueExpr(valueExprAST);
+                for (SpaceParser.NamedRefValueExprContext namedRefValueExprContext :
+                        valueExprContext.namedRefValueExpr())
+                {
+                    astChain.addValueExpr(toAst(namedRefValueExprContext));
                 }
                 valueExprAST = astChain;
-            }
-            else {
-                valueExprAST = toAst(valueExprContext.atomicValueExpr(0));
             }
         }
         return valueExprAST;
@@ -636,9 +633,8 @@ public class Antlr2AstTransform {
     private ValueExpr toAst(SpaceParser.AtomicValueExprContext atomicValueExprContext) {
         ValueExpr valueExprAST = null;
         SpaceParser.LiteralExprContext literalExprContext = atomicValueExprContext.literalExpr();
-        SpaceParser.FunctionCallExprContext functionCallExprContext = atomicValueExprContext.functionCallExpr();
+        SpaceParser.NamedRefValueExprContext namedRefValueExprContext = atomicValueExprContext.namedRefValueExpr();
         SpaceParser.NewObjectExprContext objectExprContext = atomicValueExprContext.newObjectExpr();
-        SpaceParser.SpacePathExprContext spacePathExprContext = atomicValueExprContext.spacePathExpr();
         SpaceParser.SymbolicExprContext operatorExprContext = atomicValueExprContext.symbolicExpr();
         SpaceParser.NewSetExprContext newSetExprContext = atomicValueExprContext.newSetExpr();
         if (literalExprContext != null) {
@@ -649,12 +645,9 @@ public class Antlr2AstTransform {
         }
         else if (objectExprContext != null)
             valueExprAST = toAst(objectExprContext);
-        else if (functionCallExprContext != null)
+        else if (namedRefValueExprContext != null)
             // nested
-            valueExprAST = toAst(functionCallExprContext);
-        else if (spacePathExprContext != null) {
-            valueExprAST = toMetaRef(spacePathExprContext, MetaType.DATUM);
-        }
+            valueExprAST = toAst(namedRefValueExprContext);
         else if (operatorExprContext != null) {
             valueExprAST = toAst(operatorExprContext);
         }
@@ -664,16 +657,29 @@ public class Antlr2AstTransform {
         return valueExprAST;
     }
 
+    private ValueExpr toAst(SpaceParser.NamedRefValueExprContext namedRefValueExprContext) {
+        ValueExpr valueExprAST = null;
+        SpaceParser.MetaRefExprContext metaRefExprContext = namedRefValueExprContext.metaRefExpr();
+        SpaceParser.FunctionCallExprContext functionCallExprContext = namedRefValueExprContext.functionCallExpr();
+        if (metaRefExprContext != null) {
+            valueExprAST = toMetaRef(metaRefExprContext, MetaType.DATUM);
+        }
+        else if (functionCallExprContext != null) {
+            valueExprAST = toAst(functionCallExprContext);
+        }
+        return valueExprAST;
+    }
+
     private NewSetExpr toAst(SpaceParser.NewSetExprContext newSetExprContext) {
         return astFactory.newNewSetExpr(toSI(newSetExprContext), toAst(newSetExprContext.anyTypeRef()));
     }
 
-    private NewObjectExpr toAst(SpaceParser.NewObjectExprContext newObjectExprContext) {
+    private NewTupleExpr toAst(SpaceParser.NewObjectExprContext newObjectExprContext) {
         logTrans(newObjectExprContext);
-        NewObjectExpr newObjectExpr = astFactory.newNewObjectExpr(toSI(newObjectExprContext),
-                                                                  toAst(newObjectExprContext.anyTypeRef()),
-                                                                  toAst(newObjectExprContext.untypedTupleLiteral()));
-        return newObjectExpr;
+        NewTupleExpr newTupleExpr = astFactory.newNewObjectExpr(toSI(newObjectExprContext),
+                                                                toAst(newObjectExprContext.anyTypeRef()),
+                                                                toAst(newObjectExprContext.untypedTupleLiteral()));
+        return newTupleExpr;
     }
 
     /**

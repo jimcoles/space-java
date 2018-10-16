@@ -27,7 +27,7 @@ import java.util.List;
  * @param <T> The class of meta object being referenced.
  * @author Jim Coles
  */
-public class MetaReference<T extends NamedElement> extends ModelElement implements ValueExpr {
+public class MetaReference<T extends NamedElement> extends ModelElement implements NamePath, ValueExpr {
 
     private MetaType targetMetaType;
     private MetaRefPart<Namespace> nsRefPart;

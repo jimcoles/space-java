@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class NewSetExpr extends ModelElement implements ValueExpr {
     private TypeRef tupleTypeRef;
-    private List<NewObjectExpr> newObjectExprs = new LinkedList<>();
+    private List<NewTupleExpr> newTupleExprs = new LinkedList<>();
 
     NewSetExpr(SourceInfo sourceInfo, TypeRefImpl tupleTypeRef) {
         super(sourceInfo);
@@ -30,14 +30,14 @@ public class NewSetExpr extends ModelElement implements ValueExpr {
         return tupleTypeRef;
     }
 
-    public List<NewObjectExpr> getNewObjectExprs() {
-        return newObjectExprs;
+    public List<NewTupleExpr> getNewTupleExprs() {
+        return newTupleExprs;
     }
 
-    public void addNewObjectExpr(NewObjectExpr newObjectExpr) {
-        newObjectExprs.add(newObjectExpr);
+    public void addNewObjectExpr(NewTupleExpr newTupleExpr) {
+        newTupleExprs.add(newTupleExpr);
         //
-        addChild(newObjectExpr);
+        addChild(newTupleExpr);
     }
 
 }

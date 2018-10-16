@@ -30,7 +30,7 @@ import java.util.Set;
  * @author Jim Coles
  * @version 1.0
  */
-public class Directory extends NamedElement implements ValueExpr {
+public class Directory extends NamedElement {
 
 //    public static final Directory ROOT_DIRECTORY = new Directory(new IntrinsicSourceInfo(), "root");
 

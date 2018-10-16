@@ -12,12 +12,12 @@ package org.jkcsoft.space.lang.ast;
 /**
  * Creates new Tuples, Spaces(Sets), Sequences.
  */
-public class NewObjectExpr extends ModelElement implements ValueExpr {
+public class NewTupleExpr extends ModelElement implements ValueExpr {
 
     private TypeRefImpl typeRef;
     private TupleExpr tupleExpr;
 
-    public NewObjectExpr(SourceInfo sourceInfo, TypeRefImpl typeRef, TupleExpr tupleExpr) {
+    public NewTupleExpr(SourceInfo sourceInfo, TypeRefImpl typeRef, TupleExpr tupleExpr) {
         super(sourceInfo);
         this.typeRef = typeRef;
         this.tupleExpr = tupleExpr;

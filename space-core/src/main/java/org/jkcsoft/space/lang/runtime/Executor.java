@@ -121,8 +121,6 @@ public class Executor extends ExprProcessor implements ExeContext {
         initRuntime();
         preLoadSpecialNativeTypes();
         loadSpecialOperators();
-        spaceLangDir = nsRegistry.getLangNs().getRootDir().getChildDir("space").getChildDir("lang");
-        implicitImportTypes = AstUtils.getChildTypes(spaceLangDir);
     }
 
     private void initRuntime() {
@@ -156,9 +154,12 @@ public class Executor extends ExprProcessor implements ExeContext {
             for (File srcRootDir : srcRootDirs) {
                 //
                 DirLoadResults dirLoadResults = loadSrcRootDir(srcRootDir);
+                log.info("loaded source root ["+srcRootDir+"]");
                 //
                 runResults.addSrcDirLoadResult(dirLoadResults);
             }
+
+            resolveLangDir();
 
             // 2. Determine all needed Java classes and load corresponding Space wrappers
             java.util.Set<ImportExpr> javaImports =
@@ -255,6 +256,11 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
     }
 
+    private void resolveLangDir() {
+        spaceLangDir = nsRegistry.getLangNs().getRootDir().getChildDir("space").getChildDir("lang");
+        implicitImportTypes = AstUtils.getChildTypes(spaceLangDir);
+    }
+
     private void presentAllErrors(RunResults runResults) {
         Set<File> keyFiles = runResults.getErrorsBySrcFile().keySet();
         Collection nonNullKeyFiles = CollectionUtils.select(keyFiles, keyFile -> keyFile != null);
@@ -291,7 +297,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             SpaceHome.getSjiService().getDeepLoadSpaceWrapper(jNativeType, "space", "native", "opsys");
         }
 
-        TypeRefImpl opSysRef = TypeRefImpl.newTypeRef(JOpSys.class.getName());
+        TypeRefImpl opSysRef = TypeRefImpl.newTypeRef(nsRegistry.getJavaNs().getName() + ":" + JOpSys.class.getName());
         AstUtils.resolveAstPath(opSysRef);
         if (opSysRef.isResolvedValid())
             op_sys_type_def = (ComplexType) opSysRef.getResolvedType();
@@ -407,7 +413,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         // type check ...
         if (unitLoadErrors.size() == 0) {
-            typeCheck(parseUnit, unitLoadErrors);
+            validateSemantics(parseUnit, unitLoadErrors);
         }
         else {
             if (log.isDebugEnabled())
@@ -415,11 +421,19 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
     }
 
-    private void typeCheck(ParseUnit parseUnit, List<AstLoadError> errors) {
-        // TODO: Traverse full linked AST
-        /*
-        1. Ensure compatible left/right side of assignments.
-         */
+    private void validateSemantics(ParseUnit parseUnit, List<AstLoadError> errors) {
+    /*
+        TODO
+        - Check compatible left/right side of assignments.
+        - Check nested function call arg
+        - Insert implicit cast of new tuples if needed
+        - Check symbolic expression arg types
+        - Check chained expression types
+        - Check namespace uniqness / ambiguity
+     */
+        AstUtils.queryAst(parseUnit, new QueryAstConsumer<>(AssignmentExpr.class));
+        AstUtils.queryAst(parseUnit, new QueryAstConsumer<>(FunctionCallExpr.class));
+        AstUtils.queryAst(parseUnit, new QueryAstConsumer<>(AssignmentExpr.class));
     }
 
     private void linkUnitRefs(ParseUnit parseUnit, List<AstLoadError> unitLoadErrors) {
@@ -522,7 +536,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         // init the context tuple
         callStack.push(bootCallCtxt);
         // this evaluates the init statements for the type such as var inits.
-        exec(evalContext, (StatementBlock) bootTypeDefn.getBody());
+        eval(evalContext, (StatementBlock) bootTypeDefn.getBody());
         // call the 'main' function a dummy function call expr
         eval(evalContext, bootMainCallExpr);
         callStack.pop();
@@ -555,10 +569,57 @@ public class Executor extends ExprProcessor implements ExeContext {
     }
 
     /**
-     * TODO I think we'll eventually want all statements to get put on an Action Queue
-     * or Transaction Queue or such.
+     * The dispatcher eval method.
      */
-    private void exec(EvalContext evalContext, StatementBlock statementBlock) {
+    private Value eval(EvalContext spcContext, ValueExpr expression) {
+        log.debug("eval: (deleg) " + expression);
+        Value value = null;
+        if (expression instanceof AssignmentExpr) {
+            value = eval(spcContext, (AssignmentExpr) expression);
+        }
+        else if (expression instanceof FunctionCallExpr) {
+            value = eval(spcContext, (FunctionCallExpr) expression);
+        }
+        else if (expression instanceof MetaReference) {
+            value = eval(spcContext, (MetaReference) expression);
+        }
+        else if (expression instanceof NewTupleExpr) {
+            value = eval(spcContext, (NewTupleExpr) expression);
+        }
+        else if (expression instanceof NewSetExpr) {
+            value = eval(spcContext, (NewSetExpr) expression);
+        }
+        else if (expression instanceof OperatorExpr) {
+            value = eval(spcContext, (OperatorExpr) expression);
+        }
+        else if (expression instanceof PrimitiveLiteralExpr) {
+            value = eval(spcContext, (PrimitiveLiteralExpr) expression);
+        }
+        else if (expression instanceof SequenceLiteralExpr) {
+            value = eval(spcContext, (SequenceLiteralExpr) expression);
+        }
+        else if (expression instanceof ThisArgExpr) {
+            value = eval(spcContext, (ThisArgExpr) expression);
+        }
+        else if (expression instanceof ThisTupleExpr) {
+            value = eval(spcContext, (ThisTupleExpr) expression);
+        }
+        else if (expression instanceof ValueExprChain) {
+            value = eval(spcContext, (ValueExprChain) expression);
+        }
+        else
+            throw new SpaceX("don't know how to evaluate " + expression);
+
+        log.debug("eval -> " + value);
+        return value;
+    }
+
+    /**
+     * TODO I think we'll eventually want all statements to get put on an Action Queue
+     * or Transaction Queue or such. In effect, each statement becomes a first-class
+     * action / job.
+     */
+    private void eval(EvalContext evalContext, StatementBlock statementBlock) {
         log.debug("exec: " + statementBlock);
         FunctionCallContext functionCallContext = evalContext.peekStack();
         Tuple blockTuple = statementBlock instanceof SpaceTypeDefnBody ?
@@ -577,7 +638,7 @@ public class Executor extends ExprProcessor implements ExeContext {
                 // TODO
             }
             else if (statement instanceof StatementBlock) {
-                exec(evalContext, ((StatementBlock) statement));
+                eval(evalContext, ((StatementBlock) statement));
                 // Klunky (?) handling of space 'return' statement
                 if (functionCallContext.isPendingReturn())
                     return;
@@ -592,52 +653,25 @@ public class Executor extends ExprProcessor implements ExeContext {
         return;
     }
 
-    private Value eval(EvalContext spcContext, ValueExpr expression) {
-        log.debug("eval: (deleg) " + expression);
-        Value value = null;
-        if (expression instanceof FunctionCallExpr) {
-            value = eval(spcContext, (FunctionCallExpr) expression);
+    private Value eval(EvalContext evalContext, ValueExprChain exprChain) {
+        for (ValueExpr valueExpr : exprChain.getChain()) {
+            eval(evalContext, valueExpr);
         }
-        else if (expression instanceof AssignmentExpr) {
-            value = eval(spcContext, (AssignmentExpr) expression);
-        }
-        else if (expression instanceof PrimitiveLiteralExpr) {
-            value = eval(spcContext, (PrimitiveLiteralExpr) expression);
-        }
-        else if (expression instanceof SequenceLiteralExpr) {
-            value = eval(spcContext, ((SequenceLiteralExpr) expression));
-        }
-        else if (expression instanceof MetaReference) {
-            value = eval(spcContext, ((MetaReference) expression));
-        }
-        else if (expression instanceof OperatorExpr) {
-            value = eval(spcContext, ((OperatorExpr) expression));
-        }
-        else if (expression instanceof NewObjectExpr) {
-            value = eval(spcContext, ((NewObjectExpr) expression));
-        }
-        else if (expression instanceof NewSetExpr) {
-            value = eval(spcContext, ((NewSetExpr) expression));
-        }
-        else
-            throw new SpaceX("don't know how to evaluate " + expression);
-
-        log.debug("eval -> " + value);
-        return value;
+        return getCallStack().peek().getReturnValueHolder().getValue();
     }
 
-    private Tuple eval(EvalContext evalContext, NewObjectExpr newObjectExpr) {
-        log.debug("eval: " + newObjectExpr);
-        Tuple value = eval(evalContext, (ComplexType) newObjectExpr.getTypeRef().getResolvedMetaObj(),
-                           newObjectExpr.getTupleExpr());
-        return value;
-    }
+//    private Tuple eval(EvalContext evalContext, NewTupleExpr newTupleExpr) {
+//        log.debug("eval: " + newTupleExpr);
+//        Tuple value = eval(evalContext, (ComplexType) newTupleExpr.getTypeRef().getResolvedMetaObj(),
+//                           newTupleExpr.getTupleExpr());
+//        return value;
+//    }
 
     private Value eval(EvalContext evalContext, NewSetExpr newSetExpr) {
         log.debug("eval: " + newSetExpr);
         SetSpace value = newSet(null, null);
-        newSetExpr.getNewObjectExprs().forEach(
-            newObjectExpr -> value.addTuple(eval(evalContext, newObjectExpr))
+        newSetExpr.getNewTupleExprs().forEach(
+            newTupleExpr -> value.addTuple(eval(evalContext, newTupleExpr))
         );
         return value;
     }
@@ -675,7 +709,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             if (functionDefn instanceof SpaceFunctionDefn) {
                 SpaceFunctionDefn targetFunctionDefn =
                     (SpaceFunctionDefn) functionDefn;
-                exec(evalContext, targetFunctionDefn.getStatementBlock());
+                eval(evalContext, targetFunctionDefn.getStatementBlock());
             }
             else if (functionDefn instanceof SjiFunctionDefnImpl) {
                 evalNative(evalContext, functionCallExpr);
@@ -690,11 +724,11 @@ public class Executor extends ExprProcessor implements ExeContext {
         return value;
     }
 
-    private Tuple eval(EvalContext evalContext, ComplexType tupleTypeDefn, TupleExpr tupleExpr)
+    private Tuple eval(EvalContext evalContext, NewTupleExpr newTupleExpr)
     {
-        log.debug("eval: new tuple => " + tupleTypeDefn + ", " + tupleExpr);
-        TupleImpl tuple = newTupleImpl(tupleTypeDefn);
-        List<ValueExpr> valueExprs = tupleExpr != null ? tupleExpr.getValueExprs() : null;
+        log.debug("eval: new tuple => " + newTupleExpr);
+        TupleImpl tuple = newTupleImpl((ComplexType) newTupleExpr.getTypeRef().getResolvedType());
+        List<ValueExpr> valueExprs = newTupleExpr != null ? newTupleExpr.getTupleExpr().getValueExprs() : null;
         // validation
         int numValueExprs = valueExprs == null ? 0 : valueExprs.size();
         if (numValueExprs != tuple.getSize())
@@ -808,6 +842,61 @@ public class Executor extends ExprProcessor implements ExeContext {
         return leftSideHolder.getValue();
     }
 
+    /**
+     * Returns the literal value object associated with the {@link PrimitiveLiteralExpr}.
+     * The returned object may be a scalar, a character sequence, or a complete
+     * space.
+     */
+    private Value eval(EvalContext evalContext, PrimitiveLiteralExpr primitiveLiteralExpr) {
+        log.debug("eval: " + primitiveLiteralExpr);
+        Value value = null;
+        if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.CARD) {
+//            case TEXT:
+//                CharacterSequence csLiteral = newCharacterSequence(primitiveLiteralExpr.getValueExpr());
+//                value = newReference(csLiteral);
+//                break;
+            value = getObjFactory().newCardinalValue(new Integer(primitiveLiteralExpr.getValueExpr()));
+        }
+        else if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.BOOLEAN) {
+            value = getObjFactory().newBooleanValue(Boolean.valueOf(primitiveLiteralExpr.getValueExpr()));
+        }
+        else if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.CHAR) {
+            value = getObjFactory().newCharacterValue(primitiveLiteralExpr.getValueExpr().charAt(0));
+        }
+        else if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.REAL) {
+            value = getObjFactory().newRealValue(Double.valueOf(primitiveLiteralExpr.getValueExpr()));
+        }
+//       else if (primitiveLiteralExpr.getTypeDefn() ==  RATIONAL) {
+//       }
+        else {
+            throw new SpaceX(evalContext.newRuntimeError(
+                "Can not yet handle primitive literal of type " + primitiveLiteralExpr.getTypeDefn()));
+        }
+        log.debug("eval -> " + value);
+        return value;
+    }
+
+//    private SpaceObject exec(Space userSpaceContext, SpacePathExpr pathExpr) {
+//        SpaceObject value = null;
+//
+//        return value;
+//    }
+
+    private Value eval(EvalContext evalContext, SequenceLiteralExpr sequenceLiteralExpr) {
+        log.debug("eval: " + sequenceLiteralExpr);
+        Value value = null;
+        if (sequenceLiteralExpr.getTypeRef().getResolvedMetaObj() == CHAR_SEQ_TYPE_DEF) {
+            value = newCharacterSequence(sequenceLiteralExpr.getValueExpr());
+//            value = newReference(null, null, csLiteral);
+        }
+        else {
+            throw new SpaceX(
+                evalContext.newRuntimeError("Can not yet handle sequence literal of type " + sequenceLiteralExpr));
+        }
+        log.debug("eval -> " + value);
+        return value;
+    }
+
     private ValueHolder findInBlocksRec(Named toMember, LinkedList<BlockContext> blocks) {
         ValueHolder assignable = null;
         Iterator<BlockContext> blockContextIterator = blocks.descendingIterator();
@@ -862,61 +951,6 @@ public class Executor extends ExprProcessor implements ExeContext {
             }
         }
         return newValue;
-    }
-
-    /**
-     * Returns the literal value object associated with the {@link PrimitiveLiteralExpr}.
-     * The returned object may be a scalar, a character sequence, or a complete
-     * space.
-     */
-    private Value eval(EvalContext evalContext, PrimitiveLiteralExpr primitiveLiteralExpr) {
-        log.debug("eval: " + primitiveLiteralExpr);
-        Value value = null;
-        if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.CARD) {
-//            case TEXT:
-//                CharacterSequence csLiteral = newCharacterSequence(primitiveLiteralExpr.getValueExpr());
-//                value = newReference(csLiteral);
-//                break;
-            value = getObjFactory().newCardinalValue(new Integer(primitiveLiteralExpr.getValueExpr()));
-        }
-        else if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.BOOLEAN) {
-            value = getObjFactory().newBooleanValue(Boolean.valueOf(primitiveLiteralExpr.getValueExpr()));
-        }
-        else if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.CHAR) {
-            value = getObjFactory().newCharacterValue(primitiveLiteralExpr.getValueExpr().charAt(0));
-        }
-        else if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.REAL) {
-            value = getObjFactory().newRealValue(Double.valueOf(primitiveLiteralExpr.getValueExpr()));
-        }
-//       else if (primitiveLiteralExpr.getTypeDefn() ==  RATIONAL) {
-//       }
-        else {
-            throw new SpaceX(evalContext.newRuntimeError(
-                "Can not yet handle primitive literal of type " + primitiveLiteralExpr.getTypeDefn()));
-        }
-        log.debug("eval -> " + value);
-        return value;
-    }
-
-//    private SpaceObject exec(Space userSpaceContext, SpacePathExpr pathExpr) {
-//        SpaceObject value = null;
-//
-//        return value;
-//    }
-
-    private Value eval(EvalContext evalContext, SequenceLiteralExpr sequenceLiteralExpr) {
-        log.debug("eval: " + sequenceLiteralExpr);
-        Value value = null;
-        if (sequenceLiteralExpr.getTypeRef().getResolvedMetaObj() == CHAR_SEQ_TYPE_DEF) {
-            value = newCharacterSequence(sequenceLiteralExpr.getValueExpr());
-//            value = newReference(null, null, csLiteral);
-        }
-        else {
-            throw new SpaceX(
-                evalContext.newRuntimeError("Can not yet handle sequence literal of type " + sequenceLiteralExpr));
-        }
-        log.debug("eval -> " + value);
-        return value;
     }
 
     private TupleImpl newTupleImpl(ComplexType defn) {
@@ -1155,7 +1189,6 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
     }
 
-
     private class RefLinker implements AstScanConsumer {
 
         private ParseUnit parseUnit;
@@ -1229,6 +1262,14 @@ public class Executor extends ExprProcessor implements ExeContext {
             AstUtils.checkSetResolve(reference.getFirstPart(), (NamedElement) importedTypeMatch);
         }
 
+        private void checkImplicitImports(MetaReference reference) {
+            DatumType importedTypeMatch = (DatumType) CollectionUtils.find(
+                implicitImportTypes,
+                object -> ((DatumType) object).getName().equals(reference.getFirstPart().getNameExpr())
+            );
+            AstUtils.checkSetResolve(reference.getFirstPart(), (NamedElement) importedTypeMatch);
+        }
+
         @Override
         public void after(ModelElement astNode) {
 
@@ -1237,14 +1278,6 @@ public class Executor extends ExprProcessor implements ExeContext {
         public List<AstLoadError> getErrors() {
             return errors;
         }
-    }
-
-    private void checkImplicitImports(MetaReference reference) {
-        DatumType importedTypeMatch = (DatumType) CollectionUtils.find(
-            implicitImportTypes,
-            object -> ((DatumType) object).getName().equals(reference.getFirstPart().getNameExpr())
-        );
-        AstUtils.checkSetResolve(reference.getFirstPart(), (NamedElement) importedTypeMatch);
     }
 
 }

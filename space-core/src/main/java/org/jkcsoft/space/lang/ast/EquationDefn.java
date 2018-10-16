@@ -31,4 +31,5 @@ public class EquationDefn extends NamedElement {
     public MetaType getMetaType() {
         return null;
     }
+
 }

@@ -15,9 +15,13 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public class ValueExprChain implements ValueExpr {
+public class ValueExprChain extends ModelElement implements NamePath, ValueExpr {
 
     private List<ValueExpr> chain;
+
+    ValueExprChain(SourceInfo sourceInfo) {
+        super(sourceInfo);
+    }
 
     public ValueExprChain addValueExpr(ValueExpr valueExpr) {
         if (chain == null)

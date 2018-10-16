@@ -14,8 +14,8 @@ import org.jkcsoft.space.lang.instance.SetSpace;
 import java.util.List;
 
 /**
- * Represents our intrinsic notion of a query against the set of Space type definitions,
- * objects and spaces.
+ * Represents our intrinsic notion of a Query against a Space (set
+ * of Types, Equations, and related).
  *
  * @author Jim Coles
  * @version 1.0

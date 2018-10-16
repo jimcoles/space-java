@@ -134,8 +134,8 @@ public class AstFactory {
         return new TupleExpr(sourceInfo);
     }
 
-    public NewObjectExpr newNewObjectExpr(SourceInfo sourceInfo, TypeRefImpl typeRefPathExpr, TupleExpr tupleExpr) {
-        return new NewObjectExpr(sourceInfo, typeRefPathExpr, tupleExpr);
+    public NewTupleExpr newNewObjectExpr(SourceInfo sourceInfo, TypeRefImpl typeRefPathExpr, TupleExpr tupleExpr) {
+        return new NewTupleExpr(sourceInfo, typeRefPathExpr, tupleExpr);
     }
 
     public NewSetExpr newNewSetExpr(SourceInfo sourceInfo, TypeRefImpl tupleTypeRef) {
@@ -182,5 +182,9 @@ public class AstFactory {
 
     public ImportExpr newImportExpr(SourceInfo sourceInfo, TypeRefImpl metaReference, String alias) {
         return new ImportExpr(sourceInfo, metaReference, alias);
+    }
+
+    public ValueExprChain newValueExprChain(SourceInfo sourceInfo) {
+        return new ValueExprChain(sourceInfo);
     }
 }

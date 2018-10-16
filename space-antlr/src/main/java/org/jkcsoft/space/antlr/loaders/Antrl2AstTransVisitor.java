@@ -106,12 +106,6 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<ModelElement> 
     }
 
     @Override
-    public ModelElement visitArgTupleOrRef(SpaceParser.ArgTupleOrRefContext ctx) {
-        return super.visitArgTupleOrRef(ctx);
-    }
-
-
-    @Override
     public ModelElement visitUnaryOperExpr(SpaceParser.UnaryOperExprContext ctx) {
         return super.visitUnaryOperExpr(ctx);
     }
@@ -380,10 +374,6 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<ModelElement> 
         return super.visitQueryDefn(ctx);
     }
 
-    @Override
-    public ModelElement visitSpacePathExpr(SpaceParser.SpacePathExprContext ctx) {
-        return super.visitSpacePathExpr(ctx);
-    }
 
     @Override
     public ModelElement visitSpacePathList(SpaceParser.SpacePathListContext ctx) {
