@@ -23,4 +23,6 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface ValueExpr {
 
+    DatumType getDatumType();
+
 }

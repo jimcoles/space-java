@@ -38,4 +38,9 @@ public class PrimitiveLiteralExpr extends ModelElement implements ValueExpr {
     public String getDisplayName() {
         return valueExpr;
     }
+
+    @Override
+    public DatumType getDatumType() {
+        return typeDefn;
+    }
 }

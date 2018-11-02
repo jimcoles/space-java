@@ -19,4 +19,9 @@ public class ThisArgExpr extends ModelElement implements ValueExpr {
     ThisArgExpr(SourceInfo sourceInfo) {
         super(sourceInfo);
     }
+
+    @Override
+    public DatumType getDatumType() {
+        return null;
+    }
 }

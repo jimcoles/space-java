@@ -12,41 +12,33 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
- * Encapsulates a single part of a reference path.
- * For now, usually (always?) a Directory or Type.
+ * Encapsulates a single part of a 'dot-separated' {@link ExpressionChain}.
  *
  * @author Jim Coles
  */
-public class MetaRefPart<T extends NamedElement> extends ModelElement {
+public abstract class ExprLink<T extends NamedElement> extends ModelElement {
 
-//    private MetaReference parentPath;
-    private NamePartExpr namePartExpr;
+//    private ModelElement linkOrRefExpr; // package name, datum name (ref), function name, literal expr
     // elements below set by linker
     /** The meta object to which this ref refers, e.g. the SpaceTypeDefn or Package
-     * or VariableDefn */
-    private T resolvedMetaObj;
+     * or VariableDefn, FunctionDefn */
+    private T resolvedMetaObj; // package, datum defn, func defn
     private LinkState state = LinkState.INITIALIZED;
 
-//    private MetaRefPart prevRefPart;
-//    private MetaRefPart nextRefPart;
-
-    public MetaRefPart(NamePartExpr namePartExpr) {
-        super(namePartExpr.getSourceInfo());
+    public ExprLink(SourceInfo sourceInfo) {
+        super(sourceInfo);
 //        this.parentPath = parentPath;
-        this.namePartExpr = namePartExpr;
+//        this.linkOrRefExpr = linkOrRefExpr;
     }
 
     public boolean isWildcard() {
-        return getNamePartExpr().getNameExpr().equals("*");
+        return (getExpression() instanceof NamePartExpr
+            && ((NamePartExpr) getExpression()).getNameExpr().equals("*"));
     }
 
-    public NamePartExpr getNamePartExpr() {
-        return namePartExpr;
-    }
+    public abstract boolean isValueExpr();
 
-    public String getNameExpr() {
-        return namePartExpr != null ? namePartExpr.getNameExpr() : "";
-    }
+    public abstract ModelElement getExpression();
 
     public T getResolvedMetaObj() {
         return resolvedMetaObj;
@@ -72,7 +64,4 @@ public class MetaRefPart<T extends NamedElement> extends ModelElement {
         return resolvedMetaObj != null ? resolvedMetaObj.getMetaType() : null;
     }
 
-    public MetaRefPart copy(MetaReference parentRef) {
-        return new MetaRefPart(this.getNamePartExpr());
-    }
 }

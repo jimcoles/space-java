@@ -65,4 +65,9 @@ public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
     public String toString() {
         return super.toString();
     }
+
+    @Override
+    public boolean isAssignableTo(DatumType argsType) {
+        return false;
+    }
 }

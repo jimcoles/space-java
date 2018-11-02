@@ -9,21 +9,12 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.SpaceList;
-
 /**
- * The base notion of an expression.  The subtypes are DefnExpr and ActionExpr.
- * <p>
- * Question: Is a SpaceExpr a Relation, or vice versa?
- *
  * @author Jim Coles
- * @version 1.0
  */
-public abstract class SpaceExpr {
+public class MetaRefPath {
 
-    private SpaceList exprList;
-
-    SpaceExpr() {
+    public void addPart(NamePartExpr expression) {
 
     }
 

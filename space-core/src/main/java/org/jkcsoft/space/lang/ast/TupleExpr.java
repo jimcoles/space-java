@@ -19,6 +19,7 @@ import java.util.List;
 public class TupleExpr extends ModelElement implements ValueExpr {
 
     private List<ValueExpr> valueExprs;
+    private ComplexType implicitType;
 
     TupleExpr(SourceInfo sourceInfo) {
         super(sourceInfo);
@@ -37,4 +38,8 @@ public class TupleExpr extends ModelElement implements ValueExpr {
         return valueExprs;
     }
 
+    @Override
+    public DatumType getDatumType() {
+        return implicitType;
+    }
 }

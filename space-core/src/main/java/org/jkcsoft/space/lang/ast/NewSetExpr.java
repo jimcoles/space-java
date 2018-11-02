@@ -16,6 +16,7 @@ import java.util.List;
  * @author Jim Coles
  */
 public class NewSetExpr extends ModelElement implements ValueExpr {
+
     private TypeRef tupleTypeRef;
     private List<NewTupleExpr> newTupleExprs = new LinkedList<>();
 
@@ -38,6 +39,11 @@ public class NewSetExpr extends ModelElement implements ValueExpr {
         newTupleExprs.add(newTupleExpr);
         //
         addChild(newTupleExpr);
+    }
+
+    @Override
+    public DatumType getDatumType() {
+        return tupleTypeRef.getResolvedType();
     }
 
 }

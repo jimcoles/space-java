@@ -55,7 +55,7 @@ public class SjiService {
      *
      * @param className Standard Java fully-qualified class name "java.lang.String".
      */
-    public DatumType getDeepLoadSpaceWrapper(String className, String ... overrideDirNames)
+    public DatumType getDeepLoadSpaceWrapper(String className, String[] overrideDirNames)
         throws ClassNotFoundException
     {
         DatumType wrapper = null;
@@ -70,7 +70,7 @@ public class SjiService {
         return wrapper;
     }
 
-    public DatumType getDeepLoadSpaceWrapper(Class<?> jnClass, String ... overrideDirNames) {
+    public DatumType getDeepLoadSpaceWrapper(Class<?> jnClass, String[] overrideDirNames) {
         SjiTypeMapping sjiTypeMapping = sjiMappingByClass.get(jnClass);
         if (sjiTypeMapping == null) {
             sjiTypeMapping = createSjiTypeMapping(jnClass);
@@ -118,7 +118,7 @@ public class SjiService {
         );
         for (TypeRefByClass unresolvedRef : unresolvedRefs) {
             if (unresolvedRef.getState() == LinkState.INITIALIZED) {
-                deepLoadSpaceWrapper(unresolvedRef.getMapping(), overrideDirNames);
+                deepLoadSpaceWrapper(unresolvedRef.getMapping(), null);
 //                DatumType spaceWrapper = getDeepLoadSpaceWrapper(unresolvedRef.getWrappedClass());
                 if (unresolvedRef.getState() != LinkState.RESOLVED) {
                     log.error("space wrapper for Java class " +
@@ -130,6 +130,7 @@ public class SjiService {
                 log.info("skipping load of previously unresolved ref");
             }
         }
+        log.debug("created Space wrapper mapping: " + sjiTypeMapping);
     }
 
     public PrimitiveTypeDefn getPrimitiveTypeDefn(Class jnClass) {

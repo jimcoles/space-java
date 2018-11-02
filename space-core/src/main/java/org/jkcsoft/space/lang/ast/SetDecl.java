@@ -19,9 +19,9 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class SetDecl<T extends NamedElement> extends NamedElement implements Declaration {
 
-    private MetaReference<T> tupleTypeRef;
+    private ExpressionChain<T> tupleTypeRef;
 
-    SetDecl(SourceInfo sourceInfo, String name, MetaReference tupleTypeRef) {
+    SetDecl(SourceInfo sourceInfo, String name, ExpressionChain tupleTypeRef) {
         super(sourceInfo, name);
 
         this.tupleTypeRef = tupleTypeRef;
@@ -39,7 +39,7 @@ public class SetDecl<T extends NamedElement> extends NamedElement implements Dec
         return MetaType.DATUM;
     }
 
-    public MetaReference<T> getTupleTypeRef() {
+    public ExpressionChain<T> getTupleTypeRef() {
         return tupleTypeRef;
     }
 

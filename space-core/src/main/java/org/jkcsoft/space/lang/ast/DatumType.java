@@ -28,4 +28,5 @@ public interface DatumType extends Named {
 
     boolean isPrimitive();
 
+    boolean isAssignableTo(DatumType argsType);
 }

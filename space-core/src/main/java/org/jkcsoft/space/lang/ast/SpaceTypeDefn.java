@@ -56,6 +56,11 @@ public class SpaceTypeDefn extends NamedElement implements ComplexType {
         return false;
     }
 
+    @Override
+    public boolean isAssignableTo(DatumType argsType) {
+        return false;
+    }
+
     public boolean isComputed() {
         return body.isComputed();
     }

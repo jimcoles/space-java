@@ -23,7 +23,7 @@ public class Namespace extends NamedElement {
 
     Namespace(SourceInfo sourceInfo, String name, Namespace ... nsLookupChain) {
         super(sourceInfo, name);
-        this.rootDir = AstFactory.getInstance().newAstDir(new IntrinsicSourceInfo(), "/");
+        this.rootDir = AstFactory.getInstance().newAstDir(new IntrinsicSourceInfo(), "(root)");
         this.nsLookupChain = new Namespace[nsLookupChain.length + 1];
         this.nsLookupChain[0] = this;
         for (int idxExtraLookup = 0; idxExtraLookup < nsLookupChain.length; idxExtraLookup++) {

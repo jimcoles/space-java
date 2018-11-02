@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public class TypeRefImpl extends MetaReference implements TypeRef {
+public class TypeRefImpl extends ExpressionChain implements TypeRef {
 
     /** Somewhat analogous to Java 'new URL(String spec)' */
     public static TypeRefImpl newTypeRef(String typeNameSpec) {

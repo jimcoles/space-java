@@ -40,4 +40,9 @@ public class SequenceLiteralExpr extends ModelElement implements ValueExpr {
     public String getDisplayName() {
         return valueExpr;
     }
+
+    @Override
+    public DatumType getDatumType() {
+        return typeRef.getDatumType();
+    }
 }

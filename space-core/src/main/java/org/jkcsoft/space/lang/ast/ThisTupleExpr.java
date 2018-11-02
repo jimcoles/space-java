@@ -19,4 +19,9 @@ public class ThisTupleExpr extends ModelElement implements ValueExpr {
     ThisTupleExpr(SourceInfo sourceInfo) {
         super(sourceInfo);
     }
+
+    @Override
+    public DatumType getDatumType() {
+        return null;
+    }
 }

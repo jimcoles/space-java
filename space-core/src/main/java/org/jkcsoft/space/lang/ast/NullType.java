@@ -24,4 +24,8 @@ public class NullType extends PrimitiveTypeDefn {
         super(sourceInfo, name);
     }
 
+    @Override
+    public boolean isAssignableTo(DatumType argsType) {
+        return false;
+    }
 }

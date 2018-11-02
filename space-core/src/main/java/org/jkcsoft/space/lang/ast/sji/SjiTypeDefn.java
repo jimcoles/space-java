@@ -54,6 +54,11 @@ public class SjiTypeDefn extends NamedElement implements ComplexType {
     }
 
     @Override
+    public boolean isAssignableTo(DatumType argsType) {
+        return false;
+    }
+
+    @Override
     public boolean hasDatums() {
         return false;
     }

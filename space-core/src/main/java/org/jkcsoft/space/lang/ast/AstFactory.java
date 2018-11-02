@@ -91,12 +91,12 @@ public class AstFactory {
         return new SequenceLiteralExpr(sourceInfo, newTypeRef(sourceInfo, NumPrimitiveTypeDefn.CHAR), text);
     }
 
-    public MetaRefPart newMetaRefPart(NamePartExpr namePartExpr) {
-        return new MetaRefPart(namePartExpr);
+    public SimpleExprLink newMetaRefPart(NamePartExpr namePartExpr) {
+        return new SimpleExprLink(namePartExpr);
     }
 
-    public MetaRefPart newMetaRefPart(SourceInfo sourceInfo, String nameExpr) {
-        return new MetaRefPart(newNamePartExpr(sourceInfo, null, nameExpr));
+    public SimpleExprLink newMetaRefPart(SourceInfo sourceInfo, String nameExpr) {
+        return new SimpleExprLink(newNamePartExpr(sourceInfo, null, nameExpr));
     }
 
     public NamePartExpr newNamePartExpr(SourceInfo sourceInfo, PathOperEnum oper, String searchName)
@@ -142,14 +142,14 @@ public class AstFactory {
         return new NewSetExpr(sourceInfo, tupleTypeRef);
     }
 
-    public MetaReference newMetaReference(SourceInfo sourceInfo, MetaType type, MetaRefPart nsRefPart) {
-        MetaReference metaReference = new MetaReference(sourceInfo, type);
-        metaReference.setNsRefPart(nsRefPart);
-        return metaReference;
+    public ExpressionChain newMetaReference(SourceInfo sourceInfo, MetaType type, SimpleExprLink<Namespace> nsRefPart) {
+        ExpressionChain expressionChain = new ExpressionChain(sourceInfo, type);
+        expressionChain.setNsRefPart(nsRefPart);
+        return expressionChain;
     }
 
     public TypeRefImpl newTypeRef(SourceInfo sourceInfo, List<TypeRefImpl.CollectionType> collectionTypes,
-                                  MetaRefPart nsRefPart)
+                                  SimpleExprLink<Namespace> nsRefPart)
     {
         TypeRefImpl typeRef = new TypeRefImpl(sourceInfo, collectionTypes);
         typeRef.setNsRefPart(nsRefPart);
@@ -164,7 +164,7 @@ public class AstFactory {
         return new ParseUnit(sourceInfo);
     }
 
-    public PackageDecl newPackageDecl(SourceInfo sourceInfo, MetaReference<Directory> packageRef) {
+    public PackageDecl newPackageDecl(SourceInfo sourceInfo, ExpressionChain<Directory> packageRef) {
         return new PackageDecl(sourceInfo, packageRef);
     }
 

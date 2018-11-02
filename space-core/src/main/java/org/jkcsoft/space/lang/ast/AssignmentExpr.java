@@ -9,26 +9,24 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
 /**
  * @author Jim Coles
  */
 public class AssignmentExpr extends ModelElement implements ValueExpr {
 
-    private MetaReference<NamedElement> memberRef;
+    private ExpressionChain<NamedElement> memberRef;
     private ValueExpr valueExpr;
 
     public AssignmentExpr(SourceInfo sourceInfo) {
         super(sourceInfo);
     }
 
-    public MetaReference<NamedElement> getMemberRef() {
+    public ExpressionChain<NamedElement> getMemberRef() {
         return memberRef;
     }
 
     /** The left-side reference. */
-    public void setMemberRef(MetaReference<NamedElement> memberRef) {
+    public void setMemberRef(ExpressionChain<NamedElement> memberRef) {
         this.memberRef = memberRef;
         //
         addChild(memberRef);
@@ -51,5 +49,9 @@ public class AssignmentExpr extends ModelElement implements ValueExpr {
         return valueExpr;
     }
 
+    @Override
+    public DatumType getDatumType() {
+        return memberRef.getDatumType();
+    }
 
 }

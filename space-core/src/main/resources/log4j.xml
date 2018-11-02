@@ -11,7 +11,9 @@
 
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 
-<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xsi:schemaLocation="http://jakarta.apache.org/log4j/ ">
     <appender name="console" class="org.apache.log4j.ConsoleAppender">
         <param name="Target" value="System.out"/>
         <layout class="org.apache.log4j.PatternLayout">
@@ -36,7 +38,7 @@
     </appender>
 
     <logger name="dumpFile" additivity="false">
-        <appender-ref ref="dumpFile" />
+        <appender-ref ref="dumpFile"/>
     </logger>
 
     <root>

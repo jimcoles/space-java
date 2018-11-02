@@ -128,7 +128,7 @@ query-def <queryName> (
 parseUnit :
     packageStatement?
     importStatement*
-    (spaceTypeDefn | equationDefn | functionDefn)*
+    (spaceTypeDefn | equationDefn | functionDefn | topLevelAssociationDefn)*
     ;
 
 /*
@@ -224,6 +224,12 @@ associationDefn :
 
 associationDecl :
     elementDeclHeader? complexOptCollTypeRef identifier
+    ;
+
+topLevelAssociationDefn :
+    'assoc' identifier '{'
+        (endAnno=annotation)*
+    '}'
     ;
 
 /*------------------------------------------------------------------------------
@@ -351,6 +357,38 @@ queryExpr :
 
 queryRootExpr:
     complexTypeRef
+    ;
+
+/*------------------------------------------------------------------------------
+  FUNCTIONS
+
+  A function, in its pure form, is kind of Relation, wherein there is a unique
+  mapping from some independent variables to the remaining dependent variables
+  in the space.
+  Functions are expresssed in such a way that they provides a way to compute
+  the solution to an Equation. Space functions,
+  in general, compute solutions via a sequence of imperitive statements.
+
+  Some subset of Space equations might be solvable via our inference engine,
+  the Equator, which can infer an 'execution plan' that solves the equation.
+  For more complex equations, the programmer will have to supply functions
+  that solve for the tuple (or set of tuples) that satisfy the current
+  system of equations.
+------------------------------------------------------------------------------*/
+
+functionDefn :
+    elementDeclHeader?
+    'function' accessModifier? (anyTypeRef | voidTypeName) identifier indParams=parameterDefnList
+    ('context' contextSpace=parameterDefnList)?
+    ('solves' metaRefExpr)?
+    statementBlock
+    ;
+
+parameterDefnList : '(' (parameterDecl (',' parameterDecl)* )? ')' ;
+
+parameterDecl :
+    variableDecl |
+    associationDecl
     ;
 
 /*------------------------------------------------------------------------------
@@ -517,36 +555,12 @@ treePathExpr :
     ;
 
 /*------------------------------------------------------------------------------
-  FUNCTIONS
+ STATEMENTS
 
-  A function, in its pure form, is kind of Relation, wherein there is a unique
-  mapping from some independent variables to the remaining dependent variables
-  in the space.
-  Functions are expresssed in such a way that they provides a way to compute
-  the solution to an Equation. Space functions,
-  in general, compute solutions via a sequence of imperitive statements.
-
-  Some subset of Space equations might be solvable via our inference engine,
-  the Equator, which can infer an 'execution plan' that solves the equation.
-  For more complex equations, the programmer will have to supply functions
-  that solve for the tuple (or set of tuples) that satisfy the current
-  system of equations.
+ Statements are the imperative side of the Space langauge. They are
+ execuatble instructions that allow users to implement algorithms, modify
+ program state, etc..
 ------------------------------------------------------------------------------*/
-
-functionDefn :
-    elementDeclHeader?
-    'function' accessModifier? (anyTypeRef | voidTypeName) identifier parameterDefnList
-    ('solves' metaRefExpr)? // ref to equation
-    statementBlock
-    ;
-
-parameterDefnList : '(' (parameterDecl (',' parameterDecl)* )? ')' ;
-
-parameterDecl :
-    variableDecl |
-    associationDecl
-    ;
-
 statement :
     expression ';'
     | statementBlock
@@ -583,6 +597,14 @@ returnStatement :
 // object holding parameters.  The language runtime knows the names/paths of
 // all elements in a Tuple.
 
+// A valueExpr is like a metaRefExpr except that the latter is a simple
+// dot-seperated list of identifiers, whereas the former may start
+// with literals or symbolic expressions and may contain function calls
+
+valueExpr :
+    atomicValueExpr ('.' namedRefValueExpr)*
+    ;
+
 functionCallExpr :
     metaRefExpr '(' valueExpr? ')'
     ;
@@ -610,13 +632,6 @@ namedRefValueExpr :
 
 //argTupleOrRef : (untypedTupleLiteral | spacePathExpr) ;
 
-// A valueExpr is like a metaRefExpr except that the latter is a simple
-// dot-seperated list of identifiers, whereas the former may start
-// with literals or symbolic expressions and may contain function calls
-
-valueExpr :
-    atomicValueExpr ('.' namedRefValueExpr)*
-    ;
 
 valueOrAssignmentExprList :
     valueOrAssignmentExpr (',' valueOrAssignmentExpr)*
@@ -719,7 +734,7 @@ singleLineComment : SingleLineComment;
 
 multiLineComment : BlockComment;
 
-annotation : '@' newObjectExpr;
+annotation : '@' identifier '=' newObjectExpr;
 
 rightAssignmentExpr :
     '=' valueExpr

@@ -11,7 +11,6 @@ package org.jkcsoft.space.test;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.jkcsoft.space.lang.loader.AstFileLoadErrorSet;
 import org.jkcsoft.space.lang.runtime.Executor;
 
 import java.io.File;

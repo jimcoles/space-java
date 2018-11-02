@@ -10,12 +10,12 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * {@link ExpressionChain}s and {@link ValueExprChain}s are both essentially
- * dot-separated lists of names, each part of which must be resolved to a {@link Named}
- * model element.
+ * The abstract notion of a Space as a "set of datums with some structure".
  *
  * @author Jim Coles
+ * @version 1.0
  */
-public interface NamePath {
+public @interface Space {
+
 
 }

@@ -9,9 +9,6 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.MetaReference;
-import org.jkcsoft.space.lang.ast.SpaceTypeDefn;
-
 /**
  * Base notion of an index for fast lookup of objects in a Space without
  * the need to fully scan the Space. Indexes may be defined by the user or

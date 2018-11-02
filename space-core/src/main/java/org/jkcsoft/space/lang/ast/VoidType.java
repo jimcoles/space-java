@@ -24,4 +24,8 @@ public class VoidType extends PrimitiveTypeDefn {
         super(sourceInfo, name);
     }
 
+    @Override
+    public boolean isAssignableTo(DatumType argsType) {
+        return false;
+    }
 }

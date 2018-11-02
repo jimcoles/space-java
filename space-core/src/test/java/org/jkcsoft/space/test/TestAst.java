@@ -53,7 +53,7 @@ public class TestAst {
 
         ThisTupleExpr thisTupleExpr = astFactory.newThisExpr(si);
 
-        MetaReference functionDefnRef = astFactory.newMetaReference(si, MetaType.FUNCTION, astFactory
+        ExpressionChain functionDefnRef = astFactory.newMetaReference(si, MetaType.FUNCTION, astFactory
             .newMetaRefPart(si, SpaceHome.getNsRegistry().getTmpNs().getName()));
 
         AstUtils.addNewMetaRefParts(functionDefnRef, si, "test", "TestType", "testFunc");

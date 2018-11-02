@@ -73,4 +73,8 @@ public abstract class AbstractCollectionTypeDefn extends NamedElement implements
         return false;
     }
 
+    @Override
+    public boolean isAssignableTo(DatumType argsType) {
+        return false;
+    }
 }

@@ -70,25 +70,22 @@ public class G2AntlrParser implements AstLoader {
         Directory spcRootDir = tempNs.getRootDir();
         loadChildren(results, spcRootDir, srcRootDir);
         results.setSpaceRootDir(spcRootDir);
+        log.info("loaded dir " + results);
         return results;
     }
 
     @Override
     public FileLoadResults loadFile(Directory spaceDir, File spaceSrcFile) throws IOException {
-        log.info("Parsing file [" + spaceSrcFile.getAbsolutePath() + "]");
         this.srcFile = spaceSrcFile;
         AstFileLoadErrorSet fileErrors = new AstFileLoadErrorSet(spaceSrcFile);
         FileLoadResults results = new FileLoadResults();
         ParseUnit parseUnit = loadInputStream(fileErrors, new ANTLRInputStream(new FileInputStream(spaceSrcFile)));
         //
-        if (parseUnit != null) {
-            spaceDir.addParseUnit(parseUnit);
-        }
-        //
         results.setParseUnit(parseUnit);
         if (fileErrors.hasErrors())
             results.getErrors().addAll(fileErrors.getAllErrors());
         //
+        log.info("Parsed file [" + spaceSrcFile.getAbsolutePath() + "] into Space dir ["+spaceDir+"]");
         return results;
     }
 
@@ -149,10 +146,12 @@ public class G2AntlrParser implements AstLoader {
         log.info("Parse errors from ANTLR: " + Strings.buildNewlineList(loadErrors.getAllErrors()));
 
         // debug / print
-        log.trace("ANTLR Util parse dump:" + JavaHelper.EOL
-                      + parseUnitContext.toStringTree(srcParser));
-        log.trace("ANTLR custom print/dump: " + JavaHelper.EOL
-                      + printListener.getSb());
+        if (log.isTraceEnabled()) {
+            log.trace("ANTLR Util parse dump:" + JavaHelper.EOL
+                          + parseUnitContext.toStringTree(srcParser));
+            log.trace("ANTLR custom print/dump: " + JavaHelper.EOL
+                          + printListener.getSb());
+        }
 
 //        SimpleVisitor astTransVisitor = new SimpleVisitor();
         // accept() just calls back into the Visitor's visitParseUnit() method
@@ -232,7 +231,8 @@ public class G2AntlrParser implements AstLoader {
                                     BitSet ambigAlts, ATNConfigSet configs)
         {
             // TODO Not sure how to use provided params to inform user
-            parseErrors.add(new AstLoadError(AstLoadError.Type.PARSE_WARNING, new FileSourceInfo(srcFile, null, null), "ambiguity"));
+            parseErrors.add(new AstLoadError(AstLoadError.Type.PARSE_WARNING, new FileSourceInfo(srcFile, null, null),
+                                             "ambiguity: startIndex stopIndex"));
         }
 
         @Override

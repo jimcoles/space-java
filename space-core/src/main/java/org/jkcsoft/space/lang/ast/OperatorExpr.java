@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.runtime.AstUtils;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -65,5 +67,21 @@ public class OperatorExpr extends ModelElement implements ValueExpr {
     @Override
     public String getDisplayName() {
         return oper.name();
+    }
+
+    @Override
+    public DatumType getDatumType() {
+        // expressions inherit types from nested value expressions, bumping
+        // up the scale of the type if needed, e.g., long + short => long
+        DatumType argsType = null;
+        for (ValueExpr arg : args) {
+            if (argsType == null)
+                argsType = arg.getDatumType();
+            else if (arg.getDatumType().isAssignableTo(argsType)) {
+                argsType = AstUtils.larger(argsType, arg.getDatumType());
+            }
+
+        }
+        return argsType;
     }
 }

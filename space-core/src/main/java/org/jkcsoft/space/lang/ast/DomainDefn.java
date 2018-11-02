@@ -50,4 +50,9 @@ public class DomainDefn extends NamedElement implements SimpleType {
         return false;
     }
 
+    @Override
+    public boolean isAssignableTo(DatumType argsType) {
+        return false;
+    }
+
 }

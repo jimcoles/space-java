@@ -34,7 +34,7 @@ public abstract class ModelElement extends SpaceObject {
     private NamedElement namedParent;
     private List<ModelElement> children = new LinkedList<>();
     private Map<String, NamedElement> namedChildMap = new TreeMap<>();
-    private Set<MetaReference> references = null;
+    private Set<ExpressionChain> references = null;
     private List<ModelElement> groupingNodes = new LinkedList<>();
     // -------------- <end> redundant collections
 
@@ -71,8 +71,8 @@ public abstract class ModelElement extends SpaceObject {
         if (AstUtils.isGroupingNode(child)) {
             groupingNodes.add(child);
         }
-        if (child instanceof MetaReference) {
-            addReference(((MetaReference) child));
+        if (child instanceof ExpressionChain) {
+            addReference(((ExpressionChain) child));
         }
         //
         return child;
@@ -90,7 +90,7 @@ public abstract class ModelElement extends SpaceObject {
      * Must be called by the adder method for children, e.g., {@link SpaceTypeDefn}.addAssocDefn() should call this for
      * the {@link NamePartExpr} associated with it's 'from' and 'to' type definition.
      */
-    private void addReference(MetaReference reference) {
+    private void addReference(ExpressionChain reference) {
         if (reference == null) throw new IllegalArgumentException("attempt to Add null reference");
         if (references == null)
             references = new HashSet<>();
@@ -101,7 +101,7 @@ public abstract class ModelElement extends SpaceObject {
         return references != null && references.size() > 0;
     }
 
-    public Set<MetaReference> getReferences() {
+    public Set<ExpressionChain> getReferences() {
         return references;
     }
 

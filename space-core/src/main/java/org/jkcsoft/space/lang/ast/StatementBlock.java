@@ -54,6 +54,11 @@ public class StatementBlock extends Statement implements ComplexType {
         return false;
     }
 
+    @Override
+    public boolean isAssignableTo(DatumType argsType) {
+        return false;
+    }
+
     public List<Statement> getStatementSequence() {
         return statementSequence;
     }

@@ -51,6 +51,7 @@ public class SjiTypeMapping {
 
     @Override
     public String toString() {
-        return "SJI mapping for Java class ["+javaClass+"] state=" + getState();
+        return "SJI mapping for Java class ["+javaClass+"] " +
+            "state=" + getState() + " maps to ["+spaceWrapper+"]";
     }
 }

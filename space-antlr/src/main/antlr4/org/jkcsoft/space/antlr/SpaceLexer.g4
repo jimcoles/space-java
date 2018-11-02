@@ -44,12 +44,17 @@ PackageKeyword : 'package';
 ImportKeyword : 'import';
 //ImportJavaKeyword : 'import-java';
 TypeDefKeyword  : 'type';
+AssocKeyword    : 'assoc';
+
 ExtendsKeyword  : 'extends';
 //
 EquationDefKeyword : 'equation';
 //
 FunctionDefKeyword  : 'function';
+ContextKeyword      : 'context' ;
 SolvesKeyword       : 'solves';
+ForKeyword          : 'for';
+GivenKeyword        : 'given';
 //
 QueryDefKeyword : 'query';
 AssocsKeyword   : 'assocs';

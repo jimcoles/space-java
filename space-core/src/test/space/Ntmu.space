@@ -62,7 +62,7 @@ type Task {
     char[] description;
     Person assignee;
 
-    getAssignee() {
+    function Person getAssignee() {
         return assignee;
     }
 }

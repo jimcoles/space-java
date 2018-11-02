@@ -21,4 +21,8 @@ public class OperLookupExpr extends ModelElement implements ValueExpr {
         this.operLookupKey = operLookupKey;
     }
 
+    @Override
+    public DatumType getDatumType() {
+        return null;
+    }
 }

@@ -1,3 +1,6 @@
+
+import java:java.lang.CharSequence;
+
 // Syntax: Type definition
 type Person {
     // Variables
@@ -40,41 +43,38 @@ type Address {
     // Syntax: Equation Definition
     equation streetAddrFormatUSCommon {
         // Syntax: Equality Constraint as Grammar expression
-//        streetAddr ==  gramex streetNumber streetRoad unitNumber? }
+        //        streetAddr ==  gramex streetNumber streetRoad unitNumber? }
+
+        (true == true)
+
     }
 
     // Syntax: Function Definition
-    function streetFromParts solves streetAddrFormatUSCommon for
-    (streetAddr)
-    from
-    (streetNumber, streetRoad, unitNumber?) {
+    function streetAddr streetFromParts()
+        solves streetAddrFormatUSCommon
+    {
         // Assignment, not equivalence
         streetAddr = streetNumber.append(streetRoad).append(unitNumber);
     }
 
 }
 
-type = City {
+type City {
     string cityKey;
     string cityDefaultName;
 }
 
-assoc PersonAddresses = {
+assoc PersonAddresses {
 
-    leftEnd = {
-        type = Person,
-        // nav = true;
-    }
+    @leftEnd = [ endType = Person
+     //,  nav = true;
+    ]
 
-    rightEnd = {
-        type = Address,
-        multiplicity : many,
-        isList : true
-    }
+    @rightEnd = [ endType = Address, multiplicity = many, isList = true ]
 
 }
 
-type Triangle (
+type Triangle {
     real a;
     real b;
     real c;
@@ -83,8 +83,8 @@ type Triangle (
     real bcAngle;
     real caAngle;
 
-    equation sidesAngleAngles (
+    equation sidesAngleAngles {
+        ( ( a + ( b + c ) ) == 0 )
+    }
 
-    )
-
-)
+}
