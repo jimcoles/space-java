@@ -93,4 +93,9 @@ public abstract class NamedElement extends ModelElement implements Named, Compar
     public String getDisplayName() {
         return getFQName();
     }
+
+    @Override
+    protected String toUrlString() {
+        return getName();
+    }
 }

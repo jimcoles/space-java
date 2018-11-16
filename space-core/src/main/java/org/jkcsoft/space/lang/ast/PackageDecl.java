@@ -16,11 +16,14 @@ package org.jkcsoft.space.lang.ast;
  */
 public class PackageDecl extends ModelElement {
 
-    private ExpressionChain<Directory> packageRef;
+    private ExpressionChain packageRef;
 
-    PackageDecl(SourceInfo sourceInfo, ExpressionChain<Directory> packageRef) {
+    PackageDecl(SourceInfo sourceInfo, ExpressionChain packageRef) {
         super(sourceInfo);
         this.packageRef = packageRef;
     }
 
+    public ExpressionChain getPackageRef() {
+        return packageRef;
+    }
 }

@@ -110,11 +110,12 @@ public class SjiService {
 
         // load dependencies ...
         Set<TypeRefByClass> unresolvedRefs = AstUtils.queryAst(newParseUnit,
-                                                              new Executor.QueryAstConsumer<>(
-                                                                  TypeRefByClass.class, modelElement ->
-                                                                  modelElement instanceof TypeRefByClass &&
-                                                                      ((TypeRefByClass) modelElement).getState() !=
-                                                                          LinkState.RESOLVED)
+                                                               new Executor.QueryAstConsumer<>(
+                                                                   TypeRefByClass.class,
+                                                                   modelElement ->
+                                                                       modelElement instanceof TypeRefByClass &&
+                                                                           ((TypeRefByClass) modelElement).getState() !=
+                                                                               LinkState.RESOLVED)
         );
         for (TypeRefByClass unresolvedRef : unresolvedRefs) {
             if (unresolvedRef.getState() == LinkState.INITIALIZED) {

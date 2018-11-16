@@ -59,4 +59,12 @@ public class DirLoadResults {
             errorList = new LinkedList<>();
     }
 
+    @Override
+    public String toString() {
+        return "DirLoadResults{" +
+            "srcDir=" + srcDir +
+            ", spaceRootDir=" + spaceRootDir +
+            ", errors=" + (errorList != null ? errorList.size() : 0)+
+            '}';
+    }
 }

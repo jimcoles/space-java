@@ -133,6 +133,7 @@ public class AstUtils {
      */
     public static void resolveAstPath(ExpressionChain reference) {
         Namespace refNs = getNs(reference);
+        checkSetResolve(reference.getNsRefPart(), refNs);
 
         switch (reference.getTargetMetaType()) {
             case TYPE:
@@ -177,7 +178,7 @@ public class AstUtils {
     }
 
     static void checkSetResolve(ExprLink refPart, NamedElement lookup) {
-        if (lookup != null) {
+        if (refPart != null && lookup != null) {
             refPart.setResolvedMetaObj(lookup);
             refPart.setState(LinkState.RESOLVED);
         }
@@ -235,7 +236,7 @@ public class AstUtils {
                 break;
             }
             else {
-                log.debug("could not find [" + reference + "] under [" + rootDir.getFQName() + "]");
+                log.debug("could not fully resolve [" + reference + "] under [" + rootDir.getFQName() + "]");
             }
         }
     }
@@ -248,14 +249,17 @@ public class AstUtils {
         resolveRest(lookup, reference.getExprLinks().iterator());
     }
 
-    public static void resolveRest(NamedElement context, Iterator<ExprLink> refPartsIter) {
-        if (context != null && refPartsIter.hasNext()) {
+    public static void resolveRest(NamedElement nameContext, Iterator<ExprLink> refPartsIter) {
+        if (nameContext != null && refPartsIter.hasNext()) {
             SimpleExprLink refPart = (SimpleExprLink) refPartsIter.next();
-            NamedElement targetChild = lookupImmediateChild(context, refPart.getExpression().getNameExpr());
+            if (nameContext instanceof ValueExpr) {
+                nameContext = (NamedElement) ((ValueExpr) nameContext).getDatumType();
+            }
+            NamedElement targetChild = lookupImmediateChild(nameContext, refPart.getExpression().getNameExpr());
             checkSetResolve(refPart, targetChild);
             if (refPart.isResolved()) {
                 if (refPartsIter.hasNext()) {
-                    resolveRest((NamedElement) refPart.getResolvedMetaObj(), refPartsIter);
+                    resolveRest(refPart.getResolvedMetaObj(), refPartsIter);
                 }
             }
         }
@@ -330,7 +334,9 @@ public class AstUtils {
     }
 
     public static void walkAstDepthFirst(ModelElement astNode, AstScanConsumer astAction) {
-        boolean match = astAction.getFilter() == null || astAction.getFilter().test(astNode);
+        boolean match =
+            astAction.getFilter() == null
+            || astAction.getFilter().test(astNode);
         if (match)
             astAction.upon(astNode);
         List<ModelElement> children = astNode.getChildren();
@@ -401,7 +407,7 @@ public class AstUtils {
     }
 
     public static boolean isJavaNs(ImportExpr importExpr) {
-        SimpleExprLink<Namespace> nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
+        SimpleExprLink nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
         return nsRefPart != null
             && nsRefPart.getNameExprText().equals(SpaceHome.getNsRegistry().getJavaNs().getName());
     }

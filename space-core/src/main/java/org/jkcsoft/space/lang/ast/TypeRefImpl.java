@@ -26,11 +26,14 @@ public class TypeRefImpl extends ExpressionChain implements TypeRef {
         String[] topSplits = typeNameSpec.split(":");
         String nsName = topSplits.length == 2 ? topSplits[0] : null;
         AstFactory astFactory = AstFactory.getInstance();
-        TypeRefImpl typeRef = astFactory.newTypeRef(new IntrinsicSourceInfo(), null, astFactory.newMetaRefPart(null, nsName));
+        TypeRefImpl typeRef =
+            astFactory.newTypeRef(new IntrinsicSourceInfo(), null, astFactory.newMetaRefPart(null, nsName));
         String[] nameStrings = typeNameSpec.split("\\.");
         AstUtils.addNewMetaRefParts(typeRef, new IntrinsicSourceInfo(), nameStrings);
         return typeRef;
     }
+
+    // -------------------------------------------------------------------------
 
     private List<CollectionType> collectionTypes;
     private String suffix = null;
@@ -41,7 +44,7 @@ public class TypeRefImpl extends ExpressionChain implements TypeRef {
     }
 
     TypeRefImpl(SourceInfo sourceInfo, DatumType typeDefn) {
-        super(sourceInfo, (NamedElement) typeDefn);
+        super(sourceInfo, typeDefn);
     }
 
     TypeRefImpl(SourceInfo sourceInfo, DatumType typeDefn, List<CollectionType> collectionTypes) {

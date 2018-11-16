@@ -24,6 +24,7 @@ type Person {
         JnOpSys.println( jimTuple2 );
 
         // Syntax: Function call with anonymous tuple
+
         JnOpSys.println( ["Elvis", "Presley"] );
 
     }

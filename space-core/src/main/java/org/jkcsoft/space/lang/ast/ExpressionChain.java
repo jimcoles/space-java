@@ -20,7 +20,7 @@ import java.util.List;
  * Very much like a LISP "List Expression". Expression Chains are used to hold the initial
  * AST representation of any dot (".") separated expression. After the linking and
  * semantic analysis phases, a valid Expression Chain is then broken into some combination
- * of a MetaRefPath and a Value Expression Chain.
+ * of a MetaRefPath and a ValueExprChain.
  *
  * Holds either:
  *
@@ -46,37 +46,32 @@ import java.util.List;
  * V.L - Literal
  * V.D - Datum
  *
- *
- * @param <T> The class of meta object being referenced.
  * @author Jim Coles
  */
-public class ExpressionChain<T extends NamedElement> extends ModelElement implements NamePath, ValueExpr {
+public class ExpressionChain extends ModelElement implements NamePath, ValueExpr {
 
     private MetaType targetMetaType;
-    private SimpleExprLink<Namespace> nsRefPart;
+    private SimpleExprLink nsRefPart;
     private List<ExprLink> exprLinks = new LinkedList<>();
-//    private MetaRefPart firstPart;
-    // redundant lazy init fields ...
-//    private MetaRefPart<T> lastPart;
-//    private int pathLength;
-
     private ScopeKind resolvedDatumScope;  // only relevant if target is a datum type.
     private boolean isImportMatch = false;  // only relevant if this chain is a type ref or other static ref
     private TypeCheckState typeCheckState = TypeCheckState.UNCHECKED;
 
-//    private LinkState state = null;
+    // Redundantly extracted views of the exprLinks:
+    private MetaRefPath metaRefPath;
+    private ValueExprChain valueExprChain;
 
     ExpressionChain(SourceInfo sourceInfo, MetaType targetMetaType) {
         super(sourceInfo);
         this.targetMetaType = targetMetaType;
     }
 
-    public ExpressionChain(SourceInfo sourceInfo, T typeDefn) {
+    public ExpressionChain(SourceInfo sourceInfo, DatumType typeDefn) {
         this(sourceInfo, MetaType.TYPE);
-        ExprLink<T> firstPart =
-            new SimpleExprLink<>(new NamePartExpr(sourceInfo, false, null, typeDefn.getName()));
+        ExprLink firstPart =
+            new SimpleExprLink(new NamePartExpr(sourceInfo, false, null, typeDefn.getName()));
         firstPart.setState(LinkState.RESOLVED);
-        firstPart.setResolvedMetaObj(typeDefn);
+        firstPart.setResolvedMetaObj(((NamedElement) typeDefn));
         this.typeCheckState = TypeCheckState.VALID;
         //
         exprLinks.add(firstPart);
@@ -84,48 +79,6 @@ public class ExpressionChain<T extends NamedElement> extends ModelElement implem
 
     public ExpressionChain() {
         super(new ProgSourceInfo());
-    }
-
-    public boolean hasMetaRefPath() {
-        if (!isResolvedValid())
-            throw new IllegalStateException("chain expression not fully resolved and validated");
-
-        return !getFirstPart().isValueExpr();
-    }
-
-    public MetaRefPath extractMetaRefPath() {
-        if (!isResolvedValid())
-            throw new IllegalStateException("chain expression not fully resolved and validated");
-
-        MetaRefPath metaRefPath = new MetaRefPath();
-        for (ExprLink exprLink : this.exprLinks) {
-            if (!exprLink.isValueExpr()) {
-                metaRefPath.addPart(((SimpleExprLink) exprLink).getExpression());
-            }
-            else
-                break;
-        }
-        return metaRefPath;
-    }
-
-    public boolean hasValueChain() {
-        if (!isResolvedValid())
-            throw new IllegalStateException("chain expression not fully resolved and validated");
-
-        return getLastPart().isValueExpr();
-    }
-
-    public ValueExprChain extractValueExprChain() {
-        if (!isResolvedValid())
-            throw new IllegalStateException("chain expression not fully resolved and validated");
-
-        ValueExprChain valueExprChain = new ValueExprChain(null);
-        for (ExprLink exprLink : this.exprLinks) {
-            if (exprLink.isValueExpr()) {
-                valueExprChain.addValueExpr(((ValueExprLink) exprLink).getValueExpr());
-            }
-        }
-        return valueExprChain;
     }
 
     public boolean isImportRef() {
@@ -148,11 +101,11 @@ public class ExpressionChain<T extends NamedElement> extends ModelElement implem
         return nsRefPart != null;
     }
 
-    public SimpleExprLink<Namespace> getNsRefPart() {
+    public SimpleExprLink getNsRefPart() {
         return nsRefPart;
     }
 
-    public ExpressionChain<T> setNsRefPart(SimpleExprLink<Namespace> nsRefPart) {
+    public ExpressionChain setNsRefPart(SimpleExprLink nsRefPart) {
         this.nsRefPart = nsRefPart;
         return this;
     }
@@ -177,8 +130,12 @@ public class ExpressionChain<T extends NamedElement> extends ModelElement implem
         this.resolvedDatumScope = resolvedDatumScope;
     }
 
-    public T getResolvedMetaObj() {
-        return getLastPart().getResolvedMetaObj();
+    public NamedElement getResolvedMetaObj() {
+        return getLastPathLink().getResolvedMetaObj();
+    }
+
+    private SimpleExprLink getLastPathLink() {
+        return extractMetaRefPath().getLastLink();
     }
 
     public boolean isImportMatch() {
@@ -198,7 +155,7 @@ public class ExpressionChain<T extends NamedElement> extends ModelElement implem
     }
 
     public String getUrlPathSpec() {
-        return Strings.buildDelList(exprLinks, (Lister<ExprLink>) obj -> obj.getExpression().toString(), ".");
+        return Strings.buildDelList(exprLinks, (Lister<ExprLink>) obj -> obj.getExpression().toUrlString(), ".");
     }
 
     @Override
@@ -210,7 +167,7 @@ public class ExpressionChain<T extends NamedElement> extends ModelElement implem
         return null;
     }
 
-    public ExprLink<T> getLastPart() {
+    public ExprLink getLastPart() {
         return exprLinks.get(exprLinks.size() - 1);
     }
 
@@ -251,10 +208,56 @@ public class ExpressionChain<T extends NamedElement> extends ModelElement implem
         return ((DatumType) getLastPart().getResolvedMetaObj());
     }
 
+    public boolean hasMetaRefPath() {
+        if (!isResolvedValid())
+            throw new IllegalStateException("chain expression not fully resolved and validated");
+
+        return !getFirstPart().isValueExpr();
+    }
+
+    public MetaRefPath extractMetaRefPath() {
+        if (!isResolved())
+            throw new IllegalStateException("chain expression not fully resolved");
+
+        if (metaRefPath == null) {
+            metaRefPath = new MetaRefPath(resolvedDatumScope);
+            for (ExprLink exprLink : this.exprLinks) {
+                if (!exprLink.isValueExpr()) {
+                    metaRefPath.addLink((SimpleExprLink) exprLink);
+                }
+                else
+                    break;
+            }
+        }
+        return metaRefPath;
+    }
+
+    public boolean hasValueChain() {
+        if (!isResolvedValid())
+            throw new IllegalStateException("chain expression not fully resolved and validated");
+
+        return getLastPart().isValueExpr();
+    }
+
+    public ValueExprChain extractValueExprChain() {
+        if (!isResolvedValid())
+            throw new IllegalStateException("chain expression not fully resolved and validated");
+
+        if (valueExprChain == null) {
+            valueExprChain = new ValueExprChain(null);
+            for (ExprLink exprLink : this.exprLinks) {
+                if (exprLink.isValueExpr()) {
+                    valueExprChain.addValueExpr(((ValueExprLink) exprLink).getValueExpr());
+                }
+            }
+        }
+        return valueExprChain;
+    }
+
     @Override
     public String toString() {
         String suffix = getSuffix();
-        ExprLink<T> lastPart = getLastPart();
+        ExprLink lastPart = getLastPart();
         return "<" +
             "fromObj=" + (getParent() != null ? getParent() : "") +
             " path=\"" + getFullUrlSpec() + (suffix != null ? " " + suffix : "") + "\"" +

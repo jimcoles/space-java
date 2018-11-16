@@ -23,6 +23,13 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface ValueExpr {
 
-    DatumType getDatumType();
+    default boolean hasRefName() {
+        return false;
+    }
 
+    default String getRefName() {
+        return null;
+    }
+
+    DatumType getDatumType();
 }

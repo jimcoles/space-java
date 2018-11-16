@@ -142,14 +142,14 @@ public class AstFactory {
         return new NewSetExpr(sourceInfo, tupleTypeRef);
     }
 
-    public ExpressionChain newMetaReference(SourceInfo sourceInfo, MetaType type, SimpleExprLink<Namespace> nsRefPart) {
+    public ExpressionChain newMetaReference(SourceInfo sourceInfo, MetaType type, SimpleExprLink nsRefPart) {
         ExpressionChain expressionChain = new ExpressionChain(sourceInfo, type);
         expressionChain.setNsRefPart(nsRefPart);
         return expressionChain;
     }
 
     public TypeRefImpl newTypeRef(SourceInfo sourceInfo, List<TypeRefImpl.CollectionType> collectionTypes,
-                                  SimpleExprLink<Namespace> nsRefPart)
+                                  SimpleExprLink nsRefPart)
     {
         TypeRefImpl typeRef = new TypeRefImpl(sourceInfo, collectionTypes);
         typeRef.setNsRefPart(nsRefPart);
@@ -164,7 +164,7 @@ public class AstFactory {
         return new ParseUnit(sourceInfo);
     }
 
-    public PackageDecl newPackageDecl(SourceInfo sourceInfo, ExpressionChain<Directory> packageRef) {
+    public PackageDecl newPackageDecl(SourceInfo sourceInfo, ExpressionChain packageRef) {
         return new PackageDecl(sourceInfo, packageRef);
     }
 

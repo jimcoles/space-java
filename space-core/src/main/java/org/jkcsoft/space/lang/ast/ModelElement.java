@@ -150,4 +150,8 @@ public abstract class ModelElement extends SpaceObject {
             + (AstUtils.isGroupingNode(this) ? " GROUP" : "")
             ;
     }
+
+    protected String toUrlString() {
+        return toString();
+    }
 }

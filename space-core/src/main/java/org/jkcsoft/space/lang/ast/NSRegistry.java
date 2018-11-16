@@ -133,8 +133,9 @@ public class NSRegistry {
     }
 
     public void dumpSymbolTables() {
-        log.debug("normalized meta object table: " + JavaHelper.EOL
-                      + Strings.buildNewlineList(metaObjectNormalTable));
+        log.info("see dump log file for meta object table dump");
+        getDumpLogger().info("normalized meta object table: " + JavaHelper.EOL
+                          + Strings.buildNewlineList(metaObjectNormalTable));
     }
 
     public void dumpAsts() {
@@ -142,8 +143,12 @@ public class NSRegistry {
         for (Namespace ns : getNsChain()) {
             String dump = AstUtils.print(ns);
 //            log.debug("AST Root /: " + dump);
-            Logger.getLogger("dumpFile").info(dump);
+            getDumpLogger().info(dump);
         }
+    }
+
+    private Logger getDumpLogger() {
+        return Logger.getLogger("dumpFile");
     }
 
 }

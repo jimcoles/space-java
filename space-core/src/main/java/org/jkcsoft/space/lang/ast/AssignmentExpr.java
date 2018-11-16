@@ -14,19 +14,19 @@ package org.jkcsoft.space.lang.ast;
  */
 public class AssignmentExpr extends ModelElement implements ValueExpr {
 
-    private ExpressionChain<NamedElement> memberRef;
+    private ExpressionChain memberRef;
     private ValueExpr valueExpr;
 
     public AssignmentExpr(SourceInfo sourceInfo) {
         super(sourceInfo);
     }
 
-    public ExpressionChain<NamedElement> getMemberRef() {
+    public ExpressionChain getMemberRef() {
         return memberRef;
     }
 
     /** The left-side reference. */
-    public void setMemberRef(ExpressionChain<NamedElement> memberRef) {
+    public void setMemberRef(ExpressionChain memberRef) {
         this.memberRef = memberRef;
         //
         addChild(memberRef);

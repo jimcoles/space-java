@@ -13,42 +13,17 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
  * Encapsulates a single part of a static reference path.
- * Usually (always?) a Directory or Type name, as used for Type references.
+ *
+ * A Namespace, Directory, Type, or Datum name. Namespaces, Directories, and Types.
+ * Datums are value expressions; the other meta types are not.
  *
  * @author Jim Coles
  */
-public class SimpleExprLink<T extends NamedElement> extends ExprLink<T> {
-
-//    private MetaReference parentPath;
-    private NamePartExpr nameExpr; // package name, datum name (ref)
+public class SimpleExprLink extends ExprLink {
 
     public SimpleExprLink(NamePartExpr linkOrRefExpr) {
-        super(linkOrRefExpr.getSourceInfo());
+        super(linkOrRefExpr.getSourceInfo(), linkOrRefExpr);
 //        this.parentPath = parentPath;
-        this.nameExpr = linkOrRefExpr;
-    }
-
-    public boolean isWildcard() {
-        return ( this.getExpression() != null
-                    && this.getExpression().getNameExpr().equals("*") );
-    }
-
-    /** Because we want user-centric syntactic simplicity, we don't know if this named
-     * element is a value-holding thing until we resolve it. */
-    public boolean isValueExpr() {
-
-        if (getResolvedMetaObj() == null)
-            throw new IllegalStateException("referenced object [" + nameExpr + "] has not yet been resolved");
-
-        return getResolvedMetaObj().getMetaType() == MetaType.DATUM;
-    }
-
-    public NamePartExpr getExpression() {
-        return nameExpr;
-    }
-
-    public String getNameExprText() {
-        return nameExpr.getNameExpr();
     }
 
 }

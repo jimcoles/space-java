@@ -16,29 +16,7 @@ package org.jkcsoft.space.lang.ast;
  */
 public class ValueExprLink<T extends NamedElement> extends ExprLink<T> {
 
-    //    private MetaReference parentPath;
-    private ValueExpr valueExpr; // Any AST value expression such as a Function Call Expr.
-
-    public ValueExprLink(ValueExpr valueExpr) {
-        super(((ModelElement) valueExpr).getSourceInfo());
-        this.valueExpr = valueExpr;
+    public ValueExprLink(SourceInfo sourceInfo, NamePartExpr linkOrRefExpr) {
+        super(sourceInfo, linkOrRefExpr);
     }
-
-    public boolean isWildcard() {
-        return (this.getExpression() instanceof NamePartExpr
-            && ((NamePartExpr) this.getExpression()).getNameExpr().equals("*"));
-    }
-
-    public boolean isValueExpr() {
-        return true;
-    }
-
-    public ValueExpr getValueExpr() {
-        return valueExpr;
-    }
-
-    public ModelElement getExpression() {
-        return ((ModelElement) valueExpr);
-    }
-
 }

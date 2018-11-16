@@ -18,7 +18,10 @@ import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.ast.sji.SjiFunctionDefnImpl;
 import org.jkcsoft.space.lang.ast.sji.SjiTypeDefn;
 import org.jkcsoft.space.lang.instance.*;
-import org.jkcsoft.space.lang.loader.*;
+import org.jkcsoft.space.lang.loader.AstFileLoadErrorSet;
+import org.jkcsoft.space.lang.loader.AstLoadError;
+import org.jkcsoft.space.lang.loader.AstLoader;
+import org.jkcsoft.space.lang.loader.DirLoadResults;
 import org.jkcsoft.space.lang.metameta.MetaType;
 import org.jkcsoft.space.lang.runtime.jnative.math.Math;
 import org.jkcsoft.space.lang.runtime.jnative.opsys.JOpSys;
@@ -407,17 +410,44 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     private void validateSemantics(ParseUnit parseUnit, List<AstLoadError> errors) {
     /*
-        TODO
-        - Check compatible left/right side of assignments.
-        - Check nested function call arg
+        - Check left-side of assignment is a datum.
+        - Check right-side of assignment is a value expr.
+        - Check RHS type is assignable to LHS.
+        - Check nested function call arg type matches function arg type
         - Insert implicit cast of new tuples if needed
-        - Check symbolic expression arg types
+        - Check symbolic expression arg types match that of operator
         - Check chained expression types
-        - Check namespace uniqness / ambiguity
+        - Check namespace uniqueness / ambiguity
      */
         AstUtils.queryAst(parseUnit, new QueryAstConsumer<>(AssignmentExpr.class));
         AstUtils.queryAst(parseUnit, new QueryAstConsumer<>(FunctionCallExpr.class));
         AstUtils.queryAst(parseUnit, new QueryAstConsumer<>(AssignmentExpr.class));
+
+        validateMetaTypes(parseUnit, errors);
+
+        String msg = "datum expected";
+    }
+
+    private void validateMetaTypes(ParseUnit parseUnit, List<AstLoadError> errors) {
+        Set<ExpressionChain> chains =
+            AstUtils.queryAst(parseUnit,
+                              new QueryAstConsumer<>(ExpressionChain.class,
+                                                     astNode ->
+                                                         astNode instanceof ExpressionChain &&
+                                                             ((ExpressionChain) astNode).isResolved())
+            );
+        for (ExpressionChain chain : chains) {
+            if (chain.getTargetMetaType() == chain.getResolvedMetaObj().getMetaType()) {
+                chain.setTypeCheckState(TypeCheckState.VALID);
+            }
+            else {
+                AstLoadError error = new AstLoadError(AstLoadError.Type.SEMANTIC, chain.getSourceInfo(),
+                                                      "expression '" + chain + "' must reference a " +
+                                                          chain.getTargetMetaType());
+                errors.add(error);
+                log.info(error);
+            }
+        }
     }
 
     private void linkUnitRefs(ParseUnit parseUnit, List<AstLoadError> unitLoadErrors) {
@@ -467,23 +497,25 @@ public class Executor extends ExprProcessor implements ExeContext {
         AstUtils.resolveAstPath(reference);
         if (!reference.isResolved()) {
             AstLoadError error = new AstLoadError(AstLoadError.Type.LINK, reference.getSourceInfo(),
-                                              "can not resolve symbol '" + reference + "'");
+                                                  "can not resolve symbol '" + getFirstUnresolved(reference) +
+                                                      "' in '" + reference + "'");
             errors.add(error);
             log.info(error);
         }
         else {
-            if (reference.getTargetMetaType() == reference.getResolvedMetaObj().getMetaType()) {
-                reference.setTypeCheckState(TypeCheckState.VALID);
-                log.debug("resolved ref [" + reference + "]");
-            }
-            else {
-                AstLoadError error = new AstLoadError(AstLoadError.Type.LINK, reference.getSourceInfo(),
-                                                  "expression '" + reference + "' must reference a " +
-                                                      reference.getTargetMetaType());
-                errors.add(error);
-                log.info(error);
+            log.debug("resolved ref [" + reference + "]");
+        }
+    }
+
+    private ExprLink getFirstUnresolved(ExpressionChain reference) {
+        ExprLink unresolved = null;
+        for (ExprLink exprLink : reference.getExprLinks()) {
+            if (!exprLink.isResolved()) {
+                unresolved = exprLink;
+                break;
             }
         }
+        return unresolved;
     }
 
     /**
@@ -495,11 +527,11 @@ public class Executor extends ExprProcessor implements ExeContext {
         IntrinsicSourceInfo sourceInfo = new IntrinsicSourceInfo();
         String[] pathNodes = mainSpacePath.split("/.");
         TypeRefImpl exeTypeRef = getAstFactory().newTypeRef(sourceInfo, null, null);
-        SimpleExprLink<Namespace> userNsRefPart = getAstFactory().newMetaRefPart(sourceInfo, nsRegistry.getUserNs().getName());
+        SimpleExprLink userNsRefPart = getAstFactory().newMetaRefPart(sourceInfo, nsRegistry.getUserNs().getName());
         exeTypeRef.setNsRefPart(userNsRefPart);
         AstUtils.addNewMetaRefParts(exeTypeRef, sourceInfo, pathNodes);
         AstUtils.resolveAstPath(exeTypeRef);
-        SpaceTypeDefn bootTypeDefn = (SpaceTypeDefn) exeTypeRef.getResolvedType() ;
+        SpaceTypeDefn bootTypeDefn = (SpaceTypeDefn) exeTypeRef.getResolvedType();
 //        SpaceTypeDefn bootTypeDefn = progSpaceDir.getFirstSpaceDefn();
         Tuple mainTypeTuple = newTupleImpl(bootTypeDefn);
         EvalContext evalContext = new EvalContext();
@@ -563,16 +595,7 @@ public class Executor extends ExprProcessor implements ExeContext {
     private Value eval(EvalContext spcContext, ValueExpr expression) {
         log.debug("eval: (deleg) " + expression);
         Value value = null;
-        if (expression instanceof AssignmentExpr) {
-            value = eval(spcContext, (AssignmentExpr) expression);
-        }
-        else if (expression instanceof FunctionCallExpr) {
-            value = eval(spcContext, (FunctionCallExpr) expression);
-        }
-        else if (expression instanceof ExpressionChain) {
-            value = eval(spcContext, (ExpressionChain) expression);
-        }
-        else if (expression instanceof NewTupleExpr) {
+        if (expression instanceof NewTupleExpr) {
             value = eval(spcContext, (NewTupleExpr) expression);
         }
         else if (expression instanceof NewSetExpr) {
@@ -593,6 +616,15 @@ public class Executor extends ExprProcessor implements ExeContext {
         else if (expression instanceof ThisTupleExpr) {
             value = eval(spcContext, (ThisTupleExpr) expression);
         }
+        else if (expression instanceof MetaRefPath) {
+            value = eval(spcContext, (MetaRefPath) expression);
+        }
+        else if (expression instanceof AssignmentExpr) {
+            value = eval(spcContext, (AssignmentExpr) expression);
+        }
+        else if (expression instanceof FunctionCallExpr) {
+            value = eval(spcContext, (FunctionCallExpr) expression);
+        }
         else if (expression instanceof ExpressionChain) {
             value = eval(spcContext, ((ExpressionChain) expression).extractValueExprChain());
         }
@@ -603,13 +635,23 @@ public class Executor extends ExprProcessor implements ExeContext {
         return value;
     }
 
+    private Value eval(EvalContext evalContext, ThisTupleExpr thisTupleExpr) {
+        log.debug("exec: " + thisTupleExpr);
+        return evalContext.peekStack().getCtxObject();
+    }
+
+    private Value eval(EvalContext evalContext, ThisArgExpr thisArgExpr) {
+        log.debug("exec: " + thisArgExpr);
+        return evalContext.peekStack().getArgTuple();
+    }
+
     /**
      * TODO I think we'll eventually want all statements to get put on an Action Queue
      * or Transaction Queue or such. In effect, each statement becomes a first-class
      * action / job.
      */
     private void eval(EvalContext evalContext, StatementBlock statementBlock) {
-        log.debug("exec: " + statementBlock);
+        log.debug("eval: " + statementBlock);
         FunctionCallContext functionCallContext = evalContext.peekStack();
         Tuple blockTuple = statementBlock instanceof SpaceTypeDefnBody ?
             functionCallContext.getCtxObject() : newTupleImpl(statementBlock);
@@ -795,7 +837,7 @@ public class Executor extends ExprProcessor implements ExeContext {
      4. context object (tuple)
      5. static objects
     */
-    private Value eval(EvalContext evalContext, ExpressionChain<?> metaRef) {
+    private Value eval(EvalContext evalContext, MetaRefPath metaRef) {
         log.debug("eval: " + metaRef);
         Value value = null;
         Named toMember = metaRef.getResolvedMetaObj();
@@ -1088,7 +1130,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         @Override
         public Predicate<ModelElement> getFilter() {
-            return filter;
+            return (Predicate<ModelElement>) filter;
         }
 
         @Override
@@ -1223,11 +1265,8 @@ public class Executor extends ExprProcessor implements ExeContext {
                 log.debug("resolving reference [" + reference + "]");
                 if (reference.getTargetMetaType() == MetaType.TYPE && reference.isSinglePart()) {
 
-                    checkImplicitImports(reference);
-                    //
-                    if (reference.isAtInitState()) {
-                        checkUnitImports(reference);
-                    }
+                    checkImports(reference);
+
                     if (reference.isResolved()) {
                         reference.setImportMatch(true);
                         log.debug("resolved [" + reference + "] as imported type");
@@ -1249,20 +1288,28 @@ public class Executor extends ExprProcessor implements ExeContext {
             return true;
         }
 
-        private void checkUnitImports(ExpressionChain reference) {
-            DatumType importedTypeMatch =
-                (DatumType) CollectionUtils.find(parseUnit.getAllImportedTypes(),
-                                                  object -> ((DatumType) object).getName().equals(
-                                                                 reference.getFirstPart().getExpression()) );
-            AstUtils.checkSetResolve(reference.getFirstPart(), (NamedElement) importedTypeMatch);
+        private void checkImports(ExpressionChain reference) {
+            checkImplicitImports(reference.getFirstPart());
+            //
+            if (reference.isAtInitState()) {
+                checkUnitImports(reference.getFirstPart());
+            }
         }
 
-        private void checkImplicitImports(ExpressionChain reference) {
+        private void checkUnitImports(ExprLink firstPart) {
+            DatumType importedTypeMatch =
+                (DatumType) CollectionUtils.find(parseUnit.getAllImportedTypes(),
+                                                 object -> ((DatumType) object).getName()
+                                                                               .equals(firstPart.getRefName()));
+            AstUtils.checkSetResolve(firstPart, (NamedElement) importedTypeMatch);
+        }
+
+        private void checkImplicitImports(ExprLink firstPart) {
             DatumType importedTypeMatch = (DatumType) CollectionUtils.find(
                 implicitImportTypes,
-                object -> ((DatumType) object).getName().equals(reference.getFirstPart().getExpression())
+                object -> ((DatumType) object).getName().equals(firstPart.getRefName())
             );
-            AstUtils.checkSetResolve(reference.getFirstPart(), (NamedElement) importedTypeMatch);
+            AstUtils.checkSetResolve(firstPart, (NamedElement) importedTypeMatch);
         }
 
         @Override

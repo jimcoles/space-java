@@ -28,7 +28,6 @@ public class NamePartExpr extends ModelElement {
         this.nameExpr = text;
     }
 
-
     public boolean isTypeExpr() {
         return isTypeExpr;
     }
@@ -43,6 +42,11 @@ public class NamePartExpr extends ModelElement {
 
     @Override
     public String getDisplayName() {
+        return nameExpr;
+    }
+
+    @Override
+    protected String toUrlString() {
         return nameExpr;
     }
 }

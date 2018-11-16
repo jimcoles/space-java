@@ -19,7 +19,7 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
     /**
      * The name of some other named design-time thing such as a function.
      */
-    private ExpressionChain<SpaceFunctionDefn> functionRef;
+    private NamePartExpr namePartExpr;
     private ValueExpr argValueExpr;
 
     /**
@@ -29,19 +29,19 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
         super(sourceInfo);
     }
 
-    public FunctionCallExpr setFunctionRef(ExpressionChain functionRef)
+    public FunctionCallExpr setFunctionRef(NamePartExpr namePartExpr)
     {
-        if (functionRef == null) throw new RuntimeException("bug: function path null");
+        if (namePartExpr == null) throw new RuntimeException("bug: function path null");
         //
-        this.functionRef = functionRef;
+        this.namePartExpr = namePartExpr;
         //
-        addChild(this.functionRef);
+//        addChild(this.functionRef);
         //
         return this;
     }
 
-    public ExpressionChain getFunctionRef() {
-        return functionRef;
+    public NamePartExpr getNamePartExpr() {
+        return namePartExpr;
     }
 
     public ValueExpr getArgValueExpr() {
@@ -56,11 +56,21 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
 
     @Override
     public String getDisplayName() {
-        return functionRef.getDisplayName();
+        return namePartExpr.getDisplayName();
+    }
+
+    @Override
+    public boolean hasRefName() {
+        return true;
+    }
+
+    @Override
+    public String getRefName() {
+        return namePartExpr.getNameExpr();
     }
 
     @Override
     public DatumType getDatumType() {
-        return getFunctionRef().getDatumType();
+        return null;
     }
 }
