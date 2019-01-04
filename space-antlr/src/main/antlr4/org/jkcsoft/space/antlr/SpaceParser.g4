@@ -442,14 +442,14 @@ parameterDecl :
 ------------------------------------------------------------------------------*/
 
 metaRefExpr :
-    languageKey? spacePathRootExpr? identifier (spacePathAnyNavOper identifier)*
+    languageKey? spacePathRootExpr? idRef (spacePathAnyNavOper idRef)*
     ;
 
 alias :
     'as' identifier
     ;
 
-languageKey : (identifier ':') ;
+languageKey : (idRef ':') ;
 
 spacePathRootExpr : SPathRoot ;
 
@@ -606,7 +606,7 @@ valueExpr :
     ;
 
 functionCallExpr :
-    metaRefExpr '(' valueExpr? ')'
+    idRef '(' valueExpr? ')'
     ;
 
 expression :
@@ -725,6 +725,8 @@ newSequenceExpr :
 
 identifier : Identifier;
 
+idRef : Identifier;
+
 comment
     : singleLineComment
     | multiLineComment
@@ -734,7 +736,7 @@ singleLineComment : SingleLineComment;
 
 multiLineComment : BlockComment;
 
-annotation : '@' identifier '=' newObjectExpr;
+annotation : '@' idRef '=' newObjectExpr;
 
 rightAssignmentExpr :
     '=' valueExpr

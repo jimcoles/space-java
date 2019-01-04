@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 import java.util.List;
 
 /**
@@ -23,4 +25,6 @@ public interface Named extends Identified {
     List<String> getFullNamePath();
 
     Named getNamedParent();
+
+    MetaType getMetaType();
 }

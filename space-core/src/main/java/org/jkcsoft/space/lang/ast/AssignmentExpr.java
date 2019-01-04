@@ -14,44 +14,44 @@ package org.jkcsoft.space.lang.ast;
  */
 public class AssignmentExpr extends ModelElement implements ValueExpr {
 
-    private ExpressionChain memberRef;
-    private ValueExpr valueExpr;
+    private ExpressionChain leftSideDatumRef;
+    private ValueExpr rightSideValueExpr;
 
     public AssignmentExpr(SourceInfo sourceInfo) {
         super(sourceInfo);
     }
 
-    public ExpressionChain getMemberRef() {
-        return memberRef;
+    public ExpressionChain getLeftSideDatumRef() {
+        return leftSideDatumRef;
     }
 
     /** The left-side reference. */
-    public void setMemberRef(ExpressionChain memberRef) {
-        this.memberRef = memberRef;
+    public void setLeftSideDatumRef(ExpressionChain leftSideDatumRef) {
+        this.leftSideDatumRef = leftSideDatumRef;
         //
-        addChild(memberRef);
+        addChild(leftSideDatumRef);
         //
 //        addReference(memberRef);
     }
 
-    public void setValueExpr(ValueExpr valueExpr) {
-        this.valueExpr = valueExpr;
+    public void setRightSideValueExpr(ValueExpr rightSideValueExpr) {
+        this.rightSideValueExpr = rightSideValueExpr;
         //
-        if (valueExpr instanceof ModelElement)
-            addChild(((ModelElement) valueExpr));
+        if (rightSideValueExpr instanceof ModelElement)
+            addChild(((ModelElement) rightSideValueExpr));
 
 //        if (valueExpr instanceof MetaReference)
 //            addReference(((MetaReference) valueExpr));
 
     }
 
-    public ValueExpr getValueExpr() {
-        return valueExpr;
+    public ValueExpr getRightSideValueExpr() {
+        return rightSideValueExpr;
     }
 
     @Override
     public DatumType getDatumType() {
-        return memberRef.getDatumType();
+        return leftSideDatumRef.getDatumType();
     }
 
 }

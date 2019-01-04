@@ -76,11 +76,11 @@ public class TypeRefImpl extends ExpressionChain implements TypeRef {
     }
 
     public boolean isWildcard() {
-        return getLastPart().isWildcard();
+        return extractMetaRefPath().getLastLink().isWildcard();
     }
 
     public boolean isSingleton() {
-        return !getLastPart().isWildcard();
+        return !extractMetaRefPath().getLastLink().isWildcard();
     }
 
     @Override

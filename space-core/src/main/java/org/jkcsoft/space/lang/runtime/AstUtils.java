@@ -138,7 +138,7 @@ public class AstUtils {
         switch (reference.getTargetMetaType()) {
             case TYPE:
                 if (reference.isSinglePart()) {
-                    resolveIntrinsics(((SimpleExprLink) reference.getFirstPart()));
+                    resolveIntrinsics(((RefPartExpr) reference.getFirstPart()));
                     // check for 'siblings': in same parse unit or directory
                     if (reference.isAtInitState()) {
                         ParseUnit parentParseUnit = findParentParseUnit(reference, parseUnitFinderAction);
@@ -177,10 +177,11 @@ public class AstUtils {
 
     }
 
-    static void checkSetResolve(ExprLink refPart, NamedElement lookup) {
-        if (refPart != null && lookup != null) {
-            refPart.setResolvedMetaObj(lookup);
-            refPart.setState(LinkState.RESOLVED);
+    static void checkSetResolve(Linkable link, NamedElement lookup) {
+        if (link != null && lookup != null) {
+            NameRef nameRef = link.getNameRef();
+            nameRef.setResolvedMetaObj(lookup);
+            nameRef.setState(LinkState.RESOLVED);
         }
     }
 
@@ -213,7 +214,7 @@ public class AstUtils {
     }
 
     public static Set<DatumType> getSiblingTypes(TypeRefImpl reference) {
-        ExprLink parentRefPart = getParentRefPart(reference);
+        RefPartExpr parentRefPart = getParentRefPart(reference);
         return getChildTypes((Directory) parentRefPart.getResolvedMetaObj());
     }
 
@@ -223,8 +224,8 @@ public class AstUtils {
         return childTypes;
     }
 
-    private static ExprLink getParentRefPart(TypeRefImpl fullRef) {
-        List<ExprLink> pathParts = fullRef.getExprLinks();
+    private static RefPartExpr getParentRefPart(TypeRefImpl fullRef) {
+        List<RefPartExpr> pathParts = fullRef.extractMetaRefPath().getLinks();
         return pathParts.get(pathParts.size() - 2);
     }
 
@@ -241,25 +242,25 @@ public class AstUtils {
         }
     }
 
-    private static void resolveFromNode(ModelElement astNode, ExpressionChain reference) {
-        log.debug("trying to find ["+reference+"] under [" + astNode + "]");
+    private static void resolveFromNode(ModelElement astNode, ExpressionChain exprChain) {
+        log.debug("trying to find ["+exprChain+"] under [" + astNode + "]");
         NamedElement lookup =
-            lookupImmediateChild(astNode, (((SimpleExprLink) reference.getFirstPart()).getNameExprText()));
-        checkSetResolve(reference.getFirstPart(), lookup);
-        resolveRest(lookup, reference.getExprLinks().iterator());
+            lookupImmediateChild(astNode, (((RefPartExpr) exprChain.getFirstPart()).getNameExprText()));
+        checkSetResolve(exprChain.getFirstPart(), lookup);
+        resolveRest(lookup, exprChain.getExprLinks().iterator());
     }
 
-    public static void resolveRest(NamedElement nameContext, Iterator<ExprLink> refPartsIter) {
-        if (nameContext != null && refPartsIter.hasNext()) {
-            SimpleExprLink refPart = (SimpleExprLink) refPartsIter.next();
+    public static void resolveRest(Linkable nameContext, Iterator<Linkable> linksIter) {
+        if (nameContext != null && linksIter.hasNext()) {
+            RefPartExpr refPart = (RefPartExpr) linksIter.next();
             if (nameContext instanceof ValueExpr) {
                 nameContext = (NamedElement) ((ValueExpr) nameContext).getDatumType();
             }
             NamedElement targetChild = lookupImmediateChild(nameContext, refPart.getExpression().getNameExpr());
             checkSetResolve(refPart, targetChild);
             if (refPart.isResolved()) {
-                if (refPartsIter.hasNext()) {
-                    resolveRest(refPart.getResolvedMetaObj(), refPartsIter);
+                if (linksIter.hasNext()) {
+                    resolveRest(refPart.getResolvedMetaObj(), linksIter);
                 }
             }
         }
@@ -270,7 +271,7 @@ public class AstUtils {
     {
         if (containerScopeKind == null)
             containerScopeKind = inferScopeKind(context);
-        NamedElement lookup = lookupImmediateChild(context, ((SimpleExprLink) reference.getFirstPart()).getNameExprText());
+        NamedElement lookup = lookupImmediateChild(context, ((RefPartExpr) reference.getFirstPart()).getNameExprText());
         checkSetResolve(reference.getFirstPart(), lookup);
         if (reference.isResolved())
             reference.setResolvedDatumScope(containerScopeKind);
@@ -322,7 +323,7 @@ public class AstUtils {
         return childByName;
     }
 
-    private static void resolveIntrinsics(SimpleExprLink refPart) {
+    private static void resolveIntrinsics(RefPartExpr refPart) {
         NamedElement lookup = null;
         if (refPart.getExpression().getNameExpr().equals(VoidType.VOID.getName())) {
             lookup = VoidType.VOID;
@@ -407,7 +408,7 @@ public class AstUtils {
     }
 
     public static boolean isJavaNs(ImportExpr importExpr) {
-        SimpleExprLink nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
+        RefPartExpr nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
         return nsRefPart != null
             && nsRefPart.getNameExprText().equals(SpaceHome.getNsRegistry().getJavaNs().getName());
     }

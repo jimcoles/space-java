@@ -21,15 +21,12 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public interface ValueExpr {
-
-    default boolean hasRefName() {
-        return false;
-    }
-
-    default String getRefName() {
-        return null;
-    }
+public interface ValueExpr extends Linkable {
 
     DatumType getDatumType();
+
+    @Override
+    default boolean isValueExpr() {
+        return true;
+    }
 }

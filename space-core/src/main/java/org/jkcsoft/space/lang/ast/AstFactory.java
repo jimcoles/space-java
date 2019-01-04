@@ -91,12 +91,12 @@ public class AstFactory {
         return new SequenceLiteralExpr(sourceInfo, newTypeRef(sourceInfo, NumPrimitiveTypeDefn.CHAR), text);
     }
 
-    public SimpleExprLink newMetaRefPart(NamePartExpr namePartExpr) {
-        return new SimpleExprLink(namePartExpr);
+    public RefPartExpr newMetaRefPart(NamePartExpr namePartExpr) {
+        return new RefPartExpr(namePartExpr);
     }
 
-    public SimpleExprLink newMetaRefPart(SourceInfo sourceInfo, String nameExpr) {
-        return new SimpleExprLink(newNamePartExpr(sourceInfo, null, nameExpr));
+    public RefPartExpr newMetaRefPart(SourceInfo sourceInfo, String nameExpr) {
+        return new RefPartExpr(newNamePartExpr(sourceInfo, null, nameExpr));
     }
 
     public NamePartExpr newNamePartExpr(SourceInfo sourceInfo, PathOperEnum oper, String searchName)
@@ -142,14 +142,14 @@ public class AstFactory {
         return new NewSetExpr(sourceInfo, tupleTypeRef);
     }
 
-    public ExpressionChain newMetaReference(SourceInfo sourceInfo, MetaType type, SimpleExprLink nsRefPart) {
+    public ExpressionChain newMetaReference(SourceInfo sourceInfo, MetaType type, RefPartExpr nsRefPart) {
         ExpressionChain expressionChain = new ExpressionChain(sourceInfo, type);
         expressionChain.setNsRefPart(nsRefPart);
         return expressionChain;
     }
 
     public TypeRefImpl newTypeRef(SourceInfo sourceInfo, List<TypeRefImpl.CollectionType> collectionTypes,
-                                  SimpleExprLink nsRefPart)
+                                  RefPartExpr nsRefPart)
     {
         TypeRefImpl typeRef = new TypeRefImpl(sourceInfo, collectionTypes);
         typeRef.setNsRefPart(nsRefPart);

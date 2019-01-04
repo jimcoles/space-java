@@ -10,6 +10,8 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
+ * In the AST, a reference to a Space Type.
+ *
  * @author Jim Coles
  */
 public interface TypeRef {

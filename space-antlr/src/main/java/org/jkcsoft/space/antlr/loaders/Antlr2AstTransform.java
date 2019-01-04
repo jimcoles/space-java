@@ -120,12 +120,12 @@ public class Antlr2AstTransform {
 
         // do the add of new part
         for (SpaceParser.IdentifierContext identifierContext : metaRefExprContext.identifier()) {
-            metaRefAST.addNextPart(toSingleMetaRefPart(identifierContext));
+            metaRefAST.addNextPart(toRefPart(identifierContext));
         }
         return;
     }
 
-    private ExprLink toSingleMetaRefPart(SpaceParser.IdentifierContext identifierContext)
+    private RefPartExpr toRefPart(SpaceParser.IdentifierContext identifierContext)
     {
         return astFactory.newMetaRefPart(toNamePartExpr(identifierContext));
     }
@@ -230,9 +230,9 @@ public class Antlr2AstTransform {
         AssignmentExpr assignmentExprAST =
             astFactory.newAssignmentExpr(toSI(rightAssignmentExprContext));
         //
-        assignmentExprAST.setMemberRef(expressionChain);
+        assignmentExprAST.setLeftSideDatumRef(expressionChain);
         //
-        assignmentExprAST.setValueExpr(toAst(rightAssignmentExprContext.valueExpr()));
+        assignmentExprAST.setRightSideValueExpr(toAst(rightAssignmentExprContext.valueExpr()));
         return assignmentExprAST;
     }
 
@@ -278,7 +278,7 @@ public class Antlr2AstTransform {
 
     private TypeRefImpl toTypeRef(SpaceParser.MetaRefExprContext spacePathExprContext) {
         logTrans(spacePathExprContext);
-        SimpleExprLink nsRefPart =
+        RefPartExpr nsRefPart =
             spacePathExprContext.languageKey() != null ? toAst(spacePathExprContext.languageKey()) : null;
         TypeRefImpl typeRef =
             astFactory.newTypeRef(toSI(spacePathExprContext), null, nsRefPart);
@@ -286,7 +286,7 @@ public class Antlr2AstTransform {
         return typeRef;
     }
 
-    private SimpleExprLink toAst(SpaceParser.LanguageKeyContext languageKeyContext) {
+    private RefPartExpr toAst(SpaceParser.LanguageKeyContext languageKeyContext) {
         return astFactory.newMetaRefPart(toSI(languageKeyContext), toText(languageKeyContext.identifier()));
     }
 
@@ -294,7 +294,7 @@ public class Antlr2AstTransform {
         logTrans(spacePathExprContext);
         if (spacePathExprContext == null)
             return null;
-        SimpleExprLink nsReference = spacePathExprContext.languageKey() != null ?
+        RefPartExpr nsReference = spacePathExprContext.languageKey() != null ?
             astFactory.newMetaRefPart(toNamePartExpr(spacePathExprContext.languageKey().identifier()))
             : null;
         ExpressionChain expressionChain = astFactory.newMetaReference(toSI(spacePathExprContext), metaType, nsReference);
@@ -572,7 +572,8 @@ public class Antlr2AstTransform {
         FunctionCallExpr functionCallExpr =
             astFactory.newFunctionCallExpr(toSI(functionCallExprContext));
         //
-        functionCallExpr.setFunctionRef(toMetaRef(functionCallExprContext.metaRefExpr(), MetaType.FUNCTION));
+//        functionCallExpr.setFunctionRef(toMetaRef(functionCallExprContext.metaRefExpr(), MetaType.FUNCTION));
+        functionCallExpr.setFunctionRef(toRefPart(functionCallExprContext.m));
         //
         if (functionCallExprContext.valueExpr() != null) {
             // more common
@@ -615,12 +616,13 @@ public class Antlr2AstTransform {
         logTrans(valueExprContext);
         ValueExpr valueExprAST = null;
         if (valueExprContext != null) {
-            valueExprAST = toAst(valueExprContext.atomicValueExpr());
+            ValueExpr atomicValueExpr = toAst(valueExprContext.atomicValueExpr());
+            valueExprAST = atomicValueExpr;
             // 2 thru last
             if (valueExprContext.namedRefValueExpr().size() > 0) {
                 ValueExprChain astChain = astFactory.newValueExprChain(toSI(valueExprContext));
                 valueExprAST = astChain;
-                astChain.addValueExpr(valueExprAST);
+                astChain.addValueExpr(atomicValueExpr);
                 for (SpaceParser.NamedRefValueExprContext namedRefValueExprContext :
                         valueExprContext.namedRefValueExpr())
                 {

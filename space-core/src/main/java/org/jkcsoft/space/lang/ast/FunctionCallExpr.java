@@ -14,12 +14,12 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class FunctionCallExpr extends ModelElement implements ValueExpr {
+public class FunctionCallExpr extends ModelElement implements NameRef<FunctionDefn>, ValueExpr {
 
     /**
      * The name of some other named design-time thing such as a function.
      */
-    private NamePartExpr namePartExpr;
+    private RefPartExpr<FunctionDefn> functionRef;
     private ValueExpr argValueExpr;
 
     /**
@@ -29,19 +29,19 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
         super(sourceInfo);
     }
 
-    public FunctionCallExpr setFunctionRef(NamePartExpr namePartExpr)
+    public RefPartExpr getFunctionRef() {
+        return functionRef;
+    }
+
+    public FunctionCallExpr setFunctionRef(RefPartExpr namePartExpr)
     {
         if (namePartExpr == null) throw new RuntimeException("bug: function path null");
         //
-        this.namePartExpr = namePartExpr;
+        this.functionRef = namePartExpr;
         //
 //        addChild(this.functionRef);
         //
         return this;
-    }
-
-    public NamePartExpr getNamePartExpr() {
-        return namePartExpr;
     }
 
     public ValueExpr getArgValueExpr() {
@@ -56,21 +56,41 @@ public class FunctionCallExpr extends ModelElement implements ValueExpr {
 
     @Override
     public String getDisplayName() {
-        return namePartExpr.getDisplayName();
+        return functionRef.getDisplayName();
     }
 
     @Override
-    public boolean hasRefName() {
+    public boolean hasNameRef() {
         return true;
     }
 
     @Override
-    public String getRefName() {
-        return namePartExpr.getNameExpr();
+    public String getNameRef() {
+        return functionRef.getNameRef();
+    }
+
+    @Override
+    public void setResolvedMetaObj(FunctionDefn resolvedMetaObj) {
+        functionRef.setResolvedMetaObj(resolvedMetaObj);
+    }
+
+    @Override
+    public void setState(LinkState linkState) {
+        functionRef.setState(linkState);
+    }
+
+    @Override
+    public void setTypeCheckState(TypeCheckState typeCheckState) {
+        functionRef.setTypeCheckState(typeCheckState);
+    }
+
+    @Override
+    public boolean isResolved() {
+        return functionRef.isResolved();
     }
 
     @Override
     public DatumType getDatumType() {
-        return null;
+        return functionRef.getResolvedMetaObj().getReturnType();
     }
 }

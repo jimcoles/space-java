@@ -5,11 +5,11 @@ public type NtmuSpace
 */
 {
     function void main(char[] args) {
-        char[] test = "";
+        char[] test = "".split("");
         char[] appStr = Lang.append(["firstHalf", "lastHalf"]);
         Person jim = Person[53.75, "Jim", "Coles", "last"];
 //        Person wango = Person[last = "Coles", first = "Jim", last = "last", age = 53.75];
-        Task task = Task[2000.0, "Git 'er done, boy!'", jim];
+        Task task = Task[2000.0, "Git 'er done, boy!", jim];
         Task task2 = Task[9.0, "Go play with your Bronster.", jim];
 //        Task task3 = Task[9.0, "Do it till ya satisfied", wango];
 

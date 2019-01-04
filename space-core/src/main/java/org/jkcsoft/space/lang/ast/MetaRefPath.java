@@ -18,18 +18,22 @@ import java.util.List;
  */
 public class MetaRefPath {
 
-    private List<SimpleExprLink> links = new LinkedList<>();
+    private List<RefPartExpr> links = new LinkedList<>();
     private ScopeKind resolvedDatumScope;
 
     MetaRefPath(ScopeKind resolvedDatumScope) {
         this.resolvedDatumScope = resolvedDatumScope;
     }
 
-    void addLink(SimpleExprLink link) {
+    void addLink(RefPartExpr link) {
         links.add(link);
     }
 
-    public NamedElement getResolvedMetaObj() {
+    public List<RefPartExpr> getLinks() {
+        return links;
+    }
+
+    public Named getResolvedMetaObj() {
         return getLastLink().getResolvedMetaObj();
     }
 
@@ -37,7 +41,8 @@ public class MetaRefPath {
         return resolvedDatumScope;
     }
 
-    public SimpleExprLink getLastLink() {
+    public RefPartExpr getLastLink() {
         return links.get(links.size() - 1);
     }
+
 }

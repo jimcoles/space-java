@@ -36,6 +36,6 @@ public class ValueExprChain extends ModelElement implements NamePath, ValueExpr 
 
     @Override
     public DatumType getDatumType() {
-        return chain.get(chain.size() -1).getDatumType();
+        return chain.get(chain.size() - 1).getDatumType();
     }
 }

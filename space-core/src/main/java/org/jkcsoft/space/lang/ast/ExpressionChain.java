@@ -25,7 +25,7 @@ import java.util.List;
  * Holds either:
  *
  * 1. Meta Reference Path: A full reference to a named element via its AST name path. The reference may be
- *    multi-part (fully qualified).  Holds a chain of {@link ExprLink}s,
+ *    multi-part (fully qualified).  Holds a chain of {@link RefPartExpr}s,
  *    each of which resolves to a single meta object.  The MetaType of the full reference
  *    should be known at parse time.
  *
@@ -51,8 +51,8 @@ import java.util.List;
 public class ExpressionChain extends ModelElement implements NamePath, ValueExpr {
 
     private MetaType targetMetaType;
-    private SimpleExprLink nsRefPart;
-    private List<ExprLink> exprLinks = new LinkedList<>();
+    private RefPartExpr nsRefPart;
+    private List<Linkable> exprLinks = new LinkedList<>();
     private ScopeKind resolvedDatumScope;  // only relevant if target is a datum type.
     private boolean isImportMatch = false;  // only relevant if this chain is a type ref or other static ref
     private TypeCheckState typeCheckState = TypeCheckState.UNCHECKED;
@@ -66,12 +66,12 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
         this.targetMetaType = targetMetaType;
     }
 
-    public ExpressionChain(SourceInfo sourceInfo, DatumType typeDefn) {
+    ExpressionChain(SourceInfo sourceInfo, DatumType typeDefn) {
         this(sourceInfo, MetaType.TYPE);
-        ExprLink firstPart =
-            new SimpleExprLink(new NamePartExpr(sourceInfo, false, null, typeDefn.getName()));
+
+        RefPartExpr firstPart =  new RefPartExpr(new NamePartExpr(sourceInfo, false, null, typeDefn.getName()));
         firstPart.setState(LinkState.RESOLVED);
-        firstPart.setResolvedMetaObj(((NamedElement) typeDefn));
+        firstPart.setResolvedMetaObj(typeDefn);
         this.typeCheckState = TypeCheckState.VALID;
         //
         exprLinks.add(firstPart);
@@ -101,20 +101,20 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
         return nsRefPart != null;
     }
 
-    public SimpleExprLink getNsRefPart() {
+    public RefPartExpr getNsRefPart() {
         return nsRefPart;
     }
 
-    public ExpressionChain setNsRefPart(SimpleExprLink nsRefPart) {
+    public ExpressionChain setNsRefPart(RefPartExpr nsRefPart) {
         this.nsRefPart = nsRefPart;
         return this;
     }
 
-    public List<ExprLink> getExprLinks() {
+    public List<Linkable> getExprLinks() {
         return exprLinks;
     }
 
-    public ExprLink getFirstPart() {
+    public Linkable getFirstPart() {
         return exprLinks.get(0);
     }
 
@@ -130,11 +130,11 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
         this.resolvedDatumScope = resolvedDatumScope;
     }
 
-    public NamedElement getResolvedMetaObj() {
+    public Named getResolvedMetaObj() {
         return getLastPathLink().getResolvedMetaObj();
     }
 
-    private SimpleExprLink getLastPathLink() {
+    private RefPartExpr getLastPathLink() {
         return extractMetaRefPath().getLastLink();
     }
 
@@ -155,7 +155,7 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
     }
 
     public String getUrlPathSpec() {
-        return Strings.buildDelList(exprLinks, (Lister<ExprLink>) obj -> obj.getExpression().toUrlString(), ".");
+        return Strings.buildDelList(exprLinks, (Lister<RefPartExpr>) obj -> obj.getExpression().toUrlString(), ".");
     }
 
     @Override
@@ -167,7 +167,7 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
         return null;
     }
 
-    public ExprLink getLastPart() {
+    public Linkable getLastPart() {
         return exprLinks.get(exprLinks.size() - 1);
     }
 
@@ -175,7 +175,7 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
         return exprLinks.size();
     }
 
-    public void addNextPart(ExprLink nextPart) {
+    public void addNextPart(Linkable nextPart) {
         exprLinks.add(nextPart);
     }
 
@@ -188,7 +188,7 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
     }
 
     public LinkState getState() {
-        return getLastPart().getState();
+        return getLastPart().hasNameRef() ? getState() : LinkState.RESOLVED;
     }
 
     public boolean isAtInitState() {
@@ -205,7 +205,7 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
 
     @Override
     public DatumType getDatumType() {
-        return ((DatumType) getLastPart().getResolvedMetaObj());
+        return ((ValueExpr) getLastPart()).getDatumType();
     }
 
     public boolean hasMetaRefPath() {
@@ -221,9 +221,9 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
 
         if (metaRefPath == null) {
             metaRefPath = new MetaRefPath(resolvedDatumScope);
-            for (ExprLink exprLink : this.exprLinks) {
-                if (!exprLink.isValueExpr()) {
-                    metaRefPath.addLink((SimpleExprLink) exprLink);
+            for (Linkable refPartExpr : this.exprLinks) {
+                if (!refPartExpr.isValueExpr()) {
+                    metaRefPath.addLink((RefPartExpr) refPartExpr);
                 }
                 else
                     break;
@@ -245,9 +245,9 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
 
         if (valueExprChain == null) {
             valueExprChain = new ValueExprChain(null);
-            for (ExprLink exprLink : this.exprLinks) {
-                if (exprLink.isValueExpr()) {
-                    valueExprChain.addValueExpr(((ValueExprLink) exprLink).getValueExpr());
+            for (Linkable linkExpr : this.exprLinks) {
+                if (linkExpr.isValueExpr()) {
+                    valueExprChain.addValueExpr(((ValueExpr) linkExpr));
                 }
             }
         }
@@ -255,15 +255,32 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
     }
 
     @Override
+    public boolean hasNameRef() {
+        boolean has = false;
+        for (Linkable exprLink : exprLinks) {
+            if (exprLink.hasNameRef()) {
+                has = true;
+                break;
+            }
+        }
+        return has;
+    }
+
+    @Override
+    public NameRef getNameRef() {
+        return null;
+    }
+
+    @Override
     public String toString() {
         String suffix = getSuffix();
-        ExprLink lastPart = getLastPart();
+        Linkable lastPart = getLastPart();
         return "<" +
             "fromObj=" + (getParent() != null ? getParent() : "") +
             " path=\"" + getFullUrlSpec() + (suffix != null ? " " + suffix : "") + "\"" +
             " (" + (targetMetaType != null ? targetMetaType.toString().substring(0, 3) : "?") + ")" +
             (resolvedDatumScope != null ? " " + resolvedDatumScope.toString().substring(0, 3) : "") +
-            " resObj=" + (getState() == LinkState.RESOLVED ? lastPart.getResolvedMetaObj() : "?") +
+            " resObj=" + (getState() == LinkState.RESOLVED ? lastPart : "?") +
             '>';
 
     }
