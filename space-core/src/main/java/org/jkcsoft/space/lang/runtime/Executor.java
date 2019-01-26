@@ -510,7 +510,7 @@ public class Executor extends ExprProcessor implements ExeContext {
     private Linkable getFirstUnresolved(ExpressionChain reference) {
         Linkable unresolved = null;
         for (Linkable link : reference.getExprLinks()) {
-            if (!link.isResolved()) {
+            if (link.hasNameRef() && !link.getNameRef().isResolved()) {
                 unresolved = link;
                 break;
             }
@@ -527,7 +527,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         IntrinsicSourceInfo sourceInfo = new IntrinsicSourceInfo();
         String[] pathNodes = mainSpacePath.split("/.");
         TypeRefImpl exeTypeRef = getAstFactory().newTypeRef(sourceInfo, null, null);
-        RefPartExpr userNsRefPart = getAstFactory().newMetaRefPart(sourceInfo, nsRegistry.getUserNs().getName());
+        NameRefExpr userNsRefPart = getAstFactory().newMetaRefPart(sourceInfo, nsRegistry.getUserNs().getName());
         exeTypeRef.setNsRefPart(userNsRefPart);
         AstUtils.addNewMetaRefParts(exeTypeRef, sourceInfo, pathNodes);
         AstUtils.resolveAstPath(exeTypeRef);
@@ -539,7 +539,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         ProgSourceInfo progSourceInfo = new ProgSourceInfo();
         FunctionCallExpr bootMainCallExpr = getAstFactory().newFunctionCallExpr(progSourceInfo);
-        RefPartExpr<SpaceFunctionDefn> mainFuncRef =
+        RefExprImpl<SpaceFunctionDefn> mainFuncRef =
             getAstFactory().newMetaRefPart(getAstFactory().newNamePartExpr(sourceInfo, null, "main"));
         bootMainCallExpr.setFunctionRef(mainFuncRef);
         bootMainCallExpr.getFunctionRef().setResolvedMetaObj(spMainActionDefn);

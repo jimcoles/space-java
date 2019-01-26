@@ -14,12 +14,12 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class FunctionCallExpr extends ModelElement implements NameRef<FunctionDefn>, ValueExpr {
+public class FunctionCallExpr extends ModelElement implements MemberRefExpr {
 
     /**
      * The name of some other named design-time thing such as a function.
      */
-    private RefPartExpr<FunctionDefn> functionRef;
+    private RefExprImpl<FunctionDefn> functionRef;
     private ValueExpr argValueExpr;
 
     /**
@@ -29,11 +29,11 @@ public class FunctionCallExpr extends ModelElement implements NameRef<FunctionDe
         super(sourceInfo);
     }
 
-    public RefPartExpr getFunctionRef() {
+    public RefExprImpl getFunctionRef() {
         return functionRef;
     }
 
-    public FunctionCallExpr setFunctionRef(RefPartExpr namePartExpr)
+    public FunctionCallExpr setFunctionRef(RefExprImpl namePartExpr)
     {
         if (namePartExpr == null) throw new RuntimeException("bug: function path null");
         //
@@ -65,7 +65,7 @@ public class FunctionCallExpr extends ModelElement implements NameRef<FunctionDe
     }
 
     @Override
-    public String getNameRef() {
+    public NameRef getNameRef() {
         return functionRef.getNameRef();
     }
 

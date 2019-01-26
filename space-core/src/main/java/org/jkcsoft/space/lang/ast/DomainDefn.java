@@ -46,7 +46,7 @@ public class DomainDefn extends NamedElement implements SimpleType {
     }
 
     @Override
-    public boolean isPrimitive() {
+    public boolean isPrimitiveType() {
         return false;
     }
 

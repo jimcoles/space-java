@@ -25,4 +25,14 @@ public class OperLookupExpr extends ModelElement implements ValueExpr {
     public DatumType getDatumType() {
         return null;
     }
+
+    @Override
+    public boolean hasNameRef() {
+        return false;
+    }
+
+    @Override
+    public NameRef getNameRef() {
+        return null;
+    }
 }

@@ -38,4 +38,14 @@ public class NewTupleExpr extends ModelElement implements ValueExpr {
     public DatumType getDatumType() {
         return typeRef.getDatumType();
     }
+
+    @Override
+    public boolean hasNameRef() {
+        return false;
+    }
+
+    @Override
+    public NameRef getNameRef() {
+        return null;
+    }
 }

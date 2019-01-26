@@ -50,7 +50,7 @@ public class StatementBlock extends Statement implements ComplexType {
     }
 
     @Override
-    public boolean isPrimitive() {
+    public boolean isPrimitiveType() {
         return false;
     }
 

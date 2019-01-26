@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2019 through present.
  *
  * Licensed under the following license agreement:
  *
@@ -10,20 +10,15 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * Evaluates to the current argument tuple. Only valid within
- * a function body context.
+ * A synonym-based reference, e.g., 'this'. Not quite the same as a
+ * {@link NameRefExpr}.
  *
  * @author Jim Coles
  */
-public class ThisArgExpr extends SynRefExpr implements ValueExpr {
+public class SynRefExpr extends RefExprImpl implements TypedExpr {
 
-    ThisArgExpr(SourceInfo sourceInfo) {
+    public SynRefExpr(SourceInfo sourceInfo) {
         super(sourceInfo);
-    }
-
-    @Override
-    public DatumType getDatumType() {
-        return ((SpaceTypeDefn) getResolvedMetaObj());
     }
 
     @Override
@@ -34,5 +29,10 @@ public class ThisArgExpr extends SynRefExpr implements ValueExpr {
     @Override
     public NameRef getNameRef() {
         return null;
+    }
+
+    @Override
+    public boolean isValueExpr() {
+        return false;
     }
 }

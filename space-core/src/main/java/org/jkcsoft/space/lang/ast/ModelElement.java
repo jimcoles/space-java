@@ -151,7 +151,4 @@ public abstract class ModelElement extends SpaceObject {
             ;
     }
 
-    protected String toUrlString() {
-        return toString();
-    }
 }

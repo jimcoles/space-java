@@ -49,7 +49,7 @@ public class SjiTypeDefn extends NamedElement implements ComplexType {
     }
 
     @Override
-    public boolean isPrimitive() {
+    public boolean isPrimitiveType() {
         return false;
     }
 

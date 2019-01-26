@@ -69,7 +69,7 @@ public abstract class AbstractCollectionTypeDefn extends NamedElement implements
     }
 
     @Override
-    public boolean isPrimitive() {
+    public boolean isPrimitiveType() {
         return false;
     }
 

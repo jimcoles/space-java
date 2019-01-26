@@ -138,7 +138,7 @@ public class AstUtils {
         switch (reference.getTargetMetaType()) {
             case TYPE:
                 if (reference.isSinglePart()) {
-                    resolveIntrinsics(((RefPartExpr) reference.getFirstPart()));
+                    resolveIntrinsics(((NameRefExpr) reference.getFirstPart()));
                     // check for 'siblings': in same parse unit or directory
                     if (reference.isAtInitState()) {
                         ParseUnit parentParseUnit = findParentParseUnit(reference, parseUnitFinderAction);
@@ -214,7 +214,7 @@ public class AstUtils {
     }
 
     public static Set<DatumType> getSiblingTypes(TypeRefImpl reference) {
-        RefPartExpr parentRefPart = getParentRefPart(reference);
+        RefExprImpl parentRefPart = getParentRefPart(reference);
         return getChildTypes((Directory) parentRefPart.getResolvedMetaObj());
     }
 
@@ -224,8 +224,8 @@ public class AstUtils {
         return childTypes;
     }
 
-    private static RefPartExpr getParentRefPart(TypeRefImpl fullRef) {
-        List<RefPartExpr> pathParts = fullRef.extractMetaRefPath().getLinks();
+    private static RefExprImpl getParentRefPart(TypeRefImpl fullRef) {
+        List<RefExprImpl> pathParts = fullRef.extractMetaRefPath().getLinks();
         return pathParts.get(pathParts.size() - 2);
     }
 
@@ -245,14 +245,14 @@ public class AstUtils {
     private static void resolveFromNode(ModelElement astNode, ExpressionChain exprChain) {
         log.debug("trying to find ["+exprChain+"] under [" + astNode + "]");
         NamedElement lookup =
-            lookupImmediateChild(astNode, (((RefPartExpr) exprChain.getFirstPart()).getNameExprText()));
+            lookupImmediateChild(astNode, (((NameRefExpr) exprChain.getFirstPart()).getNameExprText()));
         checkSetResolve(exprChain.getFirstPart(), lookup);
         resolveRest(lookup, exprChain.getExprLinks().iterator());
     }
 
     public static void resolveRest(Linkable nameContext, Iterator<Linkable> linksIter) {
         if (nameContext != null && linksIter.hasNext()) {
-            RefPartExpr refPart = (RefPartExpr) linksIter.next();
+            NameRefExpr refPart = (NameRefExpr) linksIter.next();
             if (nameContext instanceof ValueExpr) {
                 nameContext = (NamedElement) ((ValueExpr) nameContext).getDatumType();
             }
@@ -271,7 +271,7 @@ public class AstUtils {
     {
         if (containerScopeKind == null)
             containerScopeKind = inferScopeKind(context);
-        NamedElement lookup = lookupImmediateChild(context, ((RefPartExpr) reference.getFirstPart()).getNameExprText());
+        NamedElement lookup = lookupImmediateChild(context, ((NameRefExpr) reference.getFirstPart()).getNameExprText());
         checkSetResolve(reference.getFirstPart(), lookup);
         if (reference.isResolved())
             reference.setResolvedDatumScope(containerScopeKind);
@@ -323,7 +323,7 @@ public class AstUtils {
         return childByName;
     }
 
-    private static void resolveIntrinsics(RefPartExpr refPart) {
+    private static void resolveIntrinsics(NameRefExpr refPart) {
         NamedElement lookup = null;
         if (refPart.getExpression().getNameExpr().equals(VoidType.VOID.getName())) {
             lookup = VoidType.VOID;
@@ -408,7 +408,7 @@ public class AstUtils {
     }
 
     public static boolean isJavaNs(ImportExpr importExpr) {
-        RefPartExpr nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
+        NameRefExpr nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
         return nsRefPart != null
             && nsRefPart.getNameExprText().equals(SpaceHome.getNsRegistry().getJavaNs().getName());
     }

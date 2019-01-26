@@ -14,7 +14,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class ThisTupleExpr extends ModelElement implements ValueExpr {
+public class ThisTupleExpr extends SynRefExpr implements ValueExpr {
 
     ThisTupleExpr(SourceInfo sourceInfo) {
         super(sourceInfo);
@@ -22,6 +22,6 @@ public class ThisTupleExpr extends ModelElement implements ValueExpr {
 
     @Override
     public DatumType getDatumType() {
-        return null;
+        return ((SpaceTypeDefn) getResolvedMetaObj());
     }
 }

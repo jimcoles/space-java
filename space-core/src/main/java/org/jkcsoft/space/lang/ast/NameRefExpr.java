@@ -16,39 +16,26 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  * of a meta object being referenced as well the resolved meta object itself
  * AFTER the linking/resolving phase.
  *
- * A {@link RefPartExpr} gets inserted into the AST anywhere that a named reference
+ * A NameRefExpr gets inserted into the AST anywhere that a named reference
  * is made to some named thing, e.g., type ref, datum ref, function ref (call).
  *
  * Something like a LISP 'con' cell.
  *
  * @author Jim Coles
  */
-public class RefPartExpr<T extends Named> extends ModelElement implements Linkable, NameRef<T> {
+public class NameRefExpr<T extends Named> extends RefExprImpl<T> implements NameRef<T> {
 
     private NamePartExpr nameRefExpr; // package name, datum name (ref)
     // elements below set by linker
-    /** The meta object to which this ref refers, e.g. the SpaceTypeDefn or Package
-     * or VariableDefn, FunctionDefn */
-    private T resolvedMetaObj; // package, datum defn, func defn
-    private LinkState state = LinkState.INITIALIZED;
-    private TypeCheckState typeCheckState = TypeCheckState.UNCHECKED;
 
-    public RefPartExpr(NamePartExpr nameRefExpr) {
+    public NameRefExpr(NamePartExpr nameRefExpr) {
         super(nameRefExpr.getSourceInfo());
         this.nameRefExpr = nameRefExpr;
     }
 
-    public LinkState getState() {
-        return state;
-    }
-
-    public void setState(LinkState state) {
-        this.state = state;
-    }
-
     @Override
-    public void setTypeCheckState(TypeCheckState typeCheckState) {
-        this.typeCheckState = typeCheckState;
+    public String toUrlString() {
+        return nameRefExpr.getNameExpr();
     }
 
     public boolean isWildcard() {
@@ -68,14 +55,6 @@ public class RefPartExpr<T extends Named> extends ModelElement implements Linkab
         return this;
     }
 
-    public boolean isResolved() {
-        return state == LinkState.RESOLVED;
-    }
-
-    public MetaType getResolvedMetaType() {
-        return resolvedMetaObj != null ? resolvedMetaObj.getMetaType() : null;
-    }
-
     @Override
     public String getDisplayName() {
         return getExpression().getDisplayName();
@@ -83,15 +62,6 @@ public class RefPartExpr<T extends Named> extends ModelElement implements Linkab
 
     public String getNameExprText() {
         return nameRefExpr.getNameExpr();
-    }
-
-    public T getResolvedMetaObj() {
-        return resolvedMetaObj;
-    }
-
-    @Override
-    public void setResolvedMetaObj(T resolvedMetaObj) {
-        this.resolvedMetaObj = resolvedMetaObj;
     }
 
     /** Because we want user-centric syntactic simplicity, we don't know if this named

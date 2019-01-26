@@ -9,6 +9,9 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.java.util.Lister;
+import org.jkcsoft.java.util.Strings;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,18 +21,20 @@ import java.util.List;
  */
 public class MetaRefPath {
 
-    private List<RefPartExpr> links = new LinkedList<>();
+    private ExpressionChain parentChain;
+    private List<NameRef> links = new LinkedList<>();
     private ScopeKind resolvedDatumScope;
 
-    MetaRefPath(ScopeKind resolvedDatumScope) {
+    MetaRefPath(ExpressionChain parentChain, ScopeKind resolvedDatumScope) {
+        this.parentChain = parentChain;
         this.resolvedDatumScope = resolvedDatumScope;
     }
 
-    void addLink(RefPartExpr link) {
+    void addLink(NameRef link) {
         links.add(link);
     }
 
-    public List<RefPartExpr> getLinks() {
+    public List<NameRef> getLinks() {
         return links;
     }
 
@@ -41,8 +46,21 @@ public class MetaRefPath {
         return resolvedDatumScope;
     }
 
-    public RefPartExpr getLastLink() {
+    public NameRef getLastLink() {
         return links.get(links.size() - 1);
+    }
+
+    public String getFullUrlSpec() {
+        return (parentChain.getNsRefPart() != null ? parentChain.getNsRefPart().getNameExprText() + ":" : "") + getUrlPathSpec();
+    }
+
+    public String getUrlPathSpec() {
+        return Strings.buildDelList(links, (Lister<NameRef>) link -> link.toUrlString(), ".");
+    }
+
+    @Override
+    public String getDisplayName() {
+        return getUrlPathSpec();
     }
 
 }

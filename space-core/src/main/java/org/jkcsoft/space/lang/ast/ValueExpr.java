@@ -21,12 +21,8 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public interface ValueExpr extends Linkable {
+public interface ValueExpr extends TypedExpr {
 
     DatumType getDatumType();
 
-    @Override
-    default boolean isValueExpr() {
-        return true;
-    }
 }

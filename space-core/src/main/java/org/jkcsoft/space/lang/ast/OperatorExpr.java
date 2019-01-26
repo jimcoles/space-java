@@ -84,4 +84,14 @@ public class OperatorExpr extends ModelElement implements ValueExpr {
         }
         return argsType;
     }
+
+    @Override
+    public boolean hasNameRef() {
+        return false;
+    }
+
+    @Override
+    public NameRef getNameRef() {
+        return null;
+    }
 }

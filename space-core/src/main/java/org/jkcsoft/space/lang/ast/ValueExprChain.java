@@ -36,6 +36,25 @@ public class ValueExprChain extends ModelElement implements NamePath, ValueExpr 
 
     @Override
     public DatumType getDatumType() {
-        return chain.get(chain.size() - 1).getDatumType();
+        return getLastExpr().getDatumType();
+    }
+
+    private ValueExpr getLastExpr() {
+        return chain.get(chain.size() - 1);
+    }
+
+    @Override
+    public boolean isValueExpr() {
+        return getLastExpr().isValueExpr();
+    }
+
+    @Override
+    public boolean hasNameRef() {
+        return getLastExpr().hasNameRef();
+    }
+
+    @Override
+    public NameRef getNameRef() {
+        return getLastExpr().getNameRef();
     }
 }

@@ -25,7 +25,7 @@ import java.util.List;
  * Holds either:
  *
  * 1. Meta Reference Path: A full reference to a named element via its AST name path. The reference may be
- *    multi-part (fully qualified).  Holds a chain of {@link RefPartExpr}s,
+ *    multi-part (fully qualified).  Holds a chain of {@link NameRefExpr}s,
  *    each of which resolves to a single meta object.  The MetaType of the full reference
  *    should be known at parse time.
  *
@@ -51,7 +51,7 @@ import java.util.List;
 public class ExpressionChain extends ModelElement implements NamePath, ValueExpr {
 
     private MetaType targetMetaType;
-    private RefPartExpr nsRefPart;
+    private NameRefExpr nsRefPart;
     private List<Linkable> exprLinks = new LinkedList<>();
     private ScopeKind resolvedDatumScope;  // only relevant if target is a datum type.
     private boolean isImportMatch = false;  // only relevant if this chain is a type ref or other static ref
@@ -69,7 +69,7 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
     ExpressionChain(SourceInfo sourceInfo, DatumType typeDefn) {
         this(sourceInfo, MetaType.TYPE);
 
-        RefPartExpr firstPart =  new RefPartExpr(new NamePartExpr(sourceInfo, false, null, typeDefn.getName()));
+        RefExprImpl firstPart =  new NameRefExpr(new NamePartExpr(sourceInfo, false, null, typeDefn.getName()));
         firstPart.setState(LinkState.RESOLVED);
         firstPart.setResolvedMetaObj(typeDefn);
         this.typeCheckState = TypeCheckState.VALID;
@@ -101,11 +101,11 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
         return nsRefPart != null;
     }
 
-    public RefPartExpr getNsRefPart() {
+    public NameRefExpr getNsRefPart() {
         return nsRefPart;
     }
 
-    public ExpressionChain setNsRefPart(RefPartExpr nsRefPart) {
+    public ExpressionChain setNsRefPart(NameRefExpr nsRefPart) {
         this.nsRefPart = nsRefPart;
         return this;
     }
@@ -134,7 +134,7 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
         return getLastPathLink().getResolvedMetaObj();
     }
 
-    private RefPartExpr getLastPathLink() {
+    private NameRef getLastPathLink() {
         return extractMetaRefPath().getLastLink();
     }
 
@@ -149,19 +149,6 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
 //    public String getDisplayName() {
 //        return getLastPart().toString() + "(" + (getLastPart().getState() == LoadState.RESOLVED ? "res" : "unres") + ")";
 //    }
-
-    public String getFullUrlSpec() {
-        return (nsRefPart != null ? nsRefPart.getNameExprText() + ":" : "") + getUrlPathSpec();
-    }
-
-    public String getUrlPathSpec() {
-        return Strings.buildDelList(exprLinks, (Lister<RefPartExpr>) obj -> obj.getExpression().toUrlString(), ".");
-    }
-
-    @Override
-    public String getDisplayName() {
-        return getUrlPathSpec();
-    }
 
     protected String getSuffix() {
         return null;
@@ -223,7 +210,7 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
             metaRefPath = new MetaRefPath(resolvedDatumScope);
             for (Linkable refPartExpr : this.exprLinks) {
                 if (!refPartExpr.isValueExpr()) {
-                    metaRefPath.addLink((RefPartExpr) refPartExpr);
+                    metaRefPath.addLink((RefExprImpl) refPartExpr);
                 }
                 else
                     break;
@@ -268,6 +255,11 @@ public class ExpressionChain extends ModelElement implements NamePath, ValueExpr
 
     @Override
     public NameRef getNameRef() {
+        return null;
+    }
+
+    @Override
+    public String toUrlString() {
         return null;
     }
 

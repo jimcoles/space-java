@@ -26,7 +26,11 @@ public interface DatumType extends Named {
 
     SequenceTypeDefn getSequenceOfType();
 
-    boolean isPrimitive();
+    boolean isPrimitiveType();
+
+    boolean isSimpleType();
+
+    boolean isComplexType();
 
     boolean isAssignableTo(DatumType argsType);
 }

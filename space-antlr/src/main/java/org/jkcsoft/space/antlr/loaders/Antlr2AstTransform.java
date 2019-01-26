@@ -125,7 +125,7 @@ public class Antlr2AstTransform {
         return;
     }
 
-    private RefPartExpr toRefPart(SpaceParser.IdentifierContext identifierContext)
+    private RefExprImpl toRefPart(SpaceParser.IdentifierContext identifierContext)
     {
         return astFactory.newMetaRefPart(toNamePartExpr(identifierContext));
     }
@@ -278,7 +278,7 @@ public class Antlr2AstTransform {
 
     private TypeRefImpl toTypeRef(SpaceParser.MetaRefExprContext spacePathExprContext) {
         logTrans(spacePathExprContext);
-        RefPartExpr nsRefPart =
+        NameRefExpr nsRefPart =
             spacePathExprContext.languageKey() != null ? toAst(spacePathExprContext.languageKey()) : null;
         TypeRefImpl typeRef =
             astFactory.newTypeRef(toSI(spacePathExprContext), null, nsRefPart);
@@ -286,7 +286,7 @@ public class Antlr2AstTransform {
         return typeRef;
     }
 
-    private RefPartExpr toAst(SpaceParser.LanguageKeyContext languageKeyContext) {
+    private RefExprImpl toAst(SpaceParser.LanguageKeyContext languageKeyContext) {
         return astFactory.newMetaRefPart(toSI(languageKeyContext), toText(languageKeyContext.identifier()));
     }
 
@@ -294,7 +294,7 @@ public class Antlr2AstTransform {
         logTrans(spacePathExprContext);
         if (spacePathExprContext == null)
             return null;
-        RefPartExpr nsReference = spacePathExprContext.languageKey() != null ?
+        NameRefExpr nsReference = spacePathExprContext.languageKey() != null ?
             astFactory.newMetaRefPart(toNamePartExpr(spacePathExprContext.languageKey().identifier()))
             : null;
         ExpressionChain expressionChain = astFactory.newMetaReference(toSI(spacePathExprContext), metaType, nsReference);

@@ -45,8 +45,4 @@ public class NamePartExpr extends ModelElement {
         return nameExpr;
     }
 
-    @Override
-    protected String toUrlString() {
-        return nameExpr;
-    }
 }

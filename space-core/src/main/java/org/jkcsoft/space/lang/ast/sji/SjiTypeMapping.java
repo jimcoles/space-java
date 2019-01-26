@@ -46,7 +46,7 @@ public class SjiTypeMapping {
     }
 
     public boolean isPrimitive() {
-        return spaceWrapper != null && spaceWrapper.isPrimitive();
+        return spaceWrapper != null && spaceWrapper.isPrimitiveType();
     }
 
     @Override

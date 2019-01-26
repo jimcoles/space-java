@@ -43,4 +43,14 @@ public class PrimitiveLiteralExpr extends ModelElement implements ValueExpr {
     public DatumType getDatumType() {
         return typeDefn;
     }
+
+    @Override
+    public boolean hasNameRef() {
+        return false;
+    }
+
+    @Override
+    public NameRef getNameRef() {
+        return null;
+    }
 }

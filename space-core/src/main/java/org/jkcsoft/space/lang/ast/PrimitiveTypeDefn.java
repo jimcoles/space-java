@@ -64,7 +64,7 @@ public abstract class PrimitiveTypeDefn extends NamedElement implements SimpleTy
     }
 
     @Override
-    public boolean isPrimitive() {
+    public boolean isPrimitiveType() {
         return true;
     }
 }

@@ -46,4 +46,19 @@ public class NewSetExpr extends ModelElement implements ValueExpr {
         return tupleTypeRef.getResolvedType();
     }
 
+    @Override
+    public boolean hasNameRef() {
+        return false;
+    }
+
+    @Override
+    public NameRef getNameRef() {
+        return null;
+    }
+
+    @Override
+    public boolean isValueExpr() {
+        return false;
+    }
+
 }

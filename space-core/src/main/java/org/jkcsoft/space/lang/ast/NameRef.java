@@ -10,19 +10,24 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * An expression that is or contains a reference-by-name to a named things
+ * An expression that is or contains a reference-by-name to a named thing
  * such as a datum or function.
  *
  * @author Jim Coles
  */
 public interface NameRef<T extends Named> {
 
-    void setResolvedMetaObj(T resolvedMetaObj);
-
     void setState(LinkState resolved);
-
-    void setTypeCheckState(TypeCheckState typeCheckState);
 
     boolean isResolved();
 
+    void setResolvedMetaObj(T resolvedMetaObj);
+
+    Named getResolvedMetaObj();
+
+    void setTypeCheckState(TypeCheckState typeCheckState);
+
+    String toUrlString();
+
+    boolean isWildcard();
 }
