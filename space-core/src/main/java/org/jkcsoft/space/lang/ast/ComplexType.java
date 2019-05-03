@@ -22,4 +22,9 @@ public interface ComplexType extends DatumType {
 
     void setGroupingNode(boolean isGroupingNode);
 
+    @Override
+    default boolean isSimpleType() {
+        return false;
+    }
+
 }

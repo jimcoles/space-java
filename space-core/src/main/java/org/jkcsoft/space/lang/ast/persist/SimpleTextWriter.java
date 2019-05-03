@@ -11,6 +11,7 @@ package org.jkcsoft.space.lang.ast.persist;
 
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
+import org.jkcsoft.space.lang.ast.AbstractModelElement;
 import org.jkcsoft.space.lang.ast.ModelElement;
 import org.jkcsoft.space.lang.runtime.AstScanConsumer;
 import org.jkcsoft.space.lang.runtime.AstUtils;
@@ -54,7 +55,7 @@ public class SimpleTextWriter implements AstWriter, AstScanConsumer {
     }
 
     @Override
-    public void writeAst(ModelElement rootElem) {
+    public void writeAst(AbstractModelElement rootElem) {
         AstUtils.walkAstDepthFirst(rootElem, this);
     }
 }

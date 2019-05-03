@@ -23,7 +23,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  *
  * @author Jim Coles
  */
-public class NameRefExpr<T extends Named> extends RefExprImpl<T> implements NameRef<T> {
+public class NameRefExpr<T extends Named> extends AbstractRefExpr<T> implements ByNameMetaRef<T>, MemberRefHolder {
 
     private NamePartExpr nameRefExpr; // package name, datum name (ref)
     // elements below set by linker
@@ -33,25 +33,21 @@ public class NameRefExpr<T extends Named> extends RefExprImpl<T> implements Name
         this.nameRefExpr = nameRefExpr;
     }
 
-    @Override
-    public String toUrlString() {
-        return nameRefExpr.getNameExpr();
-    }
-
     public boolean isWildcard() {
         return (getExpression() instanceof NamePartExpr
             && ((NamePartExpr) getExpression()).getNameExpr().equals("*"));
     }
 
+    @Override
     public NamePartExpr getExpression() {
         return nameRefExpr;
     }
 
-    public boolean hasNameRef() {
+    public boolean hasRef() {
         return true;
     }
 
-    public NameRef getNameRef() {
+    public MetaRef getRef() {
         return this;
     }
 
@@ -60,6 +56,7 @@ public class NameRefExpr<T extends Named> extends RefExprImpl<T> implements Name
         return getExpression().getDisplayName();
     }
 
+    @Override
     public String getNameExprText() {
         return nameRefExpr.getNameExpr();
     }
@@ -74,4 +71,18 @@ public class NameRefExpr<T extends Named> extends RefExprImpl<T> implements Name
         return getResolvedMetaObj().getMetaType() == MetaType.DATUM;
     }
 
+    @Override
+    public DatumType getDatumType() {
+        return null;
+    }
+
+    @Override
+    public String toUrlString() {
+        return nameRefExpr.getNameExpr();
+    }
+
+    @Override
+    public ByNameMetaRef getRefAsNameRef() {
+        return this;
+    }
 }

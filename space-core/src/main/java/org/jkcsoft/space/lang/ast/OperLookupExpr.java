@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.ast;
 /**
  * @author Jim Coles
  */
-public class OperLookupExpr extends ModelElement implements ValueExpr {
+public class OperLookupExpr extends AbstractModelElement implements ValueExpr {
 
     private OperEnum operLookupKey;
 
@@ -27,12 +27,12 @@ public class OperLookupExpr extends ModelElement implements ValueExpr {
     }
 
     @Override
-    public boolean hasNameRef() {
+    public boolean hasRef() {
         return false;
     }
 
     @Override
-    public NameRef getNameRef() {
+    public MetaRef getRef() {
         return null;
     }
 }

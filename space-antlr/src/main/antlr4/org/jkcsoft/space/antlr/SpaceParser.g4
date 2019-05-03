@@ -297,7 +297,7 @@ equationDefn :
 
 equationExpr :
     symbolicExpr |  // type check: boolean-valued
-    valueExpr  // type check: set of tuples
+    valueExprChain  // type check: set of tuples
     ;
 
 /*------------------------------------------------------------------------------
@@ -352,7 +352,7 @@ queryExpr :
     queryRootExpr
     ('assocs' aliasedSpacePathExprList)?
     ('vars' aliasedSpacePathExprList)?
-    ('filter' valueExpr)?
+    ('filter' valueExprChain)?
     ;
 
 queryRootExpr:
@@ -576,17 +576,17 @@ statementBlock :
     ;
 
 ifStatement :
-    'if' '(' valueExpr ')'
+    'if' '(' valueExprChain ')'
     statementBlock
     ;
 
 forEachStatement :
-    'foreach' identifier 'in' valueExpr
+    'foreach' identifier 'in' valueExprChain
     statementBlock
     ;
 
 returnStatement :
-    'return' valueExpr ';'
+    'return' valueExprChain ';'
     ;
 
 /*------------------------------------------------------------------------------
@@ -601,12 +601,16 @@ returnStatement :
 // dot-seperated list of identifiers, whereas the former may start
 // with literals or symbolic expressions and may contain function calls
 
-valueExpr :
+valueExprChain :
     atomicValueExpr ('.' namedRefValueExpr)*
     ;
 
 functionCallExpr :
-    idRef '(' valueExpr? ')'
+    idRef '(' argList ')'
+    ;
+
+argList :
+    valueExprChain? ('.' valueExprChain)*
     ;
 
 expression :
@@ -614,7 +618,7 @@ expression :
     associationDefn |
     functionCallExpr |
     assignmentExpr |
-    valueExpr
+    valueExprChain
     ;
 
 atomicValueExpr :
@@ -638,7 +642,7 @@ valueOrAssignmentExprList :
     ;
 
 valueOrAssignmentExpr :
-    valueExpr | assignmentExpr
+    valueExprChain | assignmentExpr
     ;
 
 /*------------------------------------------------------------------------------
@@ -665,7 +669,7 @@ symbolicExpr :
     ;
 
 unaryOperExpr :
-    unaryOper valueExpr
+    unaryOper valueExprChain
     ;
 
 unaryOper :
@@ -673,7 +677,7 @@ unaryOper :
     ;
 
 binaryOperExpr :
-    valueExpr binaryOper valueExpr
+    valueExprChain binaryOper valueExprChain
     ;
 
 binaryOper :
@@ -739,7 +743,7 @@ multiLineComment : BlockComment;
 annotation : '@' idRef '=' newObjectExpr;
 
 rightAssignmentExpr :
-    '=' valueExpr
+    '=' valueExprChain
     ;
 
 assignmentExpr :

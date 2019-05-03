@@ -15,7 +15,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class PrimitiveLiteralExpr extends ModelElement implements ValueExpr {
+public class PrimitiveLiteralExpr extends AbstractModelElement implements ValueExpr {
 
     private NumPrimitiveTypeDefn typeDefn;
     private String valueExpr;
@@ -45,12 +45,12 @@ public class PrimitiveLiteralExpr extends ModelElement implements ValueExpr {
     }
 
     @Override
-    public boolean hasNameRef() {
+    public boolean hasRef() {
         return false;
     }
 
     @Override
-    public NameRef getNameRef() {
+    public MetaRef getRef() {
         return null;
     }
 }

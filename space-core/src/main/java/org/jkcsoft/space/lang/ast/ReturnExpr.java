@@ -23,7 +23,7 @@ public class ReturnExpr extends Statement {
         super(sourceInfo);
         this.valueExpr = valueExpr;
         //
-        addChild((ModelElement) valueExpr);
+        addChild((AbstractModelElement) valueExpr);
     }
 
     public ValueExpr getValueExpr() {

@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.ast;
 import java.util.*;
 
 @GroupingNode
-public class ParseUnit extends ModelElement {
+public class ParseUnit extends AbstractModelElement {
 
     private PackageDecl packageDecl;
     private List<ImportExpr> importExprs;

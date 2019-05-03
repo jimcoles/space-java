@@ -10,14 +10,16 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * An expression that is in general on the right-side of a dotted expression
- * and therefore always contains a reference by name to a {@link Named}
- * {@link ModelElement}.
+ * An monomial expression that is or contains a reference-by-name to a named
+ * thing such as a datum or function.
  *
  * @author Jim Coles
  */
-public interface MemberRefExpr extends TypedExpr {
+public interface ByNameMetaRef<T extends Named> extends MetaRef<T> {
 
-    NameRef getNameRef();
+    boolean isWildcard();
 
+    NamePartExpr getExpression();
+
+    String getNameExprText();
 }

@@ -236,13 +236,13 @@ public class SjiService {
     }
 
     //        return null;
-    static TypeRefImpl.CollectionType javaToSpaceCollType(Class clazz) {
-        TypeRefImpl.CollectionType spCollType = null;
+    static FullTypeRefImpl.CollectionType javaToSpaceCollType(Class clazz) {
+        FullTypeRefImpl.CollectionType spCollType = null;
         if (clazz == String.class) {
-            spCollType = TypeRefImpl.CollectionType.SEQUENCE;
+            spCollType = FullTypeRefImpl.CollectionType.SEQUENCE;
         }
         else {
-            spCollType = clazz.isArray() ? TypeRefImpl.CollectionType.SEQUENCE : null;
+            spCollType = clazz.isArray() ? FullTypeRefImpl.CollectionType.SEQUENCE : null;
         }
         return spCollType;
     }

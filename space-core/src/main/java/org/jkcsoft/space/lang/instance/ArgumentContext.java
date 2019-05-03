@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.ModelElement;
+import org.jkcsoft.space.lang.ast.AbstractModelElement;
 
 /**
  *
@@ -17,7 +17,7 @@ import org.jkcsoft.space.lang.ast.ModelElement;
  */
 public class ArgumentContext extends AbstractExeContext {
 
-    public ArgumentContext(ModelElement astNode) {
+    public ArgumentContext(AbstractModelElement astNode) {
         super(astNode);
     }
 

@@ -38,7 +38,7 @@ public class Antrl2AstMapping {
         Antrl2AstMapping.addRuleMeta(SpaceParser.RULE_expression);
         Antrl2AstMapping.addRuleMeta(SpaceParser.RULE_anyThing);
         Antrl2AstMapping.addRuleMeta(SpaceParser.RULE_parameterDecl);
-        Antrl2AstMapping.addRuleMeta(SpaceParser.RULE_valueExpr);
+        Antrl2AstMapping.addRuleMeta(SpaceParser.RULE_valueExprChain);
         Antrl2AstMapping.addRuleMeta(SpaceParser.RULE_valueOrAssignmentExpr);
         Antrl2AstMapping.addRuleMeta(SpaceParser.RULE_comment);
         Antrl2AstMapping.addRuleMeta(SpaceParser.RULE_anyTypeRef);

@@ -17,20 +17,21 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public class TypeRefImpl extends ExpressionChain implements TypeRef {
+public class FullTypeRefImpl extends ExpressionChain implements TypeRef {
 
     /** Somewhat analogous to Java 'new URL(String spec)' */
-    public static TypeRefImpl newTypeRef(String typeNameSpec) {
+    public static FullTypeRefImpl newFullTypeRef(String typeNameSpec) {
         if (typeNameSpec == null)
             throw new IllegalArgumentException("type ref name cannot be null");
         String[] topSplits = typeNameSpec.split(":");
         String nsName = topSplits.length == 2 ? topSplits[0] : null;
+        String fullName = topSplits.length == 2 ? topSplits[1] : topSplits[0];
         AstFactory astFactory = AstFactory.getInstance();
-        TypeRefImpl typeRef =
-            astFactory.newTypeRef(new IntrinsicSourceInfo(), null, astFactory.newMetaRefPart(null, nsName));
-        String[] nameStrings = typeNameSpec.split("\\.");
-        AstUtils.addNewMetaRefParts(typeRef, new IntrinsicSourceInfo(), nameStrings);
-        return typeRef;
+        FullTypeRefImpl fullTypeRef =
+            astFactory.newTypeRef(new IntrinsicSourceInfo(), null, astFactory.newNameRefExpr(null, nsName));
+        String[] nameStrings = fullName.split("\\.");
+        AstUtils.addNewMetaRefParts(fullTypeRef, new IntrinsicSourceInfo(), nameStrings);
+        return fullTypeRef;
     }
 
     // -------------------------------------------------------------------------
@@ -38,16 +39,16 @@ public class TypeRefImpl extends ExpressionChain implements TypeRef {
     private List<CollectionType> collectionTypes;
     private String suffix = null;
 
-    TypeRefImpl(SourceInfo sourceInfo, List<CollectionType> collectionTypes) {
+    FullTypeRefImpl(SourceInfo sourceInfo, List<CollectionType> collectionTypes) {
         super(sourceInfo, MetaType.TYPE);
         this.collectionTypes = collectionTypes;
     }
 
-    TypeRefImpl(SourceInfo sourceInfo, DatumType typeDefn) {
+    FullTypeRefImpl(SourceInfo sourceInfo, DatumType typeDefn) {
         super(sourceInfo, typeDefn);
     }
 
-    TypeRefImpl(SourceInfo sourceInfo, DatumType typeDefn, List<CollectionType> collectionTypes) {
+    FullTypeRefImpl(SourceInfo sourceInfo, DatumType typeDefn, List<CollectionType> collectionTypes) {
         this(sourceInfo, typeDefn);
         this.collectionTypes = collectionTypes;
     }
@@ -86,6 +87,11 @@ public class TypeRefImpl extends ExpressionChain implements TypeRef {
     @Override
     public DatumType getResolvedType() {
         return (DatumType) getResolvedMetaObj();
+    }
+
+    @Override
+    public boolean isValueExpr() {
+        return false;
     }
 
     public enum CollectionType {

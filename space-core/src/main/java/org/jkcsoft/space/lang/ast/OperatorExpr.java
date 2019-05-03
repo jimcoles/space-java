@@ -25,7 +25,7 @@ import java.util.List;
  * date < date
  * boolean == boolean
  */
-public class OperatorExpr extends ModelElement implements ValueExpr {
+public class OperatorExpr extends AbstractModelElement implements ValueExpr {
 
     private OperEnum oper;
     /* could be one, two or more args.  Could be nested expressions
@@ -40,7 +40,7 @@ public class OperatorExpr extends ModelElement implements ValueExpr {
         for (ValueExpr arg : args) {
             this.args.add(arg);
             //
-            addChild((ModelElement) arg);
+            addChild((AbstractModelElement) arg);
         }
     }
 
@@ -86,12 +86,12 @@ public class OperatorExpr extends ModelElement implements ValueExpr {
     }
 
     @Override
-    public boolean hasNameRef() {
+    public boolean hasRef() {
         return false;
     }
 
     @Override
-    public NameRef getNameRef() {
+    public MetaRef getRef() {
         return null;
     }
 }

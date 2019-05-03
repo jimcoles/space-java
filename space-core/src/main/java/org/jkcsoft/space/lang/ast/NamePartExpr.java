@@ -15,7 +15,7 @@ package org.jkcsoft.space.lang.ast;
  * @author Jim Coles
  * @see OperLookupExpr
  */
-public class NamePartExpr extends ModelElement {
+public class NamePartExpr extends AbstractModelElement {
 
     private boolean isTypeExpr;  // If true, evaluates to a meta (definition) object.
     private PathOperEnum oper;

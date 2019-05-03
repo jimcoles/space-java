@@ -11,7 +11,7 @@ package org.jkcsoft.space.lang.ast;
 /**
  * @author Jim Coles
  */
-public class ArgList extends ModelElement {
+public class ArgList extends AbstractModelElement {
 
     ArgList(SourceInfo sourceInfo) {
         super(sourceInfo);

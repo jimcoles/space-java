@@ -13,8 +13,10 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.antlr.SpaceParserBaseVisitor;
-import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.ast.AstFactory;
 import org.jkcsoft.space.lang.ast.ModelElement;
+import org.jkcsoft.space.lang.ast.NamePart;
+import org.jkcsoft.space.lang.ast.SourceInfo;
 
 import java.io.File;
 
@@ -46,7 +48,7 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<ModelElement> 
 
     @Override
     protected ModelElement aggregateResult(ModelElement aggregate, ModelElement nextResult) {
-        aggregate.addChild(nextResult);
+//        aggregate.addChild(nextResult);
         return aggregate;
     }
 
@@ -289,8 +291,8 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<ModelElement> 
     }
 
     @Override
-    public ModelElement visitValueExpr(SpaceParser.ValueExprContext ctx) {
-        return super.visitValueExpr(ctx);
+    public ModelElement visitValueExprChain(SpaceParser.ValueExprChainContext ctx) {
+        return super.visitValueExprChain(ctx);
     }
 
     @Override

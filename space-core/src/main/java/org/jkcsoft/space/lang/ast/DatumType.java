@@ -30,7 +30,5 @@ public interface DatumType extends Named {
 
     boolean isSimpleType();
 
-    boolean isComplexType();
-
     boolean isAssignableTo(DatumType argsType);
 }

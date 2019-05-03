@@ -62,7 +62,7 @@ public class SpaceTypeDefnBody extends StatementBlock {
     public FunctionDefn addFunctionDefn(FunctionDefn actionDefn) {
         functionDefns.add(actionDefn);
         //
-        addChild((ModelElement) actionDefn);
+        addChild((AbstractModelElement) actionDefn);
         //
         return actionDefn;
     }

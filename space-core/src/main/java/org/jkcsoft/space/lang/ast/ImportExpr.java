@@ -10,15 +10,15 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * Essentially a {@link TypeRefImpl} with an optional alias.
+ * Essentially a {@link FullTypeRefImpl} with an optional alias.
  * @author Jim Coles
  */
-public class ImportExpr extends ModelElement {
+public class ImportExpr extends AbstractModelElement {
 
-    private TypeRefImpl typeRefExpr;
+    private FullTypeRefImpl typeRefExpr;
     private String alias;
 
-    public ImportExpr(SourceInfo sourceInfo, TypeRefImpl typeRefExpr, String alias) {
+    public ImportExpr(SourceInfo sourceInfo, FullTypeRefImpl typeRefExpr, String alias) {
         super(sourceInfo);
         this.typeRefExpr = typeRefExpr;
         this.alias = alias;
@@ -26,7 +26,7 @@ public class ImportExpr extends ModelElement {
         addChild(typeRefExpr);
     }
 
-    public TypeRefImpl getTypeRefExpr() {
+    public FullTypeRefImpl getTypeRefExpr() {
         return typeRefExpr;
     }
 

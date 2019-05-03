@@ -22,7 +22,7 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public abstract class NamedElement extends ModelElement implements Named, Comparable<NamedElement> {
+public abstract class NamedElement extends AbstractModelElement implements Named, Comparable<NamedElement> {
 
     private String name;
     private String description;
@@ -34,7 +34,7 @@ public abstract class NamedElement extends ModelElement implements Named, Compar
     }
 
     @Override
-    void setParent(ModelElement parent) {
+    void setParent(AbstractModelElement parent) {
         super.setParent(parent);
 //        fqName = null;
     }
@@ -94,7 +94,6 @@ public abstract class NamedElement extends ModelElement implements Named, Compar
         return getFQName();
     }
 
-    @Override
     protected String toUrlString() {
         return getName();
     }

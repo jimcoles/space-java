@@ -14,10 +14,10 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class ThisTupleExpr extends SynRefExpr implements ValueExpr {
+public class ThisTupleExpr extends PronounRefExpr implements ValueExpr {
 
     ThisTupleExpr(SourceInfo sourceInfo) {
-        super(sourceInfo);
+        super(sourceInfo, "this");
     }
 
     @Override

@@ -14,7 +14,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class PackageDecl extends ModelElement {
+public class PackageDecl extends AbstractModelElement {
 
     private ExpressionChain packageRef;
 

@@ -12,12 +12,12 @@ package org.jkcsoft.space.lang.ast;
 /**
  * Creates new Tuples, Spaces(Sets), Sequences.
  */
-public class NewTupleExpr extends ModelElement implements ValueExpr {
+public class NewTupleExpr extends AbstractModelElement implements ValueExpr {
 
-    private TypeRefImpl typeRef;
+    private FullTypeRefImpl typeRef;
     private TupleExpr tupleExpr;
 
-    public NewTupleExpr(SourceInfo sourceInfo, TypeRefImpl typeRef, TupleExpr tupleExpr) {
+    public NewTupleExpr(SourceInfo sourceInfo, FullTypeRefImpl typeRef, TupleExpr tupleExpr) {
         super(sourceInfo);
         this.typeRef = typeRef;
         this.tupleExpr = tupleExpr;
@@ -26,7 +26,7 @@ public class NewTupleExpr extends ModelElement implements ValueExpr {
         addChild(tupleExpr);
     }
 
-    public TypeRefImpl getTypeRef() {
+    public FullTypeRefImpl getTypeRef() {
         return typeRef;
     }
 
@@ -40,12 +40,12 @@ public class NewTupleExpr extends ModelElement implements ValueExpr {
     }
 
     @Override
-    public boolean hasNameRef() {
+    public boolean hasRef() {
         return false;
     }
 
     @Override
-    public NameRef getNameRef() {
+    public MetaRef getRef() {
         return null;
     }
 }

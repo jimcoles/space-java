@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.ast;
 /**
  * @author Jim Coles
  */
-public class AssignmentExpr extends ModelElement implements ValueExpr {
+public class AssignmentExpr extends AbstractModelElement implements ValueExpr {
 
     private ExpressionChain leftSideDatumRef;
     private ValueExpr rightSideValueExpr;
@@ -37,8 +37,8 @@ public class AssignmentExpr extends ModelElement implements ValueExpr {
     public void setRightSideValueExpr(ValueExpr rightSideValueExpr) {
         this.rightSideValueExpr = rightSideValueExpr;
         //
-        if (rightSideValueExpr instanceof ModelElement)
-            addChild(((ModelElement) rightSideValueExpr));
+        if (rightSideValueExpr instanceof AbstractModelElement)
+            addChild(((AbstractModelElement) rightSideValueExpr));
 
 //        if (valueExpr instanceof MetaReference)
 //            addReference(((MetaReference) valueExpr));
@@ -47,6 +47,21 @@ public class AssignmentExpr extends ModelElement implements ValueExpr {
 
     public ValueExpr getRightSideValueExpr() {
         return rightSideValueExpr;
+    }
+
+    @Override
+    public boolean hasRef() {
+        return false;
+    }
+
+    @Override
+    public MetaRef getRef() {
+        return null;
+    }
+
+    @Override
+    public boolean isValueExpr() {
+        return true;
     }
 
     @Override

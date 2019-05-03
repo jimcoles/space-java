@@ -116,7 +116,7 @@ public class Directory extends NamedElement {
 //    }
 
     @Override
-    void setParent(ModelElement parent) {
+    void setParent(AbstractModelElement parent) {
         if (parent instanceof Directory)
             this.parentDir = (Directory) parent;
 

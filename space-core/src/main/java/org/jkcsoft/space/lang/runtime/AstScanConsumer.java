@@ -11,7 +11,6 @@ package org.jkcsoft.space.lang.runtime;
 
 import org.jkcsoft.space.lang.ast.ModelElement;
 
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**

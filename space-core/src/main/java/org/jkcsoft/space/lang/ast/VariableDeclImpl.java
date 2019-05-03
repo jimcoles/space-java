@@ -27,7 +27,7 @@ public class VariableDeclImpl extends NamedElement implements VariableDecl {
         super(sourceInfo, name);
         this.typeRef = typeRef;
         //
-        addChild(((ModelElement) typeRef));
+        addChild(((AbstractModelElement) typeRef));
     }
 
     @Override

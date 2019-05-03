@@ -22,13 +22,13 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class AssociationDeclImpl extends NamedElement implements AssociationDecl {
 
-    private TypeRefImpl fromTypeRef;
+    private FullTypeRefImpl fromTypeRef;
     private int fromMult;   // Defaults to "many" if assoc is declared within a Space Type Defn.
 
     private TypeRef     toTypeRef;
     private int toMult;     // Defaults to 1 if assoc is declared within a Space Type Defn.
 
-    AssociationDeclImpl(SourceInfo sourceInfo, String name, TypeRefImpl fromTypeRef, TypeRef toTypeRef) {
+    AssociationDeclImpl(SourceInfo sourceInfo, String name, FullTypeRefImpl fromTypeRef, TypeRef toTypeRef) {
         super(sourceInfo, name);
 
         if (fromTypeRef != null) {
@@ -39,7 +39,7 @@ public class AssociationDeclImpl extends NamedElement implements AssociationDecl
         if (toTypeRef == null) throw new RuntimeException("bug: path to class ref cannot be null");
         this.toTypeRef = toTypeRef;
         //
-        addChild((ModelElement) this.toTypeRef);
+        addChild((AbstractModelElement) this.toTypeRef);
     }
 
     @Override

@@ -71,7 +71,7 @@ public class SjiTypeDefn extends NamedElement implements ComplexType {
     public void addAssociationDecl(AssociationDecl associationDecl) {
         addDatum(associationDecl);
         //
-        addChild((ModelElement) associationDecl);
+        addChild((AbstractModelElement) associationDecl);
     }
 
     public void addVariableDecl(SjiVarDecl variableDecl) {

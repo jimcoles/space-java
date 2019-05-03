@@ -22,7 +22,7 @@ import java.util.List;
 public class MetaRefPath {
 
     private ExpressionChain parentChain;
-    private List<NameRef> links = new LinkedList<>();
+    private List<MetaRef> links = new LinkedList<>();
     private ScopeKind resolvedDatumScope;
 
     MetaRefPath(ExpressionChain parentChain, ScopeKind resolvedDatumScope) {
@@ -30,11 +30,11 @@ public class MetaRefPath {
         this.resolvedDatumScope = resolvedDatumScope;
     }
 
-    void addLink(NameRef link) {
+    void addLink(MetaRef link) {
         links.add(link);
     }
 
-    public List<NameRef> getLinks() {
+    public List<MetaRef> getLinks() {
         return links;
     }
 
@@ -46,7 +46,7 @@ public class MetaRefPath {
         return resolvedDatumScope;
     }
 
-    public NameRef getLastLink() {
+    public MetaRef getLastLink() {
         return links.get(links.size() - 1);
     }
 
@@ -55,12 +55,7 @@ public class MetaRefPath {
     }
 
     public String getUrlPathSpec() {
-        return Strings.buildDelList(links, (Lister<NameRef>) link -> link.toUrlString(), ".");
-    }
-
-    @Override
-    public String getDisplayName() {
-        return getUrlPathSpec();
+        return Strings.buildDelList(links, (Lister<MetaRef>) link -> link.toUrlString(), ".");
     }
 
 }

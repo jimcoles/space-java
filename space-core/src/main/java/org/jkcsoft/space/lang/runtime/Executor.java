@@ -250,18 +250,17 @@ public class Executor extends ExprProcessor implements ExeContext {
                               )
             );
         for (ImportExpr javaImport : javaImports) {
-            TypeRefImpl targetJavaTypeRef = javaImport.getTypeRefExpr();
+            FullTypeRefImpl targetJavaTypeRef = javaImport.getTypeRefExpr();
             try {
                 // the following call to getDeepLoad() ensures the Space wrapper for the
                 // Java class is loaded and ready for lookup for subsequent linking
-                SpaceHome.getSjiService().getDeepLoadSpaceWrapper(targetJavaTypeRef.getUrlPathSpec(), null);
+                SpaceHome.getSjiService().getDeepLoadSpaceWrapper(AstUtils.getUrlPathSpec(targetJavaTypeRef), null);
             }
             catch (ClassNotFoundException e) {
-                log.warn("could not find Java import class ["+targetJavaTypeRef.getUrlPathSpec()+"]");
-                AstLoadError astLoadError = new AstLoadError(AstLoadError.Type.LINK, javaImport.getSourceInfo(),
-                                                             "could not find Java import class [" +
-                                                                 targetJavaTypeRef.getUrlPathSpec() + "] in " +
-                                                                 "the Java classpath");
+                String msg = "could not find Java import class [" + AstUtils.getUrlPathSpec(targetJavaTypeRef) + "]" +
+                    " in the Java classpath";
+                log.warn(msg);
+                AstLoadError astLoadError = new AstLoadError(AstLoadError.Type.LINK, javaImport.getSourceInfo(), msg);
                 runResults.addFileError(astLoadError);
             }
         }
@@ -308,7 +307,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             SpaceHome.getSjiService().getDeepLoadSpaceWrapper(jNativeType, new String[]{"space", "native", "opsys"});
         }
 
-        TypeRefImpl opSysRef = TypeRefImpl.newTypeRef(nsRegistry.getJavaNs().getName() + ":" + JOpSys.class.getName());
+        FullTypeRefImpl opSysRef = FullTypeRefImpl.newFullTypeRef(nsRegistry.getJavaNs().getName() + ":" + JOpSys.class.getName());
         AstUtils.resolveAstPath(opSysRef);
         if (opSysRef.isResolvedValid())
             op_sys_type_def = (ComplexType) opSysRef.getResolvedType();
@@ -507,12 +506,17 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
     }
 
-    private Linkable getFirstUnresolved(ExpressionChain reference) {
-        Linkable unresolved = null;
-        for (Linkable link : reference.getExprLinks()) {
-            if (link.hasNameRef() && !link.getNameRef().isResolved()) {
-                unresolved = link;
-                break;
+    private MemberRefHolder getFirstUnresolved(ExpressionChain refChain) {
+        MemberRefHolder unresolved = null;
+        if (refChain.getFirstPart().hasRef() && !refChain.getFirstPart().getRef().isResolved())
+            unresolved = (MemberRefHolder) refChain.getFirstPart();
+
+        if (unresolved == null) {
+            for (MemberRefHolder link : refChain.getRestLinks()) {
+                if (link.hasRef() && !link.getRef().isResolved()) {
+                    unresolved = link;
+                    break;
+                }
             }
         }
         return unresolved;
@@ -526,8 +530,8 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         IntrinsicSourceInfo sourceInfo = new IntrinsicSourceInfo();
         String[] pathNodes = mainSpacePath.split("/.");
-        TypeRefImpl exeTypeRef = getAstFactory().newTypeRef(sourceInfo, null, null);
-        NameRefExpr userNsRefPart = getAstFactory().newMetaRefPart(sourceInfo, nsRegistry.getUserNs().getName());
+        FullTypeRefImpl exeTypeRef = getAstFactory().newTypeRef(sourceInfo, null, null);
+        NameRefExpr userNsRefPart = getAstFactory().newNameRefExpr(sourceInfo, nsRegistry.getUserNs().getName());
         exeTypeRef.setNsRefPart(userNsRefPart);
         AstUtils.addNewMetaRefParts(exeTypeRef, sourceInfo, pathNodes);
         AstUtils.resolveAstPath(exeTypeRef);
@@ -539,8 +543,8 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         ProgSourceInfo progSourceInfo = new ProgSourceInfo();
         FunctionCallExpr bootMainCallExpr = getAstFactory().newFunctionCallExpr(progSourceInfo);
-        RefExprImpl<SpaceFunctionDefn> mainFuncRef =
-            getAstFactory().newMetaRefPart(getAstFactory().newNamePartExpr(sourceInfo, null, "main"));
+        NameRefExpr<FunctionDefn> mainFuncRef =
+            getAstFactory().newNameRefExpr(getAstFactory().newNamePartExpr(sourceInfo, null, "main"));
         bootMainCallExpr.setFunctionRef(mainFuncRef);
         bootMainCallExpr.getFunctionRef().setResolvedMetaObj(spMainActionDefn);
         bootMainCallExpr.getFunctionRef().setTypeCheckState(TypeCheckState.VALID);
@@ -569,7 +573,7 @@ public class Executor extends ExprProcessor implements ExeContext {
     private Declaration newAnonDecl(DatumType datumType) {
         Declaration decl = null;
         DatumType rootType = getRootType(datumType);
-        TypeRefImpl typeRef = getAstFactory().newTypeRef(new ProgSourceInfo(), datumType);
+        FullTypeRefImpl typeRef = getAstFactory().newTypeRef(new ProgSourceInfo(), datumType);
         if (rootType instanceof NumPrimitiveTypeDefn) {
             decl = getAstFactory().newVariableDecl(new ProgSourceInfo(), null, typeRef);
         }
@@ -1295,20 +1299,20 @@ public class Executor extends ExprProcessor implements ExeContext {
             }
         }
 
-        private void checkUnitImports(Linkable link) {
+        private void checkUnitImports(TypedExpr exprLink) {
             DatumType importedTypeMatch =
                 (DatumType) CollectionUtils.find(parseUnit.getAllImportedTypes(),
                                                  object -> ((DatumType) object).getName()
-                                                                               .equals(link.getNameRef()));
-            AstUtils.checkSetResolve(link, (NamedElement) importedTypeMatch);
+                                                                               .equals(exprLink.getRef()));
+            AstUtils.checkSetResolve(exprLink, (NamedElement) importedTypeMatch);
         }
 
-        private void checkImplicitImports(Linkable link) {
+        private void checkImplicitImports(TypedExpr expLink) {
             DatumType importedTypeMatch = (DatumType) CollectionUtils.find(
                 implicitImportTypes,
-                object -> ((DatumType) object).getName().equals(link.getNameRef())
+                object -> ((DatumType) object).getName().equals(expLink.getRef().getResolvedMetaObj())
             );
-            AstUtils.checkSetResolve(link, (NamedElement) importedTypeMatch);
+            AstUtils.checkSetResolve(expLink, (NamedElement) importedTypeMatch);
         }
 
         @Override

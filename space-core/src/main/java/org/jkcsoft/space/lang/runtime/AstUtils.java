@@ -177,11 +177,11 @@ public class AstUtils {
 
     }
 
-    static void checkSetResolve(Linkable link, NamedElement lookup) {
-        if (link != null && lookup != null) {
-            NameRef nameRef = link.getNameRef();
-            nameRef.setResolvedMetaObj(lookup);
-            nameRef.setState(LinkState.RESOLVED);
+    static void checkSetResolve(TypedExpr exprLink, NamedElement lookup) {
+        if (exprLink != null && lookup != null) {
+            MetaRef metaRef = exprLink.getRef();
+            metaRef.setResolvedMetaObj(lookup);
+            metaRef.setState(LinkState.RESOLVED);
         }
     }
 
@@ -213,8 +213,8 @@ public class AstUtils {
         return findFirstParent(astNode, finderAction);
     }
 
-    public static Set<DatumType> getSiblingTypes(TypeRefImpl reference) {
-        RefExprImpl parentRefPart = getParentRefPart(reference);
+    public static Set<DatumType> getSiblingTypes(FullTypeRefImpl reference) {
+        MetaRef parentRefPart = getParentRefPart(reference);
         return getChildTypes((Directory) parentRefPart.getResolvedMetaObj());
     }
 
@@ -224,15 +224,15 @@ public class AstUtils {
         return childTypes;
     }
 
-    private static RefExprImpl getParentRefPart(TypeRefImpl fullRef) {
-        List<RefExprImpl> pathParts = fullRef.extractMetaRefPath().getLinks();
+    private static MetaRef getParentRefPart(FullTypeRefImpl fullRef) {
+        List<MetaRef> pathParts = fullRef.extractMetaRefPath().getLinks();
         return pathParts.get(pathParts.size() - 2);
     }
 
     private static void resolveFromRoot(Directory[] dirChain, ExpressionChain reference) {
         for (Directory rootDir : dirChain) {
             log.debug("trying to find [" + reference + "] under [" + rootDir.getFQName() + "]");
-            resolveRest(rootDir, reference.getExprLinks().iterator());
+            resolveRest(rootDir, reference.getRestLinks().iterator());
             if (reference.isResolved()) {
                 break;
             }
@@ -247,20 +247,18 @@ public class AstUtils {
         NamedElement lookup =
             lookupImmediateChild(astNode, (((NameRefExpr) exprChain.getFirstPart()).getNameExprText()));
         checkSetResolve(exprChain.getFirstPart(), lookup);
-        resolveRest(lookup, exprChain.getExprLinks().iterator());
+        resolveRest(lookup, exprChain.getRestLinks().iterator());
     }
 
-    public static void resolveRest(Linkable nameContext, Iterator<Linkable> linksIter) {
-        if (nameContext != null && linksIter.hasNext()) {
-            NameRefExpr refPart = (NameRefExpr) linksIter.next();
-            if (nameContext instanceof ValueExpr) {
-                nameContext = (NamedElement) ((ValueExpr) nameContext).getDatumType();
-            }
-            NamedElement targetChild = lookupImmediateChild(nameContext, refPart.getExpression().getNameExpr());
+    public static void resolveRest(ModelElement nameContext, Iterator<MemberRefHolder> refHolderIter) {
+        if (nameContext != null && refHolderIter.hasNext()) {
+            MemberRefHolder refPart = refHolderIter.next();
+            NamedElement targetChild =
+                lookupImmediateChild(nameContext, refPart.getRefAsNameRef().getNameExprText());
             checkSetResolve(refPart, targetChild);
-            if (refPart.isResolved()) {
-                if (linksIter.hasNext()) {
-                    resolveRest(refPart.getResolvedMetaObj(), linksIter);
+            if (refPart.getRefAsNameRef().isResolved()) {
+                if (refHolderIter.hasNext()) {
+                    resolveRest(refPart.getRefAsNameRef().getResolvedMetaObj(), refHolderIter);
                 }
             }
         }
@@ -415,7 +413,7 @@ public class AstUtils {
 
     public static void addNewMetaRefParts(ExpressionChain parentPath, SourceInfo sourceInfo, String... nameExprs) {
         for (String nameExpr : nameExprs) {
-            parentPath.addNextPart(SpaceHome.getAstFactory().newMetaRefPart(sourceInfo, nameExpr));
+            parentPath.addNextPart(SpaceHome.getAstFactory().newNameRefExpr(sourceInfo, nameExpr));
         }
         return;
     }
@@ -439,6 +437,10 @@ public class AstUtils {
 //            if typePair[0] = type1
 //        }
         return larger;
+    }
+
+    public static String getUrlPathSpec(FullTypeRefImpl targetJavaTypeRef) {
+        return null;
     }
 
     private static class PrintAstConsumer implements AstScanConsumer {

@@ -14,7 +14,7 @@ import org.jkcsoft.space.lang.instance.SpaceOid;
 /**
  * @author Jim Coles
  */
-public interface Identified {
+public interface Identified extends ModelElement {
 
     SpaceOid getOid();
 

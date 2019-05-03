@@ -10,11 +10,20 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * An expression that corresponds to a {@link SpaceTypeDefn} and which may therefore
- * be followed by a dotted reference to any member of that type. Any {@link ValueExpr}
- * is a LeftLink and so is
+ * An expression that has an associated {@link SpaceTypeDefn}, i.e., type,
+ * either by direct reference to the named type or by reference to
+ * a typed datum or return value of a function. TypeExpr's may be followed
+ * by a dotted reference to any member of their associated type.
  *
  * @author Jim Coles
  */
 public interface TypedExpr extends Linkable {
+
+    DatumType getDatumType();
+
+    boolean isValueExpr();
+
+    boolean hasRef();
+
+    MetaRef getRef();
 }

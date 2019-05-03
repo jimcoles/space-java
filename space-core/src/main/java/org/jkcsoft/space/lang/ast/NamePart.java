@@ -14,7 +14,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class NamePart extends ModelElement {
+public class NamePart extends AbstractModelElement {
 
     private String text;
 

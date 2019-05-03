@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public class TupleExpr extends ModelElement implements ValueExpr {
+public class TupleExpr extends AbstractModelElement implements ValueExpr {
 
     private List<ValueExpr> valueExprs;
     private ComplexType implicitType;
@@ -29,13 +29,23 @@ public class TupleExpr extends ModelElement implements ValueExpr {
         this.valueExprs = valueExprs;
         //
         for (ValueExpr argumentExpr : valueExprs) {
-            addChild((ModelElement) argumentExpr);
+            addChild((AbstractModelElement) argumentExpr);
         }
         return this;
     }
 
     public List<ValueExpr> getValueExprs() {
         return valueExprs;
+    }
+
+    @Override
+    public boolean hasRef() {
+        return false;
+    }
+
+    @Override
+    public MetaRef getRef() {
+        return null;
     }
 
     @Override

@@ -47,8 +47,14 @@ public abstract class AbstractCollectionTypeDefn extends NamedElement implements
         return containedElementType.isNamed();
     }
 
+    @Override
     public boolean isPrimitiveType() {
         return containedElementType instanceof NumPrimitiveTypeDefn;
+    }
+
+    @Override
+    public boolean isSimpleType() {
+        return containedElementType.isSimpleType();
     }
 
     /** True if this set hold references to objects; false if it hold values of primitives */
@@ -66,11 +72,6 @@ public abstract class AbstractCollectionTypeDefn extends NamedElement implements
         if (sequenceTypeDefn == null)
             sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
         return sequenceTypeDefn;
-    }
-
-    @Override
-    public boolean isPrimitiveType() {
-        return false;
     }
 
     @Override

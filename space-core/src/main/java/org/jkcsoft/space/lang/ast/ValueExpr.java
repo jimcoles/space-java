@@ -23,6 +23,9 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface ValueExpr extends TypedExpr {
 
-    DatumType getDatumType();
+    @Override
+    default boolean isValueExpr() {
+        return true;
+    }
 
 }

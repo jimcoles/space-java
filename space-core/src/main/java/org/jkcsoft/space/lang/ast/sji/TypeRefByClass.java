@@ -16,7 +16,7 @@ import org.jkcsoft.space.lang.ast.*;
  *
  *  (key) Java class -> Space wrapper type.
  */
-public class TypeRefByClass extends ModelElement implements TypeRef {
+public class TypeRefByClass extends AbstractModelElement implements TypeRef {
 
     private SjiTypeMapping mapping;
 

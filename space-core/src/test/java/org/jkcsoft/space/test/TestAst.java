@@ -53,12 +53,12 @@ public class TestAst {
 
         ThisTupleExpr thisTupleExpr = astFactory.newThisExpr(si);
 
-        ExpressionChain functionDefnRef = astFactory.newMetaReference(si, MetaType.FUNCTION, astFactory
-            .newMetaRefPart(si, SpaceHome.getNsRegistry().getTmpNs().getName()));
+        ExpressionChain functionDefnRef = astFactory.newMetaRefChain(si, MetaType.FUNCTION, astFactory
+            .newNameRefExpr(si, SpaceHome.getNsRegistry().getTmpNs().getName()));
 
         AstUtils.addNewMetaRefParts(functionDefnRef, si, "test", "TestType", "testFunc");
         mainMethod.getStatementBlock()
-                  .addExpr(astFactory.newFunctionCallExpr(si).setFunctionRef(functionDefnRef));
+                  .addExpr(astFactory.newFunctionCallExpr(si).setFunctionRef(((NameRefExpr) functionDefnRef.getFirstPart())));
 
 //        astFactory.newMetaObjectRefLiteral(null),
 //            astFactory.newPrimLiteralExpr("Hello, Space!")

@@ -66,8 +66,8 @@ public class StatementBlock extends Statement implements ComplexType {
     public ValueExpr addExpr(ValueExpr valueExpr) {
         statementSequence.add(new ExprStatement<>(valueExpr));
         //
-        if (valueExpr instanceof ModelElement)
-            addChild(((ModelElement) valueExpr));
+        if (valueExpr instanceof AbstractModelElement)
+            addChild(((AbstractModelElement) valueExpr));
         //
         return valueExpr;
     }

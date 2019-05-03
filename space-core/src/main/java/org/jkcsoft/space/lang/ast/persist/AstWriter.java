@@ -9,13 +9,13 @@
  */
 package org.jkcsoft.space.lang.ast.persist;
 
-import org.jkcsoft.space.lang.ast.ModelElement;
+import org.jkcsoft.space.lang.ast.AbstractModelElement;
 
 /**
  * @author Jim Coles
  */
 public interface AstWriter {
 
-    void writeAst(ModelElement rootElem);
+    void writeAst(AbstractModelElement rootElem);
 
 }

@@ -60,7 +60,7 @@ public class AstFactory {
     }
 
 
-    public SpaceFunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name, TypeRefImpl returnTypeRef) {
+    public SpaceFunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name, FullTypeRefImpl returnTypeRef) {
         SpaceFunctionDefn element = new SpaceFunctionDefn(sourceInfo, name, returnTypeRef);
         return element;
     }
@@ -91,11 +91,11 @@ public class AstFactory {
         return new SequenceLiteralExpr(sourceInfo, newTypeRef(sourceInfo, NumPrimitiveTypeDefn.CHAR), text);
     }
 
-    public RefExprImpl newMetaRefPart(NamePartExpr namePartExpr) {
+    public NameRefExpr newNameRefExpr(NamePartExpr namePartExpr) {
         return new NameRefExpr(namePartExpr);
     }
 
-    public NameRefExpr newMetaRefPart(SourceInfo sourceInfo, String nameExpr) {
+    public NameRefExpr newNameRefExpr(SourceInfo sourceInfo, String nameExpr) {
         return new NameRefExpr(newNamePartExpr(sourceInfo, null, nameExpr));
     }
 
@@ -134,30 +134,30 @@ public class AstFactory {
         return new TupleExpr(sourceInfo);
     }
 
-    public NewTupleExpr newNewObjectExpr(SourceInfo sourceInfo, TypeRefImpl typeRefPathExpr, TupleExpr tupleExpr) {
+    public NewTupleExpr newNewObjectExpr(SourceInfo sourceInfo, FullTypeRefImpl typeRefPathExpr, TupleExpr tupleExpr) {
         return new NewTupleExpr(sourceInfo, typeRefPathExpr, tupleExpr);
     }
 
-    public NewSetExpr newNewSetExpr(SourceInfo sourceInfo, TypeRefImpl tupleTypeRef) {
+    public NewSetExpr newNewSetExpr(SourceInfo sourceInfo, FullTypeRefImpl tupleTypeRef) {
         return new NewSetExpr(sourceInfo, tupleTypeRef);
     }
 
-    public ExpressionChain newMetaReference(SourceInfo sourceInfo, MetaType type, NameRefExpr nsRefPart) {
+    public ExpressionChain newMetaRefChain(SourceInfo sourceInfo, MetaType type, NameRefExpr nsRefPart) {
         ExpressionChain expressionChain = new ExpressionChain(sourceInfo, type);
         expressionChain.setNsRefPart(nsRefPart);
         return expressionChain;
     }
 
-    public TypeRefImpl newTypeRef(SourceInfo sourceInfo, List<TypeRefImpl.CollectionType> collectionTypes,
-                                  NameRefExpr nsRefPart)
+    public FullTypeRefImpl newTypeRef(SourceInfo sourceInfo, List<FullTypeRefImpl.CollectionType> collectionTypes,
+                                      NameRefExpr nsRefPart)
     {
-        TypeRefImpl typeRef = new TypeRefImpl(sourceInfo, collectionTypes);
+        FullTypeRefImpl typeRef = new FullTypeRefImpl(sourceInfo, collectionTypes);
         typeRef.setNsRefPart(nsRefPart);
         return typeRef;
     }
 
-    public TypeRefImpl newTypeRef(SourceInfo sourceInfo, DatumType typeDefn) {
-        return new TypeRefImpl(sourceInfo, typeDefn);
+    public FullTypeRefImpl newTypeRef(SourceInfo sourceInfo, DatumType typeDefn) {
+        return new FullTypeRefImpl(sourceInfo, typeDefn);
     }
 
     public ParseUnit newParseUnit(SourceInfo sourceInfo) {
@@ -180,7 +180,7 @@ public class AstFactory {
         return new Namespace(sourceInfo, name, nsLookupChain);
     }
 
-    public ImportExpr newImportExpr(SourceInfo sourceInfo, TypeRefImpl metaReference, String alias) {
+    public ImportExpr newImportExpr(SourceInfo sourceInfo, FullTypeRefImpl metaReference, String alias) {
         return new ImportExpr(sourceInfo, metaReference, alias);
     }
 

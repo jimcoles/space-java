@@ -15,10 +15,10 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class ThisArgExpr extends SynRefExpr implements ValueExpr {
+public class ThisArgExpr extends PronounRefExpr implements ValueExpr {
 
     ThisArgExpr(SourceInfo sourceInfo) {
-        super(sourceInfo);
+        super(sourceInfo, "args");
     }
 
     @Override
@@ -27,12 +27,12 @@ public class ThisArgExpr extends SynRefExpr implements ValueExpr {
     }
 
     @Override
-    public boolean hasNameRef() {
+    public boolean hasRef() {
         return false;
     }
 
     @Override
-    public NameRef getNameRef() {
+    public MetaRef getRef() {
         return null;
     }
 }

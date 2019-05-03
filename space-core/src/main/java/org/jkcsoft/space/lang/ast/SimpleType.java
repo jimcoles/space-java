@@ -14,4 +14,9 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface SimpleType extends DatumType {
 
+    @Override
+    default boolean isSimpleType() {
+        return true;
+    }
+
 }

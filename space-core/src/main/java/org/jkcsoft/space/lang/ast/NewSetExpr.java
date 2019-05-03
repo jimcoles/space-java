@@ -15,12 +15,12 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public class NewSetExpr extends ModelElement implements ValueExpr {
+public class NewSetExpr extends AbstractModelElement implements ValueExpr {
 
     private TypeRef tupleTypeRef;
     private List<NewTupleExpr> newTupleExprs = new LinkedList<>();
 
-    NewSetExpr(SourceInfo sourceInfo, TypeRefImpl tupleTypeRef) {
+    NewSetExpr(SourceInfo sourceInfo, FullTypeRefImpl tupleTypeRef) {
         super(sourceInfo);
         this.tupleTypeRef = tupleTypeRef;
         //
@@ -47,12 +47,12 @@ public class NewSetExpr extends ModelElement implements ValueExpr {
     }
 
     @Override
-    public boolean hasNameRef() {
+    public boolean hasRef() {
         return false;
     }
 
     @Override
-    public NameRef getNameRef() {
+    public MetaRef getRef() {
         return null;
     }
 

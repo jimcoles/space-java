@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public class ValueExprChain extends ModelElement implements NamePath, ValueExpr {
+public class ValueExprChain extends AbstractModelElement implements NamePath, ValueExpr {
 
     private List<ValueExpr> chain;
 
@@ -49,12 +49,12 @@ public class ValueExprChain extends ModelElement implements NamePath, ValueExpr 
     }
 
     @Override
-    public boolean hasNameRef() {
-        return getLastExpr().hasNameRef();
+    public boolean hasRef() {
+        return getLastExpr().hasRef();
     }
 
     @Override
-    public NameRef getNameRef() {
-        return getLastExpr().getNameRef();
+    public MetaRef getRef() {
+        return getLastExpr().getRef();
     }
 }

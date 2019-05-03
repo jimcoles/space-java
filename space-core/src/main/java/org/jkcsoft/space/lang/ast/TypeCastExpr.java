@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.ast;
 /**
  * @author Jim Coles
  */
-public class TypeCastExpr extends ModelElement {
+public class TypeCastExpr extends AbstractModelElement {
 
     private TypeRef targetTypeRef;
     private ValueExpr valueExpr;

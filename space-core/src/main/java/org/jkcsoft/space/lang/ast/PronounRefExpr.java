@@ -15,24 +15,37 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class SynRefExpr extends RefExprImpl implements TypedExpr {
+public class PronounRefExpr<T extends Named> extends AbstractRefExpr<T> {
 
-    public SynRefExpr(SourceInfo sourceInfo) {
+    private String pronoun;
+
+    public PronounRefExpr(SourceInfo sourceInfo, String pronoun) {
         super(sourceInfo);
+        this.pronoun = pronoun;
     }
 
     @Override
-    public boolean hasNameRef() {
+    public boolean hasRef() {
         return false;
     }
 
     @Override
-    public NameRef getNameRef() {
+    public MetaRef getRef() {
         return null;
     }
 
     @Override
     public boolean isValueExpr() {
+        return false;
+    }
+
+    @Override
+    public String toUrlString() {
+        return pronoun;
+    }
+
+    @Override
+    public boolean isWildcard() {
         return false;
     }
 }
