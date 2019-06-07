@@ -77,12 +77,12 @@ public class NameRefExpr<T extends Named> extends AbstractRefExpr<T> implements 
     }
 
     @Override
-    public String toUrlString() {
-        return nameRefExpr.getNameExpr();
+    public ByNameMetaRef getRefAsNameRef() {
+        return this;
     }
 
     @Override
-    public ByNameMetaRef getRefAsNameRef() {
-        return this;
+    public String toUrlString() {
+        return nameRefExpr.getNameExpr();
     }
 }

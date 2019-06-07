@@ -16,11 +16,11 @@ import org.jkcsoft.space.lang.ast.*;
  *
  *  (key) Java class -> Space wrapper type.
  */
-public class TypeRefByClass extends AbstractModelElement implements TypeRef {
+public class SjiTypeRefByClass extends AbstractModelElement implements TypeRef {
 
     private SjiTypeMapping mapping;
 
-    public TypeRefByClass(Object jParent, SjiTypeMapping sjiTypeMapping) {
+    public SjiTypeRefByClass(Object jParent, SjiTypeMapping sjiTypeMapping) {
         super(new NativeSourceInfo(jParent));
 
         this.mapping = sjiTypeMapping;
@@ -59,6 +59,31 @@ public class TypeRefByClass extends AbstractModelElement implements TypeRef {
     @Override
     public LinkState getState() {
         return mapping.getState();
+    }
+
+    @Override
+    public boolean hasResolvedType() {
+        return getResolvedType() != null;
+    }
+
+    @Override
+    public DatumType getDatumType() {
+        return getResolvedType();
+    }
+
+    @Override
+    public boolean isValueExpr() {
+        return false;
+    }
+
+    @Override
+    public boolean hasRef() {
+        return false;
+    }
+
+    @Override
+    public MetaRef getRef() {
+        return null;
     }
 
     @Override

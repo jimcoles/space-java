@@ -13,7 +13,6 @@ package org.jkcsoft.space.lang.ast;
  * Evaluates to a Space object which may be a meta (Definition) object.
  *
  * @author Jim Coles
- * @see OperLookupExpr
  */
 public class NamePartExpr extends AbstractModelElement {
 

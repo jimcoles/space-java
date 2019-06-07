@@ -57,4 +57,9 @@ public class ValueExprChain extends AbstractModelElement implements NamePath, Va
     public MetaRef getRef() {
         return getLastExpr().getRef();
     }
+
+    @Override
+    public boolean hasResolvedType() {
+        return getLastExpr().hasResolvedType();
+    }
 }

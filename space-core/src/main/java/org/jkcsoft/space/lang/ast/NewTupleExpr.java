@@ -40,6 +40,11 @@ public class NewTupleExpr extends AbstractModelElement implements ValueExpr {
     }
 
     @Override
+    public boolean hasResolvedType() {
+        return typeRef != null && typeRef.hasResolvedType();
+    }
+
+    @Override
     public boolean hasRef() {
         return false;
     }

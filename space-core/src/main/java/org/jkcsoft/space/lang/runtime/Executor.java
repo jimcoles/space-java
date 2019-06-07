@@ -128,6 +128,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     private void initRuntime() {
         loadAstLoader("org.jkcsoft.space.antlr.loaders.G2AntlrParser");
+        SpaceHome.getSjiService().getSjiBindings().registerPToPBinding("org.jkcsoft.space.lang.runtime.jnative", "space");
 //        NSRegistry.getInstance();
     }
 
@@ -254,10 +255,10 @@ public class Executor extends ExprProcessor implements ExeContext {
             try {
                 // the following call to getDeepLoad() ensures the Space wrapper for the
                 // Java class is loaded and ready for lookup for subsequent linking
-                SpaceHome.getSjiService().getDeepLoadSpaceWrapper(AstUtils.getUrlPathSpec(targetJavaTypeRef), null);
+                SpaceHome.getSjiService().getDeepLoadSpaceWrapper(targetJavaTypeRef.getFullUrlSpec(), null);
             }
             catch (ClassNotFoundException e) {
-                String msg = "could not find Java import class [" + AstUtils.getUrlPathSpec(targetJavaTypeRef) + "]" +
+                String msg = "could not find Java import class [" + targetJavaTypeRef.getFullUrlSpec() + "]" +
                     " in the Java classpath";
                 log.warn(msg);
                 AstLoadError astLoadError = new AstLoadError(AstLoadError.Type.LINK, javaImport.getSourceInfo(), msg);
@@ -304,11 +305,14 @@ public class Executor extends ExprProcessor implements ExeContext {
         };
 
         for (Class jNativeType : jNativeTypes) {
-            SpaceHome.getSjiService().getDeepLoadSpaceWrapper(jNativeType, new String[]{"space", "native", "opsys"});
+            SpaceHome.getSjiService().getDeepLoadSpaceWrapper(jNativeType, null);
         }
 
-        FullTypeRefImpl opSysRef = FullTypeRefImpl.newFullTypeRef(nsRegistry.getJavaNs().getName() + ":" + JOpSys.class.getName());
-        AstUtils.resolveAstPath(opSysRef);
+        FullTypeRefImpl opSysRef = FullTypeRefImpl.newFullTypeRef(
+            nsRegistry.getJavaNs().getName()
+                + ":" + SpaceHome.getSjiService().getSjiBindings().applyToJavaClassname(JOpSys.class.getName())
+        );
+        AstUtils.resolveAstRef(opSysRef);
         if (opSysRef.isResolvedValid())
             op_sys_type_def = (ComplexType) opSysRef.getResolvedType();
         else
@@ -436,15 +440,17 @@ public class Executor extends ExprProcessor implements ExeContext {
                                                              ((ExpressionChain) astNode).isResolved())
             );
         for (ExpressionChain chain : chains) {
-            if (chain.getTargetMetaType() == chain.getResolvedMetaObj().getMetaType()) {
-                chain.setTypeCheckState(TypeCheckState.VALID);
-            }
-            else {
-                AstLoadError error = new AstLoadError(AstLoadError.Type.SEMANTIC, chain.getSourceInfo(),
-                                                      "expression '" + chain + "' must reference a " +
-                                                          chain.getTargetMetaType());
-                errors.add(error);
-                log.info(error);
+            if (chain.getTargetMetaType() != null) {
+                if (chain.getTargetMetaType() == chain.getResolvedMetaObj().getMetaType()) {
+                    chain.setTypeCheckState(TypeCheckState.VALID);
+                }
+                else {
+                    AstLoadError error = new AstLoadError(AstLoadError.Type.SEMANTIC, chain.getSourceInfo(),
+                                                          "expression '" + chain + "' must reference a " +
+                                                              chain.getTargetMetaType());
+                    errors.add(error);
+                    log.info(error);
+                }
             }
         }
     }
@@ -493,7 +499,7 @@ public class Executor extends ExprProcessor implements ExeContext {
     }
 
     private void resolveAstPath(ExpressionChain reference, List<AstLoadError> errors) {
-        AstUtils.resolveAstPath(reference);
+        AstUtils.resolveAstRef(reference);
         if (!reference.isResolved()) {
             AstLoadError error = new AstLoadError(AstLoadError.Type.LINK, reference.getSourceInfo(),
                                                   "can not resolve symbol '" + getFirstUnresolved(reference) +
@@ -534,7 +540,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         NameRefExpr userNsRefPart = getAstFactory().newNameRefExpr(sourceInfo, nsRegistry.getUserNs().getName());
         exeTypeRef.setNsRefPart(userNsRefPart);
         AstUtils.addNewMetaRefParts(exeTypeRef, sourceInfo, pathNodes);
-        AstUtils.resolveAstPath(exeTypeRef);
+        AstUtils.resolveAstRef(exeTypeRef);
         SpaceTypeDefn bootTypeDefn = (SpaceTypeDefn) exeTypeRef.getResolvedType();
 //        SpaceTypeDefn bootTypeDefn = progSpaceDir.getFirstSpaceDefn();
         Tuple mainTypeTuple = newTupleImpl(bootTypeDefn);
@@ -852,7 +858,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             case ARG:
                 value = functionCallContext.getArgTuple().get((Declaration) toMember).getValue();
                 break;
-            case OBJECT:
+            case SPACE_DEFN:
                 value = functionCallContext.getCtxObject().get((Declaration) toMember).getValue();
                 break;
             case STATIC:

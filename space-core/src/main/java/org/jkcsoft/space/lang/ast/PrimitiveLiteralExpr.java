@@ -45,6 +45,11 @@ public class PrimitiveLiteralExpr extends AbstractModelElement implements ValueE
     }
 
     @Override
+    public boolean hasResolvedType() {
+        return typeDefn != null;
+    }
+
+    @Override
     public boolean hasRef() {
         return false;
     }

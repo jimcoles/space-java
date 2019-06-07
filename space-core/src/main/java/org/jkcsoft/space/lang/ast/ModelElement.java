@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +33,8 @@ public interface ModelElement {
     Set<ExpressionChain> getReferences();
 
     NamedElement getChildByName(String name);
+
+    Collection<NamedElement> getNamedChildren();
 
     String getDisplayName();
 

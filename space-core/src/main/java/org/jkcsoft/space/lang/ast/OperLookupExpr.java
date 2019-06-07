@@ -35,4 +35,9 @@ public class OperLookupExpr extends AbstractModelElement implements ValueExpr {
     public MetaRef getRef() {
         return null;
     }
+
+    @Override
+    public boolean hasResolvedType() {
+        return false;
+    }
 }

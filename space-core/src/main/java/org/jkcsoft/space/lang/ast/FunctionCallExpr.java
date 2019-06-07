@@ -81,7 +81,13 @@ public class FunctionCallExpr extends AbstractModelElement implements MemberRefH
     }
 
     @Override
+    public boolean hasResolvedType() {
+        return functionRef.hasResolvedType() &&
+            functionRef.getResolvedMetaObj().getReturnType() != null;
+    }
+
+    @Override
     public ByNameMetaRef getRefAsNameRef() {
-        return this.getRefAsNameRef();
+        return functionRef;
     }
 }

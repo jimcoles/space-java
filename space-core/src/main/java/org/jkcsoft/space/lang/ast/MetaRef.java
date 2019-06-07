@@ -10,6 +10,9 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
+ * The guts of a language reference. Most MetaRefs are {@link NameRefExpr}'s, which
+ * are resolved by name; the only exceptions are {@link PronounRefExpr}'s which are resolved
+ * by relative scope within classes and functions.
  *
  * @author Jim Coles
  */

@@ -24,3 +24,8 @@ type EquationDefn
 {
 
 }
+
+type Key
+{
+
+}

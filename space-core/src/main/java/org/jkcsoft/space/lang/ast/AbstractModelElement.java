@@ -118,6 +118,11 @@ public abstract class AbstractModelElement extends SpaceObject implements ModelE
     }
 
     @Override
+    public Collection<NamedElement> getNamedChildren() {
+        return namedChildMap.values();
+    }
+
+    @Override
     public String getDisplayName() {
         return "";
     }

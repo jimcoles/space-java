@@ -81,7 +81,7 @@ public class FullTypeRefImpl extends ExpressionChain implements TypeRef {
     }
 
     public boolean isSingleton() {
-        return !extractMetaRefPath().getLastLink().isWildcard();
+        return !((ByNameMetaRef) getAllLinks().getLast()).isWildcard();
     }
 
     @Override

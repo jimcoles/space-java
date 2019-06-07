@@ -10,11 +10,15 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
+ * The Linker sets the scope kind of a resolved meta object (e.g., a DATUM)
+ * to tell the Executor where to find the runtime instance-level object.
+ *
  * @author Jim Coles
  */
 public enum ScopeKind {
     BLOCK,
     ARG,
-    OBJECT,
+    SPACE_DEFN,
+    REF_TO_TYPE,
     STATIC
 }

@@ -141,14 +141,18 @@ public class NSRegistry {
     public void dumpAsts() {
         log.info("see dump log file for AST dumps");
         for (Namespace ns : getNsChain()) {
-            String dump = AstUtils.print(ns);
-//            log.debug("AST Root /: " + dump);
-            getDumpLogger().info(dump);
+            //            log.debug("AST Root /: " + dump);
+            getDumpLogger().info(AstUtils.printFullAst(ns));
+            getFlatLogger().info(AstUtils.printFlatNamedAst(ns));
         }
     }
 
     private Logger getDumpLogger() {
-        return Logger.getLogger("dumpFile");
+        return Logger.getLogger("dumpFileLogger");
+    }
+
+    private Logger getFlatLogger() {
+        return Logger.getLogger("flatAstDumpFileLogger");
     }
 
 }

@@ -15,11 +15,9 @@ import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.metameta.MetaType;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -74,7 +72,8 @@ public class AstUtils {
 
     /**
      * <p>Entry point for resolving static references by the linker prior to execution.
-     * Rules for resolution vary depending on the type of object referenced:
+     * Rules for resolution vary depending on the type of (meta) object referenced
+     * and the context of the reference:
      * <br>
      * Valid paths by meta type:
      *
@@ -116,65 +115,120 @@ public class AstUtils {
      * <p>
      *  1. block local -> parent blocks(s)
      *  2. function args (if ref is inside function body)
-     *  3. object member datums
+     *  3. "context object/type" member datums
      *  4. static/shared datums, fully qualified
      *<p>
-     *    If not first in chain, resolve with respect to type of preceding object.
+     *  If not first in chain, resolve with respect to type of preceding object.
      *<p>
      *  - Exe: resolves to value or ref.
      *
      * <p>Ref -> Function:
      * <p>
-     *  1. "context object" member functions
+     *  1. "context object/type" member functions
      *  2. static functions, fully qualified
      *
-     * @param reference
+     * @param refChain
      * @return
      */
-    public static void resolveAstPath(ExpressionChain reference) {
-        Namespace refNs = getNs(reference);
-        checkSetResolve(reference.getNsRefPart(), refNs);
+    public static void resolveAstRef(ExpressionChain refChain) {
+        Namespace refNs = getNs(refChain);
+        checkSetResolve(refChain.getNsRefPart(), refNs);
+        AstPathIterator pathIterator = getPathIterator(refChain);
 
-        switch (reference.getTargetMetaType()) {
+        // TODO Handle fact that first link in chain might not contain a ref
+        // TODO Finding first link/ref is the complex part. 2nd link and beyond are all type-based
+        // TODO Handle dependency between references: e.g., might have a ref to a function; i
+        //      resolve the function, but its return type has not yet been resolved
+
+        //
+        resolveFirst(refChain, pathIterator);
+        //
+        if (refChain.isMultiPart() && refChain.getFirstPart().hasResolvedType())
+            resolveRest(refChain);
+    }
+
+    /**
+     * Resolves first link in the chain if that link has a reference.
+     *
+     * @param refChain
+     * @param pathIterator
+     */
+    private static void resolveFirst(ExpressionChain refChain, AstPathIterator pathIterator) {
+
+        Namespace refNs = (Namespace) refChain.getNsRefPart().getRef().getResolvedMetaObj();
+
+        switch (MetaType.DATUM) {
             case TYPE:
-                if (reference.isSinglePart()) {
-                    resolveIntrinsics(((NameRefExpr) reference.getFirstPart()));
+                resolveIntrinsics(((NameRefExpr) refChain.getFirstPart()));
+                if (refChain.isSinglePart()) {
                     // check for 'siblings': in same parse unit or directory
-                    if (reference.isAtInitState()) {
-                        ParseUnit parentParseUnit = findParentParseUnit(reference, parseUnitFinderAction);
-                        resolveFromNode(parentParseUnit, reference);
-                        if (reference.isAtInitState()) {
-                            Directory parentDir = findParentDir(reference, dirFinderAction);
-                            resolveFromNode(parentDir, reference);
+                    if (refChain.isAtInitState()) {
+                        ParseUnit parentParseUnit = findParentParseUnit(refChain, parseUnitFinderAction);
+                        resolveFromScopeDown(parentParseUnit, refChain);
+                        if (refChain.isAtInitState()) {
+                            Directory parentDir = findParentDir(refChain, dirFinderAction);
+                            resolveFromScopeDown(parentDir, refChain);
                         }
                     }
                 }
                 // check as full path from root
-                if (reference.isAtInitState()) {
-                    resolveFromRoot(refNs.getRootDirLookupChain(), reference);
+                if (refChain.isAtInitState()) {
+                    resolveFromRoot(refNs.getRootDirLookupChain(), refChain);
                 }
                 break;
             case DATUM:
-                resolveInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
-                if (reference.isAtInitState()) {
-                    resolveFromRoot(refNs.getRootDirLookupChain(), reference);
-                    if (reference.isResolved())
-                        reference.setResolvedDatumScope(ScopeKind.STATIC);
+                resolveInNearestScope(pathIterator, refChain, null);
+                if (refChain.isAtInitState()) {
+                    resolveFromRoot(refNs.getRootDirLookupChain(), refChain);
+                    if (refChain.isResolved())
+                        refChain.setResolvedDatumScope(ScopeKind.STATIC);
                 }
                 break;
             case FUNCTION:
 //                resolveFromRoot(refNs.getRootDirLookupChain(), reference);
-                if (reference.isAtInitState() ) {
-                    if (!reference.isMultiPart()) {
-                        resolveInNearestScope(AstUtils.getNearestScopeParent(reference), reference, null);
+                if (refChain.isAtInitState() ) {
+                    if (!refChain.isMultiPart()) {
+//                        resolveInNearestScope(pathIterator, AstUtils.getNearestScopeParent(refChain), refChain, null);
+                        resolveInNearestScope(pathIterator, refChain, null);
                     }
                     else {
-                        resolveFromNode(reference.getNamedParent(), reference);
+                        resolveFromScopeDown(refChain.getNamedParent(), refChain);
                     }
                 }
                 break;
         }
 
+    }
+
+    /**
+     * Resolves all refs after the first using type info from each
+     * predecessor.
+     *
+     * @param refChain
+     */
+    private static void resolveRest(ExpressionChain refChain) {
+        resolveIntrinsics(((NameRefExpr) refChain.getFirstPart()));
+        refChain.getRestLinks();
+    }
+
+    /**
+     * The scope rules are a function of:
+     *
+     * 1. The type of thing we're trying to find.
+     * 2. If this is a pronoun reference, e.g., "this.".
+     * 3. The kind of scope from which the reference is made.
+     *
+     * @param reference
+     * @return The appropriate {@link AstPathIterator} for the reference.
+     */
+    private static AstPathIterator getPathIterator(ExpressionChain reference) {
+        ScopeKind scopeKind = inferScopeKind(reference.getParent());
+        AstPathIterator walker = null;
+        switch (scopeKind) {
+            case SPACE_DEFN:
+                walker = new ScopeCollectionWalker(reference);
+        }
+        return walker;
     }
 
     static void checkSetResolve(TypedExpr exprLink, NamedElement lookup) {
@@ -232,7 +286,7 @@ public class AstUtils {
     private static void resolveFromRoot(Directory[] dirChain, ExpressionChain reference) {
         for (Directory rootDir : dirChain) {
             log.debug("trying to find [" + reference + "] under [" + rootDir.getFQName() + "]");
-            resolveRest(rootDir, reference.getRestLinks().iterator());
+            resolveAbsolute(rootDir, reference.getAllLinksAsHolders().iterator());
             if (reference.isResolved()) {
                 break;
             }
@@ -242,15 +296,15 @@ public class AstUtils {
         }
     }
 
-    private static void resolveFromNode(ModelElement astNode, ExpressionChain exprChain) {
+    private static void resolveFromScopeDown(ModelElement astNode, ExpressionChain exprChain) {
         log.debug("trying to find ["+exprChain+"] under [" + astNode + "]");
         NamedElement lookup =
             lookupImmediateChild(astNode, (((NameRefExpr) exprChain.getFirstPart()).getNameExprText()));
         checkSetResolve(exprChain.getFirstPart(), lookup);
-        resolveRest(lookup, exprChain.getRestLinks().iterator());
+        resolveAbsolute(lookup, exprChain.getRestLinks().iterator());
     }
 
-    public static void resolveRest(ModelElement nameContext, Iterator<MemberRefHolder> refHolderIter) {
+    public static void resolveAbsolute(ModelElement nameContext, Iterator<MemberRefHolder> refHolderIter) {
         if (nameContext != null && refHolderIter.hasNext()) {
             MemberRefHolder refPart = refHolderIter.next();
             NamedElement targetChild =
@@ -258,42 +312,29 @@ public class AstUtils {
             checkSetResolve(refPart, targetChild);
             if (refPart.getRefAsNameRef().isResolved()) {
                 if (refHolderIter.hasNext()) {
-                    resolveRest(refPart.getRefAsNameRef().getResolvedMetaObj(), refHolderIter);
+                    resolveAbsolute(refPart.getRefAsNameRef().getResolvedMetaObj(), refHolderIter);
                 }
             }
         }
     }
 
-    public static void resolveInNearestScope(ModelElement context, ExpressionChain reference,
-                                                     ScopeKind containerScopeKind)
+    public static void resolveInNearestScope(AstPathIterator scopeWalker, ExpressionChain reference,
+                                             ScopeKind containerScopeKind)
     {
+        StaticScope staticScope = scopeWalker.moveToNext();
         if (containerScopeKind == null)
-            containerScopeKind = inferScopeKind(context);
-        NamedElement lookup = lookupImmediateChild(context, ((NameRefExpr) reference.getFirstPart()).getNameExprText());
+            containerScopeKind = staticScope.getScopeKind();
+        NamedElement lookup =
+            lookupImmediateChild(staticScope.getContext(), ((NameRefExpr) reference.getFirstPart()).getNameExprText());
         checkSetResolve(reference.getFirstPart(), lookup);
         if (reference.isResolved())
             reference.setResolvedDatumScope(containerScopeKind);
         else {
-            if (context instanceof StatementBlock) {
-                if (context.hasParent()) {
-                    // not found so just go up the basic tree
-                    ModelElement parent = context.getParent();
-                    if (parent instanceof StatementBlock)
-                        resolveInNearestScope(parent, reference, ScopeKind.BLOCK);
-                    else if (parent instanceof SpaceFunctionDefn)
-                        resolveInNearestScope(parent, reference, ScopeKind.ARG);
-                }
-            }
-            else if (context instanceof FunctionDefn) {
-                resolveInNearestScope((ModelElement) ((FunctionDefn) context).getArgSpaceTypeDefn(), reference,
-                                               ScopeKind.ARG);
-                if (reference.isAtInitState())
-                    resolveInNearestScope(context.getParent(), reference, ScopeKind.OBJECT);
-            }
+            resolveInNearestScope(scopeWalker, reference, containerScopeKind);
         }
     }
 
-    private static ScopeKind inferScopeKind(ModelElement context) {
+    public static ScopeKind inferScopeKind(ModelElement context) {
         ScopeKind scopeKind = null;
         if (context instanceof StatementBlock
             /* && context.getNamedParent() instanceof FunctionDefn */ )
@@ -301,7 +342,9 @@ public class AstUtils {
         else if (context instanceof SpaceFunctionDefn)
             scopeKind = ScopeKind.BLOCK;
         else if (context instanceof SpaceTypeDefn)
-            scopeKind = ScopeKind.OBJECT;
+            scopeKind = ScopeKind.SPACE_DEFN;
+        else if (context instanceof TupleExpr)
+            scopeKind = ScopeKind.SPACE_DEFN;
 
         return scopeKind;
     }
@@ -346,6 +389,28 @@ public class AstUtils {
             astAction.after(astNode);
     }
 
+    public static void walkNamedAstDepthFirst(ModelElement astNode, AstScanConsumer astAction) {
+        boolean match =
+            astAction.getFilter() == null
+                || astAction.getFilter().test(astNode);
+        if (match)
+            astAction.upon(astNode);
+
+        Collection<NamedElement> children = astNode.getNamedChildren();
+        for (NamedElement child : children) {
+            walkNamedAstDepthFirst(child, astAction);
+        }
+
+        List<ModelElement> allChildren = astNode.getChildren();
+        for (ModelElement child : allChildren) {
+            if (isGroupingNode(child))
+                walkNamedAstDepthFirst(child, astAction);
+        }
+
+        if (match)
+            astAction.after(astNode);
+    }
+
     public static void iterateParents(ModelElement astNode, AstScanConsumer astAction) {
         boolean match = astAction.getFilter() == null || astAction.getFilter().test(astNode);
         if (match)
@@ -358,9 +423,15 @@ public class AstUtils {
             astAction.after(astNode);
     }
 
-    public static String print(ModelElement modelElement) {
-        PrintAstConsumer astPrinter = new PrintAstConsumer();
+    public static String printFullAst(ModelElement modelElement) {
+        PrintFullAstConsumer astPrinter = new PrintFullAstConsumer();
         walkAstDepthFirst(modelElement, astPrinter);
+        return astPrinter.getSb().toString();
+    }
+
+    public static String printFlatNamedAst(Named modelElement) {
+        PrintFlatAstConsumer astPrinter = new PrintFlatAstConsumer();
+        walkNamedAstDepthFirst(modelElement, astPrinter);
         return astPrinter.getSb().toString();
     }
 
@@ -439,15 +510,11 @@ public class AstUtils {
         return larger;
     }
 
-    public static String getUrlPathSpec(FullTypeRefImpl targetJavaTypeRef) {
-        return null;
-    }
-
-    private static class PrintAstConsumer implements AstScanConsumer {
+    private static class PrintFullAstConsumer implements AstScanConsumer {
 
         private final StringBuilder sb = new StringBuilder();
 
-        public PrintAstConsumer() {
+        public PrintFullAstConsumer() {
         }
 
         @Override
@@ -476,4 +543,152 @@ public class AstUtils {
             return sb;
         }
     }
+
+    private static class PrintFlatAstConsumer implements AstScanConsumer {
+
+        private final StringBuilder sb = new StringBuilder();
+
+        public PrintFlatAstConsumer() {
+        }
+
+        @Override
+        public Predicate<ModelElement> getFilter() {
+            return astNode ->
+                astNode instanceof Named;
+        }
+
+        @Override
+        public boolean upon(ModelElement astNode) {
+            if (astNode instanceof Named && ((Named) astNode).isNamed()) {
+                sb.append(astNode.getDisplayName())
+                  .append(JavaHelper.EOL);
+            }
+            return true;
+        }
+
+        @Override
+        public void after(ModelElement astNode) {
+            //
+        }
+
+        public StringBuilder getSb() {
+            return sb;
+        }
+    }
+
+    /**
+     * Used to find the first (possibly only) item in an expression chain.
+     */
+    private static class ScopeCollectionWalker implements AstPathIterator {
+
+        {
+            AstPathIterator[] typeScopes = {
+                this::intrinsicsIter,
+                this::importsIter,
+                this::typeContainerIter
+            };
+            AstPathIterator[] datumScopes = {
+                this::blockIter,
+                this::fuctionDefnBlocksIter,
+            };
+            AstPathIterator[] functionScopes = {
+                this::blockIter,
+                this::fuctionDefnBlocksIter,
+            };
+            AstPathIterator[] lhsTupleDatumScopes = {
+                this::blockIter
+            };
+        }
+
+        //
+        private StaticScope staticScope;
+        //
+        //
+        private List<AstPathIterator> scopeIterAggregator = new LinkedList<>();
+        private Iterator<AstPathIterator> outerIterator;
+        private AstPathIterator currentIterator;
+
+        public ScopeCollectionWalker(ExpressionChain exprChain) {
+
+            if (outerIterator == null && scopeIterAggregator.size() > 0) {
+                outerIterator = scopeIterAggregator.iterator();
+            }
+        }
+
+        @Override
+        public StaticScope moveToNext() {
+            StaticScope next = null;
+            if (currentIterator != null) {
+                next = currentIterator.moveToNext();
+            }
+
+            if (next == null) {
+                // jump to next scope iterator
+                if (outerIterator != null && outerIterator.hasNext())
+                    currentIterator = outerIterator.next();
+                if (currentIterator != null) {
+                    next = currentIterator.moveToNext();
+                }
+            }
+
+            return next;
+        }
+
+        public StaticScope getStaticScope() {
+            return staticScope;
+        }
+
+        private ModelElement getContext() {
+            return staticScope.getContext();
+        }
+
+        /** Implements {@link AstPathIterator} */
+        private StaticScope blockIter() {
+//            if (context instanceof StatementBlock) {
+                if (getContext().hasParent()) {
+                    // not found so just go up the basic tree
+                    staticScope.setContext(getContext().getParent());
+                    if (getContext() instanceof StatementBlock)
+                        staticScope.setScopeKind(ScopeKind.BLOCK);
+                    else if (getContext() instanceof SpaceFunctionDefn)
+                        staticScope.setScopeKind(ScopeKind.ARG);
+                }
+//            }
+            return staticScope;
+        }
+
+
+        /** Implements {@link AstPathIterator} */
+        private StaticScope intrinsicsIter() {
+            // TODO
+            return staticScope;
+        }
+
+        /** Implements {@link AstPathIterator} */
+        private StaticScope importsIter() {
+            // TODO
+            return staticScope;
+        }
+
+        /** Implements {@link AstPathIterator} */
+        private StaticScope typeContainerIter() {
+            // TODO
+            return staticScope;
+        }
+
+        /** Implements {@link AstPathIterator} */
+        private StaticScope argDefnIter() {
+//            if (! (scopeKind == ScopeKind.ARG)) {
+            staticScope.setContext(((FunctionDefn) getContext()).getArgSpaceTypeDefn(), ScopeKind.ARG);
+            return staticScope;
+        }
+
+        /** Implements {@link AstPathIterator} */
+        public StaticScope fuctionDefnBlocksIter() {
+            staticScope.setContext(staticScope.getContext().getParent(), ScopeKind.SPACE_DEFN);
+            return staticScope;
+        }
+
+    }
+
 }

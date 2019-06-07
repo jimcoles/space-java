@@ -55,4 +55,9 @@ public class SequenceLiteralExpr extends AbstractModelElement implements ValueEx
     public DatumType getDatumType() {
         return typeRef.getDatumType();
     }
+
+    @Override
+    public boolean hasResolvedType() {
+        return typeRef.hasResolvedType();
+    }
 }

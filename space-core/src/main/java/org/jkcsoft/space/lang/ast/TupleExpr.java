@@ -52,4 +52,9 @@ public class TupleExpr extends AbstractModelElement implements ValueExpr {
     public DatumType getDatumType() {
         return implicitType;
     }
+
+    @Override
+    public boolean hasResolvedType() {
+        return false;
+    }
 }

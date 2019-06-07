@@ -47,6 +47,11 @@ public class NewSetExpr extends AbstractModelElement implements ValueExpr {
     }
 
     @Override
+    public boolean hasResolvedType() {
+        return tupleTypeRef != null && tupleTypeRef.hasResolvedType();
+    }
+
+    @Override
     public boolean hasRef() {
         return false;
     }

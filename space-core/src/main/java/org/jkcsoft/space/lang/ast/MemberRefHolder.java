@@ -12,7 +12,9 @@ package org.jkcsoft.space.lang.ast;
 /**
  * An expression that is in general on the right-side of a dotted expression
  * and therefore always contains a reference by name to a {@link Named}
- * {@link AbstractModelElement}.
+ * {@link ModelElement}.
+ *
+ * This interface is used by the Linker.
  *
  * @author Jim Coles
  */

@@ -37,12 +37,16 @@ public class SjiService {
     private static final Logger log = Logger.getLogger(SjiService.class);
 
     private NSRegistry nsRegistry = SpaceHome.getNsRegistry();
-
+    private SjiBindings sjiBindings = new SjiBindings();
     private Map<Class, SjiTypeMapping> sjiMappingByClass = new HashMap<>();
     private Map<String, SjiTypeMapping> sjiMappingByName = new HashMap<>();
 
     public SjiService() {
 
+    }
+
+    public SjiBindings getSjiBindings() {
+        return sjiBindings;
     }
 
     /**
@@ -85,13 +89,14 @@ public class SjiService {
     }
 
     private void deepLoadSpaceWrapper(SjiTypeMapping sjiTypeMapping, String[] overrideDirNames) {
-        String[] classNameParts = splitClassName(sjiTypeMapping.getJavaClass().getName());
         String[] packageNameParts;
         if (overrideDirNames != null)
             packageNameParts = overrideDirNames;
         else {
-            packageNameParts = new String[classNameParts.length - 1];
-            System.arraycopy(classNameParts, 0, packageNameParts, 0, packageNameParts.length);
+            String spaceTypeName = getSjiBindings().applyToJavaClassname(sjiTypeMapping.getJavaClass().getName());
+            String[] spaceTypeNameParts = splitClassName(spaceTypeName);
+            packageNameParts = new String[spaceTypeNameParts.length - 1];
+            System.arraycopy(spaceTypeNameParts, 0, packageNameParts, 0, packageNameParts.length);
         }
 
         Directory parentDir =
@@ -109,15 +114,15 @@ public class SjiService {
 //        nsRegistry.trackMetaObject(sjiTypeDefn);
 
         // load dependencies ...
-        Set<TypeRefByClass> unresolvedRefs = AstUtils.queryAst(newParseUnit,
-                                                               new Executor.QueryAstConsumer<>(
-                                                                   TypeRefByClass.class,
+        Set<SjiTypeRefByClass> unresolvedRefs = AstUtils.queryAst(newParseUnit,
+                                                                  new Executor.QueryAstConsumer<>(
+                                                                   SjiTypeRefByClass.class,
                                                                    modelElement ->
-                                                                       modelElement instanceof TypeRefByClass &&
-                                                                           ((TypeRefByClass) modelElement).getState() !=
+                                                                       modelElement instanceof SjiTypeRefByClass &&
+                                                                           ((SjiTypeRefByClass) modelElement).getState() !=
                                                                                LinkState.RESOLVED)
         );
-        for (TypeRefByClass unresolvedRef : unresolvedRefs) {
+        for (SjiTypeRefByClass unresolvedRef : unresolvedRefs) {
             if (unresolvedRef.getState() == LinkState.INITIALIZED) {
                 deepLoadSpaceWrapper(unresolvedRef.getMapping(), null);
 //                DatumType spaceWrapper = getDeepLoadSpaceWrapper(unresolvedRef.getWrappedClass());
@@ -182,13 +187,13 @@ public class SjiService {
             if (isExcludedNative(jMethod))
                 continue;
 
-            TypeRefByClass retTypeRef = new TypeRefByClass(jMethod, getOrCreateSjiMapping(jMethod.getReturnType()));
+            SjiTypeRefByClass retTypeRef = new SjiTypeRefByClass(jMethod, getOrCreateSjiMapping(jMethod.getReturnType()));
             // build arg type defn
             SjiTypeDefn argTupleTypeDefn = newNativeTypeDefn(null);
             Parameter[] jParameters = jMethod.getParameters();
             for (Parameter jParam : jParameters) {
                 SjiTypeMapping sjiParamTypeMapping = getOrCreateSjiMapping(jParam.getType());
-                TypeRefByClass paramTypeRef = new TypeRefByClass(jParam, sjiParamTypeMapping);
+                SjiTypeRefByClass paramTypeRef = new SjiTypeRefByClass(jParam, sjiParamTypeMapping);
                 if (!sjiParamTypeMapping.isPrimitive()) {
                     argTupleTypeDefn.addAssociationDecl(
 //                        newAssociationDecl(jParam, sjiParamTypeInfo)
@@ -228,7 +233,7 @@ public class SjiService {
 
     //    }
     public SjiFunctionDefnImpl newNativeFunctionDefn(SjiTypeDefn parentTypeDefn, String name, Method jMethod,
-                                                     SjiTypeDefn argTypeDefn, TypeRefByClass returnTypeRef)
+                                                     SjiTypeDefn argTypeDefn, SjiTypeRefByClass returnTypeRef)
     {
         SjiFunctionDefnImpl element = new SjiFunctionDefnImpl(parentTypeDefn, jMethod, name, returnTypeRef);
         element.setArgSpaceTypeDefn(argTypeDefn);
@@ -279,5 +284,4 @@ public class SjiService {
     static String toSpaceTypeFQName(Class sjiClass) {
         return sjiClass.getName();
     }
-
 }

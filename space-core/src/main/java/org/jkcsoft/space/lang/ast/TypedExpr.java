@@ -21,6 +21,8 @@ public interface TypedExpr extends Linkable {
 
     DatumType getDatumType();
 
+    boolean hasResolvedType();
+
     boolean isValueExpr();
 
     boolean hasRef();

@@ -1,6 +1,6 @@
 package space.lang;
 
-import java:space.jnative.opsys.JOpSys;
+import java:space.opsys.JOpSys;
 
 /**
  * Basic O/S operations like accessing standard i/o streams.

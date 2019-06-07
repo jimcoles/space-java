@@ -80,7 +80,6 @@ public class OperatorExpr extends AbstractModelElement implements ValueExpr {
             else if (arg.getDatumType().isAssignableTo(argsType)) {
                 argsType = AstUtils.larger(argsType, arg.getDatumType());
             }
-
         }
         return argsType;
     }
@@ -93,5 +92,10 @@ public class OperatorExpr extends AbstractModelElement implements ValueExpr {
     @Override
     public MetaRef getRef() {
         return null;
+    }
+
+    @Override
+    public boolean hasResolvedType() {
+        return args.size() > 0 && args.get(0).hasResolvedType();
     }
 }

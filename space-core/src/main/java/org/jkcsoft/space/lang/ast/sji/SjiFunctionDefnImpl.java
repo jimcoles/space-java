@@ -28,9 +28,9 @@ public class SjiFunctionDefnImpl extends AbstractFunctionDefn implements Functio
     //
     private Method jMethod;
     private boolean isReturnVoid;
-    private TypeRefByClass returnTypeRef;
+    private SjiTypeRefByClass returnTypeRef;
 
-    SjiFunctionDefnImpl(SjiTypeDefn parentTypeDefn, Method jMethod, String name, TypeRefByClass returnTypeRef) {
+    SjiFunctionDefnImpl(SjiTypeDefn parentTypeDefn, Method jMethod, String name, SjiTypeRefByClass returnTypeRef) {
         super(new NativeSourceInfo(jMethod), name);
         this.sjiParentTypeDefn = parentTypeDefn;
         this.jMethod = jMethod;
@@ -59,7 +59,7 @@ public class SjiFunctionDefnImpl extends AbstractFunctionDefn implements Functio
         return isReturnVoid;
     }
 
-    public TypeRefByClass getReturnTypeRef() {
+    public SjiTypeRefByClass getReturnTypeRef() {
         if (isReturnVoid)
             throw new SpaceX("Should not call getReturnTypeRef for function with void return.");
         return returnTypeRef;

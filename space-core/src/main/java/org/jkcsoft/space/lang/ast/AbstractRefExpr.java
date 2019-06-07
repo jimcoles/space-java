@@ -65,6 +65,11 @@ public abstract class AbstractRefExpr<T extends Named> extends AbstractModelElem
     }
 
     @Override
+    public boolean hasResolvedType() {
+        return resolvedMetaObj != null;
+    }
+
+    @Override
     public boolean hasRef() {
         return true;
     }
