@@ -26,13 +26,4 @@ public class ThisArgExpr extends PronounRefExpr implements ValueExpr {
         return ((SpaceTypeDefn) getResolvedMetaObj());
     }
 
-    @Override
-    public boolean hasRef() {
-        return false;
-    }
-
-    @Override
-    public MetaRef getRef() {
-        return null;
-    }
 }

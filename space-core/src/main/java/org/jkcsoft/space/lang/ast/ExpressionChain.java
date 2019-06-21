@@ -9,7 +9,9 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.metameta.MetaType;
+import org.jkcsoft.space.lang.runtime.RuntimeError;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -23,7 +25,7 @@ import java.util.List;
  * Holds either:
  *
  * 1. Meta Reference Path: A full reference to a named element via its AST name path. The
- *    reference may be multi-part (fully qualified). Holds a chain of {@link NameRefExpr}s,
+ *    reference may be multi-part (fully qualified). Holds a chain of {@link SimpleNameRefExpr}s,
  *    each of which resolves to a single meta object. The MetaType of the full reference
  *    should be known at parse time.
  *
@@ -49,13 +51,14 @@ import java.util.List;
 public class ExpressionChain extends AbstractModelElement implements ValueExpr {
 
     private MetaType targetMetaType;
-    private NameRefExpr nsRefPart;
-    private TypedExpr firstExpr;
-    private List<MemberRefHolder> restLinks = new LinkedList<>();
-    private LinkedList<TypedExpr> allLinks = new LinkedList<>();
+    private SimpleNameRefExpr nsRefPart;
+    private LinkSource firstExpr;
+    private List<NameRefOrHolder> restLinks = new LinkedList<>();
+    private LinkedList<LinkSource> allLinks = new LinkedList<>();
     private ScopeKind resolvedDatumScope;  // only relevant if target is a datum type.
     private boolean isImportMatch = false;  // only relevant if this chain is a type ref or other static ref
     private TypeCheckState typeCheckState = TypeCheckState.UNCHECKED;
+    private AstLoadError loadError;
 
     // Redundantly extracted views of the exprLinks:
     private MetaRefPath metaRefPath;
@@ -69,8 +72,8 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
     ExpressionChain(SourceInfo sourceInfo, DatumType typeDefn) {
         this(sourceInfo, MetaType.TYPE);
 
-        NameRefExpr<DatumType> firstPart =
-            new NameRefExpr<>(new NamePartExpr(sourceInfo, false, null, typeDefn.getName()));
+        SimpleNameRefExpr<DatumType> firstPart =
+            new SimpleNameRefExpr<>(new NamePartExpr(sourceInfo, false, null, typeDefn.getName()));
         firstPart.setState(LinkState.RESOLVED);
         firstPart.setResolvedMetaObj(typeDefn);
         this.typeCheckState = TypeCheckState.VALID;
@@ -104,35 +107,35 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
         return nsRefPart != null;
     }
 
-    public NameRefExpr getNsRefPart() {
+    public SimpleNameRefExpr getNsRefPart() {
         return nsRefPart;
     }
 
-    public ExpressionChain setNsRefPart(NameRefExpr nsRefPart) {
+    public ExpressionChain setNsRefPart(SimpleNameRefExpr nsRefPart) {
         this.nsRefPart = nsRefPart;
         return this;
     }
 
-    public List<MemberRefHolder> getRestLinks() {
+    public List<NameRefOrHolder> getRestLinks() {
         return restLinks;
     }
 
-    public LinkedList<TypedExpr> getAllLinks() {
+    public LinkedList<LinkSource> getAllLinks() {
         return allLinks;
     }
 
-    public LinkedList<MemberRefHolder> getAllLinksAsHolders() {
-        if (! (allLinks.getFirst() instanceof MemberRefHolder))
+    public LinkedList<NameRefOrHolder> getAllLinksAsHolders() {
+        if (! (allLinks.getFirst() instanceof NameRefOrHolder))
             throw new IllegalStateException("first element ["+allLinks.getFirst()+"] is not set or is not an identifier");
 
-        LinkedList<MemberRefHolder> refChain = new LinkedList<>();
-        for (TypedExpr typedLink : allLinks) {
-            refChain.add(((MemberRefHolder) typedLink));
+        LinkedList<NameRefOrHolder> refChain = new LinkedList<>();
+        for (LinkSource typedLink : allLinks) {
+            refChain.add(((NameRefOrHolder) typedLink));
         }
         return refChain;
     }
 
-    public TypedExpr getFirstPart() {
+    public LinkSource getFirstPart() {
         return firstExpr;
     }
 
@@ -172,7 +175,7 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
         return null;
     }
 
-    public TypedExpr getLastPart() {
+    public LinkSource getLastPart() {
         return allLinks.getLast();
     }
 
@@ -180,7 +183,7 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
         return allLinks.size();
     }
 
-    public void addNextPart(MemberRefHolder nextPart) {
+    public void addNextPart(NameRefOrHolder nextPart) {
         if (this.firstExpr == null)
             this.firstExpr = nextPart;
         else
@@ -198,10 +201,15 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
     }
 
     public LinkState getState() {
-        return hasRef() ? getLastRef().getRef().getState() : LinkState.RESOLVED;
+        return loadError != null ?
+            LinkState.NOT_FOUND :
+            (hasRef() ?
+                getLastExpr().getNameRef().getRefAsNameRef().getState() :
+                LinkState.RESOLVED);
     }
 
-    private TypedExpr getLastRef() {
+
+    private LinkSource getLastExpr() {
         return getAllLinks().getLast();
     }
 
@@ -217,16 +225,17 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
         return getState() == LinkState.RESOLVED && this.typeCheckState == TypeCheckState.VALID;
     }
 
+    public void setAstLoadError(AstLoadError error) {
+        this.loadError = error;
+    }
+
+    public AstLoadError getLoadError() {
+        return loadError;
+    }
+
     @Override
     public DatumType getDatumType() {
         return ((ValueExpr) getLastPart()).getDatumType();
-    }
-
-    public boolean hasMetaRefPath() {
-        if (!isResolvedValid())
-            throw new IllegalStateException("chain expression not fully resolved and validated");
-
-        return !getFirstPart().isValueExpr();
     }
 
     // TODO Add validation: meta path must start at first position
@@ -237,9 +246,9 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
 
         if (metaRefPath == null) {
             metaRefPath = new MetaRefPath(this, resolvedDatumScope);
-            for (TypedExpr refPartExpr : this.allLinks) {
-                if (refPartExpr.hasRef()) {
-                    metaRefPath.addLink(refPartExpr.getRef());
+            for (LinkSource refPartExpr : this.allLinks) {
+                if (refPartExpr.hasNameRef()) {
+                    metaRefPath.addLink(refPartExpr.getNameRef().getRefAsNameRef());
                 }
                 else
                     break;
@@ -252,7 +261,7 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
         if (!isResolvedValid())
             throw new IllegalStateException("chain expression not fully resolved and validated");
 
-        return getLastPart().isValueExpr();
+        return getLastPart().getTypedExpr().isValueExpr();
     }
 
     public ValueExprChain extractValueExprChain() {
@@ -261,8 +270,8 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
 
         if (valueExprChain == null) {
             valueExprChain = new ValueExprChain(null);
-            for (TypedExpr linkExpr : this.allLinks) {
-                if (linkExpr.isValueExpr()) {
+            for (LinkSource linkExpr : this.allLinks) {
+                if (linkExpr.hasTypedExpr() && linkExpr.getTypedExpr().isValueExpr()) {
                     valueExprChain.addValueExpr(((ValueExpr) linkExpr));
                 }
             }
@@ -273,8 +282,8 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
     @Override
     public boolean hasRef() {
         boolean has = false;
-        for (TypedExpr exprLink : allLinks) {
-            if (exprLink.hasRef()) {
+        for (LinkSource exprLink : allLinks) {
+            if (exprLink.hasNameRef()) {
                 has = true;
                 break;
             }
@@ -289,7 +298,8 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
 
     @Override
     public boolean hasResolvedType() {
-        return getLastPart().hasResolvedType();
+        LinkSource lastPart = getLastPart();
+        return lastPart.hasTypedExpr() && lastPart.getTypedExpr().hasResolvedType();
     }
 
     @Override
@@ -300,9 +310,9 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
     public String getFullUrlSpec() {
         StringBuilder sb = new StringBuilder();
         boolean isFirst = true;
-        for (TypedExpr link : this.getAllLinks()) {
+        for (LinkSource link : this.getAllLinks()) {
             if (link instanceof ByNameMetaRef) {
-                String name = ((NameRefExpr) link).getNameExprText();
+                String name = ((SimpleNameRefExpr) link).getNameExprText();
                 if (isFirst) {
                     isFirst = false;
                 }
@@ -318,7 +328,7 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
     @Override
     public String toString() {
         String suffix = getSuffix();
-        Linkable lastPart = getLastPart();
+        LinkSource lastPart = getLastPart();
         return "<" +
             "fromObj=" + (getParent() != null ? getParent() : "") +
             " path=\"" + getFullUrlSpec() + (suffix != null ? " " + suffix : "") + "\"" +

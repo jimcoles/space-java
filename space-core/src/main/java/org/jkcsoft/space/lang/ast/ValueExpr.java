@@ -28,4 +28,23 @@ public interface ValueExpr extends TypedExpr {
         return true;
     }
 
+    @Override
+    default boolean hasNameRef() {
+        return false;
+    }
+
+    @Override
+    default NameRefOrHolder getNameRef() {
+        return null;
+    }
+
+    @Override
+    default boolean hasTypedExpr() {
+        return true;
+    }
+
+    @Override
+    default TypedExpr getTypedExpr() {
+        return this;
+    }
 }

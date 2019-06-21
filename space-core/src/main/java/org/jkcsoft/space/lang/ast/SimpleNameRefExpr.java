@@ -12,23 +12,29 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
+ * A reference to a Named AST element by a simple name. Therefore, may be a part of
+ * a full or partial path, but each part itself must resolve to an AST named
+ * element.
+ *
  * This is a central binary associative notion that holds the unresolved 'name'
  * of a meta object being referenced as well the resolved meta object itself
  * AFTER the linking/resolving phase.
  *
- * A NameRefExpr gets inserted into the AST anywhere that a named reference
- * is made to some named thing, e.g., type ref, datum ref, function ref (call).
+ * A NameRefExpr gets inserted into the AST anywhere that a reference-by-name
+ * is made to some named thing, e.g., type ref ([dirs +] type), datum ref, function ref (call).
  *
  * Something like a LISP 'con' cell.
  *
  * @author Jim Coles
  */
-public class NameRefExpr<T extends Named> extends AbstractRefExpr<T> implements ByNameMetaRef<T>, MemberRefHolder {
+public class SimpleNameRefExpr<T extends Named> extends AbstractRefExpr<T>
+    implements ByNameMetaRef<T>, NameRefOrHolder
+{
 
     private NamePartExpr nameRefExpr; // package name, datum name (ref)
     // elements below set by linker
 
-    public NameRefExpr(NamePartExpr nameRefExpr) {
+    public SimpleNameRefExpr(NamePartExpr nameRefExpr) {
         super(nameRefExpr.getSourceInfo());
         this.nameRefExpr = nameRefExpr;
     }
@@ -82,7 +88,22 @@ public class NameRefExpr<T extends Named> extends AbstractRefExpr<T> implements 
     }
 
     @Override
+    public String getKeyOrName() {
+        return nameRefExpr.getNameExpr();
+    }
+
+    @Override
     public String toUrlString() {
         return nameRefExpr.getNameExpr();
+    }
+
+    @Override
+    public boolean hasNameRef() {
+        return true;
+    }
+
+    @Override
+    public NameRefOrHolder getNameRef() {
+        return this;
     }
 }

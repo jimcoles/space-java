@@ -189,7 +189,7 @@ public class Executor extends ExprProcessor implements ExeContext {
                     linkAndCheckUnit(parseUnit, unitLoadErrors);
                     //
                     if (unitLoadErrors.size() == 0) {
-                        log.info("no linker errors in [" + parseUnit + "]");
+                        log.info("no link or semantic errors in [" + parseUnit + "]");
                     }
                     else {
                         String redMsg = "Found [" + unitLoadErrors.size() + "] linker errors in [" + parseUnit +  "]";
@@ -199,7 +199,6 @@ public class Executor extends ExprProcessor implements ExeContext {
                     }
                     unitLoadErrors.forEach(err ->  runResults.addFileError(err));
                 }
-
             }
             catch (SpaceX ex) {
                 throw ex;
@@ -208,9 +207,10 @@ public class Executor extends ExprProcessor implements ExeContext {
                 throw new SpaceX("Failed running program", ex);
             }
 
-            if (runResults.getAllErrors().size() > 0) {
-                int[] levelCounts = runResults.getLevelCounts();
-                log.warn("skipping exec due to [" + levelCounts[AstLoadError.Level.ERROR.ordinal()] + "] errors.");
+            int[] levelCounts = runResults.getLevelCounts();
+            int errCount = levelCounts[AstLoadError.Level.ERROR.ordinal()];
+            if (errCount > 0) {
+                log.warn("skipping exec due to [" + errCount + "] errors.");
 
                 presentAllErrors(runResults);
             }
@@ -258,11 +258,16 @@ public class Executor extends ExprProcessor implements ExeContext {
                 SpaceHome.getSjiService().getDeepLoadSpaceWrapper(targetJavaTypeRef.getFullUrlSpec(), null);
             }
             catch (ClassNotFoundException e) {
-                String msg = "could not find Java import class [" + targetJavaTypeRef.getFullUrlSpec() + "]" +
-                    " in the Java classpath";
-                log.warn(msg);
-                AstLoadError astLoadError = new AstLoadError(AstLoadError.Type.LINK, javaImport.getSourceInfo(), msg);
-                runResults.addFileError(astLoadError);
+                // NOTE Java class might have been loaded already under the specified full path
+                AstUtils.resolveAstRef(AstUtils.findParentParseUnit(targetJavaTypeRef), targetJavaTypeRef);
+                if (!targetJavaTypeRef.isResolved()) {
+                    String msg = "could not find Java import class [" + targetJavaTypeRef.getFullUrlSpec() + "]" +
+                        " in the Java classpath";
+                    log.warn(msg);
+                    AstLoadError astLoadError =
+                        new AstLoadError(AstLoadError.Type.LINK, javaImport.getSourceInfo(), msg);
+                    runResults.addFileError(astLoadError);
+                }
             }
         }
     }
@@ -286,6 +291,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         {
             AstFileLoadErrorSet fileErrorSet = runResults.getErrorsBySrcFile().get(file);
             if (fileErrorSet != null) {
+                // Note: using system out instead of log per
                 System.out.println(
                     (file != null ? file.getPath() : "(internal errors)") + ": " + fileErrorSet.getSummary() + EOL
                         + toString(fileErrorSet)
@@ -312,7 +318,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             nsRegistry.getJavaNs().getName()
                 + ":" + SpaceHome.getSjiService().getSjiBindings().applyToJavaClassname(JOpSys.class.getName())
         );
-        AstUtils.resolveAstRef(opSysRef);
+        AstUtils.resolveAstRef(null, opSysRef);
         if (opSysRef.isResolvedValid())
             op_sys_type_def = (ComplexType) opSysRef.getResolvedType();
         else
@@ -469,7 +475,12 @@ public class Executor extends ExprProcessor implements ExeContext {
      Could also do some linking while loading.
      */
     private void linkRefs(ParseUnit parseUnit, List<AstLoadError> errors) {
-        AstUtils.walkAstDepthFirst(parseUnit, new RefLinker(parseUnit, errors));
+        RefLinker astLinker = new RefLinker(parseUnit, errors);
+        // link all type refs
+        AstUtils.walkAstDepthFirst(parseUnit, astLinker);
+        // link all other unresolved refs
+        astLinker.setFirstPass(false);
+        AstUtils.walkAstDepthFirst(parseUnit, astLinker);
         return;
     }
 
@@ -477,9 +488,9 @@ public class Executor extends ExprProcessor implements ExeContext {
         List<ImportExpr> importExprExprs = parseUnit.getImportExprs();
         for (ImportExpr importTypeRefExpr : importExprExprs) {
             if (importTypeRefExpr.getTypeRefExpr().isAtInitState()) {
-                resolveAstPath(importTypeRefExpr.getTypeRefExpr(), unitErrors);
+                resolveAstPath(parseUnit, importTypeRefExpr.getTypeRefExpr(), unitErrors);
                 if (importTypeRefExpr.getTypeRefExpr().isSingleton()) {
-                    if (importTypeRefExpr.getTypeRefExpr().isResolvedValid())
+                    if (importTypeRefExpr.getTypeRefExpr().isResolved())
                         parseUnit.addToAllImportedTypes(
                             (DatumType) importTypeRefExpr.getTypeRefExpr().getResolvedMetaObj());
 //                    else
@@ -498,13 +509,13 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
     }
 
-    private void resolveAstPath(ExpressionChain reference, List<AstLoadError> errors) {
-        AstUtils.resolveAstRef(reference);
+    private void resolveAstPath(ParseUnit parseUnit, ExpressionChain reference, List<AstLoadError> errors) {
+        AstUtils.resolveAstRef(parseUnit, reference);
         if (!reference.isResolved()) {
             AstLoadError error = new AstLoadError(AstLoadError.Type.LINK, reference.getSourceInfo(),
-                                                  "can not resolve symbol '" + getFirstUnresolved(reference) +
-                                                      "' in '" + reference + "'");
+                                                  "could resolve symbol '" + getFirstUnresolved(reference) + "'");
             errors.add(error);
+            reference.setAstLoadError(error);
             log.info(error);
         }
         else {
@@ -512,14 +523,17 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
     }
 
-    private MemberRefHolder getFirstUnresolved(ExpressionChain refChain) {
-        MemberRefHolder unresolved = null;
-        if (refChain.getFirstPart().hasRef() && !refChain.getFirstPart().getRef().isResolved())
-            unresolved = (MemberRefHolder) refChain.getFirstPart();
+    private NameRefOrHolder getFirstUnresolved(ExpressionChain refChain) {
+        NameRefOrHolder unresolved = null;
+        if ( refChain.getFirstPart().hasNameRef()
+             && !refChain.getFirstPart().getNameRef().getRefAsNameRef().isResolved() )
+        {
+            unresolved = (NameRefOrHolder) refChain.getFirstPart();
+        }
 
         if (unresolved == null) {
-            for (MemberRefHolder link : refChain.getRestLinks()) {
-                if (link.hasRef() && !link.getRef().isResolved()) {
+            for (NameRefOrHolder link : refChain.getRestLinks()) {
+                if (link.hasNameRef() && !link.getRefAsNameRef().isResolved()) {
                     unresolved = link;
                     break;
                 }
@@ -537,10 +551,10 @@ public class Executor extends ExprProcessor implements ExeContext {
         IntrinsicSourceInfo sourceInfo = new IntrinsicSourceInfo();
         String[] pathNodes = mainSpacePath.split("/.");
         FullTypeRefImpl exeTypeRef = getAstFactory().newTypeRef(sourceInfo, null, null);
-        NameRefExpr userNsRefPart = getAstFactory().newNameRefExpr(sourceInfo, nsRegistry.getUserNs().getName());
+        SimpleNameRefExpr userNsRefPart = getAstFactory().newNameRefExpr(sourceInfo, nsRegistry.getUserNs().getName());
         exeTypeRef.setNsRefPart(userNsRefPart);
         AstUtils.addNewMetaRefParts(exeTypeRef, sourceInfo, pathNodes);
-        AstUtils.resolveAstRef(exeTypeRef);
+        AstUtils.resolveAstRef(null, exeTypeRef);
         SpaceTypeDefn bootTypeDefn = (SpaceTypeDefn) exeTypeRef.getResolvedType();
 //        SpaceTypeDefn bootTypeDefn = progSpaceDir.getFirstSpaceDefn();
         Tuple mainTypeTuple = newTupleImpl(bootTypeDefn);
@@ -549,7 +563,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
         ProgSourceInfo progSourceInfo = new ProgSourceInfo();
         FunctionCallExpr bootMainCallExpr = getAstFactory().newFunctionCallExpr(progSourceInfo);
-        NameRefExpr<FunctionDefn> mainFuncRef =
+        SimpleNameRefExpr<FunctionDefn> mainFuncRef =
             getAstFactory().newNameRefExpr(getAstFactory().newNamePartExpr(sourceInfo, null, "main"));
         bootMainCallExpr.setFunctionRef(mainFuncRef);
         bootMainCallExpr.getFunctionRef().setResolvedMetaObj(spMainActionDefn);
@@ -858,7 +872,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             case ARG:
                 value = functionCallContext.getArgTuple().get((Declaration) toMember).getValue();
                 break;
-            case SPACE_DEFN:
+            case TYPE_DEFN:
                 value = functionCallContext.getCtxObject().get((Declaration) toMember).getValue();
                 break;
             case STATIC:
@@ -1232,12 +1246,17 @@ public class Executor extends ExprProcessor implements ExeContext {
     private class RefLinker implements AstScanConsumer {
 
         private ParseUnit parseUnit;
+        private boolean firstPass = true;
         private List<AstLoadError> errors;
         private Collection<ExpressionChain> unresolvedRefs;
 
         public RefLinker(ParseUnit parseUnit, List<AstLoadError> errors) {
             this.parseUnit = parseUnit;
             this.errors = errors;
+        }
+
+        public void setFirstPass(boolean firstPass) {
+            this.firstPass = firstPass;
         }
 
         @Override
@@ -1253,11 +1272,16 @@ public class Executor extends ExprProcessor implements ExeContext {
         }
 
         private Collection<ExpressionChain> getUnresolvedRefs(ModelElement testNode) {
-            java.util.Set<ExpressionChain> references = testNode.getReferences();
+            java.util.Set<ExpressionChain> references = testNode.getExpressionChains();
             return (Collection<ExpressionChain>) CollectionUtils.select(
                 references, obj -> {
-                    ExpressionChain ref = (ExpressionChain) obj;
-                    return ref.isAtInitState() && !ref.isImportRef();
+                    ExpressionChain exprChain = (ExpressionChain) obj;
+                    return exprChain.hasRef()
+                        && (this.firstPass ?
+                        exprChain.getTargetMetaType() == MetaType.TYPE
+                        : exprChain.getTargetMetaType() != MetaType.TYPE)
+                        && exprChain.isAtInitState()
+                        && !exprChain.isImportRef();
                 }
             );
         }
@@ -1272,20 +1296,20 @@ public class Executor extends ExprProcessor implements ExeContext {
             // NOTE: using unresolvedRefs from the predicate test function
             for (ExpressionChain reference : unresolvedRefs) {
                 log.debug("resolving reference [" + reference + "]");
-                if (reference.getTargetMetaType() == MetaType.TYPE && reference.isSinglePart()) {
-
-                    checkImports(reference);
-
-                    if (reference.isResolved()) {
-                        reference.setImportMatch(true);
-                        log.debug("resolved [" + reference + "] as imported type");
-                    }
-                }
-                else {
-                    resolveAstPath(reference, errors);
-                    if (reference.isResolved())
-                        log.debug("resolved ["+reference+"] as full path usage");
-                }
+//                if (reference.getTargetMetaType() == MetaType.TYPE && reference.isSinglePart()) {
+//
+//                    checkImports(reference);
+//
+//                    if (reference.isResolved()) {
+//                        reference.setImportMatch(true);
+//                        log.debug("resolved [" + reference + "] as imported type");
+//                    }
+//                }
+//                else {
+                    resolveAstPath(parseUnit, reference, errors);
+//                    if (reference.isResolved())
+//                        log.debug("resolved ["+reference+"] as full path usage");
+//                }
                 //
 //                if (reference.isAtInitState()) {
 //                    errors.add(new AstLoadError(AstLoadError.Type.LINK, reference.getSourceInfo(),
@@ -1305,18 +1329,20 @@ public class Executor extends ExprProcessor implements ExeContext {
             }
         }
 
-        private void checkUnitImports(TypedExpr exprLink) {
+        private void checkUnitImports(LinkSource exprLink) {
             DatumType importedTypeMatch =
-                (DatumType) CollectionUtils.find(parseUnit.getAllImportedTypes(),
-                                                 object -> ((DatumType) object).getName()
-                                                                               .equals(exprLink.getRef()));
-            AstUtils.checkSetResolve(exprLink, (NamedElement) importedTypeMatch);
+                (DatumType) CollectionUtils.find(
+                    parseUnit.getAllImportedTypes(),
+                    object -> ((DatumType) object).getName().equals(exprLink.getNameRef().getRefAsNameRef())
+                );
+           AstUtils.checkSetResolve(exprLink, (NamedElement) importedTypeMatch);
         }
 
-        private void checkImplicitImports(TypedExpr expLink) {
+        private void checkImplicitImports(LinkSource expLink) {
             DatumType importedTypeMatch = (DatumType) CollectionUtils.find(
                 implicitImportTypes,
-                object -> ((DatumType) object).getName().equals(expLink.getRef().getResolvedMetaObj())
+                object -> ((DatumType) object).getName().equals(
+                    expLink.getNameRef().getRefAsNameRef().getResolvedMetaObj())
             );
             AstUtils.checkSetResolve(expLink, (NamedElement) importedTypeMatch);
         }

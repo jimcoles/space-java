@@ -18,6 +18,12 @@ import java.util.Set;
  */
 public interface ModelElement {
 
+    SourceInfo getSourceInfo();
+
+    void setParent(ModelElement modelElement);
+
+    boolean hasParent();
+
     ModelElement getParent();
 
     boolean isGroupingNode();
@@ -28,19 +34,15 @@ public interface ModelElement {
 
     List<ModelElement> getChildren();
 
-    boolean hasReferences();
-
-    Set<ExpressionChain> getReferences();
-
     NamedElement getChildByName(String name);
 
     Collection<NamedElement> getNamedChildren();
 
+    boolean hasReferences();
+
+    Set<ExpressionChain> getExpressionChains();
+
     String getDisplayName();
-
-    SourceInfo getSourceInfo();
-
-    boolean hasParent();
 
     boolean hasGroupingNodes();
 

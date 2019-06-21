@@ -95,4 +95,23 @@ public class SjiTypeRefByClass extends AbstractModelElement implements TypeRef {
             '>';
     }
 
+    @Override
+    public boolean hasNameRef() {
+        return false;
+    }
+
+    @Override
+    public NameRefOrHolder getNameRef() {
+        return null;
+    }
+
+    @Override
+    public boolean hasTypedExpr() {
+        return true;
+    }
+
+    @Override
+    public TypedExpr getTypedExpr() {
+        return this;
+    }
 }

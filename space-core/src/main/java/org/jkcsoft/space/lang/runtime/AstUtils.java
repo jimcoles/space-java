@@ -15,7 +15,6 @@ import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
-import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -29,12 +28,48 @@ public class AstUtils {
 
     private static final Logger log = Logger.getLogger(AstUtils.class);
 
+    private static IntrinsicContainer INTRINSIC_TYPES;
+    private static Executor.FindFirstAstConsumer<Directory> dirFinderAction =
+        new Executor.FindFirstAstConsumer<>(Directory.class);
+    private static Executor.FindFirstAstConsumer<ParseUnit> parseUnitFinderAction =
+        new Executor.FindFirstAstConsumer<>(ParseUnit.class);
+    private static Executor.FindFirstAstConsumer<Namespace> nsFinderAction =
+        new Executor.FindFirstAstConsumer<>(Namespace.class);
+    private static Executor.FindFirstAstConsumer<FunctionDefn> funcDefnfinderAction =
+        new Executor.FindFirstAstConsumer<>(FunctionDefn.class);
+    private static Executor.FindFirstAstConsumer<StatementBlock> statementBlockfinderAction =
+        new Executor.FindFirstAstConsumer<>(StatementBlock.class);
+    private static Executor.FindFirstAstConsumer<NewTupleExpr> newTupleExprfinderAction =
+        new Executor.FindFirstAstConsumer<>(NewTupleExpr.class);
+    private static Executor.FindFirstAstConsumer<ModelElement> typeOrDirContainerFinder =
+        new Executor.FindFirstAstConsumer<>(
+            ModelElement.class,
+            modelElement -> modelElement instanceof SpaceTypeDefn || modelElement instanceof Directory
+        );
+
+    /** Of the two specified arg types, returns the 'largest' of the two. */
+    private static DatumType[][] typePrecedenceMap = new DatumType[][]{
+        {NumPrimitiveTypeDefn.REAL, NumPrimitiveTypeDefn.CARD}
+    };
+
+    static {
+        INTRINSIC_TYPES = AstFactory.getInstance().newIntrinsicContainer();
+        INTRINSIC_TYPES.addChild(VoidType.VOID);
+        for (Map.Entry<String, PrimitiveTypeDefn> primTypeDefnEntry : NumPrimitiveTypeDefn.getEnumsByName().entrySet())
+        {
+            INTRINSIC_TYPES.addChild(primTypeDefnEntry.getValue());
+        }
+    }
+
+    private static ModelElement getIntrinsicTypes() {
+        return INTRINSIC_TYPES;
+    }
+
     /** The nearest named parent of an element, e, is the the element thru which 'e' may be referenced. */
     public static NamedElement getNearestNamedParent(ModelElement anElem) {
         NamedElement lexParent = null;
         if (anElem.getParent() instanceof NamedElement
-            && ((NamedElement) anElem.getParent()).isNamed())
-        {
+            && ((NamedElement) anElem.getParent()).isNamed()) {
             lexParent = (NamedElement) anElem.getParent();
         }
         else if (anElem.getParent() != null) {
@@ -58,7 +93,7 @@ public class AstUtils {
     public static Directory getRunDir(Directory thisDirectory) {
         Directory directory =
             (Directory) CollectionUtils.find(thisDirectory.getChildren(),
-                                          object -> object instanceof Directory);
+                                             object -> object instanceof Directory);
         return directory;
     }
 
@@ -127,36 +162,67 @@ public class AstUtils {
      *  1. "context object/type" member functions
      *  2. static functions, fully qualified
      *
+     *
+     * @param parseUnit
      * @param refChain
      * @return
      */
-    public static void resolveAstRef(ExpressionChain refChain) {
+    public static void resolveAstRef(ParseUnit parseUnit, ExpressionChain refChain) {
         Namespace refNs = getNs(refChain);
         checkSetResolve(refChain.getNsRefPart(), refNs);
-        AstPathIterator pathIterator = getPathIterator(refChain);
+        AstScopeCollection scopeSequence = getScopeCollection(parseUnit, refChain);
 
-        // TODO Handle fact that first link in chain might not contain a ref
-        // TODO Finding first link/ref is the complex part. 2nd link and beyond are all type-based
         // TODO Handle dependency between references: e.g., might have a ref to a function; i
         //      resolve the function, but its return type has not yet been resolved
 
         //
-        resolveFirst(refChain, pathIterator);
+        if (refChain.getFirstPart().hasNameRef())
+            resolveFirst(refChain, scopeSequence);
         //
-        if (refChain.isMultiPart() && refChain.getFirstPart().hasResolvedType())
+        if (refChain.isMultiPart()
+            && refChain.getFirstPart().getNameRef().getRefAsNameRef().isResolved())
+        {
             resolveRest(refChain);
+        }
     }
 
     /**
      * Resolves first link in the chain if that link has a reference.
      *
      * @param refChain
-     * @param pathIterator
+     * @param scopeSequence
      */
-    private static void resolveFirst(ExpressionChain refChain, AstPathIterator pathIterator) {
+    private static void resolveFirst(ExpressionChain refChain, AstScopeCollection scopeSequence) {
 
-        Namespace refNs = (Namespace) refChain.getNsRefPart().getRef().getResolvedMetaObj();
+//        Namespace refNs = (Namespace) refChain.getNsRefPart().getRef().getResolvedMetaObj();
 
+        LinkSource firstPart = refChain.getFirstPart();
+        if (!firstPart.hasNameRef())
+            return;
+
+        MetaRef firstExprRef = firstPart.getNameRef().getRefAsNameRef();
+        for (StaticScope staticScope : scopeSequence) {
+            ModelElement scopeElem = staticScope.getContext();
+            log.debug("attempting to resolve [" + firstExprRef + "] under [" + staticScope + "]");
+            if (scopeElem instanceof ExpressionChain) {
+                refChain.setAstLoadError(((ExpressionChain) scopeElem).getLoadError());
+            }
+            else {
+                NamedElement lookup =
+                    lookupImmediateChild(scopeElem, firstExprRef.getKeyOrName());
+                checkSetResolve(firstPart, lookup);
+            }
+            //
+            if (firstExprRef.isResolved()) {
+                log.debug("resolved [" + firstExprRef + "] under [" + staticScope + "]");
+                break;
+            }
+            else
+                log.debug("could not resolve [" + firstExprRef + "] under [" + staticScope + "]");
+
+        }
+
+    /*
         switch (MetaType.DATUM) {
             case TYPE:
                 resolveIntrinsics(((NameRefExpr) refChain.getFirstPart()));
@@ -177,7 +243,7 @@ public class AstUtils {
                 }
                 break;
             case DATUM:
-                resolveInNearestScope(pathIterator, refChain, null);
+                resolveInNearestScope(scopeSequence, refChain, null);
                 if (refChain.isAtInitState()) {
                     resolveFromRoot(refNs.getRootDirLookupChain(), refChain);
                     if (refChain.isResolved())
@@ -188,8 +254,8 @@ public class AstUtils {
 //                resolveFromRoot(refNs.getRootDirLookupChain(), reference);
                 if (refChain.isAtInitState() ) {
                     if (!refChain.isMultiPart()) {
-//                        resolveInNearestScope(pathIterator, AstUtils.getNearestScopeParent(refChain), refChain, null);
-                        resolveInNearestScope(pathIterator, refChain, null);
+//                        resolveInNearestScope(scopeSequence, AstUtils.getNearestScopeParent(refChain), refChain, null);
+                        resolveInNearestScope(scopeSequence, refChain, null);
                     }
                     else {
                         resolveFromScopeDown(refChain.getNamedParent(), refChain);
@@ -197,6 +263,7 @@ public class AstUtils {
                 }
                 break;
         }
+    */
 
     }
 
@@ -207,8 +274,28 @@ public class AstUtils {
      * @param refChain
      */
     private static void resolveRest(ExpressionChain refChain) {
-        resolveIntrinsics(((NameRefExpr) refChain.getFirstPart()));
-        refChain.getRestLinks();
+//        resolveIntrinsics(((NameRefExpr) refChain.getFirstPart()));
+        NamedElement lookup = null;
+        LinkSource currentlhsLink = refChain.getFirstPart();
+        for (NameRefOrHolder rhsLink : refChain.getRestLinks()) {
+            String keyOrName = rhsLink.getNameRef().getRefAsNameRef().getKeyOrName();
+            if (currentlhsLink.hasNameRef()) {
+                Named lhsContainer = currentlhsLink.getNameRef().getRefAsNameRef().getResolvedMetaObj();
+//                lookup = lhsContainer.getChildByName(keyOrName);
+                lookup = lookupImmediateChild(lhsContainer, keyOrName);
+            }
+            if (lookup == null && currentlhsLink.hasTypedExpr()) {
+                DatumType lhsType = currentlhsLink.getTypedExpr().getDatumType();
+                lookup = lookupImmediateChild(lhsType, keyOrName);
+            }
+            checkSetResolve(rhsLink, lookup);
+            if (!rhsLink.getRefAsNameRef().isResolved()) {
+                break;
+            }
+            else {
+                currentlhsLink = rhsLink;
+            }
+        }
     }
 
     /**
@@ -218,22 +305,21 @@ public class AstUtils {
      * 2. If this is a pronoun reference, e.g., "this.".
      * 3. The kind of scope from which the reference is made.
      *
+     * @param parseUnit
      * @param reference
-     * @return The appropriate {@link AstPathIterator} for the reference.
+     * @return The appropriate {@link AstScopeCollection} for the reference.
      */
-    private static AstPathIterator getPathIterator(ExpressionChain reference) {
-        ScopeKind scopeKind = inferScopeKind(reference.getParent());
-        AstPathIterator walker = null;
-        switch (scopeKind) {
-            case SPACE_DEFN:
-                walker = new ScopeCollectionWalker(reference);
-        }
-        return walker;
+    private static AstScopeCollection getScopeCollection(ParseUnit parseUnit, ExpressionChain reference) {
+        ScopeKind refFromScopeKind = inferScopeKind(reference.getParent());
+        // TODO add logic to reuse scope collections where possible, e.g., references from
+        // the same context have the same scopes, etc.
+        ScopeCollectionWalker walker = new ScopeCollectionWalker(parseUnit, reference);
+        return walker.getAllScopesAsList();
     }
 
-    static void checkSetResolve(TypedExpr exprLink, NamedElement lookup) {
+    static void checkSetResolve(LinkSource exprLink, NamedElement lookup) {
         if (exprLink != null && lookup != null) {
-            MetaRef metaRef = exprLink.getRef();
+            ByNameMetaRef metaRef = exprLink.getNameRef().getRefAsNameRef();
             metaRef.setResolvedMetaObj(lookup);
             metaRef.setState(LinkState.RESOLVED);
         }
@@ -249,28 +335,67 @@ public class AstUtils {
         return ns;
     }
 
+    private static ModelElement findParentTypeDefnOrDir(ModelElement astElement) {
+        return findFirstParent(astElement, typeOrDirContainerFinder);
+    }
+
+    private static FunctionDefn findParentFunctionDefn(ModelElement astNode) {
+        return findFirstParent(astNode, funcDefnfinderAction);
+    }
+
     private static Namespace findParentNs(ModelElement astNode) {
         return findFirstParent(astNode, nsFinderAction);
     }
 
-    public static <T extends ModelElement> T findFirstParent(ModelElement astNode, Executor.FindFirstAstConsumer<T> finderAction) {
+    public static <T extends ModelElement> T findFirstParent(ModelElement astNode,
+                                                             Executor.FindFirstAstConsumer<T> finderAction)
+    {
         finderAction.clearResult();
-        AstUtils.iterateParents(astNode, finderAction);
+        AstUtils.iterateParents(astNode.getParent(), finderAction);
         return finderAction.getResult();
     }
 
-    public static Directory findParentDir(ModelElement astNode, Executor.FindFirstAstConsumer<Directory> finderAction) {
-        return findFirstParent(astNode, finderAction);
+    private static <T extends ModelElement> T findFirstParentOfClass(ModelElement astElement, Class<T> modelClazz) {
+        // TODO avoid repetitive creation of 'FindFirstAstConsumer objects
+        return findFirstParent(astElement, new Executor.FindFirstAstConsumer<T>(modelClazz));
     }
 
-    public static ParseUnit findParentParseUnit(ModelElement astNode, Executor.FindFirstAstConsumer<ParseUnit> finderAction) {
-        return findFirstParent(astNode, finderAction);
+    public static Directory findParentDir(ModelElement astNode) {
+        return findFirstParent(astNode, dirFinderAction);
+    }
+
+    private static StatementBlock findParentStatementBlock(ModelElement astNode) {
+        return findFirstParent(astNode, statementBlockfinderAction);
+    }
+
+    public static ParseUnit findParentParseUnit(ModelElement astNode) {
+        return findFirstParent(astNode, parseUnitFinderAction);
+    }
+
+    private static NewTupleExpr findParentNewTupleExpr(ModelElement astNode) {
+        return findFirstParent(astNode, newTupleExprfinderAction);
     }
 
     public static Set<DatumType> getSiblingTypes(FullTypeRefImpl reference) {
         MetaRef parentRefPart = getParentRefPart(reference);
         return getChildTypes((Directory) parentRefPart.getResolvedMetaObj());
     }
+
+//    public static void resolveInNearestScope(AstScopeCollection scopeWalker, ExpressionChain reference,
+//                                             ScopeKind containerScopeKind)
+//    {
+//        StaticScope staticScope = scopeWalker.nextScope();
+//        if (containerScopeKind == null)
+//            containerScopeKind = staticScope.getScopeKind();
+//        NamedElement lookup =
+//            lookupImmediateChild(staticScope.getContext(), ((SimpleNameRefExpr) reference.getFirstPart()).getNameExprText());
+//        checkSetResolve(reference.getFirstPart(), lookup);
+//        if (reference.isResolved())
+//            reference.setResolvedDatumScope(containerScopeKind);
+//        else {
+//            resolveInNearestScope(scopeWalker, reference, containerScopeKind);
+//        }
+//    }
 
     public static Set<DatumType> getChildTypes(Directory dir) {
         Set<DatumType> childTypes = new HashSet<>();
@@ -297,16 +422,16 @@ public class AstUtils {
     }
 
     private static void resolveFromScopeDown(ModelElement astNode, ExpressionChain exprChain) {
-        log.debug("trying to find ["+exprChain+"] under [" + astNode + "]");
+        log.debug("trying to find [" + exprChain + "] under [" + astNode + "]");
         NamedElement lookup =
-            lookupImmediateChild(astNode, (((NameRefExpr) exprChain.getFirstPart()).getNameExprText()));
+            lookupImmediateChild(astNode, (((SimpleNameRefExpr) exprChain.getFirstPart()).getNameExprText()));
         checkSetResolve(exprChain.getFirstPart(), lookup);
         resolveAbsolute(lookup, exprChain.getRestLinks().iterator());
     }
 
-    public static void resolveAbsolute(ModelElement nameContext, Iterator<MemberRefHolder> refHolderIter) {
+    public static void resolveAbsolute(ModelElement nameContext, Iterator<NameRefOrHolder> refHolderIter) {
         if (nameContext != null && refHolderIter.hasNext()) {
-            MemberRefHolder refPart = refHolderIter.next();
+            NameRefOrHolder refPart = refHolderIter.next();
             NamedElement targetChild =
                 lookupImmediateChild(nameContext, refPart.getRefAsNameRef().getNameExprText());
             checkSetResolve(refPart, targetChild);
@@ -318,33 +443,17 @@ public class AstUtils {
         }
     }
 
-    public static void resolveInNearestScope(AstPathIterator scopeWalker, ExpressionChain reference,
-                                             ScopeKind containerScopeKind)
-    {
-        StaticScope staticScope = scopeWalker.moveToNext();
-        if (containerScopeKind == null)
-            containerScopeKind = staticScope.getScopeKind();
-        NamedElement lookup =
-            lookupImmediateChild(staticScope.getContext(), ((NameRefExpr) reference.getFirstPart()).getNameExprText());
-        checkSetResolve(reference.getFirstPart(), lookup);
-        if (reference.isResolved())
-            reference.setResolvedDatumScope(containerScopeKind);
-        else {
-            resolveInNearestScope(scopeWalker, reference, containerScopeKind);
-        }
-    }
-
     public static ScopeKind inferScopeKind(ModelElement context) {
         ScopeKind scopeKind = null;
         if (context instanceof StatementBlock
-            /* && context.getNamedParent() instanceof FunctionDefn */ )
+            /* && context.getNamedParent() instanceof FunctionDefn */)
             scopeKind = ScopeKind.BLOCK;
         else if (context instanceof SpaceFunctionDefn)
             scopeKind = ScopeKind.BLOCK;
         else if (context instanceof SpaceTypeDefn)
-            scopeKind = ScopeKind.SPACE_DEFN;
+            scopeKind = ScopeKind.TYPE_DEFN;
         else if (context instanceof TupleExpr)
-            scopeKind = ScopeKind.SPACE_DEFN;
+            scopeKind = ScopeKind.TYPE_DEFN;
 
         return scopeKind;
     }
@@ -364,21 +473,21 @@ public class AstUtils {
         return childByName;
     }
 
-    private static void resolveIntrinsics(NameRefExpr refPart) {
-        NamedElement lookup = null;
-        if (refPart.getExpression().getNameExpr().equals(VoidType.VOID.getName())) {
-            lookup = VoidType.VOID;
-        }
-        else {
-            lookup = NumPrimitiveTypeDefn.valueOf(refPart.getExpression().getNameExpr());
-        }
+    private static void resolveIntrinsics(SimpleNameRefExpr refPart) {
+        NamedElement lookup = INTRINSIC_TYPES.getChildByName(refPart.getNameExprText());
+//        if (refPart.getExpression().getNameExpr().equals(VoidType.VOID.getName())) {
+//            lookup = VoidType.VOID;
+//        }
+//        else {
+//            lookup = NumPrimitiveTypeDefn.valueOf(refPart.getExpression().getNameExpr());
+//        }
         checkSetResolve(refPart, lookup);
     }
 
     public static void walkAstDepthFirst(ModelElement astNode, AstScanConsumer astAction) {
         boolean match =
             astAction.getFilter() == null
-            || astAction.getFilter().test(astNode);
+                || astAction.getFilter().test(astNode);
         if (match)
             astAction.upon(astNode);
         List<ModelElement> children = astNode.getChildren();
@@ -412,11 +521,18 @@ public class AstUtils {
     }
 
     public static void iterateParents(ModelElement astNode, AstScanConsumer astAction) {
-        boolean match = astAction.getFilter() == null || astAction.getFilter().test(astNode);
-        if (match)
-            astAction.upon(astNode);
 
-        if (astNode.hasParent())
+        if (astNode == null)
+            return;
+
+        boolean match = astAction.getFilter() == null || astAction.getFilter().test(astNode);
+        boolean keepGoing = true;
+
+        if (match) {
+            keepGoing = astAction.upon(astNode);
+        }
+
+        if (keepGoing && astNode.hasParent())
             iterateParents(astNode.getParent(), astAction);
 
         if (match)
@@ -452,14 +568,16 @@ public class AstUtils {
         return subDir;
     }
 
-    public static <T extends ModelElement> Set<T> queryAst(ModelElement queryContextElem, Executor.QueryAstConsumer<T> astQueryAction) {
+    public static <T extends ModelElement> Set<T> queryAst(ModelElement queryContextElem,
+                                                           Executor.QueryAstConsumer<T> astQueryAction)
+    {
         walkAstDepthFirst(queryContextElem, astQueryAction);
         return astQueryAction.getResults();
     }
 
     public static Directory ensureDir(Directory nsRootDir, String[] classNameParts) {
         if (!nsRootDir.isRootDir())
-            throw new IllegalArgumentException("specified dir must be a namespace root: ["+nsRootDir+"]");
+            throw new IllegalArgumentException("specified dir must be a namespace root: [" + nsRootDir + "]");
 
         Directory leafDir = nsRootDir;
         for (int idxName = 0; idxName < classNameParts.length; idxName++) {
@@ -469,7 +587,7 @@ public class AstUtils {
             }
             else {
                 leafDir = leafDir.addDir(SpaceHome.getAstFactory().newAstDir(new ProgSourceInfo(), name));
-                log.trace("created new Space dir ["+leafDir+"]");
+                log.trace("created new Space dir [" + leafDir + "]");
             }
         }
 
@@ -477,7 +595,7 @@ public class AstUtils {
     }
 
     public static boolean isJavaNs(ImportExpr importExpr) {
-        NameRefExpr nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
+        SimpleNameRefExpr nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
         return nsRefPart != null
             && nsRefPart.getNameExprText().equals(SpaceHome.getNsRegistry().getJavaNs().getName());
     }
@@ -489,19 +607,6 @@ public class AstUtils {
         return;
     }
 
-    private static Executor.FindFirstAstConsumer<Directory> dirFinderAction =
-        new Executor.FindFirstAstConsumer<>(Directory.class);
-
-    private static Executor.FindFirstAstConsumer<ParseUnit> parseUnitFinderAction =
-        new Executor.FindFirstAstConsumer<>(ParseUnit.class);
-
-    private static Executor.FindFirstAstConsumer<Namespace> nsFinderAction =
-        new Executor.FindFirstAstConsumer<>(Namespace.class);
-
-    /** Of the two specified arg types, returns the 'largest' of the two. */
-    private static DatumType[][] typePrecedenceMap = new DatumType[][] {
-        {NumPrimitiveTypeDefn.REAL, NumPrimitiveTypeDefn.CARD}
-    };
     public static DatumType larger(DatumType type1, DatumType type2) {
         DatumType larger = null;
 //        for (DatumType[] typePair : typePrecedenceMap) {
@@ -579,114 +684,207 @@ public class AstUtils {
     /**
      * Used to find the first (possibly only) item in an expression chain.
      */
-    private static class ScopeCollectionWalker implements AstPathIterator {
-
+    private static class ScopeCollectionWalker {
+        //
+        private ParseUnit parseUnit;
+        private ExpressionChain theRefChain;
+//        private StaticScope staticScope;
+        //
+        private List<AstScopeCollection> scopeCollGrouped = new LinkedList<>();
+        private AstScopeCollection allScopes;
+        private AstScopeCollection intrinsicsScopeColl = new AstScopeCollection("Intrinsic Types");
         {
-            AstPathIterator[] typeScopes = {
-                this::intrinsicsIter,
-                this::importsIter,
-                this::typeContainerIter
-            };
-            AstPathIterator[] datumScopes = {
-                this::blockIter,
-                this::fuctionDefnBlocksIter,
-            };
-            AstPathIterator[] functionScopes = {
-                this::blockIter,
-                this::fuctionDefnBlocksIter,
-            };
-            AstPathIterator[] lhsTupleDatumScopes = {
-                this::blockIter
-            };
+            intrinsicsScopeColl.add(new StaticScope(intrinsicsScopeColl, INTRINSIC_TYPES, ScopeKind.GLOBAL));
         }
 
-        //
-        private StaticScope staticScope;
-        //
-        //
-        private List<AstPathIterator> scopeIterAggregator = new LinkedList<>();
-        private Iterator<AstPathIterator> outerIterator;
-        private AstPathIterator currentIterator;
+        public ScopeCollectionWalker(ParseUnit parseUnit, ExpressionChain exprChain) {
+            this.parseUnit = parseUnit;
+            this.theRefChain = exprChain;
+            // init scope to the reference element itself
+//            this.staticScope = new StaticScope(exprChain);
+            //
+            buildScopeSequence(exprChain);
+        }
 
-        public ScopeCollectionWalker(ExpressionChain exprChain) {
-
-            if (outerIterator == null && scopeIterAggregator.size() > 0) {
-                outerIterator = scopeIterAggregator.iterator();
+        private void buildScopeSequence(ExpressionChain exprChain) {
+            switch (exprChain.getTargetMetaType()) {
+                case TYPE:
+                    scopeCollGrouped = buildTypeRefScopes();
+                    break;
+                case DATUM:
+                    if (isLhsTupleDatumRef(exprChain)) {
+                        scopeCollGrouped = buildLhsTupleDatumRefScopes();
+                    }
+                    else
+                        scopeCollGrouped = buildDatumRefScopes();
+                    break;
+                case FUNCTION:
+                    scopeCollGrouped = buildFunctionRefScopes();
+                    break;
+                case PACKAGE:
+                    scopeCollGrouped = buildPackageRefScopes();
+                    break;
             }
         }
 
-        @Override
-        public StaticScope moveToNext() {
-            StaticScope next = null;
-            if (currentIterator != null) {
-                next = currentIterator.moveToNext();
+        private List<AstScopeCollection> buildTypeRefScopes() {
+            List<AstScopeCollection> refScopes = new LinkedList<>();
+            //
+            if (!theRefChain.isImportRef()) {
+                refScopes.add(buildIntrinsicTypeScopes());
+                refScopes.add(buildImportsScopes());
+                refScopes.add(buildTypeDefnContainerScopes());
             }
+            refScopes.add(buildNsRootScopes());
+            //
+            return refScopes;
+        }
 
-            if (next == null) {
-                // jump to next scope iterator
-                if (outerIterator != null && outerIterator.hasNext())
-                    currentIterator = outerIterator.next();
-                if (currentIterator != null) {
-                    next = currentIterator.moveToNext();
+        private List<AstScopeCollection> buildDatumRefScopes() {
+            List<AstScopeCollection> refScopes = new LinkedList<>();
+            //
+            refScopes.add(buildImportsScopes());
+            refScopes.add(buildFunctionLocalBlocksScopes());
+            refScopes.add(buildArgTypeDefnScopes());
+            refScopes.add(buildTypeDefnContainerScopes());
+            //
+            return refScopes;
+        }
+
+        private List<AstScopeCollection> buildLhsTupleDatumRefScopes() {
+            List<AstScopeCollection> refScopes = new LinkedList<>();
+            //
+            refScopes.add(buildTupleTypeDefnScopes());
+            //
+            return refScopes;
+        }
+
+        private List<AstScopeCollection> buildFunctionRefScopes() {
+            List<AstScopeCollection> refScopes = new LinkedList<>();
+            //
+            refScopes.add(buildTypeDefnContainerScopes());
+            refScopes.add(buildImportsScopes());
+            //
+            return refScopes;
+        }
+
+        private List<AstScopeCollection> buildPackageRefScopes() {
+            List<AstScopeCollection> refScopes = new LinkedList<>();
+            //
+            refScopes.add(buildNsRootScopes());
+            //
+            return refScopes;
+        }
+
+        private boolean isLhsTupleDatumRef(ExpressionChain exprChain) {
+            return (exprChain.getParent() instanceof AssignmentExpr
+                && exprChain.getParent().getParent() instanceof TupleExpr)
+                && ((AssignmentExpr) exprChain.getParent()).isLhsExpr(exprChain);
+        }
+
+        // ====================================================================
+        //  The following methods build individual scope collections
+        // ====================================================================
+
+        /**
+         * Looks in the root Dir of the Namespace
+         */
+        private AstScopeCollection buildNsRootScopes() {
+            AstScopeCollection theColl = new AstScopeCollection("Directories in Root of JS");
+            //
+            theColl.add(new StaticScope(theColl, getNs(theRefChain).getRootDir(), ScopeKind.GLOBAL));
+            //
+            return theColl;
+        }
+
+        /** Looks at intrinsic types. */
+        private AstScopeCollection buildIntrinsicTypeScopes() {
+            return intrinsicsScopeColl;
+        }
+
+        /**
+         * Looks in the imports of the current parse unit.
+         */
+        private AstScopeCollection buildImportsScopes() {
+            AstScopeCollection theColl = new AstScopeCollection("Imported Types");
+            //
+            if (parseUnit != null) {
+                theColl.add(new StaticScope(theColl, parseUnit.getImportedTypeContainer()));
+            }
+            //
+            return theColl;
+        }
+
+        /**
+         * Iterates from current scope to broader scopes, stopping at the top-level type
+         * definition.
+         */
+        private AstScopeCollection buildFunctionLocalBlocksScopes() {
+            AstScopeCollection theColl = new AstScopeCollection("Local Function Blocks");
+            //
+            boolean isFuncScope = findParentFunctionDefn(theRefChain) != null;
+            if (isFuncScope) {
+                ModelElement next = findParentStatementBlock(theRefChain);
+                while (next != null) {
+                    theColl.add(new StaticScope(theColl, next, ScopeKind.BLOCK));
+                    next = findParentStatementBlock(next);
                 }
             }
-
-            return next;
+            //
+            return theColl;
         }
 
-        public StaticScope getStaticScope() {
-            return staticScope;
+        /**
+         * Iterates through the reference's parent types (possibly nested) and Directory.
+         */
+        private AstScopeCollection buildTypeDefnContainerScopes() {
+            AstScopeCollection theColl = new AstScopeCollection("Function Parent Containers");
+            ModelElement thisTypeDefn = findParentTypeDefnOrDir(theRefChain);
+            //
+            while (thisTypeDefn != null) {
+                theColl.add(new StaticScope(theColl, thisTypeDefn, ScopeKind.TYPE_DEFN));
+                thisTypeDefn = findParentTypeDefnOrDir(thisTypeDefn);
+            }
+            //
+            return theColl;
         }
 
-        private ModelElement getContext() {
-            return staticScope.getContext();
+        /**
+         * Includes the implicit type definition of the function argument list. Used
+         * to link to arguments within a function definition or for by-name assignment
+         * expressions in function calls and tuple construction.
+         */
+        private AstScopeCollection buildArgTypeDefnScopes() {
+            AstScopeCollection theColl = new AstScopeCollection("Imports");
+            FunctionDefn funcDefn = findParentFunctionDefn(theRefChain);
+            if (funcDefn != null)
+                theColl.add(new StaticScope(theColl, funcDefn.getArgSpaceTypeDefn(), ScopeKind.TYPE_DEFN));
+            //
+            return theColl;
         }
 
-        /** Implements {@link AstPathIterator} */
-        private StaticScope blockIter() {
-//            if (context instanceof StatementBlock) {
-                if (getContext().hasParent()) {
-                    // not found so just go up the basic tree
-                    staticScope.setContext(getContext().getParent());
-                    if (getContext() instanceof StatementBlock)
-                        staticScope.setScopeKind(ScopeKind.BLOCK);
-                    else if (getContext() instanceof SpaceFunctionDefn)
-                        staticScope.setScopeKind(ScopeKind.ARG);
+        private AstScopeCollection buildTupleTypeDefnScopes() {
+            AstScopeCollection theColl = new AstScopeCollection("Tuple Type");
+            NewTupleExpr newTupleExpr = findParentNewTupleExpr(theRefChain);
+            if (newTupleExpr != null) {
+                FullTypeRefImpl typeRef = newTupleExpr.getTypeRef();
+                if (typeRef.isResolved()) {
+                    theColl.add(new StaticScope(theColl, typeRef.getResolvedType(), ScopeKind.TYPE_DEFN));
                 }
-//            }
-            return staticScope;
+                else {
+                    theColl.add(new StaticScope(theColl, typeRef));
+                }
+            }
+            //
+            return theColl;
         }
 
-
-        /** Implements {@link AstPathIterator} */
-        private StaticScope intrinsicsIter() {
-            // TODO
-            return staticScope;
-        }
-
-        /** Implements {@link AstPathIterator} */
-        private StaticScope importsIter() {
-            // TODO
-            return staticScope;
-        }
-
-        /** Implements {@link AstPathIterator} */
-        private StaticScope typeContainerIter() {
-            // TODO
-            return staticScope;
-        }
-
-        /** Implements {@link AstPathIterator} */
-        private StaticScope argDefnIter() {
-//            if (! (scopeKind == ScopeKind.ARG)) {
-            staticScope.setContext(((FunctionDefn) getContext()).getArgSpaceTypeDefn(), ScopeKind.ARG);
-            return staticScope;
-        }
-
-        /** Implements {@link AstPathIterator} */
-        public StaticScope fuctionDefnBlocksIter() {
-            staticScope.setContext(staticScope.getContext().getParent(), ScopeKind.SPACE_DEFN);
-            return staticScope;
+        public AstScopeCollection getAllScopesAsList() {
+            if (allScopes == null) {
+                allScopes = new AstScopeCollection("All Scopes");
+                scopeCollGrouped.forEach(scopeColl -> allScopes.addAll(scopeColl));
+            }
+            return allScopes;
         }
 
     }

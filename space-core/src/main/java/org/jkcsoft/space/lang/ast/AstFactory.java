@@ -91,12 +91,12 @@ public class AstFactory {
         return new SequenceLiteralExpr(sourceInfo, newTypeRef(sourceInfo, NumPrimitiveTypeDefn.CHAR), text);
     }
 
-    public NameRefExpr newNameRefExpr(NamePartExpr namePartExpr) {
-        return new NameRefExpr(namePartExpr);
+    public SimpleNameRefExpr newNameRefExpr(NamePartExpr namePartExpr) {
+        return new SimpleNameRefExpr(namePartExpr);
     }
 
-    public NameRefExpr newNameRefExpr(SourceInfo sourceInfo, String nameExpr) {
-        return new NameRefExpr(newNamePartExpr(sourceInfo, null, nameExpr));
+    public SimpleNameRefExpr newNameRefExpr(SourceInfo sourceInfo, String nameExpr) {
+        return new SimpleNameRefExpr(newNamePartExpr(sourceInfo, null, nameExpr));
     }
 
     public NamePartExpr newNamePartExpr(SourceInfo sourceInfo, PathOperEnum oper, String searchName)
@@ -142,14 +142,14 @@ public class AstFactory {
         return new NewSetExpr(sourceInfo, tupleTypeRef);
     }
 
-    public ExpressionChain newMetaRefChain(SourceInfo sourceInfo, MetaType type, NameRefExpr nsRefPart) {
+    public ExpressionChain newMetaRefChain(SourceInfo sourceInfo, MetaType type, SimpleNameRefExpr nsRefPart) {
         ExpressionChain expressionChain = new ExpressionChain(sourceInfo, type);
         expressionChain.setNsRefPart(nsRefPart);
         return expressionChain;
     }
 
     public FullTypeRefImpl newTypeRef(SourceInfo sourceInfo, List<FullTypeRefImpl.CollectionType> collectionTypes,
-                                      NameRefExpr nsRefPart)
+                                      SimpleNameRefExpr nsRefPart)
     {
         FullTypeRefImpl typeRef = new FullTypeRefImpl(sourceInfo, collectionTypes);
         typeRef.setNsRefPart(nsRefPart);
@@ -186,5 +186,9 @@ public class AstFactory {
 
     public ValueExprChain newValueExprChain(SourceInfo sourceInfo) {
         return new ValueExprChain(sourceInfo);
+    }
+
+    public IntrinsicContainer newIntrinsicContainer() {
+        return new IntrinsicContainer(SourceInfo.INTRINSIC);
     }
 }

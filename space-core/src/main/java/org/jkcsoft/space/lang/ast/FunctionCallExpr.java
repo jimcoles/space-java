@@ -15,12 +15,12 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class FunctionCallExpr extends AbstractModelElement implements MemberRefHolder, ValueExpr {
+public class FunctionCallExpr extends AbstractModelElement implements NameRefOrHolder, ValueExpr {
 
     /**
      * The name of some other named design-time thing such as a function.
      */
-    private NameRefExpr<FunctionDefn> functionRef;
+    private SimpleNameRefExpr<FunctionDefn> functionRef;
     private ValueExpr argValueExpr;
 
     /**
@@ -34,7 +34,7 @@ public class FunctionCallExpr extends AbstractModelElement implements MemberRefH
         return functionRef;
     }
 
-    public FunctionCallExpr setFunctionRef(NameRefExpr<FunctionDefn> namePartExpr)
+    public FunctionCallExpr setFunctionRef(SimpleNameRefExpr<FunctionDefn> namePartExpr)
     {
         if (namePartExpr == null) throw new RuntimeException("bug: function path null");
         //
@@ -71,6 +71,16 @@ public class FunctionCallExpr extends AbstractModelElement implements MemberRefH
     }
 
     @Override
+    public boolean hasNameRef() {
+        return true;
+    }
+
+    @Override
+    public NameRefOrHolder getNameRef() {
+        return this;
+    }
+
+    @Override
     public boolean isValueExpr() {
         return true;
     }
@@ -89,5 +99,15 @@ public class FunctionCallExpr extends AbstractModelElement implements MemberRefH
     @Override
     public ByNameMetaRef getRefAsNameRef() {
         return functionRef;
+    }
+
+    @Override
+    public boolean hasTypedExpr() {
+        return true;
+    }
+
+    @Override
+    public TypedExpr getTypedExpr() {
+        return this;
     }
 }

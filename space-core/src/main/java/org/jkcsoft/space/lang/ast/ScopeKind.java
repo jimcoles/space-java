@@ -16,9 +16,11 @@ package org.jkcsoft.space.lang.ast;
  * @author Jim Coles
  */
 public enum ScopeKind {
+    GLOBAL,
     BLOCK,
     ARG,
-    SPACE_DEFN,
+    TYPE_DEFN,
+    PARSE_UNIT,
     REF_TO_TYPE,
     STATIC
 }

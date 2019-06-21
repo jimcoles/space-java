@@ -88,4 +88,15 @@ public abstract class AbstractRefExpr<T extends Named> extends AbstractModelElem
     public DatumType getDatumType() {
         return null;
     }
+
+    @Override
+    public boolean hasTypedExpr() {
+        return getResolvedMetaObj() instanceof TypeExpr;
+    }
+
+    @Override
+    public TypedExpr getTypedExpr() {
+        return ((TypedExpr) getResolvedMetaObj());
+    }
+
 }

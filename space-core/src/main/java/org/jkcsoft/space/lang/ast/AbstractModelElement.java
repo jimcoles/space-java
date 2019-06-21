@@ -23,7 +23,7 @@ import java.util.*;
  */
 public abstract class AbstractModelElement extends SpaceObject implements ModelElement {
 
-    private AbstractModelElement parent;
+    private ModelElement parent;
     private SourceInfo sourceInfo;
     /** If true, when resolving names, treat this node as if it's children were directly under this
      * node's parent. */
@@ -34,7 +34,7 @@ public abstract class AbstractModelElement extends SpaceObject implements ModelE
     private NamedElement namedParent;
     private List<ModelElement> children = new LinkedList<>();
     private Map<String, NamedElement> namedChildMap = new TreeMap<>();
-    private Set<ExpressionChain> references = null;
+    private Set<ExpressionChain> expressionChains = null;
     private List<ModelElement> groupingNodes = new LinkedList<>();
     // -------------- <end> redundant collections
 
@@ -44,12 +44,12 @@ public abstract class AbstractModelElement extends SpaceObject implements ModelE
     }
 
     @Override
-    public AbstractModelElement getParent() {
+    public ModelElement getParent() {
         return parent;
     }
 
-    /** Limit access to package. */
-    void setParent(AbstractModelElement parent) {
+    @Override
+    public void setParent(ModelElement parent) {
         this.parent = parent;
     }
 
@@ -63,7 +63,7 @@ public abstract class AbstractModelElement extends SpaceObject implements ModelE
         isGroupingNode = groupingNode;
     }
 
-    public ModelElement addChild(AbstractModelElement child) {
+    public ModelElement addChild(ModelElement child) {
         children.add(child);
         child.setParent(this);
         //
@@ -75,7 +75,7 @@ public abstract class AbstractModelElement extends SpaceObject implements ModelE
             groupingNodes.add(child);
         }
         if (child instanceof ExpressionChain) {
-            addReference(((ExpressionChain) child));
+            addExpressionChain((ExpressionChain) child);
         }
         //
         return child;
@@ -95,21 +95,21 @@ public abstract class AbstractModelElement extends SpaceObject implements ModelE
      * Must be called by the adder method for children, e.g., {@link SpaceTypeDefn}.addAssocDefn() should call this for
      * the {@link NamePartExpr} associated with it's 'from' and 'to' type definition.
      */
-    private void addReference(ExpressionChain reference) {
-        if (reference == null) throw new IllegalArgumentException("attempt to Add null reference");
-        if (references == null)
-            references = new HashSet<>();
-        references.add(reference);
+    private void addExpressionChain(ExpressionChain exprChain) {
+        if (exprChain == null) throw new IllegalArgumentException("attempt to Add null exprChain");
+        if (expressionChains == null)
+            expressionChains = new HashSet<>();
+        expressionChains.add(exprChain);
     }
 
     @Override
     public boolean hasReferences() {
-        return references != null && references.size() > 0;
+        return expressionChains != null && expressionChains.size() > 0;
     }
 
     @Override
-    public Set<ExpressionChain> getReferences() {
-        return references;
+    public Set<ExpressionChain> getExpressionChains() {
+        return expressionChains;
     }
 
     @Override

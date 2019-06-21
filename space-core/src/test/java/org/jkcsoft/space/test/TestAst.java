@@ -58,7 +58,7 @@ public class TestAst {
 
         AstUtils.addNewMetaRefParts(functionDefnRef, si, "test", "TestType", "testFunc");
         mainMethod.getStatementBlock()
-                  .addExpr(astFactory.newFunctionCallExpr(si).setFunctionRef(((NameRefExpr) functionDefnRef.getFirstPart())));
+                  .addExpr(astFactory.newFunctionCallExpr(si).setFunctionRef(((SimpleNameRefExpr) functionDefnRef.getFirstPart())));
 
 //        astFactory.newMetaObjectRefLiteral(null),
 //            astFactory.newPrimLiteralExpr("Hello, Space!")

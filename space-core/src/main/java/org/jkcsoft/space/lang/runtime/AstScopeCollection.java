@@ -11,6 +11,10 @@ package org.jkcsoft.space.lang.runtime;
 
 import org.jkcsoft.space.lang.ast.ModelElement;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+
 /**
  * Used by Linker to walk AST paths specific to a reference's scope. E.g., rules
  * for resolving new Tuple LHS var are different that those for general var
@@ -18,13 +22,24 @@ import org.jkcsoft.space.lang.ast.ModelElement;
  *
  * @author Jim Coles
  */
-public interface AstPathIterator {
+public class AstScopeCollection extends LinkedList<StaticScope> {
 
-//    boolean hasContext();
+    private String collectionName;
 
-//    ModelElement getContext();
+    public AstScopeCollection(String collectionName) {
+        this.collectionName = collectionName;
+    }
 
-    StaticScope moveToNext();
-//    StaticScope getCurrent();
+    public String getCollectionName() {
+        return collectionName;
+    }
 
+//    boolean hasNextScope();
+//    StaticScope nextScope();
+//    StaticScope getCurrentScope();
+
+    @Override
+    public String toString() {
+        return "AstScopeCollection(" + collectionName + ')';
+    }
 }

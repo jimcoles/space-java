@@ -49,6 +49,10 @@ public class AssignmentExpr extends AbstractModelElement implements ValueExpr {
         return rightSideValueExpr;
     }
 
+    public boolean isLhsExpr(ExpressionChain exprChain) {
+        return exprChain == leftSideDatumRef;
+    }
+
     @Override
     public boolean hasRef() {
         return false;

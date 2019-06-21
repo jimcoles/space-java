@@ -19,21 +19,22 @@ import org.jkcsoft.space.lang.ast.ScopeKind;
  */
 public class StaticScope {
 
+    private AstScopeCollection scopeColl;
     private ModelElement context;
     private ScopeKind scopeKind;
 
-    public StaticScope(ModelElement context) {
+    public StaticScope(AstScopeCollection scopeColl, ModelElement context) {
+        this.scopeColl = scopeColl;
         setContext(context);
     }
 
-    public StaticScope(ModelElement context, ScopeKind scopeKind) {
-        this.context = context;
-        this.scopeKind = scopeKind;
+    public StaticScope(AstScopeCollection scopeColl, ModelElement context, ScopeKind scopeKind) {
+        this.scopeColl = scopeColl;
+        setContext(context, scopeKind);
     }
 
-    public void setContext(ModelElement context) {
-        this.context = context;
-        this.scopeKind = AstUtils.inferScopeKind(this.context);
+    public AstScopeCollection getScopeColl() {
+        return scopeColl;
     }
 
     public void setContext(ModelElement context, ScopeKind scopeKind) {
@@ -45,11 +46,24 @@ public class StaticScope {
         return context;
     }
 
-    public void setScopeKind(ScopeKind scopeKind) {
-        this.scopeKind = scopeKind;
+    public void setContext(ModelElement context) {
+        setContext(context, AstUtils.inferScopeKind(this.context));
     }
 
     public ScopeKind getScopeKind() {
         return scopeKind;
+    }
+
+    public void setScopeKind(ScopeKind scopeKind) {
+        this.scopeKind = scopeKind;
+    }
+
+    @Override
+    public String toString() {
+        return "Scope [" +
+            "\''" + scopeColl.getCollectionName() + '\'' +
+            " " + scopeKind + " " +
+            " AST Node " + context +
+            ']';
     }
 }

@@ -17,7 +17,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public interface TypedExpr extends Linkable {
+public interface TypedExpr extends LinkSource {
 
     DatumType getDatumType();
 

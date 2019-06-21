@@ -17,9 +17,10 @@ public class ParseUnit extends AbstractModelElement {
     private PackageDecl packageDecl;
     private List<ImportExpr> importExprs;
     // redundant list of resolved import types after wildcard expansion
-    private Set<DatumType> allImportedTypes;
+    private Set<DatumType> allImportedTypes = null;
 
     private List<ComplexType> typeDefns = new LinkedList<>();
+    private IntrinsicContainer importedTypeContainer;
 
     ParseUnit(SourceInfo sourceInfo) {
         super(sourceInfo);
@@ -61,7 +62,7 @@ public class ParseUnit extends AbstractModelElement {
     }
 
     public Set<DatumType> getAllImportedTypes() {
-        return allImportedTypes;
+        return allImportedTypes != null ? allImportedTypes : Collections.EMPTY_SET;
     }
 
     public ComplexType addTypeDefn(ComplexType spaceTypeDefn) {
@@ -80,4 +81,12 @@ public class ParseUnit extends AbstractModelElement {
         return typeDefns;
     }
 
+    public ModelElement getImportedTypeContainer() {
+        if (importedTypeContainer == null) {
+            Set<DatumType> allImportedTypes = this.getAllImportedTypes();
+            importedTypeContainer = AstFactory.getInstance().newIntrinsicContainer();
+            allImportedTypes.forEach(dt -> importedTypeContainer.addChild(dt));
+        }
+        return importedTypeContainer;
+    }
 }

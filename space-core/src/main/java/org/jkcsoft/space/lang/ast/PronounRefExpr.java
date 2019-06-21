@@ -11,7 +11,7 @@ package org.jkcsoft.space.lang.ast;
 
 /**
  * A synonym-based reference, e.g., 'this'. Not quite the same as a
- * {@link NameRefExpr}.
+ * {@link SimpleNameRefExpr}.
  *
  * @author Jim Coles
  */
@@ -25,18 +25,18 @@ public class PronounRefExpr<T extends Named> extends AbstractRefExpr<T> {
     }
 
     @Override
+    public String getKeyOrName() {
+        return this.pronoun;
+    }
+
+    @Override
     public boolean hasRef() {
-        return false;
+        return true;
     }
 
     @Override
     public MetaRef getRef() {
-        return null;
-    }
-
-    @Override
-    public boolean isValueExpr() {
-        return false;
+        return this;
     }
 
     @Override
@@ -47,5 +47,15 @@ public class PronounRefExpr<T extends Named> extends AbstractRefExpr<T> {
     @Override
     public boolean isWildcard() {
         return false;
+    }
+
+    @Override
+    public boolean hasNameRef() {
+        return false;
+    }
+
+    @Override
+    public NameRefOrHolder getNameRef() {
+        return null;
     }
 }

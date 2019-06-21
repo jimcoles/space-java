@@ -67,4 +67,8 @@ public abstract class PrimitiveTypeDefn extends NamedElement implements SimpleTy
     public boolean isPrimitiveType() {
         return true;
     }
+
+    public static Map<String, PrimitiveTypeDefn> getEnumsByName() {
+        return enumsByName;
+    }
 }

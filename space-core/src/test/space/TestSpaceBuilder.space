@@ -4,8 +4,8 @@ import java:java.lang.CharSequence;
 // Syntax: Type definition
 type Person {
     // Variables
-    CharSequence first = "Jim";
-    CharSequence last;
+    CharSequence firstName = "Jim";
+    CharSequence lastName;
     CharSequence fullName;
 
     // Associations
@@ -39,7 +39,7 @@ type Address {
     //
     CharSequence streetNumber;
     CharSequence streetRoad;
-    card unitNumber;
+    int unitNumber;
 
     // Syntax: Equation Definition
     equation streetAddrFormatUSCommon {
@@ -61,8 +61,8 @@ type Address {
 }
 
 type City {
-    string cityKey;
-    string cityDefaultName;
+    CharSequence cityKey;
+    CharSequence cityDefaultName;
 }
 
 assoc PersonAddresses {

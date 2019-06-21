@@ -34,12 +34,6 @@ public abstract class NamedElement extends AbstractModelElement implements Named
     }
 
     @Override
-    void setParent(AbstractModelElement parent) {
-        super.setParent(parent);
-//        fqName = null;
-    }
-
-    @Override
     public String getName() {
         return name;
     }
