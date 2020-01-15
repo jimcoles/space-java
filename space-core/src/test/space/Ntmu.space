@@ -42,8 +42,8 @@ public type NtmuSpace
 type Person {
     real age;
 
-    char[] first;
-    char[] last;
+    char[] firstName;
+    char[] lastName;
     char[] fullName;
 
 //    equation FL2Full (Person person) {

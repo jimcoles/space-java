@@ -570,7 +570,10 @@ public class Executor extends ExprProcessor implements ExeContext {
         bootMainCallExpr.getFunctionRef().setTypeCheckState(TypeCheckState.VALID);
         LinkedList<ValueExpr> argExprList = new LinkedList<>();
         argExprList.add(getAstFactory().newCharSeqLiteralExpr(progSourceInfo, "(put CLI here)"));
-        bootMainCallExpr.setArgValueExpr(getAstFactory().newTupleExpr(progSourceInfo).setValueExprs(argExprList));
+        bootMainCallExpr.setArgValueExpr(
+            getAstFactory().newNewObjectExpr(progSourceInfo, null,
+                                             getAstFactory().newTupleExpr(progSourceInfo).setValueExprs(argExprList)
+            ));
         ParseUnit synthParseUnit = getAstFactory().newParseUnit(sourceInfo);
         synthParseUnit.addChild(bootTypeDefn);
         //
@@ -580,7 +583,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         // init the context tuple
         callStack.push(bootCallCtxt);
         // this evaluates the init statements for the type such as var inits.
-        eval(evalContext, (StatementBlock) bootTypeDefn.getBody());
+        eval(evalContext, bootTypeDefn.getBody());
         // call the 'main' function a dummy function call expr
         eval(evalContext, bootMainCallExpr);
         callStack.pop();
@@ -782,7 +785,7 @@ public class Executor extends ExprProcessor implements ExeContext {
     {
         log.debug("eval: new tuple => " + newTupleExpr);
         TupleImpl tuple = newTupleImpl((ComplexType) newTupleExpr.getTypeRef().getResolvedType());
-        List<ValueExpr> valueExprs = newTupleExpr != null ? newTupleExpr.getTupleExpr().getValueExprs() : null;
+        List<ValueExpr> valueExprs = newTupleExpr != null ? newTupleExpr.getTupleValueList().getValueExprs() : null;
         // validation
         int numValueExprs = valueExprs == null ? 0 : valueExprs.size();
         if (numValueExprs != tuple.getSize())

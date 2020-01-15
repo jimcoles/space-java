@@ -15,23 +15,25 @@ package org.jkcsoft.space.lang.ast;
 public class NewTupleExpr extends AbstractModelElement implements ValueExpr {
 
     private FullTypeRefImpl typeRef;
-    private TupleExpr tupleExpr;
+    private TupleValueList tupleValueList;
 
-    public NewTupleExpr(SourceInfo sourceInfo, FullTypeRefImpl typeRef, TupleExpr tupleExpr) {
+    public NewTupleExpr(SourceInfo sourceInfo, FullTypeRefImpl typeRef, TupleValueList tupleValueList) {
         super(sourceInfo);
         this.typeRef = typeRef;
-        this.tupleExpr = tupleExpr;
+        this.tupleValueList = tupleValueList;
         //
-        addChild(typeRef);
-        addChild(tupleExpr);
+        if (typeRef != null)
+            addChild(typeRef);
+
+        addChild(tupleValueList);
     }
 
     public FullTypeRefImpl getTypeRef() {
         return typeRef;
     }
 
-    public TupleExpr getTupleExpr() {
-        return tupleExpr;
+    public TupleValueList getTupleValueList() {
+        return tupleValueList;
     }
 
     @Override

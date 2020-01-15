@@ -452,7 +452,7 @@ public class AstUtils {
             scopeKind = ScopeKind.BLOCK;
         else if (context instanceof SpaceTypeDefn)
             scopeKind = ScopeKind.TYPE_DEFN;
-        else if (context instanceof TupleExpr)
+        else if (context instanceof TupleValueList)
             scopeKind = ScopeKind.TYPE_DEFN;
 
         return scopeKind;
@@ -460,6 +460,9 @@ public class AstUtils {
 
     /** Will traverse into child grouping nodes and grouping nodes only. */
     public static NamedElement lookupImmediateChild(ModelElement context, String name) {
+//        if (name.equals("firstName")) {
+//            log.debug("child names for [" + context +"] => " + Strings.buildCommaDelList(context.getNamedChildMap().keySet()));
+//        }
         NamedElement childByName = context.getChildByName(name);
         if (childByName == null) {
             if (context.hasGroupingNodes()) {
@@ -778,7 +781,7 @@ public class AstUtils {
 
         private boolean isLhsTupleDatumRef(ExpressionChain exprChain) {
             return (exprChain.getParent() instanceof AssignmentExpr
-                && exprChain.getParent().getParent() instanceof TupleExpr)
+                && exprChain.getParent().getParent() instanceof TupleValueList)
                 && ((AssignmentExpr) exprChain.getParent()).isLhsExpr(exprChain);
         }
 

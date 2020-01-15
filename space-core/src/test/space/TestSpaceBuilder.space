@@ -2,7 +2,7 @@
 import java:java.lang.CharSequence;
 
 // Syntax: Type definition
-type Person {
+type TestPerson {
     // Variables
     CharSequence firstName = "Jim";
     CharSequence lastName;
@@ -14,10 +14,10 @@ type Person {
     function void main(CharSequence args) {
 
         // Syntax: Object creation with ordered variables
-        Person jimTuple1 = Person ["Jim", "Coles"];
+        TestPerson jimTuple1 = Person ["Jim", "Coles"];
 
         // Syntax: Object creation with named variables
-        Person jimTuple2 = Person [firstName = "Jim", lastName = "Coles"];
+        TestPerson jimTuple2 = Person [firstName = "Jim", lastName = "Coles"];
 
         // Syntax: Function calls with tuple variables
 

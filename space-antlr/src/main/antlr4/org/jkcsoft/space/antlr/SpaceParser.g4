@@ -623,8 +623,8 @@ expression :
 
 atomicValueExpr :
     literalExpr
-    | newObjectExpr
-    | newSetExpr
+    | tupleLiteral
+    | setLiteral
     | symbolicExpr
     | namedRefValueExpr
     ;
@@ -693,7 +693,8 @@ binaryOper :
 literalExpr :
     scalarLiteral
     | stringLiteral
-    | untypedTupleLiteral
+    | tupleLiteral
+    | setLiteral
     ;
 
 scalarLiteral :
@@ -707,20 +708,20 @@ integerLiteral : IntegerLiteral;
 floatLiteral : FloatLiteral;
 booleanLiteral : BooleanLiteral;
 
-newObjectExpr :
-    anyTypeRef? untypedTupleLiteral
+tupleLiteral :
+    anyTypeRef? tupleValueList
     ;
 
-untypedTupleLiteral :
+tupleValueList :
     TupleStart valueOrAssignmentExprList? TupleEnd
     ;
 
-newSetExpr :
-    anyTypeRef? BlockStart newObjectExpr* BlockEnd
+setLiteral :
+    anyTypeRef? BlockStart tupleLiteral* BlockEnd
     ;
 
 newSequenceExpr :
-    anyTypeRef? '[' newObjectExpr* ']'
+    anyTypeRef? '[' tupleLiteral* ']'
     ;
 
 /*------------------------------------------------------------------------------
@@ -740,7 +741,7 @@ singleLineComment : SingleLineComment;
 
 multiLineComment : BlockComment;
 
-annotation : '@' idRef '=' newObjectExpr;
+annotation : '@' idRef '=' tupleLiteral;
 
 rightAssignmentExpr :
     '=' valueExprChain

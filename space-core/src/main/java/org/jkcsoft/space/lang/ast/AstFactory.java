@@ -130,12 +130,12 @@ public class AstFactory {
         return new OperatorExpr(sourceInfo, oper, args);
     }
 
-    public TupleExpr newTupleExpr(SourceInfo sourceInfo) {
-        return new TupleExpr(sourceInfo);
+    public TupleValueList newTupleExpr(SourceInfo sourceInfo) {
+        return new TupleValueList(sourceInfo);
     }
 
-    public NewTupleExpr newNewObjectExpr(SourceInfo sourceInfo, FullTypeRefImpl typeRefPathExpr, TupleExpr tupleExpr) {
-        return new NewTupleExpr(sourceInfo, typeRefPathExpr, tupleExpr);
+    public NewTupleExpr newNewObjectExpr(SourceInfo sourceInfo, FullTypeRefImpl typeRefPathExpr, TupleValueList tupleValueList) {
+        return new NewTupleExpr(sourceInfo, typeRefPathExpr, tupleValueList);
     }
 
     public NewSetExpr newNewSetExpr(SourceInfo sourceInfo, FullTypeRefImpl tupleTypeRef) {

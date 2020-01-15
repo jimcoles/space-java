@@ -336,12 +336,13 @@ public class Antlr2AstTransform {
     private FullTypeRefImpl toAst(SpaceParser.AnyTypeRefContext anyTypeRefContext) {
         logTrans(anyTypeRefContext);
         FullTypeRefImpl typeRefAst = null;
-        NamePartExpr pathExpr = null;
-        if (anyTypeRefContext.complexOptCollTypeRef() != null) {
-            typeRefAst = toAst(anyTypeRefContext.complexOptCollTypeRef());
-        }
-        else if (anyTypeRefContext.primitiveOptSeqTypeRef() != null) {
-            typeRefAst = toTypeRef(anyTypeRefContext.primitiveOptSeqTypeRef());
+        if (anyTypeRefContext != null) {
+            if (anyTypeRefContext.complexOptCollTypeRef() != null) {
+                typeRefAst = toAst(anyTypeRefContext.complexOptCollTypeRef());
+            }
+            else if (anyTypeRefContext.primitiveOptSeqTypeRef() != null) {
+                typeRefAst = toTypeRef(anyTypeRefContext.primitiveOptSeqTypeRef());
+            }
         }
         return typeRefAst;
     }
@@ -607,17 +608,17 @@ public class Antlr2AstTransform {
         return functionCallExpr;
     }
 
-    private TupleExpr toAst(SpaceParser.UntypedTupleLiteralContext untypedTupleLiteralCtxt) {
-        logTrans(untypedTupleLiteralCtxt);
-        TupleExpr tupleExpr = astFactory.newTupleExpr(toSI(untypedTupleLiteralCtxt));
+    private TupleValueList toAst(SpaceParser.TupleValueListContext tupleValueListContext) {
+        logTrans(tupleValueListContext);
+        TupleValueList tupleValueList = astFactory.newTupleExpr(toSI(tupleValueListContext));
         List<ValueExpr> tupleArgs = new LinkedList<>();
         SpaceParser.ValueOrAssignmentExprListContext callArgExprCtxts =
-            untypedTupleLiteralCtxt.valueOrAssignmentExprList();
+            tupleValueListContext.valueOrAssignmentExprList();
         for (SpaceParser.ValueOrAssignmentExprContext callArgContext : callArgExprCtxts.valueOrAssignmentExpr()) {
             tupleArgs.add(toAst(callArgContext));
         }
-        tupleExpr.setValueExprs(tupleArgs);
-        return tupleExpr;
+        tupleValueList.setValueExprs(tupleArgs);
+        return tupleValueList;
     }
 
     /** Then general translator from ANTLR expression to AST expression.
@@ -662,22 +663,22 @@ public class Antlr2AstTransform {
         ValueExpr valueExprAST = null;
         SpaceParser.LiteralExprContext literalExprContext = atomicValueExprContext.literalExpr();
         SpaceParser.NamedRefValueExprContext namedRefValueExprContext = atomicValueExprContext.namedRefValueExpr();
-        SpaceParser.NewObjectExprContext objectExprContext = atomicValueExprContext.newObjectExpr();
+        SpaceParser.TupleLiteralContext tupleLiteralContext = atomicValueExprContext.tupleLiteral();
         SpaceParser.SymbolicExprContext operatorExprContext = atomicValueExprContext.symbolicExpr();
-        SpaceParser.NewSetExprContext newSetExprContext = atomicValueExprContext.newSetExpr();
+        SpaceParser.SetLiteralContext setLiteralContext = atomicValueExprContext.setLiteral();
         if (literalExprContext != null) {
             valueExprAST = toAst(literalExprContext);
         }
-        else if (objectExprContext != null)
-            valueExprAST = toAst(objectExprContext);
+        else if (tupleLiteralContext != null)
+            valueExprAST = toAst(tupleLiteralContext);
         else if (namedRefValueExprContext != null)
             // nested
             valueExprAST = toAst(namedRefValueExprContext);
         else if (operatorExprContext != null) {
             valueExprAST = toAst(operatorExprContext);
         }
-        else if (newSetExprContext != null) {
-            valueExprAST = toAst(newSetExprContext);
+        else if (setLiteralContext != null) {
+            valueExprAST = toAst(setLiteralContext);
         }
         return valueExprAST;
     }
@@ -689,8 +690,10 @@ public class Antlr2AstTransform {
             valueExprAST = toAst(literalExprContext.scalarLiteral());
         else if (literalExprContext.stringLiteral() != null)
             valueExprAST = toAst(literalExprContext.stringLiteral());
-        else if (literalExprContext.untypedTupleLiteral() != null)
-            valueExprAST = toAst(literalExprContext.untypedTupleLiteral());
+        else if (literalExprContext.tupleLiteral() != null)
+            valueExprAST = toAst(literalExprContext.tupleLiteral());
+        else if (literalExprContext.setLiteral() != null)
+            valueExprAST = toAst(literalExprContext.setLiteral());
         else
             throw new IllegalArgumentException("");
 
@@ -710,15 +713,15 @@ public class Antlr2AstTransform {
         return valueExprAST;
     }
 
-    private NewSetExpr toAst(SpaceParser.NewSetExprContext newSetExprContext) {
-        return astFactory.newNewSetExpr(toSI(newSetExprContext), toAst(newSetExprContext.anyTypeRef()));
+    private NewSetExpr toAst(SpaceParser.SetLiteralContext setLiteralContext) {
+        return astFactory.newNewSetExpr(toSI(setLiteralContext), toAst(setLiteralContext.anyTypeRef()));
     }
 
-    private NewTupleExpr toAst(SpaceParser.NewObjectExprContext newObjectExprContext) {
-        logTrans(newObjectExprContext);
-        NewTupleExpr newTupleExpr = astFactory.newNewObjectExpr(toSI(newObjectExprContext),
-                                                                toAst(newObjectExprContext.anyTypeRef()),
-                                                                toAst(newObjectExprContext.untypedTupleLiteral()));
+    private NewTupleExpr toAst(SpaceParser.TupleLiteralContext tupleLiteralContext) {
+        logTrans(tupleLiteralContext);
+        NewTupleExpr newTupleExpr = astFactory.newNewObjectExpr(toSI(tupleLiteralContext),
+                                                                toAst(tupleLiteralContext.anyTypeRef()),
+                                                                toAst(tupleLiteralContext.tupleValueList()));
         return newTupleExpr;
     }
 

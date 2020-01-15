@@ -16,16 +16,15 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public class TupleExpr extends AbstractModelElement implements ValueExpr {
+public class TupleValueList extends AbstractModelElement {
 
     private List<ValueExpr> valueExprs;
-    private ComplexType implicitType;
 
-    TupleExpr(SourceInfo sourceInfo) {
+    TupleValueList(SourceInfo sourceInfo) {
         super(sourceInfo);
     }
 
-    public TupleExpr setValueExprs(List<ValueExpr> valueExprs) {
+    public TupleValueList setValueExprs(List<ValueExpr> valueExprs) {
         this.valueExprs = valueExprs;
         //
         for (ValueExpr argumentExpr : valueExprs) {
@@ -38,23 +37,4 @@ public class TupleExpr extends AbstractModelElement implements ValueExpr {
         return valueExprs;
     }
 
-    @Override
-    public boolean hasRef() {
-        return false;
-    }
-
-    @Override
-    public MetaRef getRef() {
-        return null;
-    }
-
-    @Override
-    public DatumType getDatumType() {
-        return implicitType;
-    }
-
-    @Override
-    public boolean hasResolvedType() {
-        return false;
-    }
 }

@@ -1,0 +1,8 @@
+package space.lang;
+
+/**
+ * A Key is a unique constraint.
+ */
+type Key {
+
+}

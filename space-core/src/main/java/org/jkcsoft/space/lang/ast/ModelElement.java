@@ -11,6 +11,7 @@ package org.jkcsoft.space.lang.ast;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -20,11 +21,11 @@ public interface ModelElement {
 
     SourceInfo getSourceInfo();
 
-    void setParent(ModelElement modelElement);
-
     boolean hasParent();
 
     ModelElement getParent();
+
+    void setParent(ModelElement modelElement);
 
     boolean isGroupingNode();
 
@@ -37,6 +38,8 @@ public interface ModelElement {
     NamedElement getChildByName(String name);
 
     Collection<NamedElement> getNamedChildren();
+
+    Map<String, NamedElement> getNamedChildMap();
 
     boolean hasReferences();
 

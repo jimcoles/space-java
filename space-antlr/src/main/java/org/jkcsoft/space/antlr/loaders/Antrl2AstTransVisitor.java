@@ -153,16 +153,6 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<ModelElement> 
     }
 
     @Override
-    public ModelElement visitUntypedTupleLiteral(SpaceParser.UntypedTupleLiteralContext ctx) {
-        return super.visitUntypedTupleLiteral(ctx);
-    }
-
-    @Override
-    public ModelElement visitNewSetExpr(SpaceParser.NewSetExprContext ctx) {
-        return super.visitNewSetExpr(ctx);
-    }
-
-    @Override
     public ModelElement visitNewSequenceExpr(SpaceParser.NewSequenceExprContext ctx) {
         return super.visitNewSequenceExpr(ctx);
     }
@@ -283,11 +273,6 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<ModelElement> 
     @Override
     public ModelElement visitExpression(SpaceParser.ExpressionContext ctx) {
         return super.visitExpression(ctx);
-    }
-
-    @Override
-    public ModelElement visitNewObjectExpr(SpaceParser.NewObjectExprContext ctx) {
-        return super.visitNewObjectExpr(ctx);
     }
 
     @Override
