@@ -1,0 +1,22 @@
+/**
+ * Unit Tests - build.gradle
+ */
+dependencies {
+
+    implementation project(':space-core')
+    implementation project(':space-antlr')
+
+    //
+
+    implementation 'org.slf4j:slf4j-api:1.7.29'
+    // this module needs the log impl to set root log verbosity
+    implementation 'org.slf4j:slf4j-log4j12:1.7.29'
+
+    implementation 'org.jkcsoft:java-utils:1.1-SNAPSHOT'
+
+    // tests
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'commons-io:commons-io:2.5'
+    testImplementation 'commons-cli:commons-cli:1.4'
+    testImplementation 'commons-beanutils:commons-beanutils:1.9.3'
+}

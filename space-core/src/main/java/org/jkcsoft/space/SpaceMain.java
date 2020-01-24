@@ -11,28 +11,31 @@ package org.jkcsoft.space;
 
 import org.apache.commons.cli.*;
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.jkcsoft.apps.Application;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.runtime.Executor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.script.*;
 import java.io.File;
+import java.io.Reader;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * @author Jim Coles
  */
-public class SpaceMain {
+public class SpaceMain implements ScriptEngine {
 
-    private static final Logger log = Logger.getLogger(SpaceMain.class);
+    private static final Logger log = LoggerFactory.getLogger(SpaceMain.class);
 
     public static void main(String[] args) {
         try {
             SpaceMain main = new SpaceMain();
             main.instMain(args);
         } catch (Exception e) {
-            log.fatal("last ditch error handler =>", e);
+            log.error("last ditch error handler =>", e);
         }
         return;
     }
@@ -74,11 +77,6 @@ public class SpaceMain {
                 return;
             }
 
-            // Opt: verbose => set log level to DEBUG
-            if (commandLine.hasOption(optVerbose.getOpt())) {
-                Logger.getRootLogger().setLevel(Level.DEBUG);
-            }
-
             // Exec specified Space code ...
             Executor exec = new Executor(new CliExeSettings(commandLine));
             exec.run();
@@ -99,6 +97,80 @@ public class SpaceMain {
 
     }
 
+    //
+    // ===================== ScriptEngine methods ==============================
+    // NOTE: I'm not sure that a JSR 223 scripting engine is what we want.
+    //
+    @Override
+    public Object eval(String script, ScriptContext context) throws ScriptException {
+        return null;
+    }
+
+    @Override
+    public Object eval(Reader reader, ScriptContext context) throws ScriptException {
+        return null;
+    }
+
+    @Override
+    public Object eval(String script) throws ScriptException {
+        return null;
+    }
+
+    @Override
+    public Object eval(Reader reader) throws ScriptException {
+        return null;
+    }
+
+    @Override
+    public Object eval(String script, Bindings n) throws ScriptException {
+        return null;
+    }
+
+    @Override
+    public Object eval(Reader reader, Bindings n) throws ScriptException {
+        return null;
+    }
+
+    @Override
+    public void put(String key, Object value) {
+
+    }
+
+    @Override
+    public Object get(String key) {
+        return null;
+    }
+
+    @Override
+    public Bindings getBindings(int scope) {
+        return null;
+    }
+
+    @Override
+    public void setBindings(Bindings bindings, int scope) {
+
+    }
+
+    @Override
+    public Bindings createBindings() {
+        return null;
+    }
+
+    @Override
+    public ScriptContext getContext() {
+        return null;
+    }
+
+    @Override
+    public void setContext(ScriptContext context) {
+
+    }
+
+    @Override
+    public ScriptEngineFactory getFactory() {
+        return null;
+    }
+
     private class CliExeSettings implements Executor.ExeSettings {
 
         private String exeMain;
@@ -106,8 +178,9 @@ public class SpaceMain {
 
         public CliExeSettings(CommandLine commandLine) {
             // Opt: verbose => set log level to DEBUG
+            // Opt: verbose => set log level to DEBUG
             if (commandLine.hasOption(optVerbose.getOpt())) {
-                Logger.getRootLogger().setLevel(Level.DEBUG);
+                org.apache.log4j.Logger.getRootLogger().setLevel(Level.DEBUG);
             }
 
             // Opt: file - Source file to run

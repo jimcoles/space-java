@@ -32,7 +32,7 @@ public class SpaceTypeDefn extends NamedElement implements ComplexType {
 
     SpaceTypeDefn(SourceInfo sourceInfo, NamePart nameNode) {
         super(sourceInfo, nameNode.getText());
-        this.setTypeDefn = new SetTypeDefn(sourceInfo, this);
+        setTypeDefn = new SetTypeDefn(sourceInfo, this);
         sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
     }
 

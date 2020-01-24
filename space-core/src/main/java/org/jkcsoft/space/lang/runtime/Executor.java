@@ -10,7 +10,8 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jkcsoft.java.util.Lister;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.SpaceHome;
@@ -26,6 +27,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 import org.jkcsoft.space.lang.runtime.jnative.math.Math;
 import org.jkcsoft.space.lang.runtime.jnative.opsys.JOpSys;
 import org.jkcsoft.space.lang.runtime.typecasts.CastTransforms;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -54,7 +56,7 @@ import static org.jkcsoft.java.util.JavaHelper.EOL;
  */
 public class Executor extends ExprProcessor implements ExeContext {
 
-    private static final Logger log = Logger.getLogger(Executor.class);
+    private static final Logger log = LoggerFactory.getLogger(Executor.class);
 
     public static final StackTraceLister STACK_TRACE_LISTER = new StackTraceLister();
     private static final SequenceTypeDefn CHAR_SEQ_TYPE_DEF = NumPrimitiveTypeDefn.CHAR.getSequenceOfType();
@@ -138,8 +140,8 @@ public class Executor extends ExprProcessor implements ExeContext {
             log.debug(String.format("Found loader provider class [%s]", parserImplClassName));
             astLoader = (AstLoader) aClass.newInstance();
             log.debug(String.format("Found source loader [%s]", astLoader.getName()));
-        } catch (Exception e) {
-            throw new SpaceX("can not find or load source loader [" + parserImplClassName + "]", e);
+        } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+            log.warn("can not find or load source loader [{}]", parserImplClassName, e);
         }
     }
 
@@ -322,7 +324,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         if (opSysRef.isResolvedValid())
             op_sys_type_def = (ComplexType) opSysRef.getResolvedType();
         else
-            log.fatal("could not resolve ["+opSysRef+"]");
+            log.error("could not resolve ["+opSysRef+"]");
 
         //        String jClassSeq = System.getProperty("java.class.path");
 //        String[] jClassPaths = jClassSeq.split(File.pathSeparator);
@@ -455,7 +457,7 @@ public class Executor extends ExprProcessor implements ExeContext {
                                                           "expression '" + chain + "' must reference a " +
                                                               chain.getTargetMetaType());
                     errors.add(error);
-                    log.info(error);
+                    log.info(error.toString());
                 }
             }
         }
@@ -516,7 +518,7 @@ public class Executor extends ExprProcessor implements ExeContext {
                                                   "could resolve symbol '" + getFirstUnresolved(reference) + "'");
             errors.add(error);
             reference.setAstLoadError(error);
-            log.info(error);
+            log.info(error.toString());
         }
         else {
             log.debug("resolved ref [" + reference + "]");

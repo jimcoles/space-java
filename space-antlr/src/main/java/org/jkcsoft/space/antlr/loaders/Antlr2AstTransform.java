@@ -12,7 +12,9 @@ package org.jkcsoft.space.antlr.loaders;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.loader.AstLoadError;
@@ -34,7 +36,7 @@ import java.util.*;
  */
 public class Antlr2AstTransform {
 
-    private static final Logger log = Logger.getLogger(Antlr2AstTransform.class);
+    private static final Logger log = LoggerFactory.getLogger(Antlr2AstTransform.class);
     // -------------------------------------------------------------------------
     //
     private Map<Class<? extends ParseTree>, Transformer> transformerMap = new HashMap<>();

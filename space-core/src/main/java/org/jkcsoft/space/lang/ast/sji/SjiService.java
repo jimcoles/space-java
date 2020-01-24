@@ -10,7 +10,8 @@
 package org.jkcsoft.space.lang.ast.sji;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jkcsoft.java.util.Beans;
 import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
@@ -34,7 +35,7 @@ import static org.jkcsoft.space.SpaceHome.getAstFactory;
  */
 public class SjiService {
 
-    private static final Logger log = Logger.getLogger(SjiService.class);
+    private static final Logger log = LoggerFactory.getLogger(SjiService.class);
 
     private NSRegistry nsRegistry = SpaceHome.getNsRegistry();
     private SjiBindings sjiBindings = new SjiBindings();

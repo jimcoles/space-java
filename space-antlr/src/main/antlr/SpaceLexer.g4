@@ -2,6 +2,10 @@
 
 lexer grammar SpaceLexer;
 
+//@header {
+//    package org.jkcsoft.space.antlr;
+//}
+
 //
 // -------------------------------- Lexer Rules Section ------------------------------------
 //

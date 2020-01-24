@@ -15,7 +15,9 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.tool.ast.*;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.antlr.SpaceLexer;
@@ -40,7 +42,7 @@ import java.util.*;
  */
 public class G2AntlrParser implements AstLoader {
 
-    private static final Logger log = Logger.getLogger(G2AntlrParser.class);
+    private static final Logger log = LoggerFactory.getLogger(G2AntlrParser.class);
 
     // The Space grammar itself is, of course, really a static thing ...
     private GrammarRootAST spaceGrammarRoot;
@@ -199,7 +201,9 @@ public class G2AntlrParser implements AstLoader {
         // If needed, a way to interogate the Space grammar.
         Tool antlrGrammar = new Tool();
         spaceGrammarRoot = null;
-        String grammarFileName = "/org/jkcsoft/space/antlr/SpaceParser.g4";
+//        String grammarFileName = "/org/jkcsoft/space/antlr/SpaceParser.g4";
+        // NOTE: The most recent protoc does not want
+        String grammarFileName = "/SpaceParser.g4";
         try {
 //            File file = new File(grammarFileName);
             InputStream inputStream = this.getClass().getResourceAsStream(grammarFileName);

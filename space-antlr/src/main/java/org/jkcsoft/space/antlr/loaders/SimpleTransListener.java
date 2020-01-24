@@ -13,7 +13,9 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.AstFactory;
@@ -31,7 +33,7 @@ import java.util.TreeMap;
  */
 public class SimpleTransListener implements ParseTreeListener {
 
-    private static final Logger log = Logger.getLogger(SimpleTransListener.class);
+    private static final Logger log = LoggerFactory.getLogger(SimpleTransListener.class);
 
     // ---------------------------------
     //

@@ -10,7 +10,8 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.SpaceHome;
@@ -25,7 +26,7 @@ import java.util.*;
  * @author Jim Coles
  */
 public class NSRegistry {
-    private static final Logger log = Logger.getLogger(NSRegistry.class);
+    private static final Logger log = LoggerFactory.getLogger(NSRegistry.class);
 
     private static NSRegistry instance;
 
@@ -148,11 +149,11 @@ public class NSRegistry {
     }
 
     private Logger getDumpLogger() {
-        return Logger.getLogger("dumpFileLogger");
+        return LoggerFactory.getLogger("dumpFileLogger");
     }
 
     private Logger getFlatLogger() {
-        return Logger.getLogger("flatAstDumpFileLogger");
+        return LoggerFactory.getLogger("flatAstDumpFileLogger");
     }
 
 }

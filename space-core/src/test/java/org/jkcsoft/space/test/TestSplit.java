@@ -9,7 +9,8 @@
  */
 package org.jkcsoft.space.test;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -19,7 +20,7 @@ import java.util.Arrays;
  */
 public class TestSplit {
 
-    private static final Logger log = Logger.getRootLogger();
+    private static final Logger log = LoggerFactory.getLogger("ROOT");
 
     @Test
     public void testSplit() {

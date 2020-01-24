@@ -39,6 +39,7 @@ public class TestAst {
 
         Directory astDirectory = astFactory.newAstDir(si, "TestAst");
         astDirectory.addParseUnit(astFactory.newParseUnit(si)).addTypeDefn(spaceTypeDefn);
+        spaceTypeDefn.setBody(astFactory.newTypeDefnBody(si));
         spaceTypeDefn
             .addVariableDecl(
                 astFactory.newVariableDecl(si, "myIntDim", astFactory.newTypeRef(si, NumPrimitiveTypeDefn.CARD)));
@@ -57,6 +58,7 @@ public class TestAst {
             .newNameRefExpr(si, SpaceHome.getNsRegistry().getTmpNs().getName()));
 
         AstUtils.addNewMetaRefParts(functionDefnRef, si, "test", "TestType", "testFunc");
+        mainMethod.setStatementBlock(astFactory.newStatementBlock(si));
         mainMethod.getStatementBlock()
                   .addExpr(astFactory.newFunctionCallExpr(si).setFunctionRef(((SimpleNameRefExpr) functionDefnRef.getFirstPart())));
 

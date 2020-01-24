@@ -16,3 +16,7 @@ hs_err_pid*
 /out/
 *.tokens
 *.log
+
+# gradle
+build/
+/space-gpb/tmp/

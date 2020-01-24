@@ -10,11 +10,13 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -26,7 +28,7 @@ import java.util.function.Predicate;
  */
 public class AstUtils {
 
-    private static final Logger log = Logger.getLogger(AstUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(AstUtils.class);
 
     private static IntrinsicContainer INTRINSIC_TYPES;
     private static Executor.FindFirstAstConsumer<Directory> dirFinderAction =

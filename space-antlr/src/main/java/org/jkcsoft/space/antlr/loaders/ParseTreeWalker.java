@@ -10,14 +10,15 @@
 package org.jkcsoft.space.antlr.loaders;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.log4j.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 /**
  * @author Jim Coles
  */
 public class ParseTreeWalker {
 
-    private static final Logger log = Logger.getLogger(ParseTreeWalker.class);
+    private static final Logger log = LoggerFactory.getLogger(ParseTreeWalker.class);
 
     public void walkTree(ParseTree rootNode) {
         visitNodeRecurse(rootNode);

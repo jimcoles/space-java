@@ -10,7 +10,8 @@
 package org.jkcsoft.space.antlr.loaders;
 
 import org.antlr.v4.runtime.tree.*;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jkcsoft.space.lang.ast.AstFactory;
 
 /**
@@ -21,7 +22,7 @@ public class SimpleVisitor extends AbstractParseTreeVisitor<AstFactory>
         implements ParseTreeVisitor<AstFactory>
 {
 
-    private static final Logger log = Logger.getLogger(SimpleVisitor.class.getSimpleName());
+    private static final Logger log = LoggerFactory.getLogger(SimpleVisitor.class.getSimpleName());
 
     private AstFactory astFactory = new AstFactory();
 
