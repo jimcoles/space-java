@@ -23,7 +23,7 @@ import java.util.List;
  * @author Jim Coles
  * @version 1.0
  */
-public class SpaceTypeDefn extends NamedElement implements ComplexType {
+public class SpaceTypeDefn extends AbstractDatumTypeDefn implements ComplexType {
 
     private boolean isEntity;
     private SpaceTypeDefnBody body;
@@ -49,11 +49,6 @@ public class SpaceTypeDefn extends NamedElement implements ComplexType {
     @Override
     public SequenceTypeDefn getSequenceOfType() {
         return sequenceTypeDefn;
-    }
-
-    @Override
-    public boolean isPrimitiveType() {
-        return false;
     }
 
     @Override

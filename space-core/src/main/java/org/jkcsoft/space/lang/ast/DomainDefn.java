@@ -21,13 +21,10 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  * @author Jim Coles
  * @version 1.0
  */
-public class DomainDefn extends NamedElement implements SimpleType {
-
-    private SequenceTypeDefn sequenceTypeDefn;
+public class DomainDefn extends AbstractDatumTypeDefn implements SimpleType {
 
     DomainDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
-        sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
     }
 
     @Override
@@ -38,11 +35,6 @@ public class DomainDefn extends NamedElement implements SimpleType {
     @Override
     public int getScalarDofs() {
         return 1;
-    }
-
-    @Override
-    public SequenceTypeDefn getSequenceOfType() {
-        return sequenceTypeDefn;
     }
 
     @Override

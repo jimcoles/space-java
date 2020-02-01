@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2020 through present.
  *
  * Licensed under the following license agreement:
  *
@@ -11,37 +11,38 @@ package org.jkcsoft.space.lang.instance.sji;
 
 import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.Declaration;
-import org.jkcsoft.space.lang.ast.sji.SjiPropVarDecl;
+import org.jkcsoft.space.lang.ast.sji.SjiFieldVarDecl;
 import org.jkcsoft.space.lang.instance.Value;
 import org.jkcsoft.space.lang.instance.ValueHolder;
-
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author Jim Coles
  */
-public class SjiPropValueHolder implements ValueHolder {
+public class SjiFieldValueHolder implements ValueHolder {
 
     private SjiTuple sjiTuple;
-    private SjiPropVarDecl sjiPropVarDecl;
+    private SjiFieldVarDecl fieldVarDecl;
+
+    public SjiFieldValueHolder(SjiTuple sjiTuple, SjiFieldVarDecl fieldVarDecl) {
+        this.sjiTuple = sjiTuple;
+        this.fieldVarDecl = fieldVarDecl;
+    }
 
     @Override
     public Declaration getDeclaration() {
-        return sjiPropVarDecl;
+        return null;
     }
 
     @Override
     public DatumType getType() {
-        return sjiPropVarDecl.getType();
+        return null;
     }
 
     @Override
     public void setValue(Value value) {
         try {
-            sjiPropVarDecl.getjPropDesc().getWriteMethod().invoke(sjiTuple.getjObject(), value);
+            fieldVarDecl.getjField().set(sjiTuple.getjObject(), value.getJvalue());
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
     }
@@ -50,13 +51,10 @@ public class SjiPropValueHolder implements ValueHolder {
     public Value getValue() {
         Object jValue = null;
         try {
-            jValue = sjiPropVarDecl.getjPropDesc().getReadMethod().invoke(sjiTuple.getjObject());
+            jValue = fieldVarDecl.getjField().get(sjiTuple.getjObject());
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
         return SjiUtil.toSpaceValue(jValue);
     }
-
 }

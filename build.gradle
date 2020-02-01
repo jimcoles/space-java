@@ -21,14 +21,29 @@ buildscript {
 }
 
 allprojects {
-    group = 'org.jkcsoft'
-    version = '1.0-SNAPSHOT'
+    group = 'org.jkcsoft.space'
+    version = '0.9-SNAPSHOT'
 }
 
 subprojects {
+
     apply plugin: 'java'
     apply plugin: 'maven-publish'
 
+    publishing {
+        publications {
+            library(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            mavenLocal()
+//            maven {
+//                url = uri("${buildDir}/publishing-repository")
+//            }
+        }
+    }
+    
     repositories {
         mavenLocal()
         mavenCentral()
@@ -37,7 +52,7 @@ subprojects {
 //        }
     }
 
-    sourceCompatibility = '1.8'
+    sourceCompatibility = '12'
 
     publishing {
         publications {

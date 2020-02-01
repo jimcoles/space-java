@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public class SjiTypeDefn extends NamedElement implements ComplexType {
+public class SjiTypeDefn extends AbstractDatumTypeDefn implements ComplexType {
 
     // wrapped element
     private Class jClass;

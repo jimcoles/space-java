@@ -28,4 +28,23 @@ public class SetTypeDefn extends AbstractCollectionTypeDefn {
         super(sourceInfo, containedElementType.getName() + COLL_SUFFIX, containedElementType);
     }
 
+    @Override
+    public boolean isComplexType() {
+        return false;
+    }
+
+    @Override
+    public boolean isSetType() {
+        return true;
+    }
+
+    @Override
+    public boolean isSequenceType() {
+        return false;
+    }
+
+    @Override
+    public boolean isStreamType() {
+        return false;
+    }
 }

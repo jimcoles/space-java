@@ -16,10 +16,9 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public abstract class AbstractCollectionTypeDefn extends NamedElement implements CollectionType {
+public abstract class AbstractCollectionTypeDefn extends AbstractDatumTypeDefn implements CollectionType {
 
     private DatumType containedElementType;
-    private SequenceTypeDefn sequenceTypeDefn;
 
     protected AbstractCollectionTypeDefn(SourceInfo sourceInfo,
                                          String name,
@@ -57,6 +56,11 @@ public abstract class AbstractCollectionTypeDefn extends NamedElement implements
         return containedElementType.isSimpleType();
     }
 
+    @Override
+    public boolean isComplexType() {
+        return false;
+    }
+
     /** True if this set hold references to objects; false if it hold values of primitives */
     public boolean isReferenceType() {
         return containedElementType instanceof SpaceTypeDefn;
@@ -65,13 +69,6 @@ public abstract class AbstractCollectionTypeDefn extends NamedElement implements
     @Override
     public List<String> getFullNamePath() {
         return null;
-    }
-
-    @Override
-    public SequenceTypeDefn getSequenceOfType() {
-        if (sequenceTypeDefn == null)
-            sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
-        return sequenceTypeDefn;
     }
 
     @Override

@@ -16,10 +16,13 @@ import org.jkcsoft.space.lang.ast.Declaration;
  * @author Jim Coles
  */
 public interface Tuple extends Value {
+
     @Override
     DatumType getType();
 
     void initHolder(ValueHolder valueHolder);
+
+    Tuple set(Declaration spaceDecl, Object javaObj);
 
     ValueHolder get(Declaration member);
 
@@ -27,4 +30,7 @@ public interface Tuple extends Value {
 
     @Override
     String toString();
+
+    boolean isSingleWrapper();
+
 }

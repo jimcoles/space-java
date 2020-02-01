@@ -45,17 +45,20 @@ public class Variable implements ValueHolder {
         return declaration;
     }
 
-    public void setScalarValue(ScalarValue scalarValue) {
-        this.scalarValue = scalarValue;
+    @Override
+    public DatumType getType() {
+        return declaration.getType();
+    }
+
+    @Override
+    public void setValue(Value value) {
+        if (! (value instanceof ScalarValue))
+
+        this.scalarValue = (ScalarValue) value;
     }
 
     public ScalarValue getScalarValue() {
         return scalarValue;
-    }
-
-    @Override
-    public DatumType getType() {
-        return declaration.getType();
     }
 
     @Override

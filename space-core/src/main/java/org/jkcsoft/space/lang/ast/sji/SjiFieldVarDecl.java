@@ -16,6 +16,7 @@ import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 import java.lang.reflect.Field;
 
 /**
+ * Use direct Java field access via reflection.
  * @author Jim Coles
  */
 public class SjiFieldVarDecl extends SjiVarDecl {
@@ -36,5 +37,9 @@ public class SjiFieldVarDecl extends SjiVarDecl {
     public NumPrimitiveTypeDefn getType() {
         return (NumPrimitiveTypeDefn)
             SpaceHome.getSjiService().getOrCreateSjiMapping(jField.getType()).getSpaceWrapper();
+    }
+
+    public Field getjField() {
+        return jField;
     }
 }

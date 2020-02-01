@@ -21,7 +21,7 @@ import org.jkcsoft.space.lang.ast.Declaration;
 public class Reference implements ValueHolder {
 
     private Declaration declaration;
-    private Tuple           parentTuple;
+    private Tuple       parentTuple;
     /** Oid of the referenced 'to' object */
     private SpaceOid toOid;
 
@@ -50,6 +50,11 @@ public class Reference implements ValueHolder {
     @Override
     public DatumType getType() {
         return declaration.getType();
+    }
+
+    @Override
+    public void setValue(Value value) {
+        this.toOid = (SpaceOid) value.getJvalue();
     }
 
     @Override

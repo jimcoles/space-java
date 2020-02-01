@@ -27,54 +27,16 @@ import java.util.Map;
  *
  * @author Jim Coles
  */
-public class SjiTuple extends SpaceObject implements Tuple {
+public class SjiTuple extends AbstractTuple implements Tuple {
 
     private SjiTypeDefn sjiTypeDefn;
     // the wrapped element
     private Object jObject;
-    private Map<Named, ValueHolder> valueHolderMap = new HashMap<>();
 
-    public SjiTuple(SpaceOid oid, DatumType defn, Object jObject) {
+    public SjiTuple(SpaceOid oid, SjiTypeDefn defn, Object jObject) {
         super(oid, defn);
-        this.sjiTypeDefn = sjiTypeDefn;
+        this.sjiTypeDefn = (SjiTypeDefn) defn;
         this.jObject = jObject;
-    }
-
-    @Override
-    public DatumType getType() {
-        return null;
-    }
-
-    @Override
-    public void initHolder(ValueHolder valueHolder) {
-        valueHolderMap.put(valueHolder.getDeclaration(), valueHolder);
-    }
-
-    @Override
-    public ValueHolder get(Declaration datumDecl) {
-        ValueHolder valueHolder = valueHolderMap.get(datumDecl);
-        Object jValue = null;
-        if (valueHolder == null) {
-            throw new IllegalStateException("value holder not initialized for " + datumDecl);
-        }
-
-        if (datumDecl instanceof SjiVarDecl)
-            if (datumDecl instanceof SjiPropVarDecl) {
-                Method readMethod = ((SjiPropVarDecl) datumDecl).getjPropDesc().getReadMethod();
-                try {
-                    jValue = readMethod.invoke(jObject);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-            }
-        return valueHolder;
-    }
-
-    @Override
-    public Reference getRefByOid(SpaceOid memberOid) {
-        return null;
     }
 
     public SjiTypeDefn getSjiTypeDefn() {

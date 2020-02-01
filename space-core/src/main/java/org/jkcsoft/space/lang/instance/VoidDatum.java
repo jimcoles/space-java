@@ -12,6 +12,7 @@ package org.jkcsoft.space.lang.instance;
 import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.Declaration;
 import org.jkcsoft.space.lang.ast.VoidType;
+import org.jkcsoft.space.lang.runtime.SpaceX;
 
 /**
  * @author Jim Coles
@@ -25,6 +26,17 @@ public class VoidDatum implements ValueHolder, Value {
     @Override
     public DatumType getType() {
         return VoidType.VOID;
+    }
+
+    @Override
+    public void setValue(Value value) {
+        // no-op
+    }
+
+    @Override
+    public Object getJvalue() {
+        throw new SpaceX("attempt to get void-valued value");
+//        return null;
     }
 
     @Override

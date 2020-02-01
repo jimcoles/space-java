@@ -10,6 +10,7 @@
 package org.jkcsoft.space.lang.ast.sji;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.jkcsoft.space.lang.instance.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jkcsoft.java.util.Beans;
@@ -20,13 +21,12 @@ import org.jkcsoft.space.lang.runtime.Executor;
 import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.beans.PropertyDescriptor;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.jkcsoft.space.SpaceHome.getAstFactory;
 
@@ -239,6 +239,38 @@ public class SjiService {
         SjiFunctionDefnImpl element = new SjiFunctionDefnImpl(parentTypeDefn, jMethod, name, returnTypeRef);
         element.setArgSpaceTypeDefn(argTypeDefn);
         return element;
+    }
+
+    public void javaToSpace(Collection javaColl, SetSpace spaceSet) {
+        ComplexType elemSpaceCType = null;
+        List<Declaration> datumDeclList = Collections.emptyList();
+        if (spaceSet.getType().isSetType()) {
+            DatumType elemSpaceType = ((SetTypeDefn) spaceSet.getType()).getContainedElementType();
+            if (elemSpaceType.isComplexType()) {
+                elemSpaceCType = (ComplexType) elemSpaceType;
+                datumDeclList = elemSpaceCType.getDatumDeclList();
+            }
+            else {
+                // what to do with a simple or primitive type?
+            }
+        }
+        ObjectFactory spaceObjFactory = ObjectFactory.getInstance();
+        for (Object javaObj : javaColl) {
+            TupleImpl tuple = spaceObjFactory.newTupleImpl(elemSpaceCType);
+            for (Declaration spaceDecl : datumDeclList) {
+                Object javaValue = null;
+                try {
+                    javaValue = Beans.get(javaObj, spaceDecl.getName());
+                } catch (Exception e) {
+//                    e.printStackTrace();
+                }
+                tuple.set(spaceDecl, javaObj);
+                Integer dum = 1;
+                ObjectInputStream ois = null;
+
+            }
+            spaceSet.addTuple(tuple);
+        }
     }
 
     //        return null;

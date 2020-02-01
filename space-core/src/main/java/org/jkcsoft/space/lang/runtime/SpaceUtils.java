@@ -26,7 +26,7 @@ public class SpaceUtils {
             if (rightSideValue instanceof ScalarValue) {
                 ScalarValue rsScalarValue = (ScalarValue) rightSideValue;
                 if (rsScalarValue.getType() == lsHolderAsVar.getDeclaration().getType()) {
-                    lsHolderAsVar.setScalarValue(rsScalarValue);
+                    lsHolderAsVar.setValue(rsScalarValue);
                     assigned = true;
                 }
                 else {

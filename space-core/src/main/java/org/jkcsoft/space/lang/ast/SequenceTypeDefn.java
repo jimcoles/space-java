@@ -23,4 +23,23 @@ public class SequenceTypeDefn extends AbstractCollectionTypeDefn {
         super(sourceInfo, containedElementType.getName() + "[]", containedElementType);
     }
 
+    @Override
+    public boolean isComplexType() {
+        return false;
+    }
+
+    @Override
+    public boolean isSetType() {
+        return false;
+    }
+
+    @Override
+    public boolean isSequenceType() {
+        return true;
+    }
+
+    @Override
+    public boolean isStreamType() {
+        return false;
+    }
 }

@@ -53,6 +53,11 @@ public class SequenceVariable<T extends ScalarValue> implements ValueHolder {
     }
 
     @Override
+    public void setValue(Value value) {
+        this.primSeqValue = (BinarySequence) value;
+    }
+
+    @Override
     public Value getValue() {
         return primSeqValue;
     }

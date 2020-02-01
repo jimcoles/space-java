@@ -83,4 +83,12 @@ public class SetSpace extends SpaceObject implements Value, Space, Iterable<Tupl
     public DatumType getType() {
         return getDefn();
     }
+
+    public boolean isSingleWrapper() {
+        return tuples.size() == 1 && tuples.get(0).isSingleWrapper();
+    }
+    @Override
+    public Object getJvalue() {
+        return tuples.get(0).getJvalue();
+    }
 }

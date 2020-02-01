@@ -19,9 +19,11 @@ import org.jkcsoft.space.lang.ast.Declaration;
  */
 public interface ValueHolder<V extends Value> {
 
+    Declaration getDeclaration();
+
     DatumType getType();
 
-    V getValue();
+    void setValue(V value);
 
-    Declaration getDeclaration();
+    V getValue();
 }

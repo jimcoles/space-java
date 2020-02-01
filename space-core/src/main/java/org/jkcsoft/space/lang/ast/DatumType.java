@@ -24,11 +24,21 @@ public interface DatumType extends Named {
 
     int getScalarDofs();
 
-    SequenceTypeDefn getSequenceOfType();
-
     boolean isPrimitiveType();
 
     boolean isSimpleType();
 
+    boolean isComplexType();
+
+    boolean isSetType();
+
+    boolean isSequenceType();
+
+    boolean isStreamType();
+
     boolean isAssignableTo(DatumType argsType);
+
+    SequenceTypeDefn getSequenceOfType();
+
+    SetTypeDefn getSetOfType();
 }

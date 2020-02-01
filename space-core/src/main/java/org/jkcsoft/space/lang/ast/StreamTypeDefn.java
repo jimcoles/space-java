@@ -52,4 +52,19 @@ public class StreamTypeDefn extends AbstractCollectionTypeDefn implements DatumT
         super(sourceInfo, containedElementType.getName() + COLL_SUFFIX, containedElementType);
     }
 
+
+    @Override
+    public boolean isSetType() {
+        return false;
+    }
+
+    @Override
+    public boolean isSequenceType() {
+        return false;
+    }
+
+    @Override
+    public boolean isStreamType() {
+        return true;
+    }
 }

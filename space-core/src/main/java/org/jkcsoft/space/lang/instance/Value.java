@@ -17,8 +17,9 @@ import org.jkcsoft.space.lang.ast.DatumType;
  *
  * @author Jim Coles
  */
-public interface Value {
+public interface Value<T> {
 
     DatumType getType();
 
+    T getJvalue();
 }

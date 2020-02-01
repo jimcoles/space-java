@@ -19,4 +19,28 @@ public interface SimpleType extends DatumType {
         return true;
     }
 
+    @Override
+    default boolean isPrimitiveType() {
+        return false;
+    }
+
+    @Override
+    default boolean isComplexType() {
+        return false;
+    }
+
+    @Override
+    default boolean isSetType() {
+        return false;
+    }
+
+    @Override
+    default boolean isSequenceType() {
+        return false;
+    }
+
+    @Override
+    default boolean isStreamType() {
+        return false;
+    }
 }

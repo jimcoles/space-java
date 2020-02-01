@@ -50,6 +50,11 @@ public class StatementBlock extends Statement implements ComplexType {
     }
 
     @Override
+    public SetTypeDefn getSetOfType() {
+        return null;
+    }
+
+    @Override
     public boolean isPrimitiveType() {
         return false;
     }

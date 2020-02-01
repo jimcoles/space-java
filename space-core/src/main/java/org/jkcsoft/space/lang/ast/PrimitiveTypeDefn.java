@@ -11,7 +11,6 @@ package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.NullValue;
 import org.jkcsoft.space.lang.instance.ScalarValue;
-import org.jkcsoft.space.lang.instance.ValueHolder;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.util.Map;
@@ -20,7 +19,7 @@ import java.util.TreeMap;
 /**
  * @author Jim Coles
  */
-public abstract class PrimitiveTypeDefn extends NamedElement implements SimpleType {
+public abstract class PrimitiveTypeDefn extends AbstractDatumTypeDefn implements SimpleType {
 
     private static Map<String, PrimitiveTypeDefn> enumsByName = new TreeMap<>();
 
@@ -36,7 +35,9 @@ public abstract class PrimitiveTypeDefn extends NamedElement implements SimpleTy
     //
     //--------------------------------------------------------------------------
 
-    private SequenceTypeDefn sequenceTypeDefn;
+    public static Map<String, PrimitiveTypeDefn> getEnumsByName() {
+        return enumsByName;
+    }
 
     PrimitiveTypeDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
@@ -45,13 +46,6 @@ public abstract class PrimitiveTypeDefn extends NamedElement implements SimpleTy
     @Override
     public int getScalarDofs() {
         return 1;
-    }
-
-    @Override
-    public SequenceTypeDefn getSequenceOfType() {
-        if (sequenceTypeDefn == null)
-            sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
-        return sequenceTypeDefn;
     }
 
     @Override
@@ -66,9 +60,5 @@ public abstract class PrimitiveTypeDefn extends NamedElement implements SimpleTy
     @Override
     public boolean isPrimitiveType() {
         return true;
-    }
-
-    public static Map<String, PrimitiveTypeDefn> getEnumsByName() {
-        return enumsByName;
     }
 }
