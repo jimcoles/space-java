@@ -29,7 +29,7 @@ public class DomainDefn extends AbstractDatumTypeDefn implements SimpleType {
 
     @Override
     public MetaType getMetaType() {
-        return MetaType.TYPE;
+        return super.getMetaType();
     }
 
     @Override

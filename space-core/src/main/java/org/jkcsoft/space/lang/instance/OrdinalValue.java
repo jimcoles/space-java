@@ -19,7 +19,7 @@ import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
  */
 public class OrdinalValue extends IntegerValue {
 
-    public OrdinalValue(NumPrimitiveTypeDefn type, Integer value) {
+    public OrdinalValue(NumPrimitiveTypeDefn type, Long value) {
         super(type, value);
     }
 

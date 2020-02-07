@@ -25,6 +25,11 @@ public class SjiPropValueHolder implements ValueHolder {
     private SjiTuple sjiTuple;
     private SjiPropVarDecl sjiPropVarDecl;
 
+    public SjiPropValueHolder(SjiTuple sjiTuple, SjiPropVarDecl sjiPropVarDecl) {
+        this.sjiTuple = sjiTuple;
+        this.sjiPropVarDecl = sjiPropVarDecl;
+    }
+
     @Override
     public Declaration getDeclaration() {
         return sjiPropVarDecl;

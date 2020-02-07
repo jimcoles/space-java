@@ -9,8 +9,10 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.SetTypeDefn;
+import org.jkcsoft.java.util.JavaHelper;
+import org.jkcsoft.java.util.Lister;
+import org.jkcsoft.java.util.Strings;
+import org.jkcsoft.space.lang.ast.*;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -85,10 +87,24 @@ public class SetSpace extends SpaceObject implements Value, Space, Iterable<Tupl
     }
 
     public boolean isSingleWrapper() {
-        return tuples.size() == 1 && tuples.get(0).isSingleWrapper();
+        return tuples.size() == 1 && tuples.get(0).isSingleValueWrapper();
     }
     @Override
-    public Object getJvalue() {
-        return tuples.get(0).getJvalue();
+    public Object getJValue() {
+        return tuples.get(0).getJValue();
+    }
+
+    @Override
+    public String toString() {
+        DatumType datumType = ((SetTypeDefn) getDefn()).getContainedElementType();
+        return super.toString() + " => " + JavaHelper.EOL
+            + ((datumType instanceof SimpleType) ?
+                "(value)" :
+                Strings.buildDelList(
+                    ((ComplexType) datumType).getDatumDeclList(),
+                    obj -> "\"" + ((Declaration) obj).getName() + "\"",
+                    "\t"))
+            + JavaHelper.EOL
+            + Strings.buildNewlineList(tuples);
     }
 }

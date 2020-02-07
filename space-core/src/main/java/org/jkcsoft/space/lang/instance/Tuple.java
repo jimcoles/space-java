@@ -9,10 +9,29 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.ComplexType;
 import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.Declaration;
 
 /**
+ * <p>A Tuple is an element of a {@link SetSpace} (which is, conversely,
+ * a Set of Tuples). Each Tuple contains values which are ordered and named.
+ * Values in a Tuple can be retrieved in order or by the name of the variable.  A Tuple
+ * may contain only Scalar values and Oid-based references to Tuples in other
+ * Spaces.
+ *
+ * <p>A Tuple can be thought of as a 'smart map' in that every tuple has one-and-only-one
+ * base object (and associated Oid).
+ *
+ * <p>Space object's are abstract.  A Tuple is the user's handle (view) to access an object,
+ * but the user never gets the object itself, only a view into the object.</p>
+ *
+ * <p>A central notion in Space. Similar to notion of Tuple in other languages like
+ * Python except that our data values usually have rich meta data defined in a
+ * {@link DatumType}, usually a {@link ComplexType}.
+ *
+ * <p>Analogous to a Java Object or a JDBC {@link java.sql.ResultSet}
+ *
  * @author Jim Coles
  */
 public interface Tuple extends Value {
@@ -22,15 +41,15 @@ public interface Tuple extends Value {
 
     void initHolder(ValueHolder valueHolder);
 
-    Tuple set(Declaration spaceDecl, Object javaObj);
+    Tuple setValue(Declaration spaceDecl, Value value);
 
     ValueHolder get(Declaration member);
 
-    Reference getRefByOid(SpaceOid memberOid);
+//    Reference getRefByOid(SpaceOid memberOid);
 
     @Override
     String toString();
 
-    boolean isSingleWrapper();
+    boolean isSingleValueWrapper();
 
 }

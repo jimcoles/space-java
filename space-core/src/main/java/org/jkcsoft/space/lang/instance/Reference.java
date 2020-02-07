@@ -54,7 +54,7 @@ public class Reference implements ValueHolder {
 
     @Override
     public void setValue(Value value) {
-        this.toOid = (SpaceOid) value.getJvalue();
+        this.toOid = (SpaceOid) value.getJValue();
     }
 
     @Override

@@ -14,14 +14,14 @@ import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 /**
  * @author Jim Coles
  */
-public abstract class IntegerValue extends ScalarValue<Integer> {
+public abstract class IntegerValue extends ScalarValue<Long> {
 
-    public IntegerValue(NumPrimitiveTypeDefn primitiveTypeDefn, Integer value) {
+    public IntegerValue(NumPrimitiveTypeDefn primitiveTypeDefn, Long value) {
         super(primitiveTypeDefn, value);
     }
 
     @Override
     public String asString() {
-        return Integer.toString(getJvalue());
+        return Long.toString(getJValue());
     }
 }

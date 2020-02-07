@@ -14,36 +14,24 @@ import org.jkcsoft.space.lang.ast.ComplexType;
 import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.Declaration;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Conceptually, a Tuple is an element of a Relation (which is a Set of Tuples).
- * A Tuple is much like a row in a JDBC recordset.
- * Values in a Tuple can be retrieved in order or by the name of the variable.  A Tuple
- * may contain only Scalar values and Oid-based references to Tuples in other
- * Spaces.
- * <p>A Tuple can be thought of as a 'smart map' in that every tuple has one-and-only-one
- * base object (and associated Oid).
- * <p>Space object's are abstract.  A Tuple is the user's handle (view) to access an object,
- * but the user never gets the object itself, only a view into the object.</p>
- * <p>
- * - RDB Analog: Row
- * - Java Analog: Object
  *
  * @author Jim Coles
  * @version 1.0
  */
 public class AbstractTuple extends SpaceObject implements ExeContext, Tuple {
 
-    private List<ValueHolder> valueHolders = new LinkedList<>();
+    private ValueHolder[] valueHolders;
+//    private List<ValueHolder> valueHolders = new LinkedList<>();
     // seminal map
-    private Map<SpaceOid, ValueHolder> indexAllByMemberOid = new HashMap<>();
+//    private Map<SpaceOid, ValueHolder> indexAllByMemberOid = new HashMap<>();
 
     protected AbstractTuple(SpaceOid oid, DatumType defn) {
         super(oid, defn);
+        valueHolders = new ValueHolder[defn.getScalarDofs()];
     }
 
     @Override
@@ -52,8 +40,36 @@ public class AbstractTuple extends SpaceObject implements ExeContext, Tuple {
     }
 
     @Override
-    public boolean isSingleWrapper() {
-        return valueHolders.size() == 1;
+    public boolean isSingleValueWrapper() {
+        return valueHolders.length == 1;
+    }
+
+    @Override
+    public void initHolder(ValueHolder valueHolder) {
+        int idxHolder;
+        if (getDefn() instanceof ComplexType) {
+            idxHolder = getIdxHolder(valueHolder.getDeclaration());
+        }
+        else {
+            idxHolder = 0;
+        }
+        valueHolders[idxHolder] = valueHolder;
+    }
+
+    @Override
+    public Tuple setValue(Declaration spaceDecl, Value value) {
+        get(spaceDecl).setValue(value);
+        return this;
+    }
+
+    @Override
+    public ValueHolder get(Declaration member) {
+        return valueHolders[getIdxHolder(member)];
+    }
+
+    public Declaration getDeclAt(int idx) {
+//        return ((ComplexType) getDefn()).getDatumDeclList().get(idx);
+        return valueHolders[idx].getDeclaration();
     }
 
     /**
@@ -61,44 +77,39 @@ public class AbstractTuple extends SpaceObject implements ExeContext, Tuple {
      * @return
      */
     @Override
-    public Object getJvalue() {
+    public Object getJValue() {
         Object jValue = null;
-        if (valueHolders.size() == 1) {
-            jValue = valueHolders.get(0).getValue().getJvalue();
+        if (valueHolders.length == 1) {
+//            jValue = valueHolders.get(0).getValue().getJvalue();
+            jValue = valueHolders[0].getValue().getJValue();
         }
         return jValue;
     }
 
-    @Override
-    public void initHolder(ValueHolder valueHolder) {
-        valueHolders.add(valueHolder);
-        indexAllByMemberOid.put(valueHolder.getDeclaration().getOid(), valueHolder);
+    public List<ValueHolder> getValueHolders() {
+        return Arrays.asList(valueHolders);
     }
 
-    @Override
-    public Tuple set(Declaration spaceDecl, Object javaObj) {
-        return null;
+    public int getSize() {
+        return valueHolders.length;
     }
 
-    @Override
-    public ValueHolder get(Declaration member) {
-        return indexAllByMemberOid.get(member.getOid());
-    }
+//    @Override
+//    public Reference getRefByOid(SpaceOid memberOid) {
+//        ValueHolder member = indexAllByMemberOid.get(memberOid);
+//        if (member == null)
+//            throw new IllegalArgumentException(memberOid + " not set");
+//
+//        if (!(member instanceof Reference))
+//            throw new IllegalArgumentException(memberOid + " is not a reference");
+//
+//        return (Reference) member;
+//    }
 
-    @Override
-    public Reference getRefByOid(SpaceOid memberOid) {
-        ValueHolder member = indexAllByMemberOid.get(memberOid);
-        if (member == null)
-            throw new IllegalArgumentException(memberOid + " not set");
+//
 
-        if (!(member instanceof Reference))
-            throw new IllegalArgumentException(memberOid + " is not a reference");
-
-        return (Reference) member;
-    }
-
-    public Declaration getNthMember(int idx) {
-        return ((ComplexType) getDefn()).getDatumDeclList().get(idx);
+    private int getIdxHolder(Declaration datumDecl) {
+        return ((ComplexType) getDefn()).getDatumDeclList().indexOf(datumDecl);
     }
 
     /** Get the 0-based ordinal of the specified member */
@@ -114,20 +125,10 @@ public class AbstractTuple extends SpaceObject implements ExeContext, Tuple {
         return idxMember;
     }
 
-    public ValueHolder getAssignableAt(int idx) {
-        return indexAllByMemberOid.get(getNthMember(idx).getOid());
-    }
-
-    public List<ValueHolder> getValuesHolders() {
-        return valueHolders;
-    }
-
-    public int getSize() {
-        return valueHolders.size();
-    }
-
     @Override
     public String toString() {
-        return "([" + super.toString() + "] " + Strings.buildCommaDelList(getValuesHolders()) + ")";
+        return "([" + super.toString() + "] "
+            + Strings.buildCommaDelList(getValueHolders(), obj -> ((ValueHolder) obj).getValue().toString())
+            + ")";
     }
 }

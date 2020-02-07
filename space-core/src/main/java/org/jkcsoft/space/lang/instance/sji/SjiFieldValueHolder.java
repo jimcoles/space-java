@@ -30,18 +30,18 @@ public class SjiFieldValueHolder implements ValueHolder {
 
     @Override
     public Declaration getDeclaration() {
-        return null;
+        return fieldVarDecl;
     }
 
     @Override
     public DatumType getType() {
-        return null;
+        return fieldVarDecl.getType();
     }
 
     @Override
     public void setValue(Value value) {
         try {
-            fieldVarDecl.getjField().set(sjiTuple.getjObject(), value.getJvalue());
+            fieldVarDecl.getjField().set(sjiTuple.getjObject(), value.getJValue());
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }

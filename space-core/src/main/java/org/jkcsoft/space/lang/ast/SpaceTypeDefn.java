@@ -27,18 +27,13 @@ public class SpaceTypeDefn extends AbstractDatumTypeDefn implements ComplexType 
 
     private boolean isEntity;
     private SpaceTypeDefnBody body;
-    private SetTypeDefn setTypeDefn;
-    private SequenceTypeDefn sequenceTypeDefn;
+//    private SetTypeDefn setTypeDefn;
+//    private SequenceTypeDefn sequenceTypeDefn;
 
     SpaceTypeDefn(SourceInfo sourceInfo, NamePart nameNode) {
         super(sourceInfo, nameNode.getText());
-        setTypeDefn = new SetTypeDefn(sourceInfo, this);
-        sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
-    }
-
-    @Override
-    public MetaType getMetaType() {
-        return MetaType.TYPE;
+//        setTypeDefn = new SetTypeDefn(sourceInfo, this);
+//        sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
     }
 
     @Override
@@ -46,10 +41,10 @@ public class SpaceTypeDefn extends AbstractDatumTypeDefn implements ComplexType 
         return body.getScalarDofs();
     }
 
-    @Override
-    public SequenceTypeDefn getSequenceOfType() {
-        return sequenceTypeDefn;
-    }
+//    @Override
+//    public SequenceTypeDefn getSequenceOfType() {
+//        return sequenceTypeDefn;
+//    }
 
     @Override
     public boolean isAssignableTo(DatumType argsType) {
@@ -64,9 +59,9 @@ public class SpaceTypeDefn extends AbstractDatumTypeDefn implements ComplexType 
         return body.isEnumerated();
     }
 
-    public SetTypeDefn getSetTypeDefn() {
-        return setTypeDefn;
-    }
+//    public SetTypeDefn getSetTypeDefn() {
+//        return setTypeDefn;
+//    }
 
     /**
      * Might not be needed; essentially, asking 'is this a basis type' or a 'derived' type.

@@ -9,6 +9,10 @@
  */
 package org.jkcsoft.space.lang.runtime;
 
+import org.slf4j.helpers.MessageFormatter;
+
+import java.text.MessageFormat;
+
 /**
  * @author Jim Coles
  * @version 1.0
@@ -22,8 +26,8 @@ public class SpaceX extends RuntimeException {
         this.error = error;
     }
 
-    public SpaceX(String message) {
-        super(message);
+    public SpaceX(String message, Object ... args) {
+        super(args != null ? MessageFormatter.format(message, args).getMessage() : message);
     }
 
     public SpaceX(String message, Throwable cause) {

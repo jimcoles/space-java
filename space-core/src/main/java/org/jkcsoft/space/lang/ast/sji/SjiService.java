@@ -11,6 +11,10 @@ package org.jkcsoft.space.lang.ast.sji;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.jkcsoft.space.lang.instance.*;
+import org.jkcsoft.space.lang.instance.sji.SjiFieldValueHolder;
+import org.jkcsoft.space.lang.instance.sji.SjiParamValueHolder;
+import org.jkcsoft.space.lang.instance.sji.SjiPropValueHolder;
+import org.jkcsoft.space.lang.instance.sji.SjiTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jkcsoft.java.util.Beans;
@@ -21,7 +25,6 @@ import org.jkcsoft.space.lang.runtime.Executor;
 import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.beans.PropertyDescriptor;
-import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -41,9 +44,10 @@ public class SjiService {
     private SjiBindings sjiBindings = new SjiBindings();
     private Map<Class, SjiTypeMapping> sjiMappingByClass = new HashMap<>();
     private Map<String, SjiTypeMapping> sjiMappingByName = new HashMap<>();
+    private ObjectFactory spaceObjFactory;
 
     public SjiService() {
-
+        spaceObjFactory = ObjectFactory.getInstance();
     }
 
     public SjiBindings getSjiBindings() {
@@ -106,7 +110,7 @@ public class SjiService {
         //
         // Build wrappers for this class and any required classes
         //
-        ParseUnit newParseUnit = buildShallowNativeType(sjiTypeMapping.getJavaClass());
+        ParseUnit newParseUnit = buildShallowSjiType(sjiTypeMapping.getJavaClass());
         sjiTypeMapping.setSpaceWrapper(newParseUnit.getTypeDefns().get(0));
         sjiTypeMapping.setState(LinkState.RESOLVED);
         //
@@ -164,7 +168,7 @@ public class SjiService {
         return sjiTypeMapping;
     }
 
-    private ParseUnit buildShallowNativeType(Class jnClass) {
+    private ParseUnit buildShallowSjiType(Class jnClass) {
         SjiTypeDefn sjiTypeDefn = newNativeTypeDefn(jnClass);
         //
         ParseUnit parseUnit = getAstFactory().newParseUnit(new NativeSourceInfo(jnClass));
@@ -173,19 +177,19 @@ public class SjiService {
         // Add datums
         PropertyDescriptor[] jPropDescriptors = Beans.getPropertyDescriptors(jnClass);
         for (PropertyDescriptor jPropDescriptor : jPropDescriptors) {
-            if (isExcludeNative(jPropDescriptor))
+            if (!isExcluded(jPropDescriptor))
                 sjiTypeDefn.addVariableDecl(new SjiPropVarDecl(sjiTypeDefn, jPropDescriptor));
         }
         Field[] jFields = jnClass.getDeclaredFields();
         for (Field jField : jFields) {
-            if (isExcludeNative(jField))
-            sjiTypeDefn.addVariableDecl(new SjiFieldVarDecl(sjiTypeDefn, jField));
+            if (!isExcluded(jField))
+                sjiTypeDefn.addVariableDecl(new SjiFieldVarDecl(sjiTypeDefn, jField));
         }
 
         // Add functions
         Method[] methods = jnClass.getMethods();
         for (Method jMethod : methods) {
-            if (isExcludedNative(jMethod))
+            if (isExcluded(jMethod))
                 continue;
 
             SjiTypeRefByClass retTypeRef = new SjiTypeRefByClass(jMethod, getOrCreateSjiMapping(jMethod.getReturnType()));
@@ -241,39 +245,67 @@ public class SjiService {
         return element;
     }
 
-    public void javaToSpace(Collection javaColl, SetSpace spaceSet) {
-        ComplexType elemSpaceCType = null;
-        List<Declaration> datumDeclList = Collections.emptyList();
-        if (spaceSet.getType().isSetType()) {
-            DatumType elemSpaceType = ((SetTypeDefn) spaceSet.getType()).getContainedElementType();
-            if (elemSpaceType.isComplexType()) {
-                elemSpaceCType = (ComplexType) elemSpaceType;
-                datumDeclList = elemSpaceCType.getDatumDeclList();
-            }
-            else {
-                // what to do with a simple or primitive type?
-            }
+    /**
+     * This method wraps the Java collection and objects with SJI wrapper classes such that
+     * reads, writes, and function calls on the wrappers operate on the underlying Java objects.
+     * @return
+     */
+    public SetSpace createSjiProxy(Collection<?> javaColl) {
+        if (javaColl == null) {
+            return null;
         }
-        ObjectFactory spaceObjFactory = ObjectFactory.getInstance();
-        for (Object javaObj : javaColl) {
-            TupleImpl tuple = spaceObjFactory.newTupleImpl(elemSpaceCType);
-            for (Declaration spaceDecl : datumDeclList) {
-                Object javaValue = null;
-                try {
-                    javaValue = Beans.get(javaObj, spaceDecl.getName());
-                } catch (Exception e) {
-//                    e.printStackTrace();
-                }
-                tuple.set(spaceDecl, javaObj);
-                Integer dum = 1;
-                ObjectInputStream ois = null;
 
-            }
-            spaceSet.addTuple(tuple);
+        Class<?> containedJavaClass = javaColl.iterator().next().getClass();
+        SjiTypeDefn sjiContainedTypeDefn = (SjiTypeDefn) getDeepLoadSpaceWrapper(containedJavaClass, null);
+        SetSpace setSpace = spaceObjFactory.newSet(null, sjiContainedTypeDefn.getSetOfType());
+
+        for (Object javaObj : javaColl) {
+            SjiTuple tuple = createSjiProxy(sjiContainedTypeDefn, javaObj);
+            setSpace.addTuple(tuple);
         }
+        return setSpace;
     }
 
-    //        return null;
+    private SjiTuple createSjiProxy(SjiTypeDefn sjiTypeDefn, Object javaObj) {
+        SjiTuple sjiTuple = emptySjiTuple(sjiTypeDefn, javaObj);
+        List<Declaration> datumDeclList = sjiTypeDefn.getDatumDeclList();
+        for (Declaration spaceDatumDecl : datumDeclList) {
+            sjiTuple.initHolder(createSjiProxy(sjiTuple, spaceDatumDecl));
+        }
+        return sjiTuple;
+    }
+
+    /** Tuple values are uninitialized. */
+    private SjiTuple emptySjiTuple(SjiTypeDefn sjiTypeDefn, Object javaObj) {
+        return new SjiTuple(spaceObjFactory.newOid(), sjiTypeDefn, javaObj);
+    }
+
+    private void initSjiTuple(SjiTypeDefn defn, SjiTuple tuple) {
+        // initialize
+        if (defn.hasDatums()) {
+            List<Declaration> declList = defn.getDatumDeclList();
+            for (Declaration datumDecl : declList) {
+                tuple.initHolder(createSjiProxy(tuple, datumDecl));
+            }
+        }
+
+//        spaceObjFactory.trackInstanceObject((SpaceObject) tuple);
+    }
+
+    private ValueHolder createSjiProxy(SjiTuple tuple, Declaration datumDecl) {
+        ValueHolder holder = null;
+        if (datumDecl instanceof SjiPropVarDecl) {
+            holder = new SjiPropValueHolder(tuple, ((SjiPropVarDecl) datumDecl));
+        }
+        else if (datumDecl instanceof SjiFieldVarDecl) {
+            holder = new SjiFieldValueHolder(tuple, ((SjiFieldVarDecl) datumDecl));
+        }
+        else if (datumDecl instanceof SjiParamVarDecl) {
+            holder = new SjiParamValueHolder(tuple, ((SjiParamVarDecl) datumDecl));
+        }
+        return holder;
+    }
+
     static FullTypeRefImpl.CollectionType javaToSpaceCollType(Class clazz) {
         FullTypeRefImpl.CollectionType spCollType = null;
         if (clazz == String.class) {
@@ -289,24 +321,25 @@ public class SjiService {
         return className.split("\\.");
     }
 
-    private boolean isExcludedNative(Method jMethod) {
-        boolean exclude = !isPublicMethod(jMethod);
-        exclude = exclude || ArrayUtils.contains(Object.class.getMethods(), jMethod);
+    private boolean isExcluded(Method jMethod) {
+        boolean exclude =
+            !isPublicMethod(jMethod)
+                || ArrayUtils.contains(Object.class.getMethods(), jMethod);
         return exclude;
     }
 
-    private boolean isExcludeNative(Field jField) {
-        boolean exclude = !Modifier.isPublic(jField.getModifiers()) ;
-        exclude = exclude || ArrayUtils.contains(Object.class.getFields(), jField);
+    private boolean isExcluded(Field jField) {
+        boolean exclude =
+            !Modifier.isPublic(jField.getModifiers())
+                || ArrayUtils.contains(Object.class.getFields(), jField);
         return exclude;
     }
 
-    private boolean isExcludeNative(PropertyDescriptor jPropDescriptor) {
+    private boolean isExcluded(PropertyDescriptor jPropDescriptor) {
         // exclude if prop is not readable and not writable
         boolean exclude =
-            !(isPublicMethod(jPropDescriptor.getReadMethod())
-                || isPublicMethod(jPropDescriptor.getWriteMethod())
-            );
+            !isPublicMethod(jPropDescriptor.getReadMethod())
+                || !isPublicMethod(jPropDescriptor.getWriteMethod());
         return exclude;
     }
 

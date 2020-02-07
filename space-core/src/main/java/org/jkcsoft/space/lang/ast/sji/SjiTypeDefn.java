@@ -35,17 +35,12 @@ public class SjiTypeDefn extends AbstractDatumTypeDefn implements ComplexType {
 
     @Override
     public MetaType getMetaType() {
-        return MetaType.TYPE;
+        return super.getMetaType();
     }
 
     @Override
     public int getScalarDofs() {
-        return 0;
-    }
-
-    @Override
-    public SequenceTypeDefn getSequenceOfType() {
-        return null;
+        return datumDecls.size();
     }
 
     @Override
@@ -60,7 +55,7 @@ public class SjiTypeDefn extends AbstractDatumTypeDefn implements ComplexType {
 
     @Override
     public boolean hasDatums() {
-        return false;
+        return datumDecls != null && datumDecls.size() > 0;
     }
 
     @Override

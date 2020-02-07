@@ -38,7 +38,7 @@ public abstract class AbstractCollectionTypeDefn extends AbstractDatumTypeDefn i
 
     @Override
     public MetaType getMetaType() {
-        return MetaType.TYPE;
+        return super.getMetaType();
     }
 
     @Override

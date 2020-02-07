@@ -50,7 +50,7 @@ public abstract class PrimitiveTypeDefn extends AbstractDatumTypeDefn implements
 
     @Override
     public MetaType getMetaType() {
-        return MetaType.TYPE;
+        return super.getMetaType();
     }
 
     public ScalarValue nullValue() {

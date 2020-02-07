@@ -20,7 +20,7 @@ import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 public class CardinalValue extends IntegerValue {
 
     /** Limit constructor access to package-only. */
-    CardinalValue(Integer value) {
+    CardinalValue(Long value) {
         super(NumPrimitiveTypeDefn.CARD, value);
     }
 

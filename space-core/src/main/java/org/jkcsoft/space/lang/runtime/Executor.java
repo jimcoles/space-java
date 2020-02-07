@@ -27,7 +27,6 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 import org.jkcsoft.space.lang.runtime.jnative.math.Math;
 import org.jkcsoft.space.lang.runtime.jnative.opsys.JOpSys;
 import org.jkcsoft.space.lang.runtime.typecasts.CastTransforms;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -802,7 +801,7 @@ public class Executor extends ExprProcessor implements ExeContext {
                 Value argValue = eval(evalContext, argumentExpr);
                 argValue =
                     autoCast(((ComplexType) tuple.getDefn()).getDatumDeclList().get(idxArg).getType(), argValue);
-                ValueHolder leftSideHolder = tuple.get(tuple.getNthMember(idxArg));
+                ValueHolder leftSideHolder = tuple.get(tuple.getDeclAt(idxArg));
                 SpaceUtils.assignNoCast(evalContext, leftSideHolder, argValue);
                 idxArg++;
             }
@@ -821,7 +820,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         CastTransforms casters = new CastTransforms();
         FunctionCallContext functionCallContext = evalContext.peekStack();
         try {
-            List<ValueHolder> sArgHolders = functionCallContext.getArgTuple().getValuesHolders();
+            List<ValueHolder> sArgHolders = functionCallContext.getArgTuple().getValueHolders();
             Object jArgs[] = new Object[sArgHolders.size()];
             int idxArg = 0;
             for (ValueHolder spcArgHolder : sArgHolders) {
@@ -995,7 +994,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             }
             else if (rightSideValue instanceof Variable) {
                 CharacterSequence characterSequence =
-                    newCharacterSequence(((Variable) rightSideValue).getScalarValue().getJvalue().toString());
+                    newCharacterSequence(((Variable) rightSideValue).getScalarValue().getJValue().toString());
                 newValue = characterSequence.getOid();
                 log.debug("cast variable (1-D) value to CharSequence");
             }
@@ -1005,7 +1004,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             if (leftSideTypeDefn == NumPrimitiveTypeDefn.CARD
                 && rsScalarValue.getType() == NumPrimitiveTypeDefn.REAL) {
                 newValue =
-                    ObjectFactory.getInstance().newCardinalValue(((Double) rsScalarValue.getJvalue()).intValue());
+                    ObjectFactory.getInstance().newCardinalValue(((Double) rsScalarValue.getJValue()).intValue());
                 log.debug("cast real to card");
             }
         }
@@ -1014,12 +1013,6 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     private TupleImpl newTupleImpl(ComplexType defn) {
         TupleImpl tuple = getObjFactory().newTupleImpl(defn);
-        initTrackTuple(defn, tuple);
-        return tuple;
-    }
-
-    private Tuple newSjiTuple(SjiTypeDefn defn, Object jObject) {
-        Tuple tuple = getObjFactory().newSjiTuple(defn, jObject);
         initTrackTuple(defn, tuple);
         return tuple;
     }

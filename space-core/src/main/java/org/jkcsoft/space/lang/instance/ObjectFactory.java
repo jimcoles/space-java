@@ -10,8 +10,6 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.*;
-import org.jkcsoft.space.lang.ast.sji.SjiTypeDefn;
-import org.jkcsoft.space.lang.instance.sji.SjiTuple;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -45,11 +43,6 @@ public class ObjectFactory {
         return tuple;
     }
 
-    public SjiTuple newSjiTuple(SjiTypeDefn defn, Object jObject) {
-        SjiTuple tuple = new SjiTuple(newOid(), defn, jObject);
-        return tuple;
-    }
-
     public CharacterSequence newCharacterSequence(String characters) {
         CharacterSequence characterSequence = new CharacterSequence(newOid(), characters);
         return characterSequence;
@@ -72,7 +65,7 @@ public class ObjectFactory {
         return null;
     }
 
-    public CardinalValue newCardinalValue(int i) {
+    public CardinalValue newCardinalValue(long i) {
         return new CardinalValue(i);
     }
 

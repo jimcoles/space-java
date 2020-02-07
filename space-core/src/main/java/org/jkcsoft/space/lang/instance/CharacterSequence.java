@@ -83,7 +83,7 @@ public class CharacterSequence extends BinarySequence<CharacterValue> implements
     }
 
     @Override
-    public Object getJvalue() {
+    public Object getJValue() {
         return characters;
     }
 }

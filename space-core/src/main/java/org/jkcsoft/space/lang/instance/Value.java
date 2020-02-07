@@ -21,5 +21,5 @@ public interface Value<T> {
 
     DatumType getType();
 
-    T getJvalue();
+    T getJValue();
 }

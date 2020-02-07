@@ -34,7 +34,7 @@ public class VoidDatum implements ValueHolder, Value {
     }
 
     @Override
-    public Object getJvalue() {
+    public Object getJValue() {
         throw new SpaceX("attempt to get void-valued value");
 //        return null;
     }

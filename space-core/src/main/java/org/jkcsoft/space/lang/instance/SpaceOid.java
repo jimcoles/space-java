@@ -34,7 +34,7 @@ public class SpaceOid implements Comparable<SpaceOid>, Key {
     }
 
     @Override
-    public Object getJvalue() {
+    public Object getJValue() {
         return longOid;
     }
 

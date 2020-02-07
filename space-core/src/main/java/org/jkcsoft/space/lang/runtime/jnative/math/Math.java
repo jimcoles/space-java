@@ -25,18 +25,18 @@ public class Math {
         if (left instanceof CardinalValue) {
             if (right instanceof CardinalValue)
                 value =getObjFactory().newCardinalValue(
-                    ((CardinalValue) left).getJvalue() + ((CardinalValue) right).getJvalue());
+                    ((CardinalValue) left).getJValue() + ((CardinalValue) right).getJValue());
             else if (right instanceof RealValue)
                 value =getObjFactory().newRealValue(
-                    ((CardinalValue) left).getJvalue() + ((RealValue) right).getJvalue());
+                    ((CardinalValue) left).getJValue() + ((RealValue) right).getJValue());
         }
         else if (left instanceof RealValue){
             if (right instanceof CardinalValue)
                 value =getObjFactory().newRealValue(
-                    ((RealValue) left).getJvalue() + ((CardinalValue) right).getJvalue());
+                    ((RealValue) left).getJValue() + ((CardinalValue) right).getJValue());
             else if (right instanceof RealValue)
                 value =getObjFactory().newRealValue(
-                    ((RealValue) left).getJvalue() + ((RealValue) right).getJvalue());
+                    ((RealValue) left).getJValue() + ((RealValue) right).getJValue());
         }
         return value;
     }
@@ -48,18 +48,18 @@ public class Math {
         if (left instanceof CardinalValue) {
             if (right instanceof CardinalValue)
                 value =getObjFactory().newCardinalValue(
-                    ((CardinalValue) left).getJvalue() - ((CardinalValue) right).getJvalue());
+                    ((CardinalValue) left).getJValue() - ((CardinalValue) right).getJValue());
             else if (right instanceof RealValue)
                 value =getObjFactory().newRealValue(
-                    ((CardinalValue) left).getJvalue() - ((RealValue) right).getJvalue());
+                    ((CardinalValue) left).getJValue() - ((RealValue) right).getJValue());
         }
         else if (left instanceof RealValue){
             if (right instanceof CardinalValue)
                 value =getObjFactory().newRealValue(
-                    ((RealValue) left).getJvalue() - ((CardinalValue) right).getJvalue());
+                    ((RealValue) left).getJValue() - ((CardinalValue) right).getJValue());
             else if (right instanceof RealValue)
                 value =getObjFactory().newRealValue(
-                    ((RealValue) left).getJvalue() - ((RealValue) right).getJvalue());
+                    ((RealValue) left).getJValue() - ((RealValue) right).getJValue());
         }
         return value;
     }
@@ -71,18 +71,18 @@ public class Math {
         if (left instanceof CardinalValue) {
             if (right instanceof CardinalValue)
                 value =getObjFactory().newCardinalValue(
-                    ((CardinalValue) left).getJvalue() * ((CardinalValue) right).getJvalue());
+                    ((CardinalValue) left).getJValue() * ((CardinalValue) right).getJValue());
             else if (right instanceof RealValue)
                 value =getObjFactory().newRealValue(
-                    ((CardinalValue) left).getJvalue() * ((RealValue) right).getJvalue());
+                    ((CardinalValue) left).getJValue() * ((RealValue) right).getJValue());
         }
         else if (left instanceof RealValue){
             if (right instanceof CardinalValue)
                 value =getObjFactory().newRealValue(
-                    ((RealValue) left).getJvalue() * ((CardinalValue) right).getJvalue());
+                    ((RealValue) left).getJValue() * ((CardinalValue) right).getJValue());
             else if (right instanceof RealValue)
                 value =getObjFactory().newRealValue(
-                    ((RealValue) left).getJvalue() * ((RealValue) right).getJvalue());
+                    ((RealValue) left).getJValue() * ((RealValue) right).getJValue());
         }
         return value;
     }
@@ -94,34 +94,34 @@ public class Math {
         if (left instanceof CardinalValue) {
             if (right instanceof CardinalValue)
                 value =getObjFactory().newCardinalValue(
-                    ((CardinalValue) left).getJvalue() / ((CardinalValue) right).getJvalue());
+                    ((CardinalValue) left).getJValue() / ((CardinalValue) right).getJValue());
             else if (right instanceof RealValue)
                 value =getObjFactory().newRealValue(
-                    ((CardinalValue) left).getJvalue() / ((RealValue) right).getJvalue());
+                    ((CardinalValue) left).getJValue() / ((RealValue) right).getJValue());
         }
         else if (left instanceof RealValue){
             if (right instanceof CardinalValue)
                 value =getObjFactory().newRealValue(
-                    ((RealValue) left).getJvalue() / ((CardinalValue) right).getJvalue());
+                    ((RealValue) left).getJValue() / ((CardinalValue) right).getJValue());
             else if (right instanceof RealValue)
                 value =getObjFactory().newRealValue(
-                    ((RealValue) left).getJvalue() / ((RealValue) right).getJvalue());
+                    ((RealValue) left).getJValue() / ((RealValue) right).getJValue());
         }
         return value;
     }
     // Boolean
     public static Value and(Value... args) {
         return getObjFactory()
-            .newBooleanValue(((BooleanValue) args[0]).getJvalue() & ((BooleanValue) args[1]).getJvalue());
+            .newBooleanValue(((BooleanValue) args[0]).getJValue() & ((BooleanValue) args[1]).getJValue());
     }
     public static Value condAnd(Value... args) {
         return getObjFactory()
-            .newBooleanValue(((BooleanValue) args[0]).getJvalue() && ((BooleanValue) args[1]).getJvalue());
+            .newBooleanValue(((BooleanValue) args[0]).getJValue() && ((BooleanValue) args[1]).getJValue());
     }
     // Num comparison returns boolean
     public static Value equal(Value... args) {
         return getObjFactory()
-            .newBooleanValue(((ScalarValue) args[0]).getJvalue() == ((ScalarValue) args[1]).getJvalue());
+            .newBooleanValue(((ScalarValue) args[0]).getJValue() == ((ScalarValue) args[1]).getJValue());
     }
     public static Value lt(Value... args) {
         Value left = args[0];
@@ -129,15 +129,15 @@ public class Math {
         boolean javaBool = false;
         if (left instanceof CardinalValue) {
             if (right instanceof CardinalValue)
-                javaBool = ((CardinalValue) left).getJvalue() < ((CardinalValue) right).getJvalue();
+                javaBool = ((CardinalValue) left).getJValue() < ((CardinalValue) right).getJValue();
             else if (right instanceof RealValue)
-                javaBool = ((CardinalValue) left).getJvalue() < ((RealValue) right).getJvalue();
+                javaBool = ((CardinalValue) left).getJValue() < ((RealValue) right).getJValue();
         }
         else if (left instanceof RealValue){
             if (right instanceof CardinalValue)
-                javaBool = ((RealValue) left).getJvalue() < ((CardinalValue) right).getJvalue();
+                javaBool = ((RealValue) left).getJValue() < ((CardinalValue) right).getJValue();
             else if (right instanceof RealValue)
-                javaBool = ((RealValue) left).getJvalue() < ((RealValue) right).getJvalue();
+                javaBool = ((RealValue) left).getJValue() < ((RealValue) right).getJValue();
         }
 
         return getObjFactory().newBooleanValue(javaBool);

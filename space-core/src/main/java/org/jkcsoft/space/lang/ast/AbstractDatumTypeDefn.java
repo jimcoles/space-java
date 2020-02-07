@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 /**
  * @author Jim Coles
  */
@@ -35,4 +37,8 @@ abstract public class AbstractDatumTypeDefn extends NamedElement implements Datu
         return setTypeDefn;
     }
 
+    @Override
+    public MetaType getMetaType() {
+        return MetaType.TYPE;
+    }
 }

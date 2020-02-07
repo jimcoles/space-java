@@ -40,7 +40,7 @@ public abstract class ScalarValue<T> implements Assignable, Value<T> {
 //    }
 
     @Override
-    public T getJvalue() {
+    public T getJValue() {
         return jvalue;
     }
 
