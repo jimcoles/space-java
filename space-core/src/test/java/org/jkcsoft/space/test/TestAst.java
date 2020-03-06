@@ -35,20 +35,20 @@ public class TestAst {
         astFactory.newProgram(si, "(API Builder Program)");
         //
         ObjectFactory objBuilder = ObjectFactory.getInstance();
-        SpaceTypeDefn spaceTypeDefn = astFactory.newSpaceTypeDefn(si, astFactory.newNamePart(si, "MyHelloSpace"));
+        ComplexTypeImpl complexTypeImpl = astFactory.newSpaceTypeDefn(si, astFactory.newNamePart(si, "MyHelloSpace"));
 
         Directory astDirectory = astFactory.newAstDir(si, "TestAst");
-        astDirectory.addParseUnit(astFactory.newParseUnit(si)).addTypeDefn(spaceTypeDefn);
-        spaceTypeDefn.setBody(astFactory.newTypeDefnBody(si));
-        spaceTypeDefn
+        astDirectory.addParseUnit(astFactory.newParseUnit(si)).addTypeDefn(complexTypeImpl);
+//        complexTypeImpl.setBody(astFactory.newTypeDefnBody(si));
+        complexTypeImpl
             .addVariableDecl(
                 astFactory.newVariableDecl(si, "myIntDim", astFactory.newTypeRef(si, NumPrimitiveTypeDefn.CARD)));
-        spaceTypeDefn
-            .setBody(astFactory.newTypeDefnBody(si))
+        complexTypeImpl
+//            .setBody(astFactory.newTypeDefnBody(si))
             .addVariableDecl(astFactory.newVariableDecl(si, "myCharDim",
                                                         astFactory.newTypeRef(si, NumPrimitiveTypeDefn.CHAR)));
         SpaceFunctionDefn mainMethod = astFactory.newSpaceFunctionDefn(si, "main", null);
-        spaceTypeDefn.getBody().addFunctionDefn(mainMethod);
+        complexTypeImpl.addFunctionDefn(mainMethod);
 //        CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
 //        astFactory.getUserAstRoot().addObjectInstance(arg1, astFactory);
 

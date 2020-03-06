@@ -15,20 +15,10 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 /**
  * @author Jim Coles
  */
-public class SjiAssocDecl extends NamedElement implements SjiDeclaration, AssociationDecl {
+public class SjiAssocDecl extends NamedElement implements SjiDeclaration, AssociationDefn {
 
     protected SjiAssocDecl(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
-    }
-
-    @Override
-    public TypeRef getFromTypeRef() {
-        return null;
-    }
-
-    @Override
-    public TypeRef getToTypeRef() {
-        return null;
     }
 
     @Override
@@ -42,13 +32,13 @@ public class SjiAssocDecl extends NamedElement implements SjiDeclaration, Associ
     }
 
     @Override
-    public int getFromMult() {
-        return 0;
+    public AssociationDefnEnd getFromEnd() {
+        return null;
     }
 
     @Override
-    public int getToMult() {
-        return 0;
+    public AssociationDefnEnd getToEnd() {
+        return null;
     }
 
     @Override

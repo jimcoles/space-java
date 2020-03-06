@@ -8,13 +8,14 @@
  * Also see the LICENSE file in the repository root directory.
  */
 package org.jkcsoft.space.lang.ast;
+
 /**
  * A generic expression container.  Contains a value-returning expression
  * that must be evaluated such as a function call, or assignment.
  *
  * @author Jim Coles
  */
-public class ExprStatement<T extends ValueExpr> extends Statement {
+public class ExprStatement<T extends ValueExpr> extends AbstractModelElement implements Statement {
 
     private T expression;
 

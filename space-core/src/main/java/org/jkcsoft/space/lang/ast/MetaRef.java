@@ -10,13 +10,13 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * The guts of a language reference. Most MetaRefs are {@link SimpleNameRefExpr}'s, which
+ * The guts of a language reference-by-name. Most MetaRefs are {@link SimpleNameRefExpr}'s, which
  * are resolved by name; the only exceptions are {@link PronounRefExpr}'s which are resolved
  * by relative scope within classes and functions.
  *
  * @author Jim Coles
  */
-public interface MetaRef<T extends Named> {
+public interface MetaRef<T extends Named> extends ModelElement {
 
     String getKeyOrName();
 

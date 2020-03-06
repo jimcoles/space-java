@@ -17,14 +17,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Very much like a LISP "List Expression". Expression Chains are used to hold the initial
- * AST representation of any dot (".") separated expression. After the linking and
+ * {@link ExpressionChain}'s are used to hold the initial
+ * unresolved AST representation of any dot (".") separated expression. After the linking and
  * semantic analysis phases, a valid Expression Chain is then broken into some combination
- * of a MetaRefPath and a ValueExprChain.
+ * of a MetaRefPath and a ValueExprChain depending on what the syntactic context (possible
+ * meta types of the element referenced) and actual type of the resolved element.
  *
  * Holds either:
  *
- * 1. Meta Reference Path: A full reference to a named element via its AST name path. The
+ * 1. Meta Reference Path: A full reference to a named element via its AST namespace path. The
  *    reference may be multi-part (fully qualified). Holds a chain of {@link SimpleNameRefExpr}s,
  *    each of which resolves to a single meta object. The MetaType of the full reference
  *    should be known at parse time.

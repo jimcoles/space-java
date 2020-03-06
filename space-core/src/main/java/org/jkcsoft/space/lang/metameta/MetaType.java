@@ -18,6 +18,7 @@ public enum MetaType {
     TYPE,
     DATUM, // var, domain, assoc
     FUNCTION,
+    RULE,
     PACKAGE
 //    ANY
 }

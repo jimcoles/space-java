@@ -36,7 +36,7 @@ public class SjiFieldVarDecl extends SjiVarDecl {
     @Override
     public NumPrimitiveTypeDefn getType() {
         return (NumPrimitiveTypeDefn)
-            SpaceHome.getSjiService().getOrCreateSjiMapping(jField.getType()).getSpaceWrapper();
+            SpaceHome.getSjiService().getOrCreateSjiTypeMapping(jField.getType()).getSjiProxy();
     }
 
     public Field getjField() {

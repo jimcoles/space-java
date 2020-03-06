@@ -31,7 +31,7 @@ public class SetDecl extends NamedElement implements Declaration {
 
     @Override
     public DatumType getType() {
-        return ((SpaceTypeDefn) tupleTypeRef.getResolvedMetaObj()).getSetOfType();
+        return ((ComplexTypeImpl) tupleTypeRef.getResolvedMetaObj()).getSetOfType();
     }
 
     @Override

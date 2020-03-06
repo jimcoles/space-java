@@ -11,5 +11,17 @@ package org.jkcsoft.space.lang.ast;
 /**
  * @author Jim Coles
  */
-public class AssociationDefnEnd {
+public interface AssociationDefnEnd extends Named {
+
+    TypeRef getTypeRef();
+
+    /** The multiplicity 0, 1, or many or fixed positive integer */
+    int getLowerMultiplicity();
+
+    int getUpperMultiplicity();
+
+    default boolean isRequired() {
+        return getLowerMultiplicity() > 0;
+    }
+
 }

@@ -14,7 +14,7 @@ import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.Declaration;
 
 /**
- * <p>A Tuple is an element of a {@link SetSpace} (which is, conversely,
+ * <p>A Tuple is an element of a {@link TupleSet} (which is, conversely,
  * a Set of Tuples). Each Tuple contains values which are ordered and named.
  * Values in a Tuple can be retrieved in order or by the name of the variable.  A Tuple
  * may contain only Scalar values and Oid-based references to Tuples in other

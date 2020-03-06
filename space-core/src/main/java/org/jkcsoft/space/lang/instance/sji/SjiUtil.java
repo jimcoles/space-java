@@ -22,23 +22,5 @@ public class SjiUtil {
 
     private static SjiService sji = SpaceHome.getSjiService();
 
-    public static Value toSpaceValue(Object jValue) {
-        Value sValue = null;
-        ObjectFactory spaceInst = ObjectFactory.getInstance();
-        if (jValue instanceof Integer || jValue instanceof Long)
-            sValue = spaceInst.newCardinalValue(((Long) jValue));
-        else if (jValue instanceof Float || jValue instanceof Double)
-            sValue = spaceInst.newRealValue(((Double) jValue));
-        else if (jValue instanceof Boolean)
-            sValue = spaceInst.newBooleanValue(((Boolean) jValue));
-        else if (jValue instanceof String)
-            sValue = spaceInst.newCharacterSequence((String) jValue);
-        else
-            // TODO Handle Java values that are not Java primitives or String
-//            sValue = sji.
-            throw new SpaceX("don't know how to convert Java value to Space value: [{}]", jValue);
-
-        return sValue;
-    }
 
 }

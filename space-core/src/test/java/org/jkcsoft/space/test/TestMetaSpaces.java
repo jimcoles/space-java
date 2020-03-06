@@ -22,7 +22,7 @@ public class TestMetaSpaces {
     public void testMetaSpaceQuery() {
         /*
         1. Load a known Space program file.
-        2. Query the language Spaces for the expected objects.
+        2. QueryImpl the language Spaces for the expected objects.
          */
     }
 }

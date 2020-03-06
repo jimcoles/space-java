@@ -15,7 +15,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class ReturnExpr extends Statement {
+public class ReturnExpr extends AbstractModelElement implements Statement {
 
     private ValueExpr valueExpr;
 
@@ -23,7 +23,7 @@ public class ReturnExpr extends Statement {
         super(sourceInfo);
         this.valueExpr = valueExpr;
         //
-        addChild((AbstractModelElement) valueExpr);
+        addChild((ModelElement) valueExpr);
     }
 
     public ValueExpr getValueExpr() {

@@ -55,12 +55,12 @@ public class ObjectFactory {
         return functionCallContext;
     }
 
-    public Reference newObjectReference(AssociationDecl associationDecl, Tuple parentTuple, SpaceOid refToOid) {
+    public Reference newObjectReference(AssociationDefn associationDecl, Tuple parentTuple, SpaceOid refToOid) {
         Reference reference = new Reference(associationDecl, parentTuple, refToOid);
         return reference;
     }
 
-    public SetSpace box(Tuple tuple) {
+    public TupleSet box(Tuple tuple) {
 //        return new Space(newOid(), null, tuple.getDefn());
         return null;
     }
@@ -85,8 +85,8 @@ public class ObjectFactory {
         return new BlockContext(statementBlock, tuple);
     }
 
-    public SetSpace newSet(SetSpace contextSpace, SetTypeDefn defn) {
-        return new SetSpace(newOid(), contextSpace, defn);
+    public TupleSet newSet(SetTypeDefn defn) {
+        return new TupleSet(newOid(), defn);
     }
 
     public VoidDatum newVoidHolder() {

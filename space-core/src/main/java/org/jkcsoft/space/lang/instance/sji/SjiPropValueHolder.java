@@ -9,9 +9,11 @@
  */
 package org.jkcsoft.space.lang.instance.sji;
 
+import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.Declaration;
 import org.jkcsoft.space.lang.ast.sji.SjiPropVarDecl;
+import org.jkcsoft.space.lang.ast.sji.SjiService;
 import org.jkcsoft.space.lang.instance.Value;
 import org.jkcsoft.space.lang.instance.ValueHolder;
 
@@ -21,6 +23,8 @@ import java.lang.reflect.InvocationTargetException;
  * @author Jim Coles
  */
 public class SjiPropValueHolder implements ValueHolder {
+
+    private SjiService sjiService = SpaceHome.getSjiService();
 
     private SjiTuple sjiTuple;
     private SjiPropVarDecl sjiPropVarDecl;
@@ -61,7 +65,7 @@ public class SjiPropValueHolder implements ValueHolder {
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
-        return SjiUtil.toSpaceValue(jValue);
+        return sjiService.toSpaceValue(jValue);
     }
 
 }

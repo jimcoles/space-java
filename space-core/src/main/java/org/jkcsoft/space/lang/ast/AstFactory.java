@@ -54,9 +54,9 @@ public class AstFactory {
         return new NamePart(sourceInfo, name);
     }
 
-    public SpaceTypeDefn newSpaceTypeDefn(SourceInfo sourceInfo, NamePart nameNode) {
-        SpaceTypeDefn spaceTypeDefn = new SpaceTypeDefn(sourceInfo, nameNode);
-        return spaceTypeDefn;
+    public ComplexTypeImpl newSpaceTypeDefn(SourceInfo sourceInfo, NamePart nameNode) {
+        ComplexTypeImpl complexTypeImpl = new ComplexTypeImpl(sourceInfo, nameNode);
+        return complexTypeImpl;
     }
 
 
@@ -75,8 +75,8 @@ public class AstFactory {
         return element;
     }
 
-    public AssociationDeclImpl newAssociationDecl(SourceInfo sourceInfo, String name, TypeRef toTypeRef) {
-        AssociationDeclImpl element = new AssociationDeclImpl(sourceInfo, name, null, toTypeRef);
+    public AssociationDefnImpl newAssociationDecl(SourceInfo sourceInfo, String name, TypeRef toTypeRef) {
+        AssociationDefnImpl element = new AssociationDefnImpl(sourceInfo, name, null, toTypeRef);
         return element;
     }
 
@@ -106,10 +106,6 @@ public class AstFactory {
 
     public ThisTupleExpr newThisExpr(SourceInfo sourceInfo) {
         return new ThisTupleExpr(sourceInfo);
-    }
-
-    public SpaceTypeDefnBody newTypeDefnBody(SourceInfo codeSourceInfo) {
-        return new SpaceTypeDefnBody(codeSourceInfo);
     }
 
     public StatementBlock newStatementBlock(SourceInfo sourceInfo) {

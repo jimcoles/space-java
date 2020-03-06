@@ -17,7 +17,7 @@ import java.util.Set;
 /**
  * @author Jim Coles
  */
-public interface ModelElement {
+public interface ModelElement extends Tagable {
 
     SourceInfo getSourceInfo();
 

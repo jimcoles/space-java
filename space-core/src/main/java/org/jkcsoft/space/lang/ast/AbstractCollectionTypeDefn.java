@@ -63,7 +63,7 @@ public abstract class AbstractCollectionTypeDefn extends AbstractDatumTypeDefn i
 
     /** True if this set hold references to objects; false if it hold values of primitives */
     public boolean isReferenceType() {
-        return containedElementType instanceof SpaceTypeDefn;
+        return containedElementType instanceof ComplexTypeImpl;
     }
 
     @Override

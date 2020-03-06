@@ -24,7 +24,7 @@ import java.util.Set;
  * Encapsulates an entire executable system as defined by Space definition elements
  * (ModelElements) and associated instances.
  *
- * A Directory may contain child Directories or {@link SpaceTypeDefn}'s or other {@link Named}
+ * A Directory may contain child Directories or {@link ComplexTypeImpl}'s or other {@link Named}
  * element types.
  *
  * @author Jim Coles

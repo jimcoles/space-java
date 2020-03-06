@@ -68,16 +68,16 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
         blockContexts.add(blockContext);
     }
 
+    public BlockContext popBlock() {
+        return blockContexts.pop();
+    }
+
     public BlockContext currentBlockCtxt() {
         return blockContexts.getLast();
     }
 
     public LinkedList<BlockContext> getBlockContexts() {
         return blockContexts;
-    }
-
-    public BlockContext popBlock() {
-        return blockContexts.pop();
     }
 
     public ValueHolder getReturnValueHolder() {

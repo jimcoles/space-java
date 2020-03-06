@@ -11,7 +11,7 @@ package org.jkcsoft.space.lang.ast;
 /**
  * @author Jim Coles
  */
-public class IfStatement extends Statement {
+public class IfStatement extends AbstractModelElement implements Statement {
     // if
     private OperatorExpr condition;
     // then

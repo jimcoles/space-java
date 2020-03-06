@@ -11,6 +11,7 @@ package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.ObjectFactory;
 import org.jkcsoft.space.lang.instance.SpaceObject;
+import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.runtime.AstUtils;
 
 import java.util.*;
@@ -36,6 +37,7 @@ public abstract class AbstractModelElement extends SpaceObject implements ModelE
     private Map<String, NamedElement> namedChildMap = new TreeMap<>();
     private Set<ExpressionChain> expressionChains = null;
     private List<ModelElement> groupingNodes = new LinkedList<>();
+    private List<Tuple> allTags = Collections.emptyList();
     // -------------- <end> redundant collections
 
     protected AbstractModelElement(SourceInfo sourceInfo) {
@@ -92,7 +94,7 @@ public abstract class AbstractModelElement extends SpaceObject implements ModelE
     }
 
     /**
-     * Must be called by the adder method for children, e.g., {@link SpaceTypeDefn}.addAssocDefn() should call this for
+     * Must be called by the adder method for children, e.g., {@link ComplexTypeImpl}.addAssocDefn() should call this for
      * the {@link NamePartExpr} associated with it's 'from' and 'to' type definition.
      */
     private void addExpressionChain(ExpressionChain exprChain) {
@@ -158,6 +160,11 @@ public abstract class AbstractModelElement extends SpaceObject implements ModelE
         if (namedParent == null)
             namedParent = AstUtils.getNearestNamedParent(this);
         return namedParent;
+    }
+
+    @Override
+    public List<Tuple> getAllTagsList() {
+        return allTags;
     }
 
     @Override

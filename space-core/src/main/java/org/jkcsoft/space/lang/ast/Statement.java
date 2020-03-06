@@ -17,9 +17,8 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public abstract class Statement extends AbstractModelElement {
+public interface Statement extends ModelElement {
 
-    public Statement(SourceInfo sourceInfo) {
-        super(sourceInfo);
-    }
+    // A marker for now
+
 }

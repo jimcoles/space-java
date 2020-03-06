@@ -10,20 +10,19 @@
 package org.jkcsoft.space.lang.instance;
 
 /**
- * A Transaction is applicable to both in-memory and persistenct actions.  Every Action
- * implicitly defines a Transaction.  Transactions are therefore nestable.
- * <p>
- * With in-memory transactions, we might be able to avoid introducing the notion of Threads.
+ * A Transaction is applicable to both in-memory and persistence actions. Every Action
+ * implicitly defines a Transaction. Transactions are therefore nestable.
+ *
+ * <p>In-memory Transactions might offset the need for direct thread control by the
+ * programmer.
  *
  * @author Jim Coles
  * @version 1.0
  */
 public class Transaction {
 
-
     public Transaction() {
+
     }
-
-
 
 }

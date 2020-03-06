@@ -9,12 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
-import java.util.List;
-
 /**
- * Just a wrapper around the {@link SpaceTypeDefn} associated with this set's contents,
+ * Just a wrapper around the {@link ComplexTypeImpl} associated with this set's contents,
  * but distinguishes 'set of type' versus just 'type' for type checking and execution
  * purposes.
  *

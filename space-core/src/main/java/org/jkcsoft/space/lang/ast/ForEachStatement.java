@@ -14,7 +14,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class ForEachStatement extends Statement {
+public class ForEachStatement extends AbstractModelElement implements Statement {
     // for
     private VariableDecl loopVariableDecl;
     private ValueExpr spaceExpression;  // an expression that returns a Space. can be just an Assoc path.

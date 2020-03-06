@@ -17,7 +17,6 @@ import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.ast.sji.SjiFunctionDefnImpl;
-import org.jkcsoft.space.lang.ast.sji.SjiTypeDefn;
 import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.loader.AstFileLoadErrorSet;
 import org.jkcsoft.space.lang.loader.AstLoadError;
@@ -129,7 +128,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     private void initRuntime() {
         loadAstLoader("org.jkcsoft.space.antlr.loaders.G2AntlrParser");
-        SpaceHome.getSjiService().getSjiBindings().registerPToPBinding("org.jkcsoft.space.lang.runtime.jnative", "space");
+        SpaceHome.getSjiService().registerPackageBinding("org.jkcsoft.space.lang.runtime.jnative", "space");
 //        NSRegistry.getInstance();
     }
 
@@ -256,7 +255,7 @@ public class Executor extends ExprProcessor implements ExeContext {
             try {
                 // the following call to getDeepLoad() ensures the Space wrapper for the
                 // Java class is loaded and ready for lookup for subsequent linking
-                SpaceHome.getSjiService().getDeepLoadSpaceWrapper(targetJavaTypeRef.getFullUrlSpec(), null);
+                SpaceHome.getSjiService().getSjiTypeProxyDeepLoad(targetJavaTypeRef.getFullUrlSpec(), null);
             }
             catch (ClassNotFoundException e) {
                 // NOTE Java class might have been loaded already under the specified full path
@@ -312,12 +311,12 @@ public class Executor extends ExprProcessor implements ExeContext {
         };
 
         for (Class jNativeType : jNativeTypes) {
-            SpaceHome.getSjiService().getDeepLoadSpaceWrapper(jNativeType, null);
+            SpaceHome.getSjiService().getSjiTypeProxyDeepLoad(jNativeType, null);
         }
 
         FullTypeRefImpl opSysRef = FullTypeRefImpl.newFullTypeRef(
             nsRegistry.getJavaNs().getName()
-                + ":" + SpaceHome.getSjiService().getSjiBindings().applyToJavaClassname(JOpSys.class.getName())
+                + ":" + SpaceHome.getSjiService().getFQSpaceName(JOpSys.class.getName())
         );
         AstUtils.resolveAstRef(null, opSysRef);
         if (opSysRef.isResolvedValid())
@@ -503,7 +502,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
                     // add all types local to this parse unit's directory
                     parseUnit.getAllImportedTypes().addAll(
-                        AstUtils.queryAst(parseUnit.getParent(), new QueryAstConsumer<>(SpaceTypeDefn.class))
+                        AstUtils.queryAst(parseUnit.getParent(), new QueryAstConsumer<>(ComplexTypeImpl.class))
                     );
                 }
             }
@@ -556,11 +555,11 @@ public class Executor extends ExprProcessor implements ExeContext {
         exeTypeRef.setNsRefPart(userNsRefPart);
         AstUtils.addNewMetaRefParts(exeTypeRef, sourceInfo, pathNodes);
         AstUtils.resolveAstRef(null, exeTypeRef);
-        SpaceTypeDefn bootTypeDefn = (SpaceTypeDefn) exeTypeRef.getResolvedType();
+        ComplexTypeImpl bootTypeDefn = (ComplexTypeImpl) exeTypeRef.getResolvedType();
 //        SpaceTypeDefn bootTypeDefn = progSpaceDir.getFirstSpaceDefn();
         Tuple mainTypeTuple = newTupleImpl(bootTypeDefn);
         EvalContext evalContext = new EvalContext();
-        SpaceFunctionDefn spMainActionDefn = bootTypeDefn.getBody().getFunction("main");
+        SpaceFunctionDefn spMainActionDefn = bootTypeDefn.getFunction("main");
 
         ProgSourceInfo progSourceInfo = new ProgSourceInfo();
         FunctionCallExpr bootMainCallExpr = getAstFactory().newFunctionCallExpr(progSourceInfo);
@@ -584,15 +583,13 @@ public class Executor extends ExprProcessor implements ExeContext {
         // init the context tuple
         callStack.push(bootCallCtxt);
         // this evaluates the init statements for the type such as var inits.
-        eval(evalContext, bootTypeDefn.getBody());
+        eval(evalContext, bootTypeDefn.getInitBlock());
         // call the 'main' function a dummy function call expr
         eval(evalContext, bootMainCallExpr);
         callStack.pop();
         log.debug("exiting Space program execution");
         return null;
     }
-
-    //
 
     private Declaration newAnonDecl(DatumType datumType) {
         Declaration decl = null;
@@ -601,7 +598,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         if (rootType instanceof NumPrimitiveTypeDefn) {
             decl = getAstFactory().newVariableDecl(new ProgSourceInfo(), null, typeRef);
         }
-        else if (rootType instanceof SpaceTypeDefn) {
+        else if (rootType instanceof ComplexTypeImpl) {
             decl = getAstFactory().newAssociationDecl(new ProgSourceInfo(), null, typeRef);
         }
 
@@ -680,34 +677,39 @@ public class Executor extends ExprProcessor implements ExeContext {
     private void eval(EvalContext evalContext, StatementBlock statementBlock) {
         log.debug("eval: " + statementBlock);
         FunctionCallContext functionCallContext = evalContext.peekStack();
-        Tuple blockTuple = statementBlock instanceof SpaceTypeDefnBody ?
+        Tuple blockTuple = statementBlock instanceof ComplexType ?
             functionCallContext.getCtxObject() : newTupleImpl(statementBlock);
         functionCallContext.addBlockContext(getObjFactory().newBlockContext(statementBlock, blockTuple));
         List<Statement> statementSequence = statementBlock.getStatementSequence();
         for (Statement statement : statementSequence) {
-            if (statement instanceof ExprStatement) {
-                ExprStatement exprHolderStatement = (ExprStatement) statement;
-                eval(evalContext, exprHolderStatement.getExpression());
-            }
-            else if (statement instanceof IfStatement) {
-                // TODO
-            }
-            else if (statement instanceof ForEachStatement) {
-                // TODO
-            }
-            else if (statement instanceof StatementBlock) {
-                eval(evalContext, ((StatementBlock) statement));
-                // Klunky (?) handling of space 'return' statement
-                if (functionCallContext.isPendingReturn())
-                    return;
-            }
-            else if (statement instanceof ReturnExpr) {
-                Value retVal = eval(evalContext, ((ReturnExpr) statement).getValueExpr());
-                autoCastAssign(evalContext, functionCallContext.getReturnValueHolder(), retVal);
-                functionCallContext.setPendingReturn(true);
-            }
+            eval(evalContext, statement);
+            if (evalContext.peekStack().isPendingReturn())
+                break;
         }
         functionCallContext.popBlock();
+        return;
+    }
+
+    private void eval(EvalContext evalContext, Statement statement) {
+        FunctionCallContext functionCallContext = evalContext.peekStack();
+        if (statement instanceof ExprStatement) {
+            ExprStatement exprHolderStatement = (ExprStatement) statement;
+            eval(evalContext, exprHolderStatement.getExpression());
+        }
+        else if (statement instanceof IfStatement) {
+            // TODO
+        }
+        else if (statement instanceof ForEachStatement) {
+            // TODO
+        }
+        else if (statement instanceof StatementBlock) {
+            eval(evalContext, ((StatementBlock) statement));
+        }
+        else if (statement instanceof ReturnExpr) {
+            Value retVal = eval(evalContext, ((ReturnExpr) statement).getValueExpr());
+            autoCastAssign(evalContext, functionCallContext.getReturnValueHolder(), retVal);
+            functionCallContext.setPendingReturn(true);
+        }
         return;
     }
 
@@ -727,7 +729,7 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     private Value eval(EvalContext evalContext, NewSetExpr newSetExpr) {
         log.debug("eval: " + newSetExpr);
-        SetSpace value = newSet(null, null);
+        TupleSet value = newSet(null);
         newSetExpr.getNewTupleExprs().forEach(
             newTupleExpr -> value.addTuple(eval(evalContext, newTupleExpr))
         );
@@ -1031,17 +1033,17 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     // ---------------------------- New Space Objects ------------------------
 
-    private SetSpace newSet(SetSpace contextSpace, SetTypeDefn setTypeDefn) {
-        SetSpace setSpace = getObjFactory().newSet(contextSpace, setTypeDefn);
-        trackInstanceObject(setSpace);
-        return setSpace;
+    private TupleSet newSet(SetTypeDefn setTypeDefn) {
+        TupleSet tupleSet = getObjFactory().newSet(setTypeDefn);
+        trackInstanceObject(tupleSet);
+        return tupleSet;
     }
 
-    private Reference newReference(AssociationDecl assocDecl, Tuple tuple, SpaceObject toObject) {
+    private Reference newReference(AssociationDefn assocDecl, Tuple tuple, SpaceObject toObject) {
         return newReference(assocDecl, tuple, toObject.getOid());
     }
 
-    private Reference newReference(AssociationDecl assocDecl, Tuple tuple, SpaceOid toOid) {
+    private Reference newReference(AssociationDefn assocDecl, Tuple tuple, SpaceOid toOid) {
         return getObjFactory().newObjectReference(assocDecl, tuple, toOid);
     }
 
@@ -1058,7 +1060,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         if (declaration.getType() instanceof PrimitiveTypeDefn) {
             holder = new Variable(tuple, ((VariableDecl) declaration));
         }
-        else if (declaration instanceof SpaceTypeDefn) {
+        else if (declaration instanceof ComplexTypeImpl) {
             holder = ofact.newObjectReference(null, null, null);
         }
         else if (declaration instanceof StreamTypeDefn) {

@@ -9,14 +9,12 @@
  */
 
 /**
- * <p>This package defines the Abstract Syntax Tree (AST) for the Space language and
- * is the heart of the Java implementation of Space.  The package contains classes
- * representing all language notions for Space including
- * non-terminals and terminals.  These are the types of things one sees in
- * a given Space source code file.</p>
+ * <p>This package represents, concretely, the Space Abstract Syntax Tree (AST).
+ * The Space AST is the heart of the Java implementation of the language and as such
+ * contains Java interfaces and classes corresponding to all language notions.</p>
  * <h2>Package Specification</h2>
- * Eventually we will have a version of this package that is itself generated
- * from a Space model.
+ * NOTE: In the future, we may replace this Java implementation with a Space implementations
+ * of the AST.
  * <p>
  * Many element classes are named per the following: <br>
  * <p>
@@ -27,8 +25,8 @@
  * <h2>Primary Notions</h2>
  * <p>The following are concrete notions defined by a Space programmer.</p>
  * <ul>
- *     <li>SpaceDefn - A Space is a thing, a noun, an entity. A Space has state
- *     described via Variables and Associations.</li>
+ *     <li>{@link org.jkcsoft.space.lang.ast.ComplexTypeImpl} - A type corresponds to a type
+ *     of thing, a noun, an entity. A type has state described via Variables and Associations.</li>
  *     <li>{@link org.jkcsoft.space.lang.ast.VariableDeclImpl} - A scalar-valued element
  *     with some semantic meaning associated with a Space</li>
  *     <li>EquationDefn</li>
@@ -37,7 +35,7 @@
  * <table border="true" padding="5">
  *     <tr><th>Declarative</th><th></th><th>Imperative</th></tr>
  *     <tr>
- *         <td>{@link org.jkcsoft.space.lang.ast.EquationDefn}</td>
+ *         <td>{@link org.jkcsoft.space.lang.ast.RuleImpl}</td>
  *         <td></td>
  *         <td>{@link org.jkcsoft.space.lang.ast.SpaceFunctionDefn}</td>
  *     </tr>

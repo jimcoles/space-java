@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.instance.sji;
 
+import org.jkcsoft.space.SpaceHome;
+import org.jkcsoft.space.lang.ast.sji.SjiService;
 import org.jkcsoft.space.lang.instance.Value;
 
 import java.lang.reflect.InvocationTargetException;
@@ -19,6 +21,7 @@ import java.lang.reflect.Method;
  */
 public class SjiMethodCall {
 
+    private SjiService sjiService = SpaceHome.getSjiService();
     private Object jObject;
     private Method jMethod;
     private Object[] jArgs;
@@ -32,7 +35,7 @@ public class SjiMethodCall {
     public Value call() {
         Value sValue = null;
         try {
-            sValue = SjiUtil.toSpaceValue(jMethod.invoke(jObject, jArgs));
+            sValue = sjiService.toSpaceValue(jMethod.invoke(jObject, jArgs));
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }

@@ -10,9 +10,25 @@
 package org.jkcsoft.space.lang.instance;
 
 /**
- * Not sure how I'm going to use this but it seems like we should have
- * an abstraction called 'Space'.
+ * A Space is a collection of {@link TupleSet}'s wherein objects in one collection may
+ * hold a Reference to another object. The Space is the basis for satisfying
+ * a QueryImpl. A Space has associated runtime-managed indices including trees.
+ *
+ * Every VM has a default (main) Space.
+ * A VM may hold multiple Spaces.
+ * User logic may have knowledge of multiple Spaces and may move data
+ * between Spaces.
+ *
+ * Simple programs will use the default Space.
+ * More complex enterprise and service-oriented apps will contain multiple related spaces.
+ *
+ * Possible implementations:
+ * InMemorySpaceImpl -
+ * RemoteSpaceImpl - An in memory proxy to a remote state machine. This could represent
+ * an external system such as a database.
  */
 public interface Space {
+
+
 
 }

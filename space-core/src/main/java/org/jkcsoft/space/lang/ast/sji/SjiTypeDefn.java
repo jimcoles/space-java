@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public class SjiTypeDefn extends AbstractDatumTypeDefn implements ComplexType {
+public class SjiTypeDefn extends AbstractProjection implements ComplexType {
 
     // wrapped element
     private Class jClass;
@@ -63,7 +63,7 @@ public class SjiTypeDefn extends AbstractDatumTypeDefn implements ComplexType {
         return datumDecls;
     }
 
-    public void addAssociationDecl(AssociationDecl associationDecl) {
+    public void addAssociationDecl(AssociationDefn associationDecl) {
         addDatum(associationDecl);
         //
         addChild((AbstractModelElement) associationDecl);
@@ -85,4 +85,8 @@ public class SjiTypeDefn extends AbstractDatumTypeDefn implements ComplexType {
         addChild(sjiFunctionDefnImpl);
     }
 
+    @Override
+    public ComplexType getRootType() {
+        return null;
+    }
 }

@@ -12,18 +12,17 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
- * An EquationDefn is a symbolic expression that expresses a
- * relation between two otherwise independent things (Spaces).
- * An Equation is, notionally, very similar to a Rule or a
- * grammar Production.  An Equation must at all times evaluate
- * to true if the system is to be deemed in a valid state.
+ * NOT USED. See {@link View} instead.
+ *
+ * Represents our intrinsic notion of a QueryImpl (definition) against an Object Space
+ * (sets of Tuples).
  *
  * @author Jim Coles
  * @version 1.0
  */
-public class EquationDefn extends NamedElement {
+public class QueryImpl extends NamedElement implements Query {
 
-    public EquationDefn(SourceInfo sourceInfo, String name) {
+    protected QueryImpl(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
     }
 
@@ -31,5 +30,4 @@ public class EquationDefn extends NamedElement {
     public MetaType getMetaType() {
         return null;
     }
-
 }

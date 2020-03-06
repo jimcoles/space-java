@@ -22,26 +22,53 @@ import java.util.List;
  * @author Jim Coles
  */
 @LexicalNode
-public class StatementBlock extends Statement implements ComplexType {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public class StatementBlock extends AbstractProjection implements Statement, ComplexType {
 
 //    private List<AssociationDefn> associationDefnList;
     private List<Statement> statementSequence = new LinkedList<>();  // child statements
-//    private List<VariableDefn> variableDefnList;
-    private List<Declaration> datumDeclList;
 
     public StatementBlock(SourceInfo sourceInfo) {
-        super(sourceInfo);
-        datumDeclList = new LinkedList<>();
+        super(sourceInfo, null);
     }
 
     @Override
     public MetaType getMetaType() {
         return null;
-    }
-
-    @Override
-    public int getScalarDofs() {
-        return datumDeclList.size();
     }
 
     @Override
@@ -52,16 +79,6 @@ public class StatementBlock extends Statement implements ComplexType {
     @Override
     public SetTypeDefn getSetOfType() {
         return null;
-    }
-
-    @Override
-    public boolean isPrimitiveType() {
-        return false;
-    }
-
-    @Override
-    public boolean isAssignableTo(DatumType argsType) {
-        return false;
     }
 
     public List<Statement> getStatementSequence() {
@@ -86,35 +103,6 @@ public class StatementBlock extends Statement implements ComplexType {
     }
 
     @Override
-    public boolean hasDatums() {
-        return datumDeclList != null && datumDeclList.size() > 0;
-    }
-
-
-    // ===========================================================
-    // Child adders
-    //
-    public VariableDecl addVariableDecl(VariableDeclImpl variableDecl) {
-        datumDeclList.add(variableDecl);
-        //
-        addChild(variableDecl);
-        return variableDecl;
-    }
-
-    public AssociationDecl addAssociationDecl(AssociationDeclImpl associationDecl) {
-        datumDeclList.add(associationDecl);
-        //
-        addChild(associationDecl);
-        //
-        return associationDecl;
-    }
-
-    @Override
-    public List<Declaration> getDatumDeclList() {
-        return datumDeclList;
-    }
-
-    @Override
     public String getDisplayName() {
         return "{block}";
     }
@@ -131,6 +119,11 @@ public class StatementBlock extends Statement implements ComplexType {
 
     @Override
     public List<String> getFullNamePath() {
+        return null;
+    }
+
+    @Override
+    public ComplexType getRootType() {
         return null;
     }
 }

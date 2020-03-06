@@ -11,7 +11,7 @@ package org.jkcsoft.space.test;
 
 import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.sji.SjiService;
-import org.jkcsoft.space.lang.instance.SetSpace;
+import org.jkcsoft.space.lang.instance.TupleSet;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +29,7 @@ public class TestTupleSet {
     @Test public void testTupleSetBuild() {
 //        List
         SjiService sji = SpaceHome.getSjiService();
+//        DatumType sjiGcProxy = sji.getSjiTypeProxyDeepLoad(GregorianCalendar.class, null);
         Calendar bdCal = GregorianCalendar.getInstance();
         //
         {
@@ -37,8 +38,8 @@ public class TestTupleSet {
                 new User("Di", toMillis(bdCal, 1959, 6, 16)),
                 new User("Jim", toMillis(bdCal, 1964, 8, 28))
             );
-            SetSpace setSpace = sji.createSjiProxy(javaColl);
-            log.info("SJI set => {}", setSpace);
+            TupleSet tupleSet = sji.createSjiInstanceProxy(javaColl);
+            log.info("SJI set => {}", tupleSet);
         }
         // Use Calendar object
         // TODO: how to wrap a Java GregorianCalendar as a Space Tuple w/ Value
@@ -48,9 +49,9 @@ public class TestTupleSet {
                 new UserC("Di", newCal(1959, 6, 16)),
                 new UserC("Jim", newCal(1964, 8, 28))
             );
-            SetSpace setSpaceC = sji.createSjiProxy(javaCollC);
+            TupleSet tupleSetC = sji.createSjiInstanceProxy(javaCollC);
             //
-            log.info("SJI set => {}", setSpaceC);
+            log.info("SJI set => {}", tupleSetC);
         }
     }
 

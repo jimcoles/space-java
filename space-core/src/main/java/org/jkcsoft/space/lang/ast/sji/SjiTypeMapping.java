@@ -18,7 +18,7 @@ import org.jkcsoft.space.lang.ast.LinkState;
 public class SjiTypeMapping {
 
     private Class javaClass; // the key
-    private DatumType spaceWrapper; // the target
+    private DatumType sjiProxy; // the target
     private LinkState state = LinkState.INITIALIZED;
 
     public SjiTypeMapping(Class javaClass) {
@@ -29,12 +29,12 @@ public class SjiTypeMapping {
         return javaClass;
     }
 
-    public DatumType getSpaceWrapper() {
-        return spaceWrapper;
+    public DatumType getSjiProxy() {
+        return sjiProxy;
     }
 
-    public void setSpaceWrapper(DatumType resolvedType) {
-        this.spaceWrapper = resolvedType;
+    public void setSjiProxy(DatumType resolvedType) {
+        this.sjiProxy = resolvedType;
     }
 
     public LinkState getState() {
@@ -46,12 +46,12 @@ public class SjiTypeMapping {
     }
 
     public boolean isPrimitive() {
-        return spaceWrapper != null && spaceWrapper.isPrimitiveType();
+        return sjiProxy != null && sjiProxy.isPrimitiveType();
     }
 
     @Override
     public String toString() {
         return "SJI mapping for Java class ["+javaClass+"] " +
-            "state=" + getState() + " maps to ["+spaceWrapper+"]";
+            "state=" + getState() + " maps to ["+ sjiProxy +"]";
     }
 }

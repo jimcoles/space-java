@@ -11,11 +11,15 @@
 
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.QueryImpl;
+
 /**
  * @author Jim Coles
  * @version 1.0
  */
 public class View {
+
+    private QueryImpl query;
 
     View() {
 

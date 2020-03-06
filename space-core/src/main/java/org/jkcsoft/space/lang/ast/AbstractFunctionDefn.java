@@ -19,7 +19,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public abstract class AbstractFunctionDefn extends NamedElement implements FunctionDefn, SolutionExpr {
 
-    private EquationDefn governingEquation; // TODO
+    private Rule governingEquation; // TODO
     private ComplexType argSpaceTypeDefn;
 
     protected AbstractFunctionDefn(SourceInfo sourceInfo, String name)
@@ -43,7 +43,7 @@ public abstract class AbstractFunctionDefn extends NamedElement implements Funct
         return argSpaceTypeDefn;
     }
 
-    public EquationDefn getGoverningEquation() {
+    public Rule getGoverningEquation() {
         return governingEquation;
     }
 

@@ -26,19 +26,19 @@ public class SjiTypeRefByClass extends AbstractModelElement implements TypeRef {
         this.mapping = sjiTypeMapping;
 
         if (sjiTypeMapping.getJavaClass() == Boolean.TYPE) {
-            mapping.setSpaceWrapper(NumPrimitiveTypeDefn.BOOLEAN);
+            mapping.setSjiProxy(NumPrimitiveTypeDefn.BOOLEAN);
         }
         else if (sjiTypeMapping.getJavaClass() == Integer.TYPE) {
-            mapping.setSpaceWrapper(NumPrimitiveTypeDefn.CARD);
+            mapping.setSjiProxy(NumPrimitiveTypeDefn.CARD);
         }
         else if (sjiTypeMapping.getJavaClass() == Float.TYPE) {
-            mapping.setSpaceWrapper(NumPrimitiveTypeDefn.REAL);
+            mapping.setSjiProxy(NumPrimitiveTypeDefn.REAL);
         }
         else if (sjiTypeMapping.getJavaClass() == Void.TYPE) {
-            mapping.setSpaceWrapper(VoidType.VOID);
+            mapping.setSjiProxy(VoidType.VOID);
         }
 
-        if (mapping.getSpaceWrapper() != null)
+        if (mapping.getSjiProxy() != null)
             mapping.setState(LinkState.RESOLVED);
 
     }
@@ -53,7 +53,7 @@ public class SjiTypeRefByClass extends AbstractModelElement implements TypeRef {
 
     @Override
     public DatumType getResolvedType() {
-        return mapping.getSpaceWrapper();
+        return mapping.getSjiProxy();
     }
 
     @Override

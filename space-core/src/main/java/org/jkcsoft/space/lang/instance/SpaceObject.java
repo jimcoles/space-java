@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.ComplexTypeImpl;
 import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.VariableDeclImpl;
 
@@ -19,8 +20,8 @@ import org.jkcsoft.space.lang.ast.VariableDeclImpl;
  * <table>
  *     <tr><th>Object Kind</th><th>Dims</th><th>Meta Type</th></tr>
  *     <tr><td>{@link ScalarValue}</td> <td>1x1</td> <td>{@link VariableDeclImpl}</td></tr>
- *     <tr><td>{@link TupleImpl}</td> <td>1xn</td> <td>{@link org.jkcsoft.space.lang.ast.SpaceTypeDefn} or {@link org.jkcsoft.space.lang.ast.ViewDefn}</td></tr>
- *     <tr><td>{@link SetSpace}</td> <td>nxm</td> <td>{@link org.jkcsoft.space.lang.ast.SpaceTypeDefn}</td></tr>
+ *     <tr><td>{@link TupleImpl}</td> <td>1xn</td> <td>{@link ComplexTypeImpl} or {@link org.jkcsoft.space.lang.ast.ViewDefn}</td></tr>
+ *     <tr><td>{@link TupleSet}</td> <td>nxm</td> <td>{@link ComplexTypeImpl}</td></tr>
  *     <tr>
  *         <td>ObjectStream &nbsp&nbsp</td>
  *         <td>nx1 </td>

@@ -10,7 +10,6 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.java.util.JavaHelper;
-import org.jkcsoft.java.util.Lister;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
 
@@ -35,20 +34,19 @@ import java.util.function.Consumer;
  * @author Jim Coles
  * @version 1.0
  */
-public class SetSpace extends SpaceObject implements Value, Space, Iterable<Tuple> {
+public class TupleSet extends SpaceObject implements Value, Iterable<Tuple> {
 
     /** Can be an EntityDefn or a ViewDefn */
-    private SetSpace contextSpace;
+    private Space contextSpace;
 
     /** The backing list maintains the sequence of tuples as they are added */
     private List<Tuple> tuples = new LinkedList<>();
 
-    SetSpace(SpaceOid oid, SetSpace contextSpace, SetTypeDefn setTypeDefn) {
+    TupleSet(SpaceOid oid, SetTypeDefn setTypeDefn) {
         super(oid, setTypeDefn);
-        this.contextSpace = contextSpace;
     }
 
-    public SetSpace addTuple(Tuple tuple) {
+    public TupleSet addTuple(Tuple tuple) {
         tuples.add(tuple);
         validate(tuple);
         return this;
@@ -60,10 +58,6 @@ public class SetSpace extends SpaceObject implements Value, Space, Iterable<Tupl
 
     private void validate(Tuple tuple) {
 
-    }
-
-    public SetSpace getContextSpace() {
-        return contextSpace;
     }
 
     @Override
@@ -89,6 +83,7 @@ public class SetSpace extends SpaceObject implements Value, Space, Iterable<Tupl
     public boolean isSingleWrapper() {
         return tuples.size() == 1 && tuples.get(0).isSingleValueWrapper();
     }
+
     @Override
     public Object getJValue() {
         return tuples.get(0).getJValue();
@@ -99,11 +94,11 @@ public class SetSpace extends SpaceObject implements Value, Space, Iterable<Tupl
         DatumType datumType = ((SetTypeDefn) getDefn()).getContainedElementType();
         return super.toString() + " => " + JavaHelper.EOL
             + ((datumType instanceof SimpleType) ?
-                "(value)" :
-                Strings.buildDelList(
-                    ((ComplexType) datumType).getDatumDeclList(),
-                    obj -> "\"" + ((Declaration) obj).getName() + "\"",
-                    "\t"))
+            "(value)" :
+            Strings.buildDelList(
+                ((ComplexType) datumType).getDatumDeclList(),
+                obj -> "\"" + ((Declaration) obj).getName() + "\"",
+                "\t"))
             + JavaHelper.EOL
             + Strings.buildNewlineList(tuples);
     }

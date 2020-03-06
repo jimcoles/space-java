@@ -14,15 +14,21 @@ package org.jkcsoft.space.lang.ast;
  * Keys may be a simple a a single, opaque byte or as complex as tuple of scalar
  * variables.
  *
+ * 4GL: Defining a Key at the language-level pushes Space in the 4GL direction.
+ *
+ * Keys enable some nice high-level things:
+ * <li>Language-managed Indexes and Trees.
+ * <li>Mapping to key-oriented database models.
+ * <li>CDI-like injection of objects, i.e., Space should feel like it has an intrinsic
+ * CDI injector.
+ *
  * @author Jim Coles
  */
 public class KeyDefn {
 
-    private boolean isByteSeq;
-    private int numBytes;
+    private Projection vars;
 
-    private boolean isVarSet;
-    private ViewDefn varSet;
-
-
+    public Projection getVars() {
+        return vars;
+    }
 }

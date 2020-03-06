@@ -16,7 +16,6 @@ import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -46,7 +45,7 @@ public class AstUtils {
     private static Executor.FindFirstAstConsumer<ModelElement> typeOrDirContainerFinder =
         new Executor.FindFirstAstConsumer<>(
             ModelElement.class,
-            modelElement -> modelElement instanceof SpaceTypeDefn || modelElement instanceof Directory
+            modelElement -> modelElement instanceof ComplexTypeImpl || modelElement instanceof Directory
         );
 
     /** Of the two specified arg types, returns the 'largest' of the two. */
@@ -452,7 +451,7 @@ public class AstUtils {
             scopeKind = ScopeKind.BLOCK;
         else if (context instanceof SpaceFunctionDefn)
             scopeKind = ScopeKind.BLOCK;
-        else if (context instanceof SpaceTypeDefn)
+        else if (context instanceof ComplexTypeImpl)
             scopeKind = ScopeKind.TYPE_DEFN;
         else if (context instanceof TupleValueList)
             scopeKind = ScopeKind.TYPE_DEFN;

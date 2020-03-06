@@ -93,7 +93,7 @@ query-def <queryName> (
 
  Operators produce a new computed thing from existing thing(s)
 
- Navigation opers = Query opers
+ Navigation opers = QueryImpl opers
 . - LEFT nav.  Do we need a RIGHT nav operator to tell engine that reference is in the right space?
 
 
@@ -314,8 +314,8 @@ equationExpr :
 
   Differentiate:
 
-      'view' - A static 'View' definition Query that describes a new Type as an algebraic variation
-      of existing Types using Projection. Can be a Denormalizing Query. Mapping Query. Used
+      'view' - A static 'View' definition QueryImpl that describes a new Type as an algebraic variation
+      of existing Types using Projection. Can be a Denormalizing QueryImpl. Mapping QueryImpl. Used
       in mapping base Types to some Interface (or other Space) or as a means of defining
       new Types or Interfaces. Used to define Type 'extension'.
 
@@ -332,7 +332,7 @@ equationExpr :
       Function
       Space - An identified set of Types and related Equations (and related Functions, etc)
       Interface - Is this the same as a View?
-      Query
+      QueryImpl
       View
 
       Transform - Space, S1, to Space, S2

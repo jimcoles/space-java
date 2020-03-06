@@ -14,7 +14,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public interface TypeRef extends TypedExpr {
+public interface TypeRef extends TypedExpr, ModelElement {
 
     DatumType getResolvedType();
 

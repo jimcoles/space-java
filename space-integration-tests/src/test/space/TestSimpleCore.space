@@ -65,6 +65,7 @@ type City {
     CharSequence cityDefaultName;
 }
 
+// Detached Association def
 assoc PersonAddresses {
 
     @leftEnd = [ endType = Person

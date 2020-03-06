@@ -14,7 +14,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.LoggerFactory;
 import org.jkcsoft.space.antlr.SpaceParser;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.loader.AstLoadError;
@@ -138,11 +137,10 @@ public class Antlr2AstTransform {
         return toNameRefExpr(toNamePartExpr(identifierContext));
     }
 
-    public SpaceTypeDefn toAst(SpaceParser.SpaceTypeDefnContext spaceTypeDefnContext) {
+    public ComplexTypeImpl toAst(SpaceParser.SpaceTypeDefnContext spaceTypeDefnContext) {
         logTrans(spaceTypeDefnContext);
-        SpaceTypeDefn spaceTypeDefn = null;
-        // TODO: 2/8/17 Not all spaces are Entities?
-        spaceTypeDefn = astFactory.newSpaceTypeDefn(
+        ComplexTypeImpl complexTypeImpl = null;
+        complexTypeImpl = astFactory.newSpaceTypeDefn(
             toSI(spaceTypeDefnContext),
             astFactory.newNamePart(toSI(spaceTypeDefnContext.identifier()), toText(spaceTypeDefnContext.identifier()))
         );
@@ -157,16 +155,16 @@ public class Antlr2AstTransform {
 
         SpaceParser.SpaceTypeDefnBodyContext spaceTypeDefnBodyContext = spaceTypeDefnContext.spaceTypeDefnBody();
 
-        spaceTypeDefn.setBody(toAst(spaceTypeDefnContext.spaceTypeDefnBody()));
+//        complexTypeImpl.setBody(toAst(spaceTypeDefnContext.spaceTypeDefnBody()));
 
-        return spaceTypeDefn;
+        return complexTypeImpl;
     }
 
-    private SpaceTypeDefnBody toAst(SpaceParser.SpaceTypeDefnBodyContext spaceTypeDefnBodyContext) {
+    private void setProjection(Projection projection, SpaceParser.SpaceTypeDefnBodyContext spaceTypeDefnBodyContext) {
         logTrans(spaceTypeDefnBodyContext);
         SourceInfo bodySourceInfo = toSI(spaceTypeDefnBodyContext);
-        SpaceTypeDefnBody typeDefnBodyAST =
-            astFactory.newTypeDefnBody(bodySourceInfo);
+//        SpaceTypeDefnBody typeDefnBodyAST =
+//            astFactory.newTypeDefnBody(bodySourceInfo);
 
 //        StatementBlock initBlock = astFactory.newStatementBlock(bodySourceInfo);
 //        typeDefnBodyAST.setInitBlock(initBlock);
@@ -176,9 +174,9 @@ public class Antlr2AstTransform {
             for (SpaceParser.VariableDefnStmtContext variableDefnStmtContext : varDefCtxts) {
                 // Add var def
                 VariableDeclImpl variableDeclAST = toAst(variableDefnStmtContext.variableDefn());
-                typeDefnBodyAST.addVariableDecl(variableDeclAST);
+                projection.addVariableDecl(variableDeclAST);
                 // Add assignment if there is one
-                extractInit(typeDefnBodyAST, variableDefnStmtContext);
+                extractInit(projection.getInitBlock(), variableDefnStmtContext);
             }
         }
 
@@ -186,23 +184,23 @@ public class Antlr2AstTransform {
         if (assocDefCtxts != null && !assocDefCtxts.isEmpty()) {
             for (SpaceParser.AssociationDefnStmtContext assocDefCtx : assocDefCtxts) {
                 // Add declarative element
-                typeDefnBodyAST.addAssociationDecl(toAst(assocDefCtx.associationDefn()));
+                projection.addAssociationDecl(toAst(assocDefCtx.associationDefn()));
                 // Add assignment expr if it exists
-                extractInit(typeDefnBodyAST, assocDefCtx);
+                extractInit(projection.getInitBlock(), assocDefCtx);
             }
         }
 
         List<SpaceParser.FunctionDefnContext> actionDefCtxts = spaceTypeDefnBodyContext.functionDefn();
         if (actionDefCtxts != null && !actionDefCtxts.isEmpty()) {
             for (SpaceParser.FunctionDefnContext functionDefnCtx : actionDefCtxts) {
-                typeDefnBodyAST.addFunctionDefn(toAst(functionDefnCtx));
+                projection.addFunctionDefn(toAst(functionDefnCtx));
             }
         }
 
 //        List<SpaceParser.SpaceTypeDefnContext> childSpaceTypeDefnCtxts = spaceTypeDefnBodyContext.spaceTypeDefn();
         // TODO Handle sub-space defn
 
-        return typeDefnBodyAST;
+        return;
     }
 
     private void extractInit(StatementBlock blockAST, SpaceParser.AssociationDefnStmtContext assocDefCtx) {
@@ -244,7 +242,7 @@ public class Antlr2AstTransform {
         return assignmentExprAST;
     }
 
-    private AssociationDeclImpl toAst(SpaceParser.AssociationDefnContext assocDefCtx) {
+    private AssociationDefnImpl toAst(SpaceParser.AssociationDefnContext assocDefCtx) {
         logTrans(assocDefCtx);
         SpaceParser.ComplexOptCollTypeRefContext complexTypeRefContext = assocDefCtx.associationDecl().complexOptCollTypeRef();
         return astFactory.newAssociationDecl(
@@ -383,12 +381,12 @@ public class Antlr2AstTransform {
         return typeRefAst;
     }
 
-    private SpaceTypeDefn toAst(SpaceParser.ParameterDefnListContext parameterDeclCtxt) {
+    private ComplexTypeImpl toAst(SpaceParser.ParameterDefnListContext parameterDeclCtxt) {
         logTrans(parameterDeclCtxt);
         SourceInfo sourceInfo = toSI(parameterDeclCtxt);
-        SpaceTypeDefn typeDefn =
+        ComplexTypeImpl typeDefn =
             astFactory.newSpaceTypeDefn(sourceInfo, astFactory.newNamePart(sourceInfo, "func args"));
-        typeDefn.setBody(astFactory.newTypeDefnBody(sourceInfo));
+//        typeDefn.setBody(astFactory.newTypeDefnBody(sourceInfo));
         List<SpaceParser.ParameterDeclContext> parameterDeclContexts = parameterDeclCtxt.parameterDecl();
         for (SpaceParser.ParameterDeclContext parameterDeclContext : parameterDeclContexts) {
             if (parameterDeclContext.variableDecl() != null)
@@ -400,7 +398,7 @@ public class Antlr2AstTransform {
         return typeDefn;
     }
 
-    private AssociationDeclImpl toAst(SpaceParser.AssociationDeclContext assocDeclCtxt) {
+    private AssociationDefnImpl toAst(SpaceParser.AssociationDeclContext assocDeclCtxt) {
         logTrans(assocDeclCtxt);
         return astFactory.newAssociationDecl(
             toSI(assocDeclCtxt),

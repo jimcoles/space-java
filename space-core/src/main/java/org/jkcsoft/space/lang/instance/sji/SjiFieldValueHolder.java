@@ -9,9 +9,11 @@
  */
 package org.jkcsoft.space.lang.instance.sji;
 
+import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.Declaration;
 import org.jkcsoft.space.lang.ast.sji.SjiFieldVarDecl;
+import org.jkcsoft.space.lang.ast.sji.SjiService;
 import org.jkcsoft.space.lang.instance.Value;
 import org.jkcsoft.space.lang.instance.ValueHolder;
 
@@ -22,6 +24,7 @@ public class SjiFieldValueHolder implements ValueHolder {
 
     private SjiTuple sjiTuple;
     private SjiFieldVarDecl fieldVarDecl;
+    private SjiService sjiService = SpaceHome.getSjiService();
 
     public SjiFieldValueHolder(SjiTuple sjiTuple, SjiFieldVarDecl fieldVarDecl) {
         this.sjiTuple = sjiTuple;
@@ -55,6 +58,6 @@ public class SjiFieldValueHolder implements ValueHolder {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-        return SjiUtil.toSpaceValue(jValue);
+        return sjiService.toSpaceValue(jValue);
     }
 }
