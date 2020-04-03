@@ -27,7 +27,7 @@ type MySpaceDef [equates-to OtherSpaceDef YetAnotherSpaceDef ...] (
     int myIntVar [=<int>];  // var-defn
     boolean myBoolVar [=];  // var-defn
 
-    // These define Associations (ala Foreign Key Relationships)
+    // These define Associations (ala Foreign KeyValue Relationships)
     MyOtherSpaceDef ref;
 
 )
@@ -241,7 +241,7 @@ topLevelAssociationDefn :
   Keys are user-level identifiers as opposed to the internal Space OIDs, which
   are not accessible to the user program.
 
-  Mathematically, I think a Key is just the 'parameter', 't', in a Parametric Equation,
+  Mathematically, I think a KeyValue is just the 'parameter', 't', in a Parametric Equation,
 
     x(t), y(t)
 

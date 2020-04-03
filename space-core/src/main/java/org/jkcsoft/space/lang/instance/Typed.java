@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2020 through present.
  *
  * Licensed under the following license agreement:
  *
@@ -10,9 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 /**
- * Holds a sequence of objects by reference.
- *
  * @author Jim Coles
  */
-public class ObjectRefSequence {
+public interface Typed {
 }

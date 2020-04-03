@@ -21,9 +21,23 @@ public interface ValueHolder<V extends Value> {
 
     Declaration getDeclaration();
 
-    DatumType getType();
+    default DatumType getType() {
+        return getDeclaration().getType();
+    }
 
+    /** Assign @value to this holder slot. */
     void setValue(V value);
 
+    /** Does this value slot have an assignable value? */
+    boolean hasValue();
+
+    /**
+     * Get the assignable value that the Executor will use move to a left-hand side of
+     * assignment statement or other assignment semantics.
+     * For scalars this a primitive value such as a integer.
+     * For {@link org.jkcsoft.space.lang.ast.AssociationDefn}, this is the SpaceOid.
+     * For Java Objects, this is the actual Java Object.
+     */
     V getValue();
+
 }

@@ -9,11 +9,11 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
-import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.ast.AbstractProjection;
+import org.jkcsoft.space.lang.ast.ComplexType;
+import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.NativeSourceInfo;
 import org.jkcsoft.space.lang.metameta.MetaType;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Wraps Java Class to implement an AST Type Defn.
@@ -25,8 +25,8 @@ public class SjiTypeDefn extends AbstractProjection implements ComplexType {
     // wrapped element
     private Class jClass;
 
-    private List<Declaration> datumDecls = new LinkedList<>();
-    private List<SjiFunctionDefnImpl> functionDefns = new LinkedList<>();
+//    private List<Declaration> datumDecls = new LinkedList<>();
+//    private List<SjiFunctionDefnImpl> functionDefns = new LinkedList<>();
 
     SjiTypeDefn(Class jClass) {
         super(new NativeSourceInfo(jClass), jClass == null ? "(method args)" : jClass.getSimpleName());
@@ -38,10 +38,10 @@ public class SjiTypeDefn extends AbstractProjection implements ComplexType {
         return super.getMetaType();
     }
 
-    @Override
-    public int getScalarDofs() {
-        return datumDecls.size();
-    }
+//    @Override
+//    public int getScalarDofs() {
+//        return datumDecls.size();
+//    }
 
     @Override
     public boolean isPrimitiveType() {
@@ -53,37 +53,37 @@ public class SjiTypeDefn extends AbstractProjection implements ComplexType {
         return false;
     }
 
-    @Override
-    public boolean hasDatums() {
-        return datumDecls != null && datumDecls.size() > 0;
-    }
+//    @Override
+//    public boolean hasDatums() {
+//        return datumDecls != null && datumDecls.size() > 0;
+//    }
 
-    @Override
-    public List<Declaration> getDatumDeclList() {
-        return datumDecls;
-    }
+//    @Override
+//    public List<Declaration> getDatumDeclList() {
+//        return datumDecls;
+//    }
 
-    public void addAssociationDecl(AssociationDefn associationDecl) {
-        addDatum(associationDecl);
-        //
-        addChild((AbstractModelElement) associationDecl);
-    }
+//    public void addAssociationDecl(AssociationDefn associationDecl) {
+//        addDatum(associationDecl);
+//        //
+//        addChild((AbstractModelElement) associationDecl);
+//    }
 
-    public void addVariableDecl(SjiVarDecl variableDecl) {
-        addDatum(variableDecl);
-        //
-        addChild(variableDecl);
-    }
+//    public void addVariableDecl(SjiVarDecl variableDecl) {
+//        addDatum(variableDecl);
+//        //
+//        addChild(variableDecl);
+//    }
 
-    private void addDatum(Declaration declaration) {
-        datumDecls.add(declaration);
-    }
+//    private void addDatum(Declaration declaration) {
+//        datumDecls.add(declaration);
+//    }
 
-    public void addFunctionDefn(SjiFunctionDefnImpl sjiFunctionDefnImpl) {
-        functionDefns.add(sjiFunctionDefnImpl);
-        //
-        addChild(sjiFunctionDefnImpl);
-    }
+//    public void addFunctionDefn(SjiFunctionDefnImpl sjiFunctionDefnImpl) {
+//        functionDefns.add(sjiFunctionDefnImpl);
+//        //
+//        addChild(sjiFunctionDefnImpl);
+//    }
 
     @Override
     public ComplexType getRootType() {

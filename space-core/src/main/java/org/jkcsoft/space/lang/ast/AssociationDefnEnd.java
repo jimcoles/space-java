@@ -13,7 +13,9 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface AssociationDefnEnd extends Named {
 
-    TypeRef getTypeRef();
+//    TypeRef getTypeRef();
+
+    ComplexType getType();
 
     /** The multiplicity 0, 1, or many or fixed positive integer */
     int getLowerMultiplicity();

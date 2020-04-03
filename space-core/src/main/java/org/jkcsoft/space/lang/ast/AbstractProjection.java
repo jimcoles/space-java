@@ -36,7 +36,7 @@ public abstract class AbstractProjection extends AbstractDatumTypeDefn implement
     // Child adders
     //
     @Override
-    public VariableDecl addVariableDecl(VariableDeclImpl variableDecl) {
+    public VariableDecl addVariableDecl(VariableDecl variableDecl) {
         datumDeclList.add(variableDecl);
         //
         addChild(variableDecl);
@@ -44,7 +44,7 @@ public abstract class AbstractProjection extends AbstractDatumTypeDefn implement
     }
 
     @Override
-    public AssociationDefn addAssociationDecl(AssociationDefnImpl associationDecl) {
+    public AssociationDefn addAssociationDecl(AssociationDefn associationDecl) {
         datumDeclList.add(associationDecl);
         //
         addChild(associationDecl);

@@ -12,10 +12,11 @@ package org.jkcsoft.space.lang.instance;
 import org.jkcsoft.space.lang.ast.ComplexType;
 import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.Projection;
 
 /**
- * <p>A Tuple is an element of a {@link TupleSet} (which is, conversely,
- * a Set of Tuples). Each Tuple contains values which are ordered and named.
+ * <p>A Tuple is an element of a {@link TupleSetImpl}. Each Tuple contains values
+ * which are ordered and named.
  * Values in a Tuple can be retrieved in order or by the name of the variable.  A Tuple
  * may contain only Scalar values and Oid-based references to Tuples in other
  * Spaces.
@@ -34,21 +35,19 @@ import org.jkcsoft.space.lang.ast.Declaration;
  *
  * @author Jim Coles
  */
-public interface Tuple extends Value {
+public interface Tuple extends ValueCollection<ValueHolder>, Value, SpaceObject {
 
-    @Override
-    DatumType getType();
+    Projection getType();
 
     void initHolder(ValueHolder valueHolder);
 
     Tuple setValue(Declaration spaceDecl, Value value);
 
+    Tuple setValue(int idx, Value value);
+
     ValueHolder get(Declaration member);
 
-//    Reference getRefByOid(SpaceOid memberOid);
-
-    @Override
-    String toString();
+    ValueHolder get(int idx);
 
     boolean isSingleValueWrapper();
 

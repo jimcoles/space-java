@@ -21,7 +21,7 @@ import org.jkcsoft.space.lang.ast.DatumType;
  * @author Jim Coles
  * @version 1.0
  */
-public class SpaceOid implements Comparable<SpaceOid>, Key {
+public class SpaceOid implements Comparable<SpaceOid>, KeyValue {
 
     private long longOid = 0;
 
@@ -34,7 +34,7 @@ public class SpaceOid implements Comparable<SpaceOid>, Key {
     }
 
     @Override
-    public Object getJValue() {
+    public Object getJavaValue() {
         return longOid;
     }
 
@@ -48,8 +48,4 @@ public class SpaceOid implements Comparable<SpaceOid>, Key {
         return Long.compare(this.longOid, o.getLongOid());
     }
 
-    @Override
-    public DatumType getType() {
-        return null;
-    }
 }

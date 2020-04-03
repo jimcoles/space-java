@@ -16,26 +16,30 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  * name. Space Associations are similar to Java fields/properties, but have a
  * richer set of attributes.
  *
- * A named usage or relationship of one type by another type.
+ * <p>A named usage or relationship of one type by another type.
  * Captures a wide range of relationships such as one-to-many, recursive.
  * Analogous to a foreign key relationship in RDB world or a simple
  * field declaration (of a non-primitive type) in Java.
  *
- * The set of language specified (versus user-specified) Association attributes is
- * driven by the following key Use Cases:
- * <p>
- * 1. Enable a simple textualization (write and read) of a Space type. Most commonly,
- * textualize a full graph of Space objects encompassing a range of related types.
- * 1.a. Space, itself, in its terse, conventional form.
- * 1.b. A JSON-like variant.
- * 1.c. JSON (Strict)
- * <p>
- * 2. Eliminate redundant state management by letting the language runtime
+ * <p>The set of language-specified (versus user-specified) Association attributes is
+ * driven by the following key Use Cases:<ol>
+ *
+ * <li>Enable a simple JSON-like textualization (write and read) of a Space object set.
+ * Most commonly,textualize a full graph of Space objects encompassing a range of
+ * associated types.
+ *
+ * <li>Enable a "terse source code" textualization (write and parse) of a Space type system.
+ * Eventually, the Space syntax itself will driven by a Space-in-Space description. This use
+ * case will control, for example, which
+ *
+ * <li>Eliminate redundant state management by letting the language runtime
  * manage hierarchies (trees) and maps. In conventional OOP, tree structure management requires
  * that I set a 'parent node' reference on all child nodes AND a list of 'child nodes'.
  * In Space, I simply create an edge pair (a,b).
- * <p>
- * 3. In its simplest form, behaves just like an OOP variable with a non-primitive type.
+ *
+ * <li>In its simplest form, behaves just like an OOP variable with a non-primitive type.
+ *
+ * </ol>
  *
  * @author Jim Coles
  */

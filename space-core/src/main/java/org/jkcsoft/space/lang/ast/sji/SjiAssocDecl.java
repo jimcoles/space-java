@@ -15,10 +15,22 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 /**
  * @author Jim Coles
  */
-public class SjiAssocDecl extends NamedElement implements SjiDeclaration, AssociationDefn {
+public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaration, AssociationDefn {
 
-    protected SjiAssocDecl(SourceInfo sourceInfo, String name) {
+    private SjiAssociationDefnEnd fromEnd;
+    private SjiAssociationDefnEnd toEnd;
+
+    protected SjiAssocDecl(SourceInfo sourceInfo, SjiTypeDefn fromType, SjiTypeDefn toType, String name) {
         super(sourceInfo, name);
+
+        if (fromType != null) {
+            this.fromEnd = new SjiAssociationDefnEnd(sourceInfo, name, fromType, 1, 1);
+            addChild(this.fromEnd);
+        }
+
+        if (toType == null) throw new RuntimeException("bug: path to class ref cannot be null");
+        this.toEnd = new SjiAssociationDefnEnd(sourceInfo, name, toType, 1, 1);
+        addChild(this.toEnd);
     }
 
     @Override

@@ -10,8 +10,8 @@
 package org.jkcsoft.space.lang.instance;
 
 /**
- * A Space is a collection of {@link TupleSet}'s wherein objects in one collection may
- * hold a Reference to another object. The Space is the basis for satisfying
+ * A Space is a collection of {@link TupleSetImpl}'s wherein objects in one collection may
+ * hold a ReferenceByOid to another object. The Space is the basis for satisfying
  * a QueryImpl. A Space has associated runtime-managed indices including trees.
  *
  * Every VM has a default (main) Space.

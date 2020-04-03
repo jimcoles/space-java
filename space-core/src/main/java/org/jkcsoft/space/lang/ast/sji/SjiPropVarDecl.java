@@ -18,12 +18,11 @@ import java.beans.PropertyDescriptor;
 /**
  * @author Jim Coles
  */
-public class SjiPropVarDecl extends SjiVarDecl {
+public class SjiPropVarDecl extends SjiVarDecl implements SjiPropBased {
 
     private PropertyDescriptor jPropDesc;
 
-    SjiPropVarDecl(SjiTypeDefn sjiTypeDefn, PropertyDescriptor jPd)
-    {
+    SjiPropVarDecl(SjiTypeDefn sjiTypeDefn, PropertyDescriptor jPd) {
         super(new NativeSourceInfo(jPd), sjiTypeDefn, jPd.getName());
         this.jPropDesc = jPd;
     }
@@ -33,6 +32,7 @@ public class SjiPropVarDecl extends SjiVarDecl {
         return (NumPrimitiveTypeDefn) SpaceHome.getSjiService().getPrimitiveTypeDefn(jPropDesc.getPropertyType());
     }
 
+    @Override
     public PropertyDescriptor getjPropDesc() {
         return jPropDesc;
     }

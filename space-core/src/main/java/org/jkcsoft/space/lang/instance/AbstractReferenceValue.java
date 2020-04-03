@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2020 through present.
  *
  * Licensed under the following license agreement:
  *
@@ -10,10 +10,8 @@
 package org.jkcsoft.space.lang.instance;
 
 /**
- * Base notion of primary key, alternate key, etc.
- *
  * @author Jim Coles
  */
-public interface Key extends Value {
+public abstract class AbstractReferenceValue<J> implements ReferenceValue<J> {
 
 }

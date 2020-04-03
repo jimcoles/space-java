@@ -10,6 +10,7 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.jkcsoft.space.lang.instance.sji.SjiTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jkcsoft.java.util.Lister;
@@ -616,57 +617,59 @@ public class Executor extends ExprProcessor implements ExeContext {
     /**
      * The dispatcher eval method.
      */
-    private Value eval(EvalContext spcContext, ValueExpr expression) {
+    private ValueHolder eval(EvalContext spcContext, ValueExpr expression) {
         log.debug("eval: (deleg) " + expression);
-        Value value = null;
+        ValueHolder valueHolder = null;
         if (expression instanceof NewTupleExpr) {
-            value = eval(spcContext, (NewTupleExpr) expression);
+            valueHolder = eval(spcContext, (NewTupleExpr) expression);
         }
         else if (expression instanceof NewSetExpr) {
-            value = eval(spcContext, (NewSetExpr) expression);
+            valueHolder = eval(spcContext, (NewSetExpr) expression);
         }
         else if (expression instanceof OperatorExpr) {
-            value = eval(spcContext, (OperatorExpr) expression);
+            valueHolder = eval(spcContext, (OperatorExpr) expression);
         }
         else if (expression instanceof PrimitiveLiteralExpr) {
-            value = eval(spcContext, (PrimitiveLiteralExpr) expression);
+            valueHolder = eval(spcContext, (PrimitiveLiteralExpr) expression);
         }
         else if (expression instanceof SequenceLiteralExpr) {
-            value = eval(spcContext, (SequenceLiteralExpr) expression);
+            valueHolder = eval(spcContext, (SequenceLiteralExpr) expression);
         }
         else if (expression instanceof ThisArgExpr) {
-            value = eval(spcContext, (ThisArgExpr) expression);
+            valueHolder = eval(spcContext, (ThisArgExpr) expression);
         }
         else if (expression instanceof ThisTupleExpr) {
-            value = eval(spcContext, (ThisTupleExpr) expression);
+            valueHolder = eval(spcContext, (ThisTupleExpr) expression);
         }
         else if (expression instanceof MetaRefPath) {
-            value = eval(spcContext, (MetaRefPath) expression);
+            valueHolder = eval(spcContext, (MetaRefPath) expression);
         }
         else if (expression instanceof AssignmentExpr) {
-            value = eval(spcContext, (AssignmentExpr) expression);
+            valueHolder = eval(spcContext, (AssignmentExpr) expression);
         }
         else if (expression instanceof FunctionCallExpr) {
-            value = eval(spcContext, (FunctionCallExpr) expression);
+            valueHolder = eval(spcContext, (FunctionCallExpr) expression);
         }
         else if (expression instanceof ExpressionChain) {
-            value = eval(spcContext, ((ExpressionChain) expression).extractValueExprChain());
+            valueHolder = eval(spcContext, ((ExpressionChain) expression).extractValueExprChain());
         }
         else
             throw new SpaceX("don't know how to evaluate " + expression);
 
-        log.debug("eval -> " + value);
-        return value;
+        log.debug("eval -> " + valueHolder);
+        return valueHolder;
     }
 
-    private Value eval(EvalContext evalContext, ThisTupleExpr thisTupleExpr) {
+    private ValueHolder eval(EvalContext evalContext, ThisTupleExpr thisTupleExpr) {
         log.debug("exec: " + thisTupleExpr);
-        return evalContext.peekStack().getCtxObject();
+        Tuple ctxObject = evalContext.peekStack().getCtxObject();
+        return getObjFactory().newReferenceByOidHolder(ctxObject, null, ctxObject.getOid());
     }
 
-    private Value eval(EvalContext evalContext, ThisArgExpr thisArgExpr) {
+    private ValueHolder eval(EvalContext evalContext, ThisArgExpr thisArgExpr) {
         log.debug("exec: " + thisArgExpr);
-        return evalContext.peekStack().getArgTuple();
+        TupleImpl argTuple = evalContext.peekStack().getArgTuple();
+        return getObjFactory().newReferenceByOidHolder(argTuple, null, argTuple.getOid());
     }
 
     /**
@@ -706,18 +709,18 @@ public class Executor extends ExprProcessor implements ExeContext {
             eval(evalContext, ((StatementBlock) statement));
         }
         else if (statement instanceof ReturnExpr) {
-            Value retVal = eval(evalContext, ((ReturnExpr) statement).getValueExpr());
+            ValueHolder retVal = eval(evalContext, ((ReturnExpr) statement).getValueExpr());
             autoCastAssign(evalContext, functionCallContext.getReturnValueHolder(), retVal);
             functionCallContext.setPendingReturn(true);
         }
         return;
     }
 
-    private Value eval(EvalContext evalContext, ValueExprChain exprChain) {
+    private ValueHolder eval(EvalContext evalContext, ValueExprChain exprChain) {
         for (ValueExpr valueExpr : exprChain.getChain()) {
             eval(evalContext, valueExpr);
         }
-        return getCallStack().peek().getReturnValueHolder().getValue();
+        return getCallStack().peek().getReturnValueHolder();
     }
 
 //    private Tuple eval(EvalContext evalContext, NewTupleExpr newTupleExpr) {
@@ -727,38 +730,38 @@ public class Executor extends ExprProcessor implements ExeContext {
 //        return value;
 //    }
 
-    private Value eval(EvalContext evalContext, NewSetExpr newSetExpr) {
+    private ValueHolder eval(EvalContext evalContext, NewSetExpr newSetExpr) {
         log.debug("eval: " + newSetExpr);
-        TupleSet value = newSet(null);
+        TupleSetImpl tupleSet = newSet(null);
         newSetExpr.getNewTupleExprs().forEach(
-            newTupleExpr -> value.addTuple(eval(evalContext, newTupleExpr))
+            newTupleExpr -> tupleSet.addTupleRef(eval(evalContext, newTupleExpr))
         );
-        return value;
+        return tupleSet;
     }
 
-    private Value eval(EvalContext evalContext, OperatorExpr operatorExpr) {
+    private ValueHolder eval(EvalContext evalContext, OperatorExpr operatorExpr) {
         log.debug("eval: " + operatorExpr);
-        Value value = null;
+        ValueHolder valueHolder = null;
         OperEvaluator oper = lookupOperEval(operatorExpr.getOper());
         if (oper == null)
             throw new SpaceX(evalContext.newRuntimeError("no operator evaluator for " + operatorExpr.getOper()));
         Value[] argValues = new Value[operatorExpr.getArgs().size()];
         for (int idxArg = 0; idxArg < operatorExpr.getArgs().size(); idxArg++) {
-            argValues[idxArg] = eval(evalContext, operatorExpr.getArgs().get(idxArg));
+            argValues[idxArg] = eval(evalContext, operatorExpr.getArgs().get(idxArg)).getValue();
         }
-        value = oper.eval(argValues);
-        return value;
+        Value value = oper.eval(argValues);
+        valueHolder = getObjFactory().newValueHolder(value);
+        return valueHolder;
     }
 
-    private Value eval(EvalContext evalContext, FunctionCallExpr functionCallExpr) {
+    private ValueHolder eval(EvalContext evalContext, FunctionCallExpr functionCallExpr) {
         log.debug("eval: " + functionCallExpr);
-        Value value = null;
 
         FunctionDefn functionDefn = (FunctionDefn) functionCallExpr.getFunctionRef().getResolvedMetaObj();
         ComplexType argTypeDefn = functionDefn.getArgSpaceTypeDefn();
         TupleImpl argTupleValue = (TupleImpl) eval(evalContext, functionCallExpr.getArgValueExpr());
         ValueHolder retValHolder = functionDefn.isReturnVoid() ? newVoidHolder()
-            : newHolder(null, newAnonDecl(functionDefn.getReturnType()));
+            : newEmptyVarHolder(null, newAnonDecl(functionDefn.getReturnType()));
         FunctionCallContext functionCallContext =
             getObjFactory().newFunctionCall(evalContext.peekStack().getCtxObject(), functionCallExpr, argTupleValue,
                                             retValHolder);
@@ -774,17 +777,17 @@ public class Executor extends ExprProcessor implements ExeContext {
             else if (functionDefn instanceof SjiFunctionDefnImpl) {
                 evalNative(evalContext, functionCallExpr);
             }
-            value = evalContext.peekStack().getReturnValueHolder().getValue();
+            evalContext.peekStack().getReturnValueHolder().getValue();
         } finally {
             FunctionCallContext popCall = callStack.pop();
             popCall.setPendingReturn(false);
             log.debug("popped call stack. size [" + callStack.size() + "]");
         }
-        log.debug("eval -> " + value);
-        return value;
+        log.debug("eval -> " + retValHolder);
+        return retValHolder;
     }
 
-    private Tuple eval(EvalContext evalContext, NewTupleExpr newTupleExpr)
+    private DeclaredReferenceHolder eval(EvalContext evalContext, NewTupleExpr newTupleExpr)
     {
         log.debug("eval: new tuple => " + newTupleExpr);
         TupleImpl tuple = newTupleImpl((ComplexType) newTupleExpr.getTypeRef().getResolvedType());
@@ -800,15 +803,16 @@ public class Executor extends ExprProcessor implements ExeContext {
         if (valueExprs != null) {
             int idxArg = 0;
             for (ValueExpr argumentExpr : valueExprs) {
-                Value argValue = eval(evalContext, argumentExpr);
-                argValue =
-                    autoCast(((ComplexType) tuple.getDefn()).getDatumDeclList().get(idxArg).getType(), argValue);
+                ValueHolder argValueHolder = eval(evalContext, argumentExpr);
+                argValueHolder.setValue(
+                    autoCast(((ComplexType) tuple.getDefn()).getDatumDeclList().get(idxArg).getType(), argValueHolder)
+                );
                 ValueHolder leftSideHolder = tuple.get(tuple.getDeclAt(idxArg));
-                SpaceUtils.assignNoCast(evalContext, leftSideHolder, argValue);
+                SpaceUtils.assignNoCast(evalContext, leftSideHolder, argValueHolder);
                 idxArg++;
             }
         }
-        return tuple;
+        return getObjFactory().newReferenceByOidHolder(evalContext.peekStack().getArgTuple(), null, tuple.getOid());
     }
 
     /**
@@ -816,9 +820,9 @@ public class Executor extends ExprProcessor implements ExeContext {
      * do not have nested actions, at least none that are executed or controlled
      * by this executor.
      */
-    private Value evalNative(EvalContext evalContext, FunctionCallExpr functionCallExpr) {
+    private ValueHolder evalNative(EvalContext evalContext, FunctionCallExpr functionCallExpr) {
         log.debug("eval: " + functionCallExpr);
-        Value value = null;
+        ValueHolder valueHolder = null;
         CastTransforms casters = new CastTransforms();
         FunctionCallContext functionCallContext = evalContext.peekStack();
         try {
@@ -827,9 +831,10 @@ public class Executor extends ExprProcessor implements ExeContext {
             int idxArg = 0;
             for (ValueHolder spcArgHolder : sArgHolders) {
                 Object jArg = "?";
-                if (spcArgHolder instanceof Reference)
-                    //
-                    jArg = dereference(((Reference) spcArgHolder).getToOid()).toString();
+                if (spcArgHolder instanceof DeclaredReferenceHolder) {
+                    DeclaredReferenceHolder refHolder = (DeclaredReferenceHolder) spcArgHolder;
+                    jArg = refHolder.getValue().getJavaValue();
+                }
                 else {
                     jArg = spcArgHolder.toString();
                 }
@@ -844,18 +849,24 @@ public class Executor extends ExprProcessor implements ExeContext {
             Object jObjectDummy =
                 funcDef.getjMethod().getDeclaringClass().newInstance();
             Object jValue = funcDef.getjMethod().invoke(jObjectDummy, jArgs);
-            if (jValue instanceof String)
-                value = casters.stringToCharSeq(evalContext, ((String) jValue));
+
+            // TODO Do we need special handling / casting for Java Strings?
+
+//            if (jValue instanceof String) {
+                SjiTuple sjiTupleValue = SpaceHome.getSjiService().getOrCreateSjiObjectProxy(jValue);
+                valueHolder = getObjFactory().newReferenceByOidHolder(null, null, sjiTupleValue.getOid());
+//                valueHolder = casters.stringToCharSeq(evalContext, ((String) jValue));
+//            }
         } catch (Exception e) {
             log.error("error invoking native method", e);
             throw new SpaceX(newRuntimeError("error invoking native method " + e.getMessage()));
         }
-        if (value != null) {
-            autoCastAssign(evalContext, functionCallContext.getReturnValueHolder(), value);
+        if (valueHolder != null) {
+            autoCastAssign(evalContext, functionCallContext.getReturnValueHolder(), valueHolder);
         }
         functionCallContext.setPendingReturn(true);
-        log.debug("eval -> " + value);
-        return value;
+        log.debug("eval -> " + valueHolder);
+        return valueHolder;
     }
 
     /*
@@ -866,40 +877,40 @@ public class Executor extends ExprProcessor implements ExeContext {
      4. context object (tuple)
      5. static objects
     */
-    private Value eval(EvalContext evalContext, MetaRefPath metaRef) {
+    private ValueHolder eval(EvalContext evalContext, MetaRefPath metaRef) {
         log.debug("eval: " + metaRef);
-        Value value = null;
+        ValueHolder valueHolder = null;
         Named toMember = metaRef.getResolvedMetaObj();
         FunctionCallContext functionCallContext = evalContext.peekStack();
         switch (metaRef.getResolvedDatumScope()) {
             case BLOCK:
-                value = findInBlocksRec(toMember, functionCallContext.getBlockContexts()).getValue();
+                valueHolder = findInBlocksRec(toMember, functionCallContext.getBlockContexts());
                 break;
             case ARG:
-                value = functionCallContext.getArgTuple().get((Declaration) toMember).getValue();
+                valueHolder = functionCallContext.getArgTuple().get((Declaration) toMember);
                 break;
             case TYPE_DEFN:
-                value = functionCallContext.getCtxObject().get((Declaration) toMember).getValue();
+                valueHolder = functionCallContext.getCtxObject().get((Declaration) toMember);
                 break;
             case STATIC:
                 throw new SpaceX(evalContext.newRuntimeError("don't yet eval static datums"));
 //                break;
         }
 
-        if (value == null)
+        if (valueHolder == null)
             throw new SpaceX(evalContext.newRuntimeError("could not resolve reference " + metaRef));
 
-        log.debug("eval -> " + value);
-        return value;
+        log.debug("eval -> " + valueHolder);
+        return valueHolder;
     }
 
-    private Value eval(EvalContext evalContext, AssignmentExpr assignmentExpr) {
+    private ValueHolder eval(EvalContext evalContext, AssignmentExpr assignmentExpr) {
         log.debug("eval: " + assignmentExpr);
         ValueHolder leftSideHolder = (ValueHolder) eval(evalContext, assignmentExpr.getLeftSideDatumRef());
-        Value rightSideValue = eval(evalContext, assignmentExpr.getRightSideValueExpr());
-        autoCastAssign(evalContext, leftSideHolder, rightSideValue);
+        ValueHolder rightSideHolder = eval(evalContext, assignmentExpr.getRightSideValueExpr());
+        autoCastAssign(evalContext, leftSideHolder, rightSideHolder);
         log.debug("eval -> " + leftSideHolder);
-        return leftSideHolder.getValue();
+        return leftSideHolder;
     }
 
     /**
@@ -907,24 +918,36 @@ public class Executor extends ExprProcessor implements ExeContext {
      * The returned object may be a scalar, a character sequence, or a complete
      * space.
      */
-    private Value eval(EvalContext evalContext, PrimitiveLiteralExpr primitiveLiteralExpr) {
+    private ValueHolder eval(EvalContext evalContext, PrimitiveLiteralExpr primitiveLiteralExpr) {
         log.debug("eval: " + primitiveLiteralExpr);
-        Value value = null;
+        ValueHolder valueHolder = null;
         if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.CARD) {
 //            case TEXT:
 //                CharacterSequence csLiteral = newCharacterSequence(primitiveLiteralExpr.getValueExpr());
 //                value = newReference(csLiteral);
 //                break;
-            value = getObjFactory().newCardinalValue(new Integer(primitiveLiteralExpr.getValueExpr()));
+            valueHolder = getObjFactory().newCardinalValueHolder(
+                evalContext.peekStack().getCtxObject(), null,
+                Integer.parseInt(primitiveLiteralExpr.getValueExpr())
+            );
         }
         else if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.BOOLEAN) {
-            value = getObjFactory().newBooleanValue(Boolean.valueOf(primitiveLiteralExpr.getValueExpr()));
+            valueHolder = getObjFactory().newBooleanValueHolder(
+                evalContext.peekStack().getCtxObject(), null,
+                Boolean.parseBoolean(primitiveLiteralExpr.getValueExpr())
+            );
         }
         else if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.CHAR) {
-            value = getObjFactory().newCharacterValue(primitiveLiteralExpr.getValueExpr().charAt(0));
+            valueHolder = getObjFactory().newCharacterValueHolder(
+                evalContext.peekStack().getCtxObject(), null,
+                primitiveLiteralExpr.getValueExpr().charAt(0)
+            );
         }
         else if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.REAL) {
-            value = getObjFactory().newRealValue(Double.valueOf(primitiveLiteralExpr.getValueExpr()));
+            valueHolder = getObjFactory().newRealValueHolder(
+                evalContext.peekStack().getCtxObject(), null,
+                Double.valueOf(primitiveLiteralExpr.getValueExpr())
+            );
         }
 //       else if (primitiveLiteralExpr.getTypeDefn() ==  RATIONAL) {
 //       }
@@ -932,8 +955,8 @@ public class Executor extends ExprProcessor implements ExeContext {
             throw new SpaceX(evalContext.newRuntimeError(
                 "Can not yet handle primitive literal of type " + primitiveLiteralExpr.getTypeDefn()));
         }
-        log.debug("eval -> " + value);
-        return value;
+        log.debug("eval -> " + valueHolder);
+        return valueHolder;
     }
 
 //    private SpaceObject exec(Space userSpaceContext, SpacePathExpr pathExpr) {
@@ -942,9 +965,9 @@ public class Executor extends ExprProcessor implements ExeContext {
 //        return value;
 //    }
 
-    private Value eval(EvalContext evalContext, SequenceLiteralExpr sequenceLiteralExpr) {
+    private ValueHolder eval(EvalContext evalContext, SequenceLiteralExpr sequenceLiteralExpr) {
         log.debug("eval: " + sequenceLiteralExpr);
-        Value value = null;
+        ValueHolder value = null;
         if (sequenceLiteralExpr.getTypeRef().getResolvedMetaObj() == CHAR_SEQ_TYPE_DEF) {
             value = newCharacterSequence(sequenceLiteralExpr.getValueExpr());
 //            value = newReference(null, null, csLiteral);
@@ -971,42 +994,40 @@ public class Executor extends ExprProcessor implements ExeContext {
         return operEvalMap.get(operEnum);
     }
 
-    private void autoCastAssign(EvalContext evalContext, ValueHolder leftSideHolder, Value rightSideValue) {
+    private void autoCastAssign(EvalContext evalContext, ValueHolder leftSideHolder, ValueHolder rightSideHolder) {
         DatumType leftSideDefnObj =
-            leftSideHolder instanceof Variable ?
-                ((Variable) leftSideHolder).getDeclaration().getType()
-                : (leftSideHolder instanceof Reference ?
-                ((Reference) leftSideHolder).getDeclaration().getType()
-                : null);
+            leftSideHolder instanceof VariableValueHolder ?
+                ((VariableValueHolder) leftSideHolder).getDeclaration().getType()
+                : (leftSideHolder instanceof DeclaredReferenceHolder ? leftSideHolder.getType() : null);
 
-        rightSideValue = autoCast(leftSideDefnObj, rightSideValue);
-        SpaceUtils.assignNoCast(evalContext, leftSideHolder, rightSideValue);
+        rightSideHolder.setValue(autoCast(leftSideDefnObj, rightSideHolder));
+        SpaceUtils.assignNoCast(evalContext, leftSideHolder, rightSideHolder);
     }
 
-    private Value autoCast(DatumType leftSideTypeDefn, Value rightSideValue) {
-        Value newValue = rightSideValue;
+    private Value autoCast(DatumType leftSideTypeDefn, ValueHolder rightSideHolder) {
+        Value newValue = rightSideHolder.getValue();
         // TODO Add some notion of 'casting' and 'auto-(un)boxing'.
         if (leftSideTypeDefn.getOid().equals(Executor.CHAR_SEQ_TYPE_DEF.getOid())
-            && !(rightSideValue instanceof Reference)) {
-            if (rightSideValue instanceof ScalarValue) {
+            && !(rightSideHolder instanceof ReferenceByOid)) {
+            if (rightSideHolder instanceof ScalarValue) {
                 CharacterSequence characterSequence =
-                    newCharacterSequence(((ScalarValue) rightSideValue).asString());
+                    newCharacterSequence(((ScalarValue) rightSideHolder).asString());
                 newValue = characterSequence.getOid();
                 log.debug("cast scalar value to CharSequence");
             }
-            else if (rightSideValue instanceof Variable) {
+            else if (rightSideHolder instanceof VariableValueHolder) {
                 CharacterSequence characterSequence =
-                    newCharacterSequence(((Variable) rightSideValue).getScalarValue().getJValue().toString());
+                    newCharacterSequence(((VariableValueHolder) rightSideHolder).getScalarValue().getJavaValue().toString());
                 newValue = characterSequence.getOid();
                 log.debug("cast variable (1-D) value to CharSequence");
             }
         }
-        else if (leftSideTypeDefn instanceof NumPrimitiveTypeDefn && rightSideValue instanceof ScalarValue) {
-            ScalarValue rsScalarValue = (ScalarValue) rightSideValue;
+        else if (leftSideTypeDefn instanceof NumPrimitiveTypeDefn && rightSideHolder instanceof ScalarValue) {
+            ScalarValue rsScalarValue = (ScalarValue) rightSideHolder;
             if (leftSideTypeDefn == NumPrimitiveTypeDefn.CARD
                 && rsScalarValue.getType() == NumPrimitiveTypeDefn.REAL) {
                 newValue =
-                    ObjectFactory.getInstance().newCardinalValue(((Double) rsScalarValue.getJValue()).intValue());
+                    ObjectFactory.getInstance().newCardinalValue(((Double) rsScalarValue.getJavaValue()).intValue());
                 log.debug("cast real to card");
             }
         }
@@ -1024,7 +1045,7 @@ public class Executor extends ExprProcessor implements ExeContext {
         if (defn.hasDatums()) {
             List<Declaration> declList = defn.getDatumDeclList();
             for (Declaration datumDecl : declList) {
-                tuple.initHolder(newHolder(tuple, datumDecl));
+                tuple.initHolder(newEmptyVarHolder(tuple, datumDecl));
             }
         }
 
@@ -1033,18 +1054,14 @@ public class Executor extends ExprProcessor implements ExeContext {
 
     // ---------------------------- New Space Objects ------------------------
 
-    private TupleSet newSet(SetTypeDefn setTypeDefn) {
-        TupleSet tupleSet = getObjFactory().newSet(setTypeDefn);
+    private TupleSetImpl newSet(SetTypeDefn setTypeDefn) {
+        TupleSetImpl tupleSet = getObjFactory().newSet(setTypeDefn);
         trackInstanceObject(tupleSet);
         return tupleSet;
     }
 
-    private Reference newReference(AssociationDefn assocDecl, Tuple tuple, SpaceObject toObject) {
-        return newReference(assocDecl, tuple, toObject.getOid());
-    }
-
-    private Reference newReference(AssociationDefn assocDecl, Tuple tuple, SpaceOid toOid) {
-        return getObjFactory().newObjectReference(assocDecl, tuple, toOid);
+    private DeclaredReferenceHolder<SpaceOid> newReferenceHolderByOid(AssociationDefn assocDecl, Tuple tuple, SpaceOid toOid) {
+        return getObjFactory().newReferenceByOidHolder(tuple, assocDecl, toOid);
     }
 
     CharacterSequence newCharacterSequence(String stringValue) {
@@ -1054,23 +1071,23 @@ public class Executor extends ExprProcessor implements ExeContext {
     }
 
 
-    public ValueHolder newHolder(Tuple tuple, Declaration declaration) {
+    public ValueHolder newEmptyVarHolder(Tuple tuple, Declaration declaration) {
         ValueHolder holder = null;
         ObjectFactory ofact = getObjFactory();
         if (declaration.getType() instanceof PrimitiveTypeDefn) {
-            holder = new Variable(tuple, ((VariableDecl) declaration));
+            holder = new VariableValueHolder(tuple, ((VariableDecl) declaration));
         }
         else if (declaration instanceof ComplexTypeImpl) {
-            holder = ofact.newObjectReference(null, null, null);
+            holder = ofact.newReferenceByOidHolder(null, null, null);
         }
         else if (declaration instanceof StreamTypeDefn) {
-            holder = ofact.newObjectReference(null, null, null);
+            holder = ofact.newReferenceByOidHolder(null, null, null);
         }
         else if (declaration instanceof SequenceTypeDefn) {
-            holder = ofact.newObjectReference(null, null, null);
+            holder = ofact.newReferenceByOidHolder(null, null, null);
         }
         else if (declaration instanceof SetTypeDefn) {
-            holder = ofact.newObjectReference(null, null, null);
+            holder = ofact.newReferenceByOidHolder(null, null, null);
         }
         return holder;
     }

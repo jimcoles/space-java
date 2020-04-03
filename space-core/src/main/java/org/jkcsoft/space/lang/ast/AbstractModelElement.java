@@ -9,8 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.AbstractSpaceObject;
 import org.jkcsoft.space.lang.instance.ObjectFactory;
-import org.jkcsoft.space.lang.instance.SpaceObject;
 import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.runtime.AstUtils;
 
@@ -22,7 +22,7 @@ import java.util.*;
  * @author Jim Coles
  * @version 1.0
  */
-public abstract class AbstractModelElement extends SpaceObject implements ModelElement {
+public abstract class AbstractModelElement extends AbstractSpaceObject implements ModelElement {
 
     private ModelElement parent;
     private SourceInfo sourceInfo;

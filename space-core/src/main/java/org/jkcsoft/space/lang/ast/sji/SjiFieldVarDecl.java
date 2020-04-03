@@ -19,7 +19,7 @@ import java.lang.reflect.Field;
  * Use direct Java field access via reflection.
  * @author Jim Coles
  */
-public class SjiFieldVarDecl extends SjiVarDecl {
+public class SjiFieldVarDecl extends SjiVarDecl implements SjiFieldBased {
 
     // OR direct field access ...
     private Field jField;

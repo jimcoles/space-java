@@ -16,7 +16,7 @@ import org.jkcsoft.space.lang.runtime.SpaceX;
  * Holds one-dimensional values for primitive types: Ints, Real, Chars
  * @author Jim Coles
  */
-public abstract class ScalarValue<T> implements Assignable, Value<T> {
+public abstract class ScalarValue<T> implements Value<T> {
 
     private NumPrimitiveTypeDefn type;
     private T jvalue;    // the java object value such as int, float, char
@@ -40,7 +40,7 @@ public abstract class ScalarValue<T> implements Assignable, Value<T> {
 //    }
 
     @Override
-    public T getJValue() {
+    public T getJavaValue() {
         return jvalue;
     }
 

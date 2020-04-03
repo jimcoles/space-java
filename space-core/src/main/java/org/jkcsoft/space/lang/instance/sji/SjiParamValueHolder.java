@@ -45,6 +45,11 @@ public class SjiParamValueHolder implements ValueHolder {
     }
 
     @Override
+    public boolean hasValue() {
+        return false;
+    }
+
+    @Override
     public Value getValue() {
         return tuple.get(sjiParamVarDecl).getValue();
     }

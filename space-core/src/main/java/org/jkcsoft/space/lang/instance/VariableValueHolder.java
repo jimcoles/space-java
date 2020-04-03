@@ -14,23 +14,23 @@ import org.jkcsoft.space.lang.ast.VariableDecl;
 import org.jkcsoft.space.lang.ast.VariableDeclImpl;
 
 /**
- * The instance-level counterpart to a {@link VariableDeclImpl}.
- * A {@link Variable} contains a reference to its definition, a VariableDefn, and
+ * The value-level counterpart to a {@link VariableDeclImpl}.
+ * A {@link VariableValueHolder} contains a reference to its definition, a VariableDefn, and
  * zero or one {@link ScalarValue}s.
  */
-public class Variable implements ValueHolder {
+public class VariableValueHolder implements ValueHolder {
 
+    private Tuple parentTuple;
     private VariableDecl declaration;
-    private Tuple           parentTuple;
-    private ScalarValue     scalarValue;
+    private ScalarValue scalarValue;
 
-    public Variable(Tuple parentTuple, VariableDecl declaration, ScalarValue scalarValue) {
+    public VariableValueHolder(Tuple parentTuple, VariableDecl declaration, ScalarValue scalarValue) {
         this.parentTuple = parentTuple;
         this.declaration = declaration;
         this.scalarValue = scalarValue;
     }
 
-    public Variable(Tuple parentTuple, VariableDecl declaration) {
+    public VariableValueHolder(Tuple parentTuple, VariableDecl declaration) {
         this.parentTuple = parentTuple;
         this.declaration = declaration;
         this.scalarValue = declaration.getType().nullValue();
@@ -50,13 +50,6 @@ public class Variable implements ValueHolder {
         return declaration.getType();
     }
 
-    @Override
-    public void setValue(Value value) {
-        if (! (value instanceof ScalarValue))
-
-        this.scalarValue = (ScalarValue) value;
-    }
-
     public ScalarValue getScalarValue() {
         return scalarValue;
     }
@@ -67,8 +60,20 @@ public class Variable implements ValueHolder {
     }
 
     @Override
+    public void setValue(Value value) {
+        if (!(value instanceof ScalarValue))
+            this.scalarValue = (ScalarValue) value;
+    }
+
+    @Override
+    public boolean hasValue() {
+        return scalarValue != null;
+    }
+
+    @Override
     public String toString() {
-        return ((declaration != null) ? "("+declaration.getType().getName()+")" + declaration.getName() + "=" : "(anon)")
+        return ((declaration != null) ?
+            "(" + declaration.getType().getName() + ")" + declaration.getName() + "=" : "(anon)")
             + (scalarValue != NullValue.NULL_VALUE ? scalarValue.toString() : "(not initialized)");
     }
 }

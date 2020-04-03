@@ -8,7 +8,7 @@
 package com.jkc.roml.lang;
 
 /**
- * Conceptually, the generalization for sub-types Variable and Constant.
+ * Conceptually, the generalization for sub-types VariableValueHolder and Constant.
  *
  * @author Jim Coles
  * @version 1.0

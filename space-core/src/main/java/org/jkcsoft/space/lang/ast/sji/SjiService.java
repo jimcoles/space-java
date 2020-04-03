@@ -13,14 +13,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.jkcsoft.java.util.Beans;
 import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
-import org.jkcsoft.space.lang.instance.ObjectFactory;
-import org.jkcsoft.space.lang.instance.TupleSet;
-import org.jkcsoft.space.lang.instance.Value;
-import org.jkcsoft.space.lang.instance.ValueHolder;
-import org.jkcsoft.space.lang.instance.sji.SjiFieldValueHolder;
-import org.jkcsoft.space.lang.instance.sji.SjiParamValueHolder;
-import org.jkcsoft.space.lang.instance.sji.SjiPropValueHolder;
-import org.jkcsoft.space.lang.instance.sji.SjiTuple;
+import org.jkcsoft.space.lang.instance.*;
+import org.jkcsoft.space.lang.instance.sji.*;
 import org.jkcsoft.space.lang.runtime.AstUtils;
 import org.jkcsoft.space.lang.runtime.Executor;
 import org.jkcsoft.space.lang.runtime.SpaceX;
@@ -57,11 +51,14 @@ public class SjiService {
     // =========================================================================
 
     private NSRegistry nsRegistry = SpaceHome.getNsRegistry();
+    private ObjectFactory spaceObjFactory;
     //
     private Map<String, String> javaToSpacePackages = new TreeMap<>();
     private Map<Class, SjiTypeMapping> sjiMappingByClass = new HashMap<>();
     private Map<String, SjiTypeMapping> sjiMappingByName = new HashMap<>();
-    private ObjectFactory spaceObjFactory;
+    //
+    private Map<Object, SjiTuple> sjiTuplesByJavaObject = new TreeMap<>();
+    private Map<SpaceOid, SjiTuple> sjiTuplesByOid = new TreeMap<>();
 
     public SjiService() {
         spaceObjFactory = ObjectFactory.getInstance();
@@ -218,7 +215,17 @@ public class SjiService {
         PropertyDescriptor[] jPropDescriptors = Beans.getPropertyDescriptors(jnClass);
         for (PropertyDescriptor jPropDescriptor : jPropDescriptors) {
             if (!isExcluded(jPropDescriptor))
-                sjiTypeProxy.addVariableDecl(new SjiPropVarDecl(sjiTypeProxy, jPropDescriptor));
+                // TODO Handle Java-to-Space mapping via more sophisticated scheme including external
+                // mapping file
+            {
+                DatumType sjiToType = getSjiTypeProxyDeepLoad(jPropDescriptor.getPropertyType(), null);
+                if (sjiToType.isSimpleType())
+                    sjiTypeProxy.addVariableDecl(new SjiPropVarDecl(sjiTypeProxy, jPropDescriptor));
+                else
+                    sjiTypeProxy.addAssociationDecl(
+                        new SjiPropAssocDecl(sjiTypeProxy, (SjiTypeDefn) sjiToType, jPropDescriptor)
+                    );
+            }
         }
         Field[] jFields = jnClass.getDeclaredFields();
         for (Field jField : jFields) {
@@ -301,7 +308,7 @@ public class SjiService {
 
         Class<?> containedJavaClass = javaColl.iterator().next().getClass();
         SjiTypeDefn sjiContainedTypeDefn = (SjiTypeDefn) getSjiTypeProxyDeepLoad(containedJavaClass, null);
-        TupleSet tupleSet = spaceObjFactory.newSet(sjiContainedTypeDefn.getSetOfType());
+        TupleSetImpl tupleSet = spaceObjFactory.newSet(sjiContainedTypeDefn.getSetOfType());
 
         for (Object javaObj : javaColl) {
             SjiTuple tuple = createSjiInstanceProxy(sjiContainedTypeDefn, javaObj);
@@ -310,12 +317,24 @@ public class SjiService {
         return tupleSet;
     }
 
+    public SjiTuple getOrCreateSjiObjectProxy(Object javaObj) {
+        SjiTuple sjiTuple = null;
+        SjiTypeDefn sjiTypeDefn = (SjiTypeDefn) getSjiTypeProxyDeepLoad(javaObj.getClass(), null);
+        sjiTuple = createSjiInstanceProxy(sjiTypeDefn, javaObj);
+        return sjiTuple;
+    }
+
     private SjiTuple createSjiInstanceProxy(SjiTypeDefn sjiTypeDefn, Object javaObj) {
         SjiTuple sjiTuple = emptySjiTuple(sjiTypeDefn, javaObj);
-        List<Declaration> datumDeclList = sjiTypeDefn.getDatumDeclList();
-        for (Declaration spaceDatumDecl : datumDeclList) {
-            sjiTuple.initHolder(createSjiDatumProxy(sjiTuple, spaceDatumDecl));
+        // initialize
+        SjiTypeDefn defn = sjiTuple.getSjiTypeDefn();
+        if (defn.hasDatums()) {
+            List<Declaration> declList = defn.getDatumDeclList();
+            for (Declaration datumDecl : declList) {
+                sjiTuple.initHolder(createSjiDatumProxy(sjiTuple, datumDecl));
+            }
         }
+//        spaceObjFactory.trackInstanceObject((SpaceObject) tuple);
         return sjiTuple;
     }
 
@@ -342,33 +361,25 @@ public class SjiService {
 
     /** Tuple values are uninitialized. */
     private SjiTuple emptySjiTuple(SjiTypeDefn sjiTypeDefn, Object javaObj) {
-        SjiTuple sjiTuple = new SjiTuple(spaceObjFactory.newOid(), sjiTypeDefn, javaObj);
-        initSjiTuple(sjiTuple);
-        return sjiTuple;
-    }
-
-    private void initSjiTuple(SjiTuple tuple) {
-        // initialize
-        SjiTypeDefn defn = tuple.getSjiTypeDefn();
-        if (defn.hasDatums()) {
-            List<Declaration> declList = defn.getDatumDeclList();
-            for (Declaration datumDecl : declList) {
-                tuple.initHolder(createSjiDatumProxy(tuple, datumDecl));
-            }
-        }
-//        spaceObjFactory.trackInstanceObject((SpaceObject) tuple);
+        return new SjiTuple(spaceObjFactory.newOid(), sjiTypeDefn, javaObj);
     }
 
     private ValueHolder createSjiDatumProxy(SjiTuple tuple, Declaration datumDecl) {
         ValueHolder holder = null;
         if (datumDecl instanceof SjiPropVarDecl) {
-            holder = new SjiPropValueHolder(tuple, ((SjiPropVarDecl) datumDecl));
+            holder = new SjiPropVarValueHolder(tuple, ((SjiPropVarDecl) datumDecl));
         }
         else if (datumDecl instanceof SjiFieldVarDecl) {
-            holder = new SjiFieldValueHolder(tuple, ((SjiFieldVarDecl) datumDecl));
+            holder = new SjiFieldVarValueHolder(tuple, ((SjiFieldVarDecl) datumDecl));
         }
         else if (datumDecl instanceof SjiParamVarDecl) {
             holder = new SjiParamValueHolder(tuple, ((SjiParamVarDecl) datumDecl));
+        }
+        else if (datumDecl instanceof SjiPropAssocDecl) {
+            holder = new SjiPropAssocValueHolder(tuple, ((SjiPropAssocDecl) datumDecl));
+        }
+        else if (datumDecl instanceof SjiFieldAssocDecl) {
+            holder = new SjiFieldAssocValueHolder(tuple, ((SjiFieldAssocDecl) datumDecl));
         }
         return holder;
     }

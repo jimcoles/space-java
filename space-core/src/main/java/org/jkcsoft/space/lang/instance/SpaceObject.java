@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2020 through present.
  *
  * Licensed under the following license agreement:
  *
@@ -9,49 +9,31 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.ComplexTypeImpl;
 import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.VariableDeclImpl;
+import org.jkcsoft.space.lang.ast.Identified;
 
 /**
- * Something is a {@link SpaceObject} if it is an identifiable thing.
- * There are only five kinds of SpaceObjects:
- * <p>
- * <table>
- *     <tr><th>Object Kind</th><th>Dims</th><th>Meta Type</th></tr>
- *     <tr><td>{@link ScalarValue}</td> <td>1x1</td> <td>{@link VariableDeclImpl}</td></tr>
- *     <tr><td>{@link TupleImpl}</td> <td>1xn</td> <td>{@link ComplexTypeImpl} or {@link org.jkcsoft.space.lang.ast.ViewDefn}</td></tr>
- *     <tr><td>{@link TupleSet}</td> <td>nxm</td> <td>{@link ComplexTypeImpl}</td></tr>
- *     <tr>
- *         <td>ObjectStream &nbsp&nbsp</td>
- *         <td>nx1 </td>
- *         <td>{@link org.jkcsoft.space.lang.ast.StreamTypeDefn}</td>
- *     </tr>
- * </table>
+ * {@link SpaceObject}s are either {@link Tuple}s, Sets, Sequences, or Streams.
+ * In addition, primitive and {@link org.jkcsoft.space.lang.ast.SimpleType} values
+ * can be boxed in an object wrapper. All objects have internal identifiers ({@link SpaceOid}s)
+ * to support operations such as '=='.
  *
  * @author Jim Coles
  */
-public class SpaceObject {
+public interface SpaceObject {
 
-    private SpaceOid oid;
-    private DatumType defn;
+    /**
+     * In general, every object has constraints defining what it is and what it can relate to.
+     */
+    DatumType getDefn();
 
-    public SpaceObject(SpaceOid oid, DatumType defn) {
-        this.oid = oid;
-        this.defn = defn;
-    }
+    /** */
+    SpaceOid getOid();
 
-    public SpaceOid getOid() {
-        return oid;
-    }
-
-    public DatumType getDefn() {
-        return defn;
-    }
-
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName() + ":" + this.getOid();
-    }
+    /**
+     * Every object can hold some kind of value which may be a reference to another object.
+     * the nature of valid objects is controlled by the {@link DatumType} of this object.
+     */
+//    SpaceObject addObject(ValueHolder node);
 
 }

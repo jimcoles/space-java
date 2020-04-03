@@ -58,7 +58,7 @@
     <!--
       Define ROML on top of ROML using only the following base notions:
        - Entity
-       - Reference
+       - ReferenceByOid
        - Equation
        - Transform
      This provides the basic internal model of ROML that will enable mapping

@@ -26,7 +26,7 @@ public class CharacterValue extends ScalarValue<Character> {
 
 //        String myString =(@NotNull String) "";
 
-        return String.valueOf(getJValue());
+        return String.valueOf(getJavaValue());
 
     }
 }

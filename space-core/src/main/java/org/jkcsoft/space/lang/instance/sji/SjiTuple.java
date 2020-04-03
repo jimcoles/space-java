@@ -46,4 +46,9 @@ public class SjiTuple extends AbstractTuple implements Tuple {
     public Object getjObject() {
         return jObject;
     }
+
+    @Override
+    public Object getJavaValue() {
+        return jObject;
+    }
 }

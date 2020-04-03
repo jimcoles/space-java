@@ -21,7 +21,8 @@ public class VoidDatum implements ValueHolder, Value {
 
     public static final VoidDatum VOID = new VoidDatum();
 
-    private VoidDatum() {}
+    private VoidDatum() {
+    }
 
     @Override
     public DatumType getType() {
@@ -29,12 +30,12 @@ public class VoidDatum implements ValueHolder, Value {
     }
 
     @Override
-    public void setValue(Value value) {
-        // no-op
+    public boolean hasValue() {
+        return false;
     }
 
     @Override
-    public Object getJValue() {
+    public Object getJavaValue() {
         throw new SpaceX("attempt to get void-valued value");
 //        return null;
     }
@@ -42,6 +43,11 @@ public class VoidDatum implements ValueHolder, Value {
     @Override
     public Value getValue() {
         return this;
+    }
+
+    @Override
+    public void setValue(Value value) {
+        // no-op
     }
 
     @Override

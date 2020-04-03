@@ -14,13 +14,14 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
  * Basically, here to lend a polymorphic notion to our various structural
- * declarative notions: Primitives, Domains, and Space Type's.
+ * declarative notions: Primitives, Domains, and Type's.
+ *
+ * <p>At it's most basic, a {@link DatumType} is just a byte sequence with some
+ * constraints superimposed.
  *
  * @author Jim Coles
  */
 public interface DatumType extends Named {
-
-    MetaType getMetaType();
 
     int getScalarDofs();
 

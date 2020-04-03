@@ -13,6 +13,7 @@ import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.ComplexType;
 import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.Projection;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +23,7 @@ import java.util.List;
  * @author Jim Coles
  * @version 1.0
  */
-public class AbstractTuple extends SpaceObject implements ExeContext, Tuple {
+public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple, ExeContext {
 
     private ValueHolder[] valueHolders;
 //    private List<ValueHolder> valueHolders = new LinkedList<>();
@@ -35,7 +36,7 @@ public class AbstractTuple extends SpaceObject implements ExeContext, Tuple {
     }
 
     @Override
-    public DatumType getType() {
+    public Projection getType() {
         return getDefn();
     }
 
@@ -63,6 +64,12 @@ public class AbstractTuple extends SpaceObject implements ExeContext, Tuple {
     }
 
     @Override
+    public Tuple setValue(int idx, Value value) {
+        valueHolders[idx].setValue(value);
+        return this;
+    }
+
+    @Override
     public ValueHolder get(Declaration member) {
         return valueHolders[getIdxHolder(member)];
     }
@@ -72,38 +79,38 @@ public class AbstractTuple extends SpaceObject implements ExeContext, Tuple {
         return valueHolders[idx].getDeclaration();
     }
 
-    /**
-     * This method only valid on a Tuple if the tuple has one-and-only-one dimension.
-     * @return
-     */
-    @Override
-    public Object getJValue() {
-        Object jValue = null;
-        if (valueHolders.length == 1) {
-//            jValue = valueHolders.get(0).getValue().getJvalue();
-            jValue = valueHolders[0].getValue().getJValue();
-        }
-        return jValue;
-    }
-
     public List<ValueHolder> getValueHolders() {
         return Arrays.asList(valueHolders);
+    }
+
+    @Override
+    public ValueHolder get(int idx) {
+        return valueHolders[idx];
     }
 
     public int getSize() {
         return valueHolders.length;
     }
 
+    @Override
+    public Object getJavaValue() {
+        Object[] values = new Object[getSize()];
+        for (int idxHolder = 0; idxHolder < valueHolders.length; idxHolder++) {
+            values[idxHolder] = valueHolders[idxHolder].getValue().getJavaValue();
+        }
+        return values;
+    }
+
 //    @Override
-//    public Reference getRefByOid(SpaceOid memberOid) {
+//    public ReferenceByOid getRefByOid(SpaceOid memberOid) {
 //        ValueHolder member = indexAllByMemberOid.get(memberOid);
 //        if (member == null)
 //            throw new IllegalArgumentException(memberOid + " not set");
 //
-//        if (!(member instanceof Reference))
+//        if (!(member instanceof ReferenceByOid))
 //            throw new IllegalArgumentException(memberOid + " is not a reference");
 //
-//        return (Reference) member;
+//        return (ReferenceByOid) member;
 //    }
 
 //
@@ -126,9 +133,15 @@ public class AbstractTuple extends SpaceObject implements ExeContext, Tuple {
     }
 
     @Override
+    public ValueCollection<ValueHolder> addValue(ValueHolder holder) {
+        return this;
+    }
+
+    @Override
     public String toString() {
         return "([" + super.toString() + "] "
             + Strings.buildCommaDelList(getValueHolders(), obj -> ((ValueHolder) obj).getValue().toString())
             + ")";
     }
+
 }

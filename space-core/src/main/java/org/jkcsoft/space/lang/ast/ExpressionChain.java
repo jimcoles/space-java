@@ -25,7 +25,7 @@ import java.util.List;
  *
  * Holds either:
  *
- * 1. Meta Reference Path: A full reference to a named element via its AST namespace path. The
+ * 1. Meta ReferenceByOid Path: A full reference to a named element via its AST namespace path. The
  *    reference may be multi-part (fully qualified). Holds a chain of {@link SimpleNameRefExpr}s,
  *    each of which resolves to a single meta object. The MetaType of the full reference
  *    should be known at parse time.

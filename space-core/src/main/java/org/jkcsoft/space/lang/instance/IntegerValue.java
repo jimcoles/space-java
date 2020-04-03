@@ -22,6 +22,6 @@ public abstract class IntegerValue extends ScalarValue<Long> {
 
     @Override
     public String asString() {
-        return Long.toString(getJValue());
+        return Long.toString(getJavaValue());
     }
 }

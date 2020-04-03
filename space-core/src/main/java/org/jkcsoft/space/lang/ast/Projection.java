@@ -31,9 +31,9 @@ public interface Projection {
     // ===========================================================
     // Child adders
     //
-    VariableDecl addVariableDecl(VariableDeclImpl variableDecl);
+    VariableDecl addVariableDecl(VariableDecl variableDecl);
 
-    AssociationDefn addAssociationDecl(AssociationDefnImpl associationDecl);
+    AssociationDefn addAssociationDecl(AssociationDefn associationDecl);
 
     List<VariableDecl> getVariables();
 

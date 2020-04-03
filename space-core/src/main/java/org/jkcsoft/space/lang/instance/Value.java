@@ -9,17 +9,18 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.DatumType;
-
 /**
- * Tag for classes that hold leaf values (with no type info) like ints, chars, byte,
- * set and sequence.
+ * A {@link Value} is the object that gets assigned (at the Java level) to the LHS
+ * {@link ValueHolder} of an assignment operation. {@link Value} objects do not have
+ * type information or know the context of their Space-level declaration;
+ * {@link ValueHolder} objects keep type and declaration context info.
+ * Holds leaf values (with no type info) like ints, chars, byte, set and sequence.
  *
  * @author Jim Coles
  */
-public interface Value<T> {
+public interface Value<J> {
 
-    DatumType getType();
+//    DatumType getType();
 
-    T getJValue();
+    J getJavaValue();
 }

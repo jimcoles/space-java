@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.Tuple;
-import org.jkcsoft.space.lang.instance.TupleSet;
+import org.jkcsoft.space.lang.instance.TupleSetImpl;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ import java.util.List;
  */
 public interface Tagable {
 
-    /** Return tags as a {@link TupleSet}. */
+    /** Return tags as a {@link TupleSetImpl}. */
     List<Tuple> getAllTagsList();
 
 }

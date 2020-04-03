@@ -10,6 +10,7 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
+ * A {@link SimpleType} is a {@link PrimitiveTypeDefn} with constraints.
  * @author Jim Coles
  */
 public interface SimpleType extends DatumType {

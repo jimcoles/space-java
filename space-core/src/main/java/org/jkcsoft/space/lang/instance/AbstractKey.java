@@ -17,5 +17,5 @@ package org.jkcsoft.space.lang.instance;
  *
  * @author Jim Coles
  */
-public interface AbstractKey extends Key {
+public interface AbstractKey extends KeyValue {
 }

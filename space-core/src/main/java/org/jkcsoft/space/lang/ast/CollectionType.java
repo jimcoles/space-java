@@ -10,11 +10,11 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * Collection types are collections of one or more other types. Similar to Java
+ * TupleCollection types are collections of one or more other types. Similar to Java
  * parameterized collections but all parameters are carried along into
  * runtime for type validation purposes. Also, the Space language
  * knows about these. In contrast, Java knows about arrays (and their types)
- * but does not know about java.util.Collection notions.
+ * but does not know about java.util.TupleCollection notions.
  *
  * @author Jim Coles
  */

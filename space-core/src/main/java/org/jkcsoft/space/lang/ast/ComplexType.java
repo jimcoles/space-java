@@ -14,20 +14,7 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public interface
-
-
-
-
-
-
-
-
-
-
-
-
-ComplexType extends DatumType, Projection {
+public interface ComplexType extends DatumType, Projection {
 
     boolean hasDatums();
 

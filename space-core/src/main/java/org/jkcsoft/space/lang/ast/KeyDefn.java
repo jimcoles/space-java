@@ -14,7 +14,7 @@ package org.jkcsoft.space.lang.ast;
  * Keys may be a simple a a single, opaque byte or as complex as tuple of scalar
  * variables.
  *
- * 4GL: Defining a Key at the language-level pushes Space in the 4GL direction.
+ * 4GL: Defining a KeyValue at the language-level pushes Space in the 4GL direction.
  *
  * Keys enable some nice high-level things:
  * <li>Language-managed Indexes and Trees.

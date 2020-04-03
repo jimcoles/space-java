@@ -36,7 +36,7 @@ public abstract class AbstractFunctionDefn extends NamedElement implements Funct
         this.argSpaceTypeDefn = argSpaceTypeDefn;
         this.argSpaceTypeDefn.setGroupingNode(true);
         //
-        addChild((NamedElement) argSpaceTypeDefn);
+        addChild(argSpaceTypeDefn);
     }
 
     public ComplexType getArgSpaceTypeDefn() {

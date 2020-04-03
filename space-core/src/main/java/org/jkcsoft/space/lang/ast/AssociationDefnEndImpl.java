@@ -39,8 +39,8 @@ public class AssociationDefnEndImpl extends NamedElement implements AssociationD
     }
 
     @Override
-    public TypeRef getTypeRef() {
-        return null;
+    public ComplexType getType() {
+        return ((ComplexType) endTypeRef.getResolvedType());
     }
 
     @Override

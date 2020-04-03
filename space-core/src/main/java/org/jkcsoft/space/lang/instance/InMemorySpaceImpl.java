@@ -14,7 +14,7 @@ import org.jkcsoft.space.lang.ast.DatumType;
 /**
  * @author Jim Coles
  */
-public class InMemorySpaceImpl extends SpaceObject implements Space {
+public class InMemorySpaceImpl extends AbstractSpaceObject implements Space {
 
     public InMemorySpaceImpl(SpaceOid oid, DatumType defn) {
         super(oid, defn);

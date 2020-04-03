@@ -78,12 +78,7 @@ public class CharacterSequence extends BinarySequence<CharacterValue> implements
     }
 
     @Override
-    public DatumType getType() {
-        return NumPrimitiveTypeDefn.CHAR.getSequenceOfType();
-    }
-
-    @Override
-    public Object getJValue() {
+    public Object getJavaValue() {
         return characters;
     }
 }

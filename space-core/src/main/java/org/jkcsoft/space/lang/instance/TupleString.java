@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2020 through present.
  *
  * Licensed under the following license agreement:
  *
@@ -10,10 +10,8 @@
 package org.jkcsoft.space.lang.instance;
 
 /**
- * Tagging interface for now.
- *
+ * A
  * @author Jim Coles
  */
-public interface Assignable {
-    
+public interface TupleString extends SpaceObject {
 }

@@ -13,7 +13,7 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
- * Meta-level element of a Variable. Declares a named 'usage' of
+ * Meta-level element of a VariableValueHolder. Declares a named 'usage' of
  * a Primitive by a Type.
  *
  * @author Jim Coles

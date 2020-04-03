@@ -18,13 +18,13 @@ import org.jkcsoft.space.lang.instance.*;
  */
 public class SpaceUtils {
 
-    public static void assignNoCast(Executor.EvalContext exe, ValueHolder leftSideHolder, Value rightSideValue) {
+    public static void assignNoCast(Executor.EvalContext exe, ValueHolder leftSideHolder, ValueHolder rightSideHolder) {
         boolean assigned = false;
         RuntimeError error = null;
-        if (leftSideHolder instanceof Variable) {
-            Variable lsHolderAsVar = (Variable) leftSideHolder;
-            if (rightSideValue instanceof ScalarValue) {
-                ScalarValue rsScalarValue = (ScalarValue) rightSideValue;
+        if (leftSideHolder instanceof VariableValueHolder) {
+            VariableValueHolder lsHolderAsVar = (VariableValueHolder) leftSideHolder;
+            if (rightSideHolder instanceof ScalarValue) {
+                ScalarValue rsScalarValue = (ScalarValue) rightSideHolder.getValue();
                 if (rsScalarValue.getType() == lsHolderAsVar.getDeclaration().getType()) {
                     lsHolderAsVar.setValue(rsScalarValue);
                     assigned = true;
@@ -36,28 +36,15 @@ public class SpaceUtils {
                 }
             }
         }
-//        else if (leftSideHolder instanceof ScalarValue) {
-//            ScalarValue lsScalarValue = ((ScalarValue) leftSideHolder);
-//            if (rightSideValue instanceof ScalarValue) {
-//                ScalarValue rsScalarValue = (ScalarValue) rightSideValue;
-//                if (rsScalarValue.getType() == lsScalarValue.getType()) {
-//                    lsScalarValue.setJvalue(rsScalarValue.getJvalue());
-//                    assigned = true;
-//                }
-//                else {
-//                    error = exe.newRuntimeError(
-//                        "type mismatch: cannot assign " + lsScalarValue.getType() + " <- " +
-//                            rsScalarValue.getType());
-//                }
-//            }
-//        }
-        else if (leftSideHolder instanceof Reference) {
-            if (rightSideValue instanceof Reference) {
-                ((Reference) leftSideHolder).setToOid(((Reference) rightSideValue).getToOid());
+        else if (leftSideHolder instanceof DeclaredReferenceHolder) {
+            if (rightSideHolder instanceof DeclaredReferenceHolder) {
+                leftSideHolder.setValue(rightSideHolder.getValue());
                 assigned = true;
             }
-            else if(rightSideValue instanceof TupleImpl) {
-                ((Reference) leftSideHolder).setToOid(((TupleImpl) rightSideValue).getOid());
+            else if(rightSideHolder instanceof TupleImpl) {
+                leftSideHolder.setValue(
+                    ObjectFactory.getInstance().newReferenceByOid(((TupleImpl) rightSideHolder).getOid())
+                );
                 assigned = true;
             }
         }
@@ -66,7 +53,7 @@ public class SpaceUtils {
             if (error != null)
                 throw new SpaceX(error);
             else
-                throw new SpaceX(exe.newRuntimeError("cannot assign " + leftSideHolder + " <- " + rightSideValue));
+                throw new SpaceX(exe.newRuntimeError("cannot assign " + leftSideHolder + " <- " + rightSideHolder));
         }
         //
     }

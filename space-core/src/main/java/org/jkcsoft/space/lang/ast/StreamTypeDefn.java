@@ -14,12 +14,16 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 import java.util.List;
 
 /**
+ * A Stream is first-class collective data type similar to the notion of a BLOB data type used by
+ * databases.
+ * TODO: Should we allow Space programs direct access to the raw type, or, 'Box' it with wrapper Type?
+ *
  * In Space, a stream is the generalization controlling the notions of
  *
  * <ul>
- *     <li>Object Stream</li>
  *     <li>Primitive Stream
  *     <li>Character Stream</li>
+ *     <li>Object Stream</li>
  *     <li>Character Sequence</li>
  * </ul>
  * Notions to reconcile with our model of streams, sequences, strings:

@@ -14,7 +14,7 @@ import org.jkcsoft.space.lang.ast.VariableDecl;
 import org.jkcsoft.space.lang.ast.VariableDeclImpl;
 
 /**
- * The instance-level counterpart to a {@link VariableDeclImpl}.
+ * The value-level counterpart to a Sequence of {@link DatumType}.
  * A {@link SequenceVariable} contains a reference to its definition, a VariableDefn, and
  * zero to many {@link ScalarValue}s.
  */
@@ -55,6 +55,11 @@ public class SequenceVariable<T extends ScalarValue> implements ValueHolder {
     @Override
     public void setValue(Value value) {
         this.primSeqValue = (BinarySequence) value;
+    }
+
+    @Override
+    public boolean hasValue() {
+        return primSeqValue != null;
     }
 
     @Override

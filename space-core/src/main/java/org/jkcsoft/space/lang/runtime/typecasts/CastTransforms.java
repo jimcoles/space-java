@@ -10,8 +10,6 @@
 package org.jkcsoft.space.lang.runtime.typecasts;
 
 import org.jkcsoft.space.lang.instance.CharacterSequence;
-import org.jkcsoft.space.lang.instance.ObjectFactory;
-import org.jkcsoft.space.lang.instance.Reference;
 import org.jkcsoft.space.lang.runtime.Executor;
 
 /**

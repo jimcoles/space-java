@@ -37,7 +37,7 @@ public class ObjectTable {
     private Map<SpaceOid, SpaceObject> objectsByType = new TreeMap<>();
 
     /**
-     * Key=the referenced object's Oid.
+     * KeyValue=the referenced object's Oid.
      * Value=the set of object Oids holding reference to the key Oid.
      */
     private Map<SpaceOid, Set<SpaceOid>> objectReferenceMap = new TreeMap<>();

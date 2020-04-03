@@ -19,9 +19,9 @@ import org.jkcsoft.space.lang.ast.StreamTypeDefn;
  *
  * @author Jim Coles
  */
-public class ObjectStream extends SpaceObject {
+public class TupleStream extends AbstractSpaceObject {
 
-    public ObjectStream(SpaceOid oid, StreamTypeDefn defn) {
+    public TupleStream(SpaceOid oid, StreamTypeDefn defn) {
         super(oid, defn);
     }
 }

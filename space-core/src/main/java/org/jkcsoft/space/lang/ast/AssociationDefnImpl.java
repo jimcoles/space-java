@@ -22,7 +22,7 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
     private AssociationDefnEnd fromEnd;
     private AssociationDefnEnd toEnd;
 
-    AssociationDefnImpl(SourceInfo sourceInfo, String name, FullTypeRefImpl fromTypeRef, TypeRef toTypeRef) {
+    AssociationDefnImpl(SourceInfo sourceInfo, String name, TypeRef fromTypeRef, TypeRef toTypeRef) {
         super(sourceInfo, name);
 
         if (fromTypeRef != null) {
@@ -42,7 +42,7 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
 
     @Override
     public DatumType getToType() {
-        return toEnd.getTypeRef().getResolvedType();
+        return toEnd.getType();
     }
 
     @Override
@@ -65,6 +65,7 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
      */
     @Override
     public boolean isRecursive() {
-        return fromEnd.getTypeRef() == toEnd.getTypeRef();
+        return fromEnd.getType() == toEnd.getType();
     }
+
 }

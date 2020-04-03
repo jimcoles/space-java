@@ -22,6 +22,6 @@ public class RealValue extends ScalarValue<Double> {
 
     @Override
     public String asString() {
-        return Double.toString(getJValue());
+        return Double.toString(getJavaValue());
     }
 }
