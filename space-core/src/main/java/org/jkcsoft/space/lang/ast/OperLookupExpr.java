@@ -14,15 +14,15 @@ package org.jkcsoft.space.lang.ast;
  */
 public class OperLookupExpr extends AbstractModelElement implements ValueExpr {
 
-    private OperEnum operLookupKey;
+    private Operators operLookupKey;
 
-    public OperLookupExpr(SourceInfo sourceInfo, OperEnum operLookupKey) {
+    public OperLookupExpr(SourceInfo sourceInfo, Operators operLookupKey) {
         super(sourceInfo);
         this.operLookupKey = operLookupKey;
     }
 
     @Override
-    public DatumType getDatumType() {
+    public TypeDefn getDatumType() {
         return null;
     }
 

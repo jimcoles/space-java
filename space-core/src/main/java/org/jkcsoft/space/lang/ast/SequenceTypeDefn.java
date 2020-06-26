@@ -19,8 +19,12 @@ package org.jkcsoft.space.lang.ast;
  */
 public class SequenceTypeDefn extends AbstractCollectionTypeDefn {
 
-    SequenceTypeDefn(SourceInfo sourceInfo, DatumType containedElementType) {
-        super(sourceInfo, containedElementType.getName() + "[]", containedElementType);
+    public static final String DELIM_OPEN = "[";
+    public static final String DELIM_CLOSING = "]";
+    public static final String COLL_SUFFIX = DELIM_OPEN + DELIM_CLOSING;
+
+    SequenceTypeDefn(SourceInfo sourceInfo, TypeDefn containedElementType) {
+        super(sourceInfo, containedElementType.getName() + COLL_SUFFIX, containedElementType);
     }
 
     @Override

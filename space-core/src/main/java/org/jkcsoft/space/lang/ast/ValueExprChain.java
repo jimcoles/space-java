@@ -35,7 +35,7 @@ public class ValueExprChain extends AbstractModelElement implements NamePath, Va
     }
 
     @Override
-    public DatumType getDatumType() {
+    public TypeDefn getDatumType() {
         return getLastExpr().getDatumType();
     }
 

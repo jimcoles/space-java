@@ -9,16 +9,24 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.ProjectionDecl;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 
 /**
+ * A {@link ValueHolder} for literals or expression eval results before being assigned to
+ * declared datums.
  * @author Jim Coles
  */
-public class DetachedHolder<T extends Value> implements ValueHolder<T> {
+public class DetachedHolder<V extends Value<J>, J> implements ValueHolder<V, J> {
 
-    private DatumType type;
-    T value;
+    private TypeDefn type;
+    private V value;
+
+    public DetachedHolder(TypeDefn type, V value) {
+        this.type = type;
+        this.value = value;
+    }
 
     @Override
     public Declaration getDeclaration() {
@@ -26,12 +34,12 @@ public class DetachedHolder<T extends Value> implements ValueHolder<T> {
     }
 
     @Override
-    public DatumType getType() {
+    public TypeDefn getType() {
         return type;
     }
 
     @Override
-    public void setValue(T value) {
+    public void setValue(V value) {
         this.value = value;
     }
 
@@ -41,7 +49,7 @@ public class DetachedHolder<T extends Value> implements ValueHolder<T> {
     }
 
     @Override
-    public T getValue() {
+    public V getValue() {
         return value;
     }
 }

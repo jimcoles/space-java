@@ -30,8 +30,8 @@ public class SetDecl extends NamedElement implements Declaration {
     }
 
     @Override
-    public DatumType getType() {
-        return ((ComplexTypeImpl) tupleTypeRef.getResolvedMetaObj()).getSetOfType();
+    public TypeDefn getType() {
+        return ((TypeDefnImpl) tupleTypeRef.getResolvedMetaObj()).getSetOfType();
     }
 
     @Override

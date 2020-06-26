@@ -9,10 +9,8 @@
 */
 package org.jkcsoft.space.test;
 
-import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.ObjectFactory;
-import org.jkcsoft.space.lang.ast.ProgSourceInfo;
 import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.metameta.MetaType;
 import org.jkcsoft.space.lang.runtime.AstUtils;
@@ -35,7 +33,7 @@ public class TestAst {
         astFactory.newProgram(si, "(API Builder Program)");
         //
         ObjectFactory objBuilder = ObjectFactory.getInstance();
-        ComplexTypeImpl complexTypeImpl = astFactory.newSpaceTypeDefn(si, astFactory.newNamePart(si, "MyHelloSpace"));
+        TypeDefnImpl complexTypeImpl = astFactory.newTypeDefn(si, astFactory.newNamePart(si, "MyHelloSpace"));
 
         Directory astDirectory = astFactory.newAstDir(si, "TestAst");
         astDirectory.addParseUnit(astFactory.newParseUnit(si)).addTypeDefn(complexTypeImpl);
@@ -55,7 +53,7 @@ public class TestAst {
         ThisTupleExpr thisTupleExpr = astFactory.newThisExpr(si);
 
         ExpressionChain functionDefnRef = astFactory.newMetaRefChain(si, MetaType.FUNCTION, astFactory
-            .newNameRefExpr(si, SpaceHome.getNsRegistry().getTmpNs().getName()));
+            .newNameRefExpr(si, NSRegistry.getInstance().getTmpNs().getName()));
 
         AstUtils.addNewMetaRefParts(functionDefnRef, si, "test", "TestType", "testFunc");
         mainMethod.setStatementBlock(astFactory.newStatementBlock(si));
@@ -73,7 +71,7 @@ public class TestAst {
 //                }
 //            })
 
-        Executor spex = new Executor(new TestExeSettings());
+        Executor spex = Executor.getInstance(new TestExeSettings());
 
         try {
             List<AstLoadError> errors = new LinkedList<>();

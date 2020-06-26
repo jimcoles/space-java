@@ -44,11 +44,11 @@ public class FullTypeRefImpl extends ExpressionChain implements TypeRef {
         this.collectionTypes = collectionTypes;
     }
 
-    FullTypeRefImpl(SourceInfo sourceInfo, DatumType typeDefn) {
+    FullTypeRefImpl(SourceInfo sourceInfo, TypeDefn typeDefn) {
         super(sourceInfo, typeDefn);
     }
 
-    FullTypeRefImpl(SourceInfo sourceInfo, DatumType typeDefn, List<CollectionType> collectionTypes) {
+    FullTypeRefImpl(SourceInfo sourceInfo, TypeDefn typeDefn, List<CollectionType> collectionTypes) {
         this(sourceInfo, typeDefn);
         this.collectionTypes = collectionTypes;
     }
@@ -85,8 +85,8 @@ public class FullTypeRefImpl extends ExpressionChain implements TypeRef {
     }
 
     @Override
-    public DatumType getResolvedType() {
-        return (DatumType) getResolvedMetaObj();
+    public TypeDefn getResolvedType() {
+        return (TypeDefn) getResolvedMetaObj();
     }
 
     @Override

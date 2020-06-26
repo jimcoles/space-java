@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.instance;
 import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 
 /**
- * The common notion of a Integer.  Users can set Cardinal numbers but not Ordinal
+ * The common notion of a IntAlgOper.  Users can set Cardinal numbers but not Ordinal
  * numbers.
  *
  * @author Jim Coles

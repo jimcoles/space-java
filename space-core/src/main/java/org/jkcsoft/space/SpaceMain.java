@@ -78,7 +78,7 @@ public class SpaceMain implements ScriptEngine {
             }
 
             // Exec specified Space code ...
-            Executor exec = new Executor(new CliExeSettings(commandLine));
+            Executor exec = Executor.getInstance(new CliExeSettings(commandLine));
             exec.run();
         }
         catch (ParseException e) {

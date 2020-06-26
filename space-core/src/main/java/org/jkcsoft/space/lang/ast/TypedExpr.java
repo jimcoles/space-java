@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * An expression that has an associated {@link ComplexTypeImpl}, i.e., type,
+ * An expression that has an associated {@link TypeDefnImpl}, i.e., type,
  * either by direct reference to the named type or by reference to
  * a typed datum or return value of a function. TypeExpr's may be followed
  * by a dotted reference to any member of their associated type.
@@ -19,7 +19,7 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface TypedExpr extends LinkSource {
 
-    DatumType getDatumType();
+    TypeDefn getDatumType();
 
     boolean hasResolvedType();
 

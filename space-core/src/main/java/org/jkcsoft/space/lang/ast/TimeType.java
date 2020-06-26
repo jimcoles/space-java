@@ -10,12 +10,13 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * In Space, the {@link TimeType} is a special variant of a sequence.
+ * In Space, the {@link TimeType}, aka, "Space Time", is a special variant of a sequence.
+ * The Space runtime guarantees that all operations get a unique {@link TimeType} value.
  * @author Jim Coles
  */
 public class TimeType extends SequenceTypeDefn {
 
-    TimeType(SourceInfo sourceInfo, DatumType containedElementType) {
+    TimeType(SourceInfo sourceInfo, TypeDefn containedElementType) {
         super(sourceInfo, containedElementType);
     }
 

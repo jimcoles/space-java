@@ -9,26 +9,51 @@
  */
 package org.jkcsoft.space.test;
 
-import org.jkcsoft.space.SpaceHome;
+import org.jkcsoft.space.lang.ast.AstFactory;
+import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
+import org.jkcsoft.space.lang.ast.TypeDefnImpl;
 import org.jkcsoft.space.lang.ast.sji.SjiService;
+import org.jkcsoft.space.lang.instance.TupleImpl;
 import org.jkcsoft.space.lang.instance.TupleSet;
+import org.jkcsoft.space.lang.runtime.ApiExeContext;
+import org.jkcsoft.space.lang.runtime.Executor;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 /**
  * @author Jim Coles
  */
 public class TestTupleSet {
+
     Logger log = LoggerFactory.getLogger(this.getClass().getSimpleName());
+
+    @Test
+    public void testTupleSetApi() {
+        ApiExeContext exec = Executor.defaultInstance();
+        AstFactory ast = exec.getAstFactory();
+        TypeDefnImpl personType =
+            ast.newTypeDefn("Person");
+        personType.addAssociationDecl(ast.newAssociationDecl("firstName", Executor.CHAR_SEQ_TYPE_DEF));
+        personType.addVariableDecl(ast.newVariableDecl("userId", NumPrimitiveTypeDefn.CARD));
+        //
+        TupleImpl tuple = exec.newTupleImpl(personType);
+        tuple.setValue(0, exec.getObjFactory().newCardinalValue(1L));
+        tuple.setValue(1, exec.newCharacterSequence("Jim"));
+    }
+
     /**
      * Build Space set of tuples from Java collection.
      */
-    @Test public void testTupleSetBuild() {
+    @Test
+    public void testJavaTupleSetBuild() {
 //        List
-        SjiService sji = SpaceHome.getSjiService();
+        ApiExeContext exec = Executor.defaultInstance();
+        SjiService sji = exec.getSjiService();
 //        DatumType sjiGcProxy = sji.getSjiTypeProxyDeepLoad(GregorianCalendar.class, null);
         Calendar bdCal = GregorianCalendar.getInstance();
         //
@@ -39,7 +64,7 @@ public class TestTupleSet {
                 new User("Jim", toMillis(bdCal, 1964, 8, 28))
             );
             TupleSet tupleSet = sji.createSjiInstanceProxy(javaColl);
-            log.info("SJI set => {}", tupleSet);
+            log.info("SJI set => {}", exec.print(tupleSet));
         }
         // Use Calendar object
         // TODO: how to wrap a Java GregorianCalendar as a Space Tuple w/ Value
@@ -51,7 +76,7 @@ public class TestTupleSet {
             );
             TupleSet tupleSetC = sji.createSjiInstanceProxy(javaCollC);
             //
-            log.info("SJI set => {}", tupleSetC);
+            log.info("SJI set => {}", exec.print(tupleSetC));
         }
     }
 

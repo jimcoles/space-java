@@ -112,11 +112,12 @@ public class Math {
     // Boolean
     public static Value and(Value... args) {
         return getObjFactory()
-            .newBooleanValue(((BooleanValue) args[0]).getJavaValue() & ((BooleanValue) args[1]).getJavaValue());
+            .newBooleanValue(((BooleanValue) args[0]).getJavaValue().getJavaBool() & ((BooleanValue) args[1]).getJavaValue().getJavaBool());
     }
     public static Value condAnd(Value... args) {
         return getObjFactory()
-            .newBooleanValue(((BooleanValue) args[0]).getJavaValue() && ((BooleanValue) args[1]).getJavaValue());
+            .newBooleanValue(((BooleanValue) args[0]).getJavaValue().getJavaBool() &&
+                                 ((BooleanValue) args[1]).getJavaValue().getJavaBool());
     }
     // Num comparison returns boolean
     public static Value equal(Value... args) {

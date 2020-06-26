@@ -9,12 +9,11 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.ast.VariableDecl;
-import org.jkcsoft.space.lang.ast.VariableDeclImpl;
 
 /**
- * The value-level counterpart to a Sequence of {@link DatumType}.
+ * The value-level counterpart to a Sequence of {@link TypeDefn}.
  * A {@link SequenceVariable} contains a reference to its definition, a VariableDefn, and
  * zero to many {@link ScalarValue}s.
  */
@@ -48,7 +47,7 @@ public class SequenceVariable<T extends ScalarValue> implements ValueHolder {
     }
 
     @Override
-    public DatumType getType() {
+    public TypeDefn getType() {
         return declaration.getType();
     }
 

@@ -20,7 +20,8 @@ package org.jkcsoft.space.lang.instance;
  */
 public interface Value<J> {
 
-//    DatumType getType();
+//    TypeDefn getType();
 
     J getJavaValue();
+
 }

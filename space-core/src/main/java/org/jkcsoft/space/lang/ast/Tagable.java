@@ -33,7 +33,7 @@ import java.util.List;
  * <p>DIFFERATOR: Tags may be embedded directly in source code or loaded from related stores
  * including source files, resource files, LDAP directories, etc..
  *
- * <p>The primary {@link Tagable} is {@link ComplexTypeImpl}.
+ * <p>The primary {@link Tagable} is {@link TypeDefnImpl}.
  * We might also make user objects {@link Tagable}. ISSUE: Is that good idea? Could lead to
  * abuse.
  *

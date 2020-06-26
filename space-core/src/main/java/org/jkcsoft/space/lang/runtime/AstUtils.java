@@ -12,7 +12,6 @@ package org.jkcsoft.space.lang.runtime;
 import org.apache.commons.collections.CollectionUtils;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
-import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,16 +44,16 @@ public class AstUtils {
     private static Executor.FindFirstAstConsumer<ModelElement> typeOrDirContainerFinder =
         new Executor.FindFirstAstConsumer<>(
             ModelElement.class,
-            modelElement -> modelElement instanceof ComplexTypeImpl || modelElement instanceof Directory
+            modelElement -> modelElement instanceof TypeDefnImpl || modelElement instanceof Directory
         );
 
     /** Of the two specified arg types, returns the 'largest' of the two. */
-    private static DatumType[][] typePrecedenceMap = new DatumType[][]{
+    private static TypeDefn[][] typePrecedenceMap = new TypeDefn[][]{
         {NumPrimitiveTypeDefn.REAL, NumPrimitiveTypeDefn.CARD}
     };
 
     static {
-        INTRINSIC_TYPES = AstFactory.getInstance().newIntrinsicContainer();
+        INTRINSIC_TYPES = getAstFactory().newIntrinsicContainer();
         INTRINSIC_TYPES.addChild(VoidType.VOID);
         for (Map.Entry<String, PrimitiveTypeDefn> primTypeDefnEntry : NumPrimitiveTypeDefn.getEnumsByName().entrySet())
         {
@@ -70,7 +69,7 @@ public class AstUtils {
     public static NamedElement getNearestNamedParent(ModelElement anElem) {
         NamedElement lexParent = null;
         if (anElem.getParent() instanceof NamedElement
-            && ((NamedElement) anElem.getParent()).isNamed()) {
+            && ((NamedElement) anElem.getParent()).hasName()) {
             lexParent = (NamedElement) anElem.getParent();
         }
         else if (anElem.getParent() != null) {
@@ -286,7 +285,7 @@ public class AstUtils {
                 lookup = lookupImmediateChild(lhsContainer, keyOrName);
             }
             if (lookup == null && currentlhsLink.hasTypedExpr()) {
-                DatumType lhsType = currentlhsLink.getTypedExpr().getDatumType();
+                TypeDefn lhsType = currentlhsLink.getTypedExpr().getDatumType();
                 lookup = lookupImmediateChild(lhsType, keyOrName);
             }
             checkSetResolve(rhsLink, lookup);
@@ -318,7 +317,7 @@ public class AstUtils {
         return walker.getAllScopesAsList();
     }
 
-    static void checkSetResolve(LinkSource exprLink, NamedElement lookup) {
+    public static void checkSetResolve(LinkSource exprLink, NamedElement lookup) {
         if (exprLink != null && lookup != null) {
             ByNameMetaRef metaRef = exprLink.getNameRef().getRefAsNameRef();
             metaRef.setResolvedMetaObj(lookup);
@@ -329,7 +328,7 @@ public class AstUtils {
     public static Namespace getNs(ExpressionChain reference) {
         Namespace ns = null;
         if (reference.hasNs())
-            ns = SpaceHome.getNsRegistry().getNamespace(reference.getNsRefPart().getNameExprText());
+            ns = NSRegistry.getInstance().getNamespace(reference.getNsRefPart().getNameExprText());
         else
             ns = AstUtils.findParentNs(reference);
 
@@ -377,7 +376,7 @@ public class AstUtils {
         return findFirstParent(astNode, newTupleExprfinderAction);
     }
 
-    public static Set<DatumType> getSiblingTypes(FullTypeRefImpl reference) {
+    public static Set<TypeDefn> getSiblingTypes(FullTypeRefImpl reference) {
         MetaRef parentRefPart = getParentRefPart(reference);
         return getChildTypes((Directory) parentRefPart.getResolvedMetaObj());
     }
@@ -398,8 +397,8 @@ public class AstUtils {
 //        }
 //    }
 
-    public static Set<DatumType> getChildTypes(Directory dir) {
-        Set<DatumType> childTypes = new HashSet<>();
+    public static Set<TypeDefn> getChildTypes(Directory dir) {
+        Set<TypeDefn> childTypes = new HashSet<>();
         dir.getParseUnits().forEach(parseUnit -> childTypes.addAll(parseUnit.getTypeDefns()));
         return childTypes;
     }
@@ -451,7 +450,7 @@ public class AstUtils {
             scopeKind = ScopeKind.BLOCK;
         else if (context instanceof SpaceFunctionDefn)
             scopeKind = ScopeKind.BLOCK;
-        else if (context instanceof ComplexTypeImpl)
+        else if (context instanceof TypeDefnImpl)
             scopeKind = ScopeKind.TYPE_DEFN;
         else if (context instanceof TupleValueList)
             scopeKind = ScopeKind.TYPE_DEFN;
@@ -590,7 +589,7 @@ public class AstUtils {
                 leafDir = leafDir.getChildDir(name);
             }
             else {
-                leafDir = leafDir.addDir(SpaceHome.getAstFactory().newAstDir(new ProgSourceInfo(), name));
+                leafDir = leafDir.addDir(getAstFactory().newAstDir(new ProgSourceInfo(), name));
                 log.trace("created new Space dir [" + leafDir + "]");
             }
         }
@@ -598,22 +597,26 @@ public class AstUtils {
         return leafDir;
     }
 
+    private static AstFactory getAstFactory() {
+        return AstFactory.getInstance();
+    }
+
     public static boolean isJavaNs(ImportExpr importExpr) {
         SimpleNameRefExpr nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
         return nsRefPart != null
-            && nsRefPart.getNameExprText().equals(SpaceHome.getNsRegistry().getJavaNs().getName());
+            && nsRefPart.getNameExprText().equals(NSRegistry.getInstance().getJavaNs().getName());
     }
 
     public static void addNewMetaRefParts(ExpressionChain parentPath, SourceInfo sourceInfo, String... nameExprs) {
         for (String nameExpr : nameExprs) {
-            parentPath.addNextPart(SpaceHome.getAstFactory().newNameRefExpr(sourceInfo, nameExpr));
+            parentPath.addNextPart(getAstFactory().newNameRefExpr(sourceInfo, nameExpr));
         }
         return;
     }
 
-    public static DatumType larger(DatumType type1, DatumType type2) {
-        DatumType larger = null;
-//        for (DatumType[] typePair : typePrecedenceMap) {
+    public static TypeDefn larger(TypeDefn type1, TypeDefn type2) {
+        TypeDefn larger = null;
+//        for (TypeDefn[] typePair : typePrecedenceMap) {
 //            if typePair[0] = type1
 //        }
         return larger;
@@ -668,7 +671,7 @@ public class AstUtils {
 
         @Override
         public boolean upon(ModelElement astNode) {
-            if (astNode instanceof Named && ((Named) astNode).isNamed()) {
+            if (astNode instanceof Named && ((Named) astNode).hasName()) {
                 sb.append(astNode.getDisplayName())
                   .append(JavaHelper.EOL);
             }

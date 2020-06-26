@@ -9,46 +9,37 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.ComplexTypeImpl;
-import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.VariableDeclImpl;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 
 /**
- * Something is a {@link AbstractSpaceObject} if it is an identifiable thing.
- * There are only five kinds of SpaceObjects:
- * <p>
- * <table>
- *     <tr><th>Object Kind</th><th>Dims</th><th>Meta Type</th></tr>
- *     <tr><td>{@link ScalarValue}</td> <td>1x1</td> <td>{@link VariableDeclImpl}</td></tr>
- *     <tr><td>{@link TupleImpl}</td> <td>1xn</td> <td>{@link ComplexTypeImpl} or {@link org.jkcsoft.space.lang.ast.ViewDefn}</td></tr>
- *     <tr><td>{@link TupleSetImpl}</td> <td>nxm</td> <td>{@link ComplexTypeImpl}</td></tr>
- *     <tr>
- *         <td>TupleStream &nbsp&nbsp</td>
- *         <td>nx1 </td>
- *         <td>{@link org.jkcsoft.space.lang.ast.StreamTypeDefn}</td>
- *     </tr>
- * </table>
+ * An abstract base class for impls of the {@link SpaceObject} interface. See
+ * that source for semantics.
  *
  * @author Jim Coles
  */
 public class AbstractSpaceObject implements SpaceObject {
 
-    private DatumType defn;
+    private TypeDefn defn;
     private SpaceOid oid;
 
-    public AbstractSpaceObject(SpaceOid oid, DatumType defn) {
+    public AbstractSpaceObject(SpaceOid oid, TypeDefn defn) {
         this.oid = oid;
         this.defn = defn;
     }
 
     @Override
-    public DatumType getDefn() {
+    public TypeDefn getDefn() {
         return defn;
     }
 
     @Override
     public SpaceOid getOid() {
         return oid;
+    }
+
+    // convenience
+    ObjectFactory getObjectFactory() {
+        return ObjectFactory.getInstance();
     }
 
     @Override

@@ -24,7 +24,7 @@ import java.util.Set;
  * Encapsulates an entire executable system as defined by Space definition elements
  * (ModelElements) and associated instances.
  *
- * A Directory may contain child Directories or {@link ComplexTypeImpl}'s or other {@link Named}
+ * A Directory may contain child Directories or {@link TypeDefnImpl}'s or other {@link Named}
  * element types.
  *
  * @author Jim Coles
@@ -38,7 +38,7 @@ public class Directory extends NamedElement {
     private Directory parentDir;
     private List<Directory> childDirectories = new LinkedList<>();
     private Set<ParseUnit> parseUnits = new HashSet<>();
-//    private List<ComplexType> typeDefns = new LinkedList<>();
+//    private List<TypeDefn> typeDefns = new LinkedList<>();
 
     // ================== The starting point for using Space to execute Space programs
 
@@ -79,7 +79,7 @@ public class Directory extends NamedElement {
         return getParentDir() == null;
     }
 
-//    public ComplexType addSpaceDefn(ComplexType spaceTypeDefn) {
+//    public TypeDefn addSpaceDefn(TypeDefn spaceTypeDefn) {
 //        typeDefns.add(spaceTypeDefn);
 //        //
 //        addChild((NamedElement) spaceTypeDefn);
@@ -111,7 +111,7 @@ public class Directory extends NamedElement {
         return parseUnits;
     }
 
-//    public List<ComplexType> getTypes() {
+//    public List<TypeDefn> getTypes() {
 //        return typeDefns;
 //    }
 

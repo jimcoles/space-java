@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import java.util.List;
+
 /**
  * @author Jim Coles
  */
@@ -67,7 +69,44 @@ public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
     }
 
     @Override
-    public boolean isAssignableTo(DatumType argsType) {
+    public boolean isAssignableTo(TypeDefn receivingType) {
         return false;
     }
+
+    @Override
+    public VariableDecl addVariableDecl(VariableDecl variableDecl) {
+        return null;
+    }
+
+    @Override
+    public AssociationDefn addAssociationDecl(AssociationDefn associationDecl) {
+        return null;
+    }
+
+    @Override
+    public List<VariableDecl> getVariables() {
+        return null;
+    }
+
+    @Override
+    public List<Declaration> getDatumDecls() {
+        return null;
+    }
+
+    @Override
+    public StatementBlock getInitBlock() {
+        return null;
+    }
+
+    @Override
+    public FunctionDefn addFunctionDefn(FunctionDefn functionDefn) {
+        return null;
+    }
+
+    @Override
+    public boolean hasDatums() {
+        return false;
+    }
+
+
 }

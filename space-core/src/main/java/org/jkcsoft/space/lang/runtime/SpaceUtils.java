@@ -10,6 +10,7 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.jkcsoft.space.lang.instance.*;
+import org.jkcsoft.space.lang.runtime.spm.SpmExecutor;
 
 /**
  * Holds bits used in various places.
@@ -56,5 +57,15 @@ public class SpaceUtils {
                 throw new SpaceX(exe.newRuntimeError("cannot assign " + leftSideHolder + " <- " + rightSideHolder));
         }
         //
+    }
+
+    public static String print(TupleSet tupleSetC) {
+        return null;
+    }
+
+    public static void assignNoCastSpm(SpmExecutor.EvalContext evalContext, ValueHolder leftSideHolder,
+                                       ValueHolder argValueHolder)
+    {
+
     }
 }

@@ -18,6 +18,6 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public interface CollectionType extends DatumType {
+public interface CollectionType extends TypeDefn {
 
 }

@@ -9,11 +9,14 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.LinkState;
+
 /**
  * @author Jim Coles
  */
 public class ReferenceByKey extends AbstractReferenceValue<Tuple> {
 
+    /** One or more values. */
     private Tuple keyValue;
 
     public ReferenceByKey(Tuple keyValue) {

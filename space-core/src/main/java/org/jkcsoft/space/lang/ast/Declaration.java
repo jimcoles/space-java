@@ -14,7 +14,7 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface Declaration extends Identified, Named {
 
-    DatumType getType();
+    TypeDefn getType();
 
 }
 

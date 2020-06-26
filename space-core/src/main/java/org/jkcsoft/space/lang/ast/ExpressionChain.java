@@ -11,7 +11,6 @@ package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.metameta.MetaType;
-import org.jkcsoft.space.lang.runtime.RuntimeError;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +24,7 @@ import java.util.List;
  *
  * Holds either:
  *
- * 1. Meta ReferenceByOid Path: A full reference to a named element via its AST namespace path. The
+ * 1. Meta Reference Path: A full reference to a named element via its AST namespace path. The
  *    reference may be multi-part (fully qualified). Holds a chain of {@link SimpleNameRefExpr}s,
  *    each of which resolves to a single meta object. The MetaType of the full reference
  *    should be known at parse time.
@@ -33,7 +32,7 @@ import java.util.List;
  *    Analogous to a Unix symbolic link.
  *
  * 2. Value Expression Chain: A chain of value expressions where link (i + 1) must be a
- *    named member (function or datum) of the DatumType associated with link (i). If
+ *    named member (function or datum) of the TypeDefn associated with link (i). If
  *    link (i) resolves to a value expression (i + 1) must also be a value expression.
  *    Evaluation of a value expression chain is similar to eval of a statement sequence
  *    in a statement block.
@@ -70,10 +69,10 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
         this.targetMetaType = targetMetaType;
     }
 
-    ExpressionChain(SourceInfo sourceInfo, DatumType typeDefn) {
+    ExpressionChain(SourceInfo sourceInfo, TypeDefn typeDefn) {
         this(sourceInfo, MetaType.TYPE);
 
-        SimpleNameRefExpr<DatumType> firstPart =
+        SimpleNameRefExpr<TypeDefn> firstPart =
             new SimpleNameRefExpr<>(new NamePartExpr(sourceInfo, false, null, typeDefn.getName()));
         firstPart.setState(LinkState.RESOLVED);
         firstPart.setResolvedMetaObj(typeDefn);
@@ -235,7 +234,7 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
     }
 
     @Override
-    public DatumType getDatumType() {
+    public TypeDefn getDatumType() {
         return ((ValueExpr) getLastPart()).getDatumType();
     }
 

@@ -38,7 +38,7 @@ public class ObjectFactory {
         return new SpaceOid(latestOid.incrementAndGet());
     }
 
-    public TupleImpl newTupleImpl(ComplexType defn) {
+    public TupleImpl newTupleImpl(TypeDefn defn) {
         TupleImpl tuple = new TupleImpl(newOid(), defn);
         return tuple;
     }
@@ -64,10 +64,27 @@ public class ObjectFactory {
         return newReferenceByOidHolder(parentTuple, associationDecl, newReferenceByOid(refToOid));
     }
 
-    private DeclaredReferenceHolder<SpaceOid> newReferenceByOidHolder(Tuple parentTuple, AssociationDefn associationDecl,
+    public DeclaredReferenceHolder<SpaceOid> newReferenceByOidHolder(Tuple parentTuple, AssociationDefn associationDecl,
                                                                       ReferenceByOid reference)
     {
         return new DeclaredReferenceHolder<>(parentTuple, associationDecl, reference);
+    }
+
+    public FreeReferenceHolder<SpaceOid> newFreeReferenceHolder(TupleCollection fromObject, SpaceOid refToOid) {
+        return newFreeReferenceHolder(fromObject, newReferenceByOid(refToOid));
+    }
+
+    public FreeReferenceHolder<SpaceOid> newFreeReferenceHolder(TupleCollection fromObject, ReferenceByOid referenceByOid) {
+        return new FreeReferenceHolder<>(fromObject, referenceByOid);
+    }
+
+    /** Any type of value. */
+    public <V extends Value<J>, J> DetachedHolder<V, J> newDetachedHolder(TypeDefn type, V value) {
+        return new DetachedHolder<V, J>(type, value);
+    }
+
+    public DetachedHolder<ReferenceByOid, SpaceOid> newDetachedReferenceHolder(TypeDefn type, SpaceOid toOid) {
+        return newDetachedHolder(type, newReferenceByOid(toOid));
     }
 
     public ReferenceByOid newReferenceByOid(SpaceOid refToOid) {
@@ -88,7 +105,7 @@ public class ObjectFactory {
         return holder;
     }
 
-    public ValueHolder<CardinalValue> newCardinalValueHolder(Tuple tuple, VariableDecl decl, long i) {
+    public ValueHolder<CardinalValue, Long> newCardinalValueHolder(Tuple tuple, VariableDecl decl, long i) {
         return new VariableValueHolder(tuple, decl, newCardinalValue(i));
     }
 
@@ -96,7 +113,7 @@ public class ObjectFactory {
         return new CardinalValue(i);
     }
 
-    public ValueHolder<BooleanValue> newBooleanValueHolder(Tuple tuple, VariableDecl decl, boolean aBoolean) {
+    public ValueHolder<BooleanValue, BoolEnum> newBooleanValueHolder(Tuple tuple, VariableDecl decl, boolean aBoolean) {
         return new VariableValueHolder(tuple, decl, newBooleanValue(aBoolean));
     }
 
@@ -104,7 +121,9 @@ public class ObjectFactory {
         return BooleanValue.getValue(aBoolean);
     }
 
-    public ValueHolder<CharacterValue> newCharacterValueHolder(Tuple tuple, VariableDecl decl, char character) {
+    public ValueHolder<CharacterValue, Character> newCharacterValueHolder(Tuple tuple, VariableDecl decl,
+                                                                          char character)
+    {
         return new VariableValueHolder(tuple, decl, newCharacterValue(character));
     }
 
@@ -112,7 +131,7 @@ public class ObjectFactory {
         return new CharacterValue(character);
     }
 
-    public ValueHolder<RealValue> newRealValueHolder(Tuple tuple, VariableDecl decl, Double aDouble) {
+    public ValueHolder<RealValue, Double> newRealValueHolder(Tuple tuple, VariableDecl decl, Double aDouble) {
         return new VariableValueHolder(tuple, decl, newRealValue(aDouble));
     }
 
@@ -134,5 +153,9 @@ public class ObjectFactory {
 
     public JavaReference newJavaReference(Object targetJavaObject) {
         return new JavaReference(targetJavaObject);
+    }
+
+    public View newView(ViewDefn viewDefn) {
+        return new View(viewDefn);
     }
 }

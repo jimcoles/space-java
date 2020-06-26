@@ -9,10 +9,16 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.TypeDefn;
+
+import java.util.List;
+import java.util.Set;
+
 /**
  * A Space is a collection of {@link TupleSetImpl}'s wherein objects in one collection may
  * hold a ReferenceByOid to another object. The Space is the basis for satisfying
- * a QueryImpl. A Space has associated runtime-managed indices including trees.
+ * a {@link org.jkcsoft.space.lang.ast.ViewDefn}. A Space has associated runtime-managed indices
+ * including trees.
  *
  * Every VM has a default (main) Space.
  * A VM may hold multiple Spaces.
@@ -29,6 +35,14 @@ package org.jkcsoft.space.lang.instance;
  */
 public interface Space {
 
+    Set<TypeDefn> getComplexTypeDefs();
 
+//    List<Index> getIndices();
+
+    List<View> getViews();
+
+//    SpaceObject dereference(SpaceOid referenceOid) throws SpaceX;
+//
+//    void trackObject(SpaceObject spaceObject);
 
 }

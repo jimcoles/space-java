@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
 import org.jkcsoft.space.lang.ast.VariableDecl;
 import org.jkcsoft.space.lang.ast.VariableDeclImpl;
 
@@ -33,7 +33,7 @@ public class VariableValueHolder implements ValueHolder {
     public VariableValueHolder(Tuple parentTuple, VariableDecl declaration) {
         this.parentTuple = parentTuple;
         this.declaration = declaration;
-        this.scalarValue = declaration.getType().nullValue();
+        this.scalarValue = ((PrimitiveTypeDefn) declaration.getType()).nullValue();
     }
 
     public Tuple getParentTuple() {
@@ -43,11 +43,6 @@ public class VariableValueHolder implements ValueHolder {
     @Override
     public VariableDecl getDeclaration() {
         return declaration;
-    }
-
-    @Override
-    public DatumType getType() {
-        return declaration.getType();
     }
 
     public ScalarValue getScalarValue() {

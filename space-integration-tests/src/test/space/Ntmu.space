@@ -56,7 +56,13 @@ type Person {
 
 }
 
+type Project {
+
+}
+
 type Task {
+    Project project;
+    Task parentTask;
     real estHours;
 
     char[] description;
@@ -67,6 +73,39 @@ type Task {
     }
 }
 
+
+/* The presence of any projection variables makes this a 'view' type.
+ base T1 -(assoc 1)-> T2.x1, T2.x3
+         -(assoc 2)-> T3.*
+ */
+view TaskView of Task {
+
+    // declare the base type and associations with optional names for subsequent projection
+    from
+        base
+            keys nameKey
+            -> owner "taskOwner"  // assoc to User
+                (keys userIdKey)
+                *
+            -> project
+                (keys projectSeqIdKey)
+            ...
+
+    // select which vars to project, possibly inserting datums specific to this view
+    select
+        task
+            size estimate
+            dueDate
+        string location = "Texas"
+        taskOwner (firstName, lastName)
+        string fullName = taskOwner.firstName + taskOwner.lastName
+        project.*   // all vars
+
+    where
+
+}
+
+index
 // Equations within a space type
 type Triangle {
     real side1;

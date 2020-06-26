@@ -20,7 +20,7 @@ public type MySpace
 
     // streams / sequences
 
-    // A general binary stream.  Like an RDB 'blob'. Can read/write any bit sequence to/from a bstream.
+    // A general binary stream. Like an RDB 'blob'. Can read/write any bit sequence to/from a bstream.
 //    bstream aBinaryStream;
 
     // character sequence (finite) - a special kind of bstream

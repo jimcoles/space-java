@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * {@link OperatorExpr}s are the heart of query criteria and equation
+ * {@link OperatorExpr}s are the heart of {@link ViewDefn} criteria and {@link Rule}
  * expressions.  They are expressions that evaluate to true or false
  * (or unknown?).  Expect a wide array of boolean operators such as
  * '==', 'AND', 'OR', '<', '>', 'contains', and other set-theoretic opers.
@@ -27,14 +27,14 @@ import java.util.List;
  */
 public class OperatorExpr extends AbstractModelElement implements ValueExpr {
 
-    private OperEnum oper;
+    private Operators.Operator oper;
     /* could be one, two or more args.  Could be nested expressions
     or could be literals. For a given operator, the expression must
     return a value of the proper dimensionality and type.
     */
     private List<ValueExpr> args = new LinkedList<>();
 
-    public OperatorExpr(SourceInfo sourceInfo, OperEnum oper, ValueExpr... args) {
+    public OperatorExpr(SourceInfo sourceInfo, Operators.Operator oper, ValueExpr... args) {
         super(sourceInfo);
         this.oper = oper;
         for (ValueExpr arg : args) {
@@ -44,7 +44,7 @@ public class OperatorExpr extends AbstractModelElement implements ValueExpr {
         }
     }
 
-    public OperEnum getOper() {
+    public Operators.Operator getOper() {
         return oper;
     }
 
@@ -66,14 +66,14 @@ public class OperatorExpr extends AbstractModelElement implements ValueExpr {
 
     @Override
     public String getDisplayName() {
-        return oper.name();
+        return oper.toString();
     }
 
     @Override
-    public DatumType getDatumType() {
+    public TypeDefn getDatumType() {
         // expressions inherit types from nested value expressions, bumping
         // up the scale of the type if needed, e.g., long + short => long
-        DatumType argsType = null;
+        TypeDefn argsType = null;
         for (ValueExpr arg : args) {
             if (argsType == null)
                 argsType = arg.getDatumType();

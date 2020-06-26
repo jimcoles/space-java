@@ -9,8 +9,6 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.DatumType;
-
 /**
  * Encapsulates an object identifier used by the Space runtime to identify
  * and reference instance-level 'objects' such as Spaces, Tuples, and

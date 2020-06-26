@@ -86,7 +86,7 @@ public class FunctionCallExpr extends AbstractModelElement implements NameRefOrH
     }
 
     @Override
-    public DatumType getDatumType() {
+    public TypeDefn getDatumType() {
         return functionRef.getResolvedMetaObj().getReturnType();
     }
 

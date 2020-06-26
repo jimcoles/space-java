@@ -17,17 +17,17 @@ package org.jkcsoft.space.lang.ast;
  */
 public abstract class OperatorDefn {
 
-    private DatumType argType;
-    private DatumType returnType;
+    private TypeDefn argType;
+    private TypeDefn returnType;
     private int minArgs;
     private int maxArgs;
 
     OperatorDefn() {
-        this(1);
+        this(2);
     }
 
-    OperatorDefn(int maxArgs) {
-        this(1, maxArgs);
+    OperatorDefn(int nAry) {
+        this(nAry, nAry);
     }
 
     OperatorDefn(int minArgs, int maxArgs) {
@@ -39,11 +39,11 @@ public abstract class OperatorDefn {
         return false;
     }
 
-    public DatumType getArgType() {
+    public TypeDefn getArgType() {
         return argType;
     }
 
-    public DatumType getReturnType() {
+    public TypeDefn getReturnType() {
         return returnType;
     }
 

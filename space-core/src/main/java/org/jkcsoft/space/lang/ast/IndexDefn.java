@@ -10,11 +10,11 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
+ *
  * @author Jim Coles
  */
 public class IndexDefn {
 
-    //
-    private QueryImpl query;
+    private ProjectionDecl projection;
 
 }

@@ -9,8 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance.sji;
 
-import org.jkcsoft.space.SpaceHome;
-import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.ast.Declaration;
 import org.jkcsoft.space.lang.ast.sji.SjiPropAssocDecl;
 import org.jkcsoft.space.lang.ast.sji.SjiService;
@@ -21,15 +20,17 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * @author Jim Coles
  */
-public class SjiPropAssocValueHolder implements ValueHolder<ReferenceValue> {
+public class SjiPropAssocValueHolder implements ValueHolder<ReferenceValue<Object>, Object> {
 
+    private SjiService sjiService;
     private SjiTuple sjiFromTuple;
     private SjiPropAssocDecl sjiPropVarDecl;
     private SjiTuple sjiToTuple;
     //
     private JavaReference javaReference;
 
-    public SjiPropAssocValueHolder(SjiTuple sjiFromTuple, SjiPropAssocDecl sjiPropAssocDecl) {
+    public SjiPropAssocValueHolder(SjiService sjiService, SjiTuple sjiFromTuple, SjiPropAssocDecl sjiPropAssocDecl) {
+        this.sjiService = sjiService;
         this.sjiFromTuple = sjiFromTuple;
         this.sjiPropVarDecl = sjiPropAssocDecl;
     }
@@ -40,7 +41,7 @@ public class SjiPropAssocValueHolder implements ValueHolder<ReferenceValue> {
     }
 
     @Override
-    public DatumType getType() {
+    public TypeDefn getType() {
         return sjiPropVarDecl.getType();
     }
 
@@ -84,9 +85,8 @@ public class SjiPropAssocValueHolder implements ValueHolder<ReferenceValue> {
 
     public Tuple getResolvedObject() {
         if (sjiToTuple == null) {
-            SjiService sji = SpaceHome.getSjiService();
             try {
-                sjiToTuple = sji.getOrCreateSjiObjectProxy(getTargetJavaObject());
+                sjiToTuple = sjiService.getOrCreateSjiObjectProxy(getTargetJavaObject());
             } catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }

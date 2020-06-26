@@ -9,30 +9,36 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.DatumType;
 import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.ProjectionDecl;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 
 /**
- * Variables and References hold values.
+ * A {@link ValueHolder} is a {@link Declaration} (a name and a type) and a {@link Value};
+ * This is very similar to a Lisp 'con cell' except that our holder is typed via the
+ * {@link Declaration}.
+ *
+ * <p>Possible alternate names: Node, Quantum (because it is a more basic
+ * notion than an object/tuple).
  *
  * @author Jim Coles
  */
-public interface ValueHolder<V extends Value> {
+public interface ValueHolder<V extends Value<J>, J> {
 
     Declaration getDeclaration();
 
-    default DatumType getType() {
+    default TypeDefn getType() {
         return getDeclaration().getType();
     }
 
-    /** Assign @value to this holder slot. */
+    /** Assign value to this holder slot. */
     void setValue(V value);
 
     /** Does this value slot have an assignable value? */
     boolean hasValue();
 
     /**
-     * Get the assignable value that the Executor will use move to a left-hand side of
+     * Get the atomic assignable value that the Executor will use move to a left-hand side of
      * assignment statement or other assignment semantics.
      * For scalars this a primitive value such as a integer.
      * For {@link org.jkcsoft.space.lang.ast.AssociationDefn}, this is the SpaceOid.

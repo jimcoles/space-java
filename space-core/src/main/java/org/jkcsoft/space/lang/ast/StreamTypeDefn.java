@@ -9,10 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
-import java.util.List;
-
 /**
  * A Stream is first-class collective data type similar to the notion of a BLOB data type used by
  * databases.
@@ -47,12 +43,12 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public class StreamTypeDefn extends AbstractCollectionTypeDefn implements DatumType {
+public class StreamTypeDefn extends AbstractCollectionTypeDefn implements TypeDefn {
 
     public static final String COLL_SUFFIX = "{}";
     private float length;
 
-    StreamTypeDefn(SourceInfo sourceInfo, DatumType containedElementType) {
+    StreamTypeDefn(SourceInfo sourceInfo, TypeDefn containedElementType) {
         super(sourceInfo, containedElementType.getName() + COLL_SUFFIX, containedElementType);
     }
 

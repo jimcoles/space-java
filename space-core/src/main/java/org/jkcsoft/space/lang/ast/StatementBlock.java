@@ -13,6 +13,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Applies primarily to defining a function body, or sub-block within
@@ -22,63 +23,13 @@ import java.util.List;
  * @author Jim Coles
  */
 @LexicalNode
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-public class StatementBlock extends AbstractProjection implements Statement, ComplexType {
+public class StatementBlock extends AbstractTypeDefn implements Statement, TypeDefn {
 
 //    private List<AssociationDefn> associationDefnList;
     private List<Statement> statementSequence = new LinkedList<>();  // child statements
 
     public StatementBlock(SourceInfo sourceInfo) {
-        super(sourceInfo, null);
-    }
-
-    @Override
-    public MetaType getMetaType() {
-        return null;
-    }
-
-    @Override
-    public SequenceTypeDefn getSequenceOfType() {
-        return null;
-    }
-
-    @Override
-    public SetTypeDefn getSetOfType() {
-        return null;
+        super(sourceInfo, "(block context)");
     }
 
     public List<Statement> getStatementSequence() {
@@ -108,22 +59,12 @@ public class StatementBlock extends AbstractProjection implements Statement, Com
     }
 
     @Override
-    public boolean isNamed() {
-        return false;
-    }
-
-    @Override
-    public String getName() {
+    public KeyDefn getPrimaryKeyDefn() {
         return null;
     }
 
     @Override
-    public List<String> getFullNamePath() {
-        return null;
-    }
-
-    @Override
-    public ComplexType getRootType() {
+    public Set<KeyDefn> getAllKeyDefns() {
         return null;
     }
 }

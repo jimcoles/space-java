@@ -9,13 +9,14 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.ComplexType;
-import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.ast.Declaration;
-import org.jkcsoft.space.lang.ast.Projection;
+import org.jkcsoft.space.lang.ast.ProjectionDecl;
+
+import java.util.List;
 
 /**
- * <p>A Tuple is an element of a {@link TupleSetImpl}. Each Tuple contains values
+ * <p>A Tuple is an element of a {@link TupleSet}. Each Tuple contains values
  * which are ordered and named.
  * Values in a Tuple can be retrieved in order or by the name of the variable.  A Tuple
  * may contain only Scalar values and Oid-based references to Tuples in other
@@ -29,7 +30,7 @@ import org.jkcsoft.space.lang.ast.Projection;
  *
  * <p>A central notion in Space. Similar to notion of Tuple in other languages like
  * Python except that our data values usually have rich meta data defined in a
- * {@link DatumType}, usually a {@link ComplexType}.
+ * {@link TypeDefn}, usually a {@link TypeDefn}.
  *
  * <p>Analogous to a Java Object or a JDBC {@link java.sql.ResultSet}
  *
@@ -37,7 +38,7 @@ import org.jkcsoft.space.lang.ast.Projection;
  */
 public interface Tuple extends ValueCollection<ValueHolder>, Value, SpaceObject {
 
-    Projection getType();
+    ProjectionDecl getType();
 
     void initHolder(ValueHolder valueHolder);
 
@@ -46,6 +47,8 @@ public interface Tuple extends ValueCollection<ValueHolder>, Value, SpaceObject 
     Tuple setValue(int idx, Value value);
 
     ValueHolder get(Declaration member);
+
+    List<ValueHolder> getValueHolders();
 
     ValueHolder get(int idx);
 

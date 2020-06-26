@@ -15,7 +15,7 @@ public interface AssociationDefnEnd extends Named {
 
 //    TypeRef getTypeRef();
 
-    ComplexType getType();
+    TypeDefn getType();
 
     /** The multiplicity 0, 1, or many or fixed positive integer */
     int getLowerMultiplicity();

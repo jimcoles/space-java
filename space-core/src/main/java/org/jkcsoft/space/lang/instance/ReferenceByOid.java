@@ -9,6 +9,10 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.java.util.Strings;
+
+import java.text.MessageFormat;
+
 /**
  * Holds a reference to a Space "object", which might be a Tuple or any
  * non-scalar such as a Stream or Sequence.
@@ -36,4 +40,10 @@ public class ReferenceByOid extends AbstractReferenceValue<SpaceOid> {
     public SpaceOid getJavaValue() {
         return toOid;
     }
+
+    @Override
+    public String toString() {
+        return MessageFormat.format("oid = {0} -> ", toOid);
+    }
+
 }

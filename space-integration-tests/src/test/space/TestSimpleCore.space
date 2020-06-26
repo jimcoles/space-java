@@ -42,7 +42,7 @@ type Address {
     int unitNumber;
 
     // Syntax: Equation Definition
-    equation streetAddrFormatUSCommon {
+    rule streetAddrFormatUSCommon {
         // Syntax: Equality Constraint as Grammar expression
         //        streetAddr ==  gramex streetNumber streetRoad unitNumber? }
 

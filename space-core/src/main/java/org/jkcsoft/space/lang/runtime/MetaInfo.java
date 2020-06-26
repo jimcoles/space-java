@@ -10,13 +10,10 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.jkcsoft.java.util.Strings;
-import org.jkcsoft.space.lang.ast.ModelElement;
 import org.jkcsoft.space.lang.ast.NamedElement;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * Holds redundant info needed at runtime for lookup and navigation.
@@ -38,7 +35,7 @@ public class MetaInfo {
     }
 
     void addChild(NamedElement child) {
-        if (child.isNamed())
+        if (child.hasName())
             children.put(child.getName(), child);
         else
             throw new IllegalArgumentException("Bug in runtime: Child elements must be named.");

@@ -52,7 +52,7 @@ public class SjiTypeRefByClass extends AbstractModelElement implements TypeRef {
     }
 
     @Override
-    public DatumType getResolvedType() {
+    public TypeDefn getResolvedType() {
         return mapping.getSjiProxy();
     }
 
@@ -67,7 +67,7 @@ public class SjiTypeRefByClass extends AbstractModelElement implements TypeRef {
     }
 
     @Override
-    public DatumType getDatumType() {
+    public TypeDefn getDatumType() {
         return getResolvedType();
     }
 

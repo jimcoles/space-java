@@ -31,7 +31,7 @@ public class SjiAssociationDefnEnd extends NamedElement implements AssociationDe
     }
 
     @Override
-    public ComplexType getType() {
+    public TypeDefn getType() {
         return sjiType;
     }
 

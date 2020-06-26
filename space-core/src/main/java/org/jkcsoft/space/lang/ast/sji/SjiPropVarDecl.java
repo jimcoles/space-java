@@ -9,7 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
-import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.NativeSourceInfo;
 import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 
@@ -22,14 +21,14 @@ public class SjiPropVarDecl extends SjiVarDecl implements SjiPropBased {
 
     private PropertyDescriptor jPropDesc;
 
-    SjiPropVarDecl(SjiTypeDefn sjiTypeDefn, PropertyDescriptor jPd) {
-        super(new NativeSourceInfo(jPd), sjiTypeDefn, jPd.getName());
+    SjiPropVarDecl(SjiService sjiService, SjiTypeDefn sjiTypeDefn, PropertyDescriptor jPd) {
+        super(sjiService, new NativeSourceInfo(jPd), sjiTypeDefn, jPd.getName());
         this.jPropDesc = jPd;
     }
 
     @Override
     public NumPrimitiveTypeDefn getType() {
-        return (NumPrimitiveTypeDefn) SpaceHome.getSjiService().getPrimitiveTypeDefn(jPropDesc.getPropertyType());
+        return (NumPrimitiveTypeDefn) getSjiService().getPrimitiveTypeDefn(jPropDesc.getPropertyType());
     }
 
     @Override

@@ -54,11 +54,10 @@ public class AstFactory {
         return new NamePart(sourceInfo, name);
     }
 
-    public ComplexTypeImpl newSpaceTypeDefn(SourceInfo sourceInfo, NamePart nameNode) {
-        ComplexTypeImpl complexTypeImpl = new ComplexTypeImpl(sourceInfo, nameNode);
+    public TypeDefnImpl newTypeDefn(SourceInfo sourceInfo, NamePart nameNode) {
+        TypeDefnImpl complexTypeImpl = new TypeDefnImpl(sourceInfo, nameNode);
         return complexTypeImpl;
     }
-
 
     public SpaceFunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name, FullTypeRefImpl returnTypeRef) {
         SpaceFunctionDefn element = new SpaceFunctionDefn(sourceInfo, name, returnTypeRef);
@@ -122,7 +121,7 @@ public class AstFactory {
         return new ReturnExpr(sourceInfo, valueExpr);
     }
 
-    public OperatorExpr newOperatorExpr(SourceInfo sourceInfo, OperEnum oper, ValueExpr... args) {
+    public OperatorExpr newOperatorExpr(SourceInfo sourceInfo, Operators.Operator oper, ValueExpr... args) {
         return new OperatorExpr(sourceInfo, oper, args);
     }
 
@@ -130,7 +129,9 @@ public class AstFactory {
         return new TupleValueList(sourceInfo);
     }
 
-    public NewTupleExpr newNewObjectExpr(SourceInfo sourceInfo, FullTypeRefImpl typeRefPathExpr, TupleValueList tupleValueList) {
+    public NewTupleExpr newNewObjectExpr(SourceInfo sourceInfo, FullTypeRefImpl typeRefPathExpr,
+                                         TupleValueList tupleValueList)
+    {
         return new NewTupleExpr(sourceInfo, typeRefPathExpr, tupleValueList);
     }
 
@@ -152,7 +153,7 @@ public class AstFactory {
         return typeRef;
     }
 
-    public FullTypeRefImpl newTypeRef(SourceInfo sourceInfo, DatumType typeDefn) {
+    public FullTypeRefImpl newTypeRef(SourceInfo sourceInfo, TypeDefn typeDefn) {
         return new FullTypeRefImpl(sourceInfo, typeDefn);
     }
 
@@ -172,7 +173,7 @@ public class AstFactory {
         return new ParsableChoice(parseUnit);
     }
 
-    public Namespace newNamespace(SourceInfo sourceInfo, String name, Namespace ... nsLookupChain) {
+    public Namespace newNamespace(SourceInfo sourceInfo, String name, Namespace... nsLookupChain) {
         return new Namespace(sourceInfo, name, nsLookupChain);
     }
 
@@ -186,5 +187,17 @@ public class AstFactory {
 
     public IntrinsicContainer newIntrinsicContainer() {
         return new IntrinsicContainer(SourceInfo.INTRINSIC);
+    }
+
+    public TypeDefnImpl newTypeDefn(String typeName) {
+        return newTypeDefn(SourceInfo.API, newNamePart(SourceInfo.API, typeName));
+    }
+
+    public AssociationDefn newAssociationDecl(String assocName, TypeDefn compoundTypeDef) {
+        return newAssociationDecl(SourceInfo.API, assocName, newTypeRef(SourceInfo.API, compoundTypeDef));
+    }
+
+    public VariableDecl newVariableDecl(String varName, TypeDefn simpleTypeDefn) {
+        return newVariableDecl(SourceInfo.API, varName, newTypeRef(SourceInfo.API, simpleTypeDefn));
     }
 }

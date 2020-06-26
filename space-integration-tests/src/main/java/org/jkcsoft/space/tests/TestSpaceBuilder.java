@@ -28,7 +28,7 @@ public class TestSpaceBuilder extends TestSourceStub {
         ast.newProgram(si, "");
         ObjectFactory objs = ObjectFactory.getInstance();
         //
-        ComplexType testPersonTypeDefn = ast.newSpaceTypeDefn(si, ast.newNamePart(si, "PersonType"));
+        TypeDefn testPersonTypeDefn = ast.newTypeDefn(si, ast.newNamePart(si, "PersonType"));
 //        VariableDefn firstName = ast.newVariableDefn(new ProgSourceInfo(), "firstName", PrimitiveTypeDefn.TEXT);
 //        testPersonTypeDefn.addVariable(firstName);
 //        VariableDefn lastName = ast.newVariableDefn(new ProgSourceInfo(), "lastName", PrimitiveTypeDefn.TEXT);

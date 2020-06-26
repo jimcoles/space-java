@@ -69,7 +69,7 @@ public abstract class AbstractModelElement extends AbstractSpaceObject implement
         children.add(child);
         child.setParent(this);
         //
-        if (child instanceof NamedElement) {
+        if (child instanceof NamedElement && ((NamedElement) child).hasName()) {
             NamedElement nChild = (NamedElement) child;
             namedChildMap.put(nChild.getName(), nChild);
         }
@@ -94,7 +94,7 @@ public abstract class AbstractModelElement extends AbstractSpaceObject implement
     }
 
     /**
-     * Must be called by the adder method for children, e.g., {@link ComplexTypeImpl}.addAssocDefn() should call this for
+     * Must be called by the adder method for children, e.g., {@link TypeDefnImpl}.addAssocDefn() should call this for
      * the {@link NamePartExpr} associated with it's 'from' and 'to' type definition.
      */
     private void addExpressionChain(ExpressionChain exprChain) {

@@ -25,16 +25,8 @@ import java.util.TreeMap;
  */
 public class ObjectTable {
 
-    private Index objByOid = new Index();
+//    private Index objByOid = new Index();
 
-    /**
-     * The 'object' tables for 'instance' objects associated with the running program.
-     * This map is added to as the program runs.
-     */
-    private Map<SpaceOid, SpaceObject> instObjectsIndexByOid = new TreeMap<>();
-
-    /** Map of object by the Oid of their Type defn.  So, essentially */
-    private Map<SpaceOid, SpaceObject> objectsByType = new TreeMap<>();
 
     /**
      * KeyValue=the referenced object's Oid.
@@ -42,6 +34,7 @@ public class ObjectTable {
      */
     private Map<SpaceOid, Set<SpaceOid>> objectReferenceMap = new TreeMap<>();
 
+/*
     public void addObject(SpaceObject sobj) {
         instObjectsIndexByOid.put(sobj.getOid(), sobj);
     }
@@ -49,4 +42,5 @@ public class ObjectTable {
     public SpaceObject getObjectByOid(SpaceOid oid) {
         return instObjectsIndexByOid.get(oid);
     }
+*/
 }

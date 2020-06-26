@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2020 through present.
  *
  * Licensed under the following license agreement:
  *
@@ -9,45 +9,31 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
 /**
- * A View is an algebraic combination of other Types and/or other Views,
- * both of which are Relations. The Space runtime is aware of Views and their
+ * A {@link ViewDefn} is an algebraic combination of Types and other Views.
+ * The Space runtime is aware of Views and their
  * relationship to Entities and manages state values that equate between
  * these elements.
  *
- * <p>A {@link View} can be thought of as a named Query.
+ * <p>The following are specializations of a {@link ViewDefn}
+ * <uL>
+ *     <li>A Query is a possibly unnamed and often non-persistent view.
+ *     <li>An index is a view that only specifies associations and keys in it's path, not variables.
+ * </uL>
+ * <p>A tree is a view declarative definition of a Tree with respect to a normalized Type graph.
+ * <p>The simplest definition of a Tree is just a Type with a recursive 1-to-many
+ * relationship. More complex Trees, those involving various Types, require the
+ * declaration of which Associations constitute the parent-child Tree association.
+ *
+ * <p>Every {@link org.jkcsoft.space.lang.instance.TupleSet} will have a controlling
+ * {@link ViewDefn}.
  *
  * @author Jim Coles
- * @version 1.0
  */
-public class ViewDefn extends NamedElement implements View {
+public interface ViewDefn extends TypeDefn {
 
-    //    private Space parentSpace;
-    private Projection variablesExpr;
-    // nestable boolean-valued expression
-    private Rule selector;
+    ProjectionDecl getVariableProjection();
 
-    public ViewDefn(SourceInfo sourceInfo) {
-        super(sourceInfo, null);
-    }
-
-    public ViewDefn(SourceInfo sourceInfo, String name) {
-        super(sourceInfo, name);
-    }
-
-    @Override
-    public MetaType getMetaType() {
-        return MetaType.RULE;
-    }
-
-    public Projection getVariablesExpr() {
-        return variablesExpr;
-    }
-
-    public Rule getSelector() {
-        return selector;
-    }
+    Rule getSelector();
 
 }

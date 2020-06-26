@@ -19,3 +19,5 @@ include(':space-assembly')
 include(':space-script-provider')
 //
 include(':space-integration-tests')
+include 'space-macos'
+

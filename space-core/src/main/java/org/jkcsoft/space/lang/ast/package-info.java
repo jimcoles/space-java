@@ -25,7 +25,7 @@
  * <h2>Primary Notions</h2>
  * <p>The following are concrete notions defined by a Space programmer.</p>
  * <ul>
- *     <li>{@link org.jkcsoft.space.lang.ast.ComplexTypeImpl} - A type corresponds to a type
+ *     <li>{@link org.jkcsoft.space.lang.ast.TypeDefnImpl} - A type corresponds to a type
  *     of thing, a noun, an entity. A type has state described via Variables and Associations.</li>
  *     <li>{@link org.jkcsoft.space.lang.ast.VariableDeclImpl} - A scalar-valued element
  *     with some semantic meaning associated with a Space</li>

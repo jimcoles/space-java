@@ -42,7 +42,7 @@ public class NewSetExpr extends AbstractModelElement implements ValueExpr {
     }
 
     @Override
-    public DatumType getDatumType() {
+    public TypeDefn getDatumType() {
         return tupleTypeRef.getResolvedType();
     }
 

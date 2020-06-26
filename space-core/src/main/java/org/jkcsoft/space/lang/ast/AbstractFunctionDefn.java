@@ -20,7 +20,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 public abstract class AbstractFunctionDefn extends NamedElement implements FunctionDefn, SolutionExpr {
 
     private Rule governingEquation; // TODO
-    private ComplexType argSpaceTypeDefn;
+    private TypeDefn argSpaceTypeDefn;
 
     protected AbstractFunctionDefn(SourceInfo sourceInfo, String name)
     {
@@ -32,14 +32,14 @@ public abstract class AbstractFunctionDefn extends NamedElement implements Funct
         return MetaType.FUNCTION;
     }
 
-    public void setArgSpaceTypeDefn(ComplexType argSpaceTypeDefn) {
+    public void setArgSpaceTypeDefn(TypeDefn argSpaceTypeDefn) {
         this.argSpaceTypeDefn = argSpaceTypeDefn;
         this.argSpaceTypeDefn.setGroupingNode(true);
         //
         addChild(argSpaceTypeDefn);
     }
 
-    public ComplexType getArgSpaceTypeDefn() {
+    public TypeDefn getArgSpaceTypeDefn() {
         return argSpaceTypeDefn;
     }
 

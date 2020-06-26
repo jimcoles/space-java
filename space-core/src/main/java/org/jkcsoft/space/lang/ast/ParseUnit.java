@@ -17,9 +17,9 @@ public class ParseUnit extends AbstractModelElement {
     private PackageDecl packageDecl;
     private List<ImportExpr> importExprs;
     // redundant list of resolved import types after wildcard expansion
-    private Set<DatumType> allImportedTypes = null;
+    private Set<TypeDefn> allImportedTypes = null;
 
-    private List<ComplexType> typeDefns = new LinkedList<>();
+    private List<TypeDefn> typeDefns = new LinkedList<>();
     private IntrinsicContainer importedTypeContainer;
 
     ParseUnit(SourceInfo sourceInfo) {
@@ -54,18 +54,18 @@ public class ParseUnit extends AbstractModelElement {
         return importExprs;
     }
 
-    public void addToAllImportedTypes(DatumType datumType) {
+    public void addToAllImportedTypes(TypeDefn typeDefn) {
         if (allImportedTypes == null)
             allImportedTypes = new HashSet<>();
 
-        allImportedTypes.add(datumType);
+        allImportedTypes.add(typeDefn);
     }
 
-    public Set<DatumType> getAllImportedTypes() {
+    public Set<TypeDefn> getAllImportedTypes() {
         return allImportedTypes != null ? allImportedTypes : Collections.EMPTY_SET;
     }
 
-    public ComplexType addTypeDefn(ComplexType spaceTypeDefn) {
+    public TypeDefn addTypeDefn(TypeDefn spaceTypeDefn) {
         typeDefns.add(spaceTypeDefn);
         //
         addChild((NamedElement) spaceTypeDefn);
@@ -77,13 +77,13 @@ public class ParseUnit extends AbstractModelElement {
         return streamTypeDefn;
     }
 
-    public List<ComplexType> getTypeDefns() {
+    public List<TypeDefn> getTypeDefns() {
         return typeDefns;
     }
 
     public ModelElement getImportedTypeContainer() {
         if (importedTypeContainer == null) {
-            Set<DatumType> allImportedTypes = this.getAllImportedTypes();
+            Set<TypeDefn> allImportedTypes = this.getAllImportedTypes();
             importedTypeContainer = AstFactory.getInstance().newIntrinsicContainer();
             allImportedTypes.forEach(dt -> importedTypeContainer.addChild(dt));
         }

@@ -9,10 +9,10 @@
  */
 package org.jkcsoft.space.lang.instance.sji;
 
-import org.jkcsoft.space.SpaceHome;
-import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.ast.Declaration;
 import org.jkcsoft.space.lang.ast.sji.SjiFieldAssocDecl;
+import org.jkcsoft.space.lang.ast.sji.SjiService;
 import org.jkcsoft.space.lang.instance.Value;
 import org.jkcsoft.space.lang.instance.ValueHolder;
 
@@ -21,10 +21,12 @@ import org.jkcsoft.space.lang.instance.ValueHolder;
  */
 public class SjiFieldAssocValueHolder implements ValueHolder {
 
+    private SjiService sjiService;
     private SjiTuple sjiTuple;
     private SjiFieldAssocDecl sjiFieldAssocDecl;
 
-    public SjiFieldAssocValueHolder(SjiTuple sjiTuple, SjiFieldAssocDecl sjiFieldVarDecl) {
+    public SjiFieldAssocValueHolder(SjiService sjiService, SjiTuple sjiTuple, SjiFieldAssocDecl sjiFieldVarDecl) {
+        this.sjiService = sjiService;
         this.sjiTuple = sjiTuple;
         this.sjiFieldAssocDecl = sjiFieldVarDecl;
     }
@@ -35,17 +37,8 @@ public class SjiFieldAssocValueHolder implements ValueHolder {
     }
 
     @Override
-    public DatumType getType() {
+    public TypeDefn getType() {
         return sjiFieldAssocDecl.getType();
-    }
-
-    @Override
-    public void setValue(Value value) {
-        try {
-            sjiFieldAssocDecl.getjField().set(sjiTuple.getjObject(), value.getJavaValue());
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -61,6 +54,15 @@ public class SjiFieldAssocValueHolder implements ValueHolder {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-        return SpaceHome.getSjiService().toSpaceValue(jValue);
+        return sjiService.toSpaceValue(jValue);
+    }
+
+    @Override
+    public void setValue(Value value) {
+        try {
+            sjiFieldAssocDecl.getjField().set(sjiTuple.getjObject(), value.getJavaValue());
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 }

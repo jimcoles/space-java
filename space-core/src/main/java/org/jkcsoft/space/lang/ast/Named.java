@@ -18,7 +18,7 @@ import java.util.List;
  */
 public interface Named extends Identified {
 
-    boolean isNamed();
+    boolean hasName();
 
     String getName();
 

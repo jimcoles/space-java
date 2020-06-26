@@ -10,7 +10,10 @@
 package org.jkcsoft.space.lang.instance;
 
 /**
+ * TODO Should I rename this to 'View'.
+ *
  * @author Jim Coles
  */
-public interface TupleSet {
+public interface TupleSet extends TupleCollection {
+
 }

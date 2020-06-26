@@ -191,7 +191,7 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<ModelElement> 
 
     @Override
     public ModelElement visitSpaceTypeDefn(SpaceParser.SpaceTypeDefnContext ctx) {
-        currentNode = astFactory.newSpaceTypeDefn(getSourceInfo(ctx), ((NamePart) ctx.identifier().accept(this)));
+        currentNode = astFactory.newTypeDefn(getSourceInfo(ctx), ((NamePart) ctx.identifier().accept(this)));
         return super.visitSpaceTypeDefn(ctx);
     }
 

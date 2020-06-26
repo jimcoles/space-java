@@ -10,12 +10,11 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
-import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.runtime.AstUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -26,16 +25,18 @@ import java.util.*;
  * @author Jim Coles
  */
 public class NSRegistry {
-    private static final Logger log = LoggerFactory.getLogger(NSRegistry.class);
 
+    private static final Logger log = LoggerFactory.getLogger(NSRegistry.class);
     private static NSRegistry instance;
 
     public static NSRegistry getInstance() {
         if (instance == null)
             instance = new NSRegistry();
-
         return instance;
     }
+
+    // ------------------------------------------------------------------------
+    //
 
     /**
      * Meta objects are loaded as we parse the source code. Intrinsic and native meta
@@ -66,7 +67,9 @@ public class NSRegistry {
      */
 //    private Map<NamedElement, MetaInfo> metaObjectExtendedInfoMap = new TreeMap<>();
     private NSRegistry() {
-        AstFactory astFactory = SpaceHome.getAstFactory();
+//        this.exeContext = exeContext;
+        //
+        AstFactory astFactory = AstFactory.getInstance();
         langNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "lang");
         addNamespace(langNs);
         userNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "user", langNs);

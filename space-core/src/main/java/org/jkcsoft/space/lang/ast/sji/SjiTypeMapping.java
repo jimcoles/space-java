@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
-import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.ast.LinkState;
 
 /**
@@ -18,7 +18,7 @@ import org.jkcsoft.space.lang.ast.LinkState;
 public class SjiTypeMapping {
 
     private Class javaClass; // the key
-    private DatumType sjiProxy; // the target
+    private TypeDefn sjiProxy; // the target
     private LinkState state = LinkState.INITIALIZED;
 
     public SjiTypeMapping(Class javaClass) {
@@ -29,11 +29,11 @@ public class SjiTypeMapping {
         return javaClass;
     }
 
-    public DatumType getSjiProxy() {
+    public TypeDefn getSjiProxy() {
         return sjiProxy;
     }
 
-    public void setSjiProxy(DatumType resolvedType) {
+    public void setSjiProxy(TypeDefn resolvedType) {
         this.sjiProxy = resolvedType;
     }
 

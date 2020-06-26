@@ -16,9 +16,9 @@ public interface FunctionDefn extends Named {
 
     boolean isOpaque();
 
-    ComplexType getArgSpaceTypeDefn();
+    TypeDefn getArgSpaceTypeDefn();
 
     boolean isReturnVoid();
 
-    DatumType getReturnType();
+    TypeDefn getReturnType();
 }

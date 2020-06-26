@@ -25,7 +25,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  * driven by the following key Use Cases:<ol>
  *
  * <li>Enable a simple JSON-like textualization (write and read) of a Space object set.
- * Most commonly,textualize a full graph of Space objects encompassing a range of
+ * Most commonly, textualize a full graph of Space objects encompassing a range of
  * associated types.
  *
  * <li>Enable a "terse source code" textualization (write and parse) of a Space type system.
@@ -45,21 +45,15 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public interface AssociationDefn extends Declaration {
 
-    MetaType getMetaType();
-
-    /** Satisfied by the 'to' type. */
-    @Override
-    DatumType getType();
-
     default AssociationKind getAssociationKind() {
         return AssociationKind.INDEPENDENT;
-    };
+    }
 
     AssociationDefnEnd getFromEnd();
 
     AssociationDefnEnd getToEnd();
 
-    DatumType getToType();
+    TypeDefn getToType();
 
     boolean isRecursive();
 

@@ -20,8 +20,8 @@ public class SjiPropAssocDecl extends SjiAssocDecl implements SjiPropBased {
 
     private PropertyDescriptor jPropDesc;
 
-    public SjiPropAssocDecl(SjiTypeDefn sjiFromType, SjiTypeDefn sjiToType, PropertyDescriptor jPd) {
-        super(new NativeSourceInfo(jPd), sjiFromType, sjiToType, jPd.getName());
+    public SjiPropAssocDecl(SjiService sjiService, SjiTypeDefn sjiFromType, SjiTypeDefn sjiToType, PropertyDescriptor jPd) {
+        super(sjiService, new NativeSourceInfo(jPd), sjiFromType, sjiToType, jPd.getName());
         this.jPropDesc = jPd;
     }
 

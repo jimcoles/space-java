@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.ast.sji;
 
 import org.jkcsoft.space.lang.ast.AbstractFunctionDefn;
-import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.ast.FunctionDefn;
 import org.jkcsoft.space.lang.ast.NativeSourceInfo;
 import org.jkcsoft.space.lang.runtime.SpaceX;
@@ -43,7 +43,7 @@ public class SjiFunctionDefnImpl extends AbstractFunctionDefn implements Functio
     }
 
     @Override
-    public DatumType getReturnType() {
+    public TypeDefn getReturnType() {
         return returnTypeRef.getResolvedType();
     }
 

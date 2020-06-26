@@ -9,26 +9,37 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
+
 /**
  * A general means of defining primary keys, alternate keys, and external keys.
- * Keys may be a simple a a single, opaque byte or as complex as tuple of scalar
+ * Keys may be a simple single variable, opaque byte or as complex as tuple of scalar
  * variables.
  *
- * 4GL: Defining a KeyValue at the language-level pushes Space in the 4GL direction.
- *
- * Keys enable some nice high-level things:
- * <li>Language-managed Indexes and Trees.
+ * <p>4GL: Defining keys at the language-level moves Space in the 4GL direction.
+ * Keys enable high-level language features:
+ * <li>Language-managed indexes and trees.
  * <li>Mapping to key-oriented database models.
- * <li>CDI-like injection of objects, i.e., Space should feel like it has an intrinsic
- * CDI injector.
+ * <li>CDI-like injection of objects.
+ * <li>Simple binding of configuration data to related application objects.
  *
  * @author Jim Coles
  */
-public class KeyDefn {
+public class KeyDefn extends NamedElement {
 
-    private Projection vars;
+    /** Must be a simple list of vars of a single root type. */
+    private TypeDefn vars;
 
-    public Projection getVars() {
+    protected KeyDefn(SourceInfo sourceInfo, String name) {
+        super(sourceInfo, name);
+    }
+
+    public TypeDefn getVars() {
         return vars;
+    }
+
+    @Override
+    public MetaType getMetaType() {
+        return MetaType.TYPE;
     }
 }

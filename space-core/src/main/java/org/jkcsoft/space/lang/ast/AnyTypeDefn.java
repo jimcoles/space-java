@@ -17,8 +17,7 @@ package org.jkcsoft.space.lang.ast;
 public class AnyTypeDefn {
 
     private NumPrimitiveTypeDefn primitiveTypeDefn;
-    private SimpleType simpleType;
-    private ComplexType complexType;
+    private TypeDefn typeDefn;
     private StreamTypeDefn streamTypeDefn;
 
 }

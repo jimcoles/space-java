@@ -9,11 +9,10 @@
  */
 package org.jkcsoft.space.lang.instance.sji;
 
-import org.jkcsoft.space.SpaceHome;
-import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.ast.Declaration;
-import org.jkcsoft.space.lang.ast.sji.SjiPropBased;
 import org.jkcsoft.space.lang.ast.sji.SjiPropVarDecl;
+import org.jkcsoft.space.lang.ast.sji.SjiService;
 import org.jkcsoft.space.lang.instance.Value;
 import org.jkcsoft.space.lang.instance.ValueHolder;
 
@@ -24,10 +23,12 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class SjiPropVarValueHolder implements ValueHolder {
 
+    private SjiService sjiService;
     private SjiTuple sjiTuple;
     private SjiPropVarDecl sjiPropVarDecl;
 
-    public SjiPropVarValueHolder(SjiTuple sjiTuple, SjiPropVarDecl sjiPropVarDecl) {
+    public SjiPropVarValueHolder(SjiService sjiService, SjiTuple sjiTuple, SjiPropVarDecl sjiPropVarDecl) {
+        this.sjiService = sjiService;
         this.sjiTuple = sjiTuple;
         this.sjiPropVarDecl = sjiPropVarDecl;
     }
@@ -38,7 +39,7 @@ public class SjiPropVarValueHolder implements ValueHolder {
     }
 
     @Override
-    public DatumType getType() {
+    public TypeDefn getType() {
         return sjiPropVarDecl.getType();
     }
 
@@ -68,7 +69,7 @@ public class SjiPropVarValueHolder implements ValueHolder {
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
-        return SpaceHome.getSjiService().toSpaceValue(jValue);
+        return sjiService.toSpaceValue(jValue);
     }
 
 }

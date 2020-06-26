@@ -9,18 +9,8 @@
  */
 package org.jkcsoft.space.lang.instance.sji;
 
-import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.Declaration;
-import org.jkcsoft.space.lang.ast.Named;
-import org.jkcsoft.space.lang.ast.sji.SjiPropVarDecl;
 import org.jkcsoft.space.lang.ast.sji.SjiTypeDefn;
-import org.jkcsoft.space.lang.ast.sji.SjiVarDecl;
 import org.jkcsoft.space.lang.instance.*;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Wraps Java object to implement an AST Tuple.

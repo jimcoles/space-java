@@ -17,12 +17,14 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaration, AssociationDefn {
 
+    private SjiService sjiService;
     private SjiAssociationDefnEnd fromEnd;
     private SjiAssociationDefnEnd toEnd;
 
-    protected SjiAssocDecl(SourceInfo sourceInfo, SjiTypeDefn fromType, SjiTypeDefn toType, String name) {
+    protected SjiAssocDecl(SjiService sjiService, SourceInfo sourceInfo, SjiTypeDefn fromType, SjiTypeDefn toType, String name) {
         super(sourceInfo, name);
 
+        this.sjiService = sjiService;
         if (fromType != null) {
             this.fromEnd = new SjiAssociationDefnEnd(sourceInfo, name, fromType, 1, 1);
             addChild(this.fromEnd);
@@ -34,12 +36,12 @@ public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaratio
     }
 
     @Override
-    public DatumType getToType() {
+    public TypeDefn getToType() {
         return null;
     }
 
     @Override
-    public DatumType getType() {
+    public TypeDefn getType() {
         return null;
     }
 
@@ -61,5 +63,9 @@ public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaratio
     @Override
     public MetaType getMetaType() {
         return null;
+    }
+
+    protected SjiService getSjiService() {
+        return sjiService;
     }
 }

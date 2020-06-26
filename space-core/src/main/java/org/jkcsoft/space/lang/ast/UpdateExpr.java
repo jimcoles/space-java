@@ -9,17 +9,15 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import java.util.List;
-
 /**
- * The primary {@link TreeView} implementation.
+ * Represents a Tuple update expression.
  *
  * @author Jim Coles
  */
-public class TreeViewImpl implements TreeView {
+public class UpdateExpr extends AssignmentExpr {
 
-    private ExpressionChain rootTypeRefExpr;
-    private Rule rootNodeCondition;
-    private List<AliasedMetaRef> typeAssocs;
+    public UpdateExpr(SourceInfo sourceInfo) {
+        super(sourceInfo);
+    }
 
 }

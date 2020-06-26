@@ -9,18 +9,52 @@ options {
 
 /*
 Meta-Naming Conventions:
+-----------------------
 
-  __Defn : A construct that defines the structure of a type (generalization)
-           or meta notion.
-  __Expr : A construct that references declared elements and expresses
+  __Defn : A declarative nameable element such as a type, function, or rule.
+  __Expr : A construct meant for evaluation that references declared elements and expresses
            some sequence of actions possibly resulting in a value at
-           runtime.  Might express a mix of operations and truths
+           runtime. Might express a mix of operations and truths
            (predicates).
-           ?? Do we need ActionExpr vs EquationExpr.
-  __Stmt : Expresses a thing to be executed such as a function call,
-            not a structure;
+           Expressions are the intersection between imperative and declartive logic.
+           Every expression in Space may be used in a Rule or a Statement.
+  __Stmt : An imperative instruction or action such as a function call. Statements usually
+           contain expressions.
+
+
+Syntactic notation:
+------------------
+
+{ ... } - Set of notation.
+[ ... ] - Sequence of notation.
++,-,*,/ - Algebraic addition, substraction, multiplication, division.
++> = Sequence concatenation.
+
+
+Object and Tuple operations:
+---------------------------
+create -
+read -
+update -
+delete -
+
+rename -
+
+
+Set operations:
+--------------
+
+Sequence operations:
+-------------------
+append (>>)
+
+Stream opereations:
+------------------
+pipe -
+
 
 Examples to prime the pump:
+--------------------------
 
 type MySpaceDef [equates-to OtherSpaceDef YetAnotherSpaceDef ...] (
     // Scalars
@@ -40,32 +74,36 @@ function myFunction solves <MyEquation> for [<var3>, <var4>] given [<var1>, <var
 
 )
 
- Equations are Relations expressed symbolically, i.e., symbolic expressions.
- They are just predicates in normal form analogous to
- ax + by + cz = 0
- Every (orthogonal) Equation reduces the number of degrees of freedom (DOF) of a system by one.
-equality-constraint MyEquation (
+// Rules are classified by the langauge based on the nature of the rule expressions.
+// Equations are Relations expressed symbolically, i.e., symbolic expressions.
+// They are just predicates in normal form analogous to
+// ax + by + cz = 0
+// Every (orthogonal) Equation reduces the number of degrees of freedom (DOF) of a system by one.
+
+rule MyEquation (
+    y = ax + b;
+)
+
+// A Constraint is a general predicate that must be true at the end of
+// every transaction.
+rule MyConstraint (
 
 )
 
- A Constraint is a general predicate that must be true at the end of
- every transaction.
-constraint MyConstraint (
+// An Enumerated Relation (aka, Table, Set of Tuples) is just a set of tuples
+// aligned to some type definition
 
-)
-
- An Enumerated Relation (aka, Table, Set of Tuples) is just a set of tuples
- aligned to some type definition
-enum-relation MyRelation [] (
+rule MyRelation {
     []
-)
+}
 
- Physical
+// Physical
 
 index MyIndex (
 )
 
- specifies vars of root and associated types with filter criteria
+// specifies vars of root and associated types with filter criteria
+
 query-def <queryName> (
 
     '/' <rootObject> // may be a type

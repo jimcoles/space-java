@@ -20,10 +20,12 @@ import java.lang.reflect.Method;
  */
 public abstract class SjiVarDecl extends NamedElement implements SjiDeclaration, VariableDecl {
 
+    private SjiService sjiService;
     private SjiTypeDefn sjiTypeDefn;
 
-    SjiVarDecl(SourceInfo sourceInfo, SjiTypeDefn sjiTypeDefn, String name) {
+    SjiVarDecl(SjiService sjiService, SourceInfo sourceInfo, SjiTypeDefn sjiTypeDefn, String name) {
         super(sourceInfo, name);
+        this.sjiService = sjiService;
         this.sjiTypeDefn = sjiTypeDefn;
     }
 
@@ -36,4 +38,7 @@ public abstract class SjiVarDecl extends NamedElement implements SjiDeclaration,
         return sjiTypeDefn;
     }
 
+    SjiService getSjiService() {
+        return sjiService;
+    }
 }

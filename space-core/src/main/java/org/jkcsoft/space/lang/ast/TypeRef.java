@@ -16,7 +16,7 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface TypeRef extends TypedExpr, ModelElement {
 
-    DatumType getResolvedType();
+    TypeDefn getResolvedType();
 
     LinkState getState();
 }

@@ -38,8 +38,7 @@ public abstract class NamedElement extends AbstractModelElement implements Named
         return name;
     }
 
-    @Override
-    public boolean isNamed() {
+    public boolean hasName() {
         return name != null;
     }
 
@@ -77,7 +76,7 @@ public abstract class NamedElement extends AbstractModelElement implements Named
 
     @Override
     public int compareTo(NamedElement o) {
-        if (!(this.isNamed() && o.isNamed()))
+        if (!(this.hasName() && o.hasName()))
             throw new IllegalArgumentException("Space bug: cannot compare two objects " +
                                                    "(" + this + "," + o + ") unless both are named.");
         return this.getName().compareTo(o.getName());

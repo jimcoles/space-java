@@ -41,12 +41,12 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
     }
 
     @Override
-    public DatumType getToType() {
+    public TypeDefn getToType() {
         return toEnd.getType();
     }
 
     @Override
-    public DatumType getType() {
+    public TypeDefn getType() {
         return getToType();
     }
 

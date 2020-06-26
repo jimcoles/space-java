@@ -22,8 +22,8 @@ public class ThisArgExpr extends PronounRefExpr implements ValueExpr {
     }
 
     @Override
-    public DatumType getDatumType() {
-        return ((ComplexTypeImpl) getResolvedMetaObj());
+    public TypeDefn getDatumType() {
+        return ((TypeDefnImpl) getResolvedMetaObj());
     }
 
 }

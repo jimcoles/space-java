@@ -11,10 +11,10 @@ package org.jkcsoft.space.lang.ast.sji;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.jkcsoft.java.util.Beans;
-import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.instance.sji.*;
+import org.jkcsoft.space.lang.runtime.ApiExeContext;
 import org.jkcsoft.space.lang.runtime.AstUtils;
 import org.jkcsoft.space.lang.runtime.Executor;
 import org.jkcsoft.space.lang.runtime.SpaceX;
@@ -27,8 +27,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
-
-import static org.jkcsoft.space.SpaceHome.getAstFactory;
 
 /**
  * @author Jim Coles
@@ -48,20 +46,28 @@ public class SjiService {
         return spCollType;
     }
 
+
     // =========================================================================
 
-    private NSRegistry nsRegistry = SpaceHome.getNsRegistry();
-    private ObjectFactory spaceObjFactory;
+    private final ApiExeContext apiExec;
+//    private final NSRegistry nsRegistry;
+    private final AstFactory astFactory;
+    private final ObjectFactory spaceObjFactory;
     //
-    private Map<String, String> javaToSpacePackages = new TreeMap<>();
-    private Map<Class, SjiTypeMapping> sjiMappingByClass = new HashMap<>();
-    private Map<String, SjiTypeMapping> sjiMappingByName = new HashMap<>();
+    private final Map<String, String> javaToSpacePackages = new TreeMap<>();
+    private final Map<Class, SjiTypeMapping> sjiMappingByClass = new HashMap<>();
+    private final Map<String, SjiTypeMapping> sjiMappingByName = new HashMap<>();
     //
-    private Map<Object, SjiTuple> sjiTuplesByJavaObject = new TreeMap<>();
-    private Map<SpaceOid, SjiTuple> sjiTuplesByOid = new TreeMap<>();
+    private final Map<Object, SjiTuple> sjiTuplesByJavaObject = new TreeMap<>();
 
-    public SjiService() {
+    public SjiService(ApiExeContext apiExec) {
+        this.apiExec = apiExec;
+        this.astFactory = apiExec.getAstFactory();
         spaceObjFactory = ObjectFactory.getInstance();
+    }
+
+    private NSRegistry getNsRegistry() {
+        return apiExec.getNsRegistry();
     }
 
     public void registerPackageBinding(String javaPackage, String spacePackage) {
@@ -100,10 +106,10 @@ public class SjiService {
      *
      * @param className Standard Java fully-qualified class name "java.lang.String".
      */
-    public DatumType getSjiTypeProxyDeepLoad(String className, String[] overrideDirNames)
+    public TypeDefn getSjiTypeProxyDeepLoad(String className, String[] overrideDirNames)
         throws ClassNotFoundException
     {
-        DatumType wrapper = null;
+        TypeDefn wrapper = null;
         SjiTypeMapping sjiTypeMapping = sjiMappingByName.get(className);
         if (sjiTypeMapping == null) {
             Class<?> jnClass = Class.forName(className);
@@ -115,16 +121,18 @@ public class SjiService {
         return wrapper;
     }
 
-    public DatumType getSjiTypeProxyDeepLoad(Class<?> jnClass, String[] overrideDirNames) {
+    public TypeDefn getSjiTypeProxyDeepLoad(Class<?> jnClass, String[] overrideDirNames) {
         SjiTypeMapping sjiTypeMapping = sjiMappingByClass.get(jnClass);
         if (sjiTypeMapping == null) {
             sjiTypeMapping = createSjiTypeMapping(jnClass);
-            deepLoadSjiTypeProxy(sjiTypeMapping, overrideDirNames);
         }
-        else {
-            if (sjiTypeMapping.getState() != LinkState.RESOLVED) {
-                throw new SpaceX("space wrapper type is not loaded for [" + jnClass + "]");
-            }
+        else if (sjiTypeMapping.getState() == LinkState.INITIALIZED) {
+            log.warn("SJI wrapper was initialized but not fully resolved for Java class [{}]", jnClass);
+        }
+        if (sjiTypeMapping.getState() == LinkState.INITIALIZED)
+            deepLoadSjiTypeProxy(sjiTypeMapping, overrideDirNames);
+        if (sjiTypeMapping.getState() != LinkState.RESOLVED) {
+            throw new SpaceX("SJI wrapper could not be loaded for [" + jnClass + "]");
         }
         return sjiTypeMapping.getSjiProxy();
     }
@@ -141,7 +149,7 @@ public class SjiService {
         }
 
         Directory parentDir =
-            AstUtils.ensureDir(nsRegistry.getJavaNs().getRootDir(), packageNameParts);
+            AstUtils.ensureDir(getNsRegistry().getJavaNs().getRootDir(), packageNameParts);
 
         //
         // Build wrappers for this class and any required classes
@@ -167,7 +175,7 @@ public class SjiService {
         for (SjiTypeRefByClass unresolvedRef : unresolvedRefs) {
             if (unresolvedRef.getState() == LinkState.INITIALIZED) {
                 deepLoadSjiTypeProxy(unresolvedRef.getMapping(), null);
-//                DatumType spaceWrapper = getDeepLoadSpaceWrapper(unresolvedRef.getWrappedClass());
+//                TypeDefn spaceWrapper = getDeepLoadSpaceWrapper(unresolvedRef.getWrappedClass());
                 if (unresolvedRef.getState() != LinkState.RESOLVED) {
                     log.error("space wrapper for Java class " +
                                   "[" + unresolvedRef.getWrappedClass().getName() + "]" +
@@ -218,19 +226,19 @@ public class SjiService {
                 // TODO Handle Java-to-Space mapping via more sophisticated scheme including external
                 // mapping file
             {
-                DatumType sjiToType = getSjiTypeProxyDeepLoad(jPropDescriptor.getPropertyType(), null);
+                TypeDefn sjiToType = getSjiTypeProxyDeepLoad(jPropDescriptor.getPropertyType(), null);
                 if (sjiToType.isSimpleType())
-                    sjiTypeProxy.addVariableDecl(new SjiPropVarDecl(sjiTypeProxy, jPropDescriptor));
+                    sjiTypeProxy.addVariableDecl(new SjiPropVarDecl(this, sjiTypeProxy, jPropDescriptor));
                 else
                     sjiTypeProxy.addAssociationDecl(
-                        new SjiPropAssocDecl(sjiTypeProxy, (SjiTypeDefn) sjiToType, jPropDescriptor)
+                        new SjiPropAssocDecl(this, sjiTypeProxy, (SjiTypeDefn) sjiToType, jPropDescriptor)
                     );
             }
         }
         Field[] jFields = jnClass.getDeclaredFields();
         for (Field jField : jFields) {
             if (!isExcluded(jField))
-                sjiTypeProxy.addVariableDecl(new SjiFieldVarDecl(sjiTypeProxy, jField));
+                sjiTypeProxy.addVariableDecl(new SjiFieldVarDecl(this, sjiTypeProxy, jField));
         }
 
         // Add functions
@@ -268,14 +276,18 @@ public class SjiService {
             );
             //
             sjiTypeProxy.addFunctionDefn(sjiFunctionDefnImpl);
-            nsRegistry.trackMetaObject(sjiFunctionDefnImpl);
+            getNsRegistry().trackMetaObject(sjiFunctionDefnImpl);
             //
         }
         return parseUnit;
     }
 
+    private AstFactory getAstFactory() {
+        return astFactory;
+    }
+
     private SjiVarDecl newVariableDecl(Parameter jParam, SjiTypeDefn sjiTypeDefn) {
-        return new SjiParamVarDecl(jParam, sjiTypeDefn);
+        return new SjiParamVarDecl(this, jParam, sjiTypeDefn);
     }
 
     //    private SjiAssocDecl newAssociationDecl(Parameter jParam, SjiTypeMapping sjiTypeMapping) {
@@ -329,12 +341,14 @@ public class SjiService {
         // initialize
         SjiTypeDefn defn = sjiTuple.getSjiTypeDefn();
         if (defn.hasDatums()) {
-            List<Declaration> declList = defn.getDatumDeclList();
+            List<Declaration> declList = defn.getDatumDecls();
             for (Declaration datumDecl : declList) {
                 sjiTuple.initHolder(createSjiDatumProxy(sjiTuple, datumDecl));
             }
         }
-//        spaceObjFactory.trackInstanceObject((SpaceObject) tuple);
+        //
+        apiExec.trackInstanceObject(sjiTuple);
+        //
         return sjiTuple;
     }
 
@@ -367,19 +381,19 @@ public class SjiService {
     private ValueHolder createSjiDatumProxy(SjiTuple tuple, Declaration datumDecl) {
         ValueHolder holder = null;
         if (datumDecl instanceof SjiPropVarDecl) {
-            holder = new SjiPropVarValueHolder(tuple, ((SjiPropVarDecl) datumDecl));
+            holder = new SjiPropVarValueHolder(this, tuple, ((SjiPropVarDecl) datumDecl));
         }
         else if (datumDecl instanceof SjiFieldVarDecl) {
-            holder = new SjiFieldVarValueHolder(tuple, ((SjiFieldVarDecl) datumDecl));
+            holder = new SjiFieldVarValueHolder(this, tuple, ((SjiFieldVarDecl) datumDecl));
         }
         else if (datumDecl instanceof SjiParamVarDecl) {
             holder = new SjiParamValueHolder(tuple, ((SjiParamVarDecl) datumDecl));
         }
         else if (datumDecl instanceof SjiPropAssocDecl) {
-            holder = new SjiPropAssocValueHolder(tuple, ((SjiPropAssocDecl) datumDecl));
+            holder = new SjiPropAssocValueHolder(this, tuple, ((SjiPropAssocDecl) datumDecl));
         }
         else if (datumDecl instanceof SjiFieldAssocDecl) {
-            holder = new SjiFieldAssocValueHolder(tuple, ((SjiFieldAssocDecl) datumDecl));
+            holder = new SjiFieldAssocValueHolder(this, tuple, ((SjiFieldAssocDecl) datumDecl));
         }
         return holder;
     }

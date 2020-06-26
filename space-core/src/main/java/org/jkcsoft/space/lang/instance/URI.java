@@ -7,11 +7,10 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.ast;
+package org.jkcsoft.space.lang.instance;
 
 /**
  * @author Jim Coles
  */
-public interface View extends Named {
-
+public class URI {
 }

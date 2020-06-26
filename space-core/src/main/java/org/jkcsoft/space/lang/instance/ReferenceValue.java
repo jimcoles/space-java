@@ -19,4 +19,13 @@ import org.jkcsoft.space.lang.ast.AssociationDefn;
  */
 public interface ReferenceValue<J> extends Value<J> {
 
+    /** Assign @value to this holder slot. */
+    void setResovledObject(SpaceObject object);
+
+    /** Does this value slot have an assignable value? */
+    boolean hasResolvedObject();
+
+    /** Returns the resolved object to which the ReferenceValue refers. */
+    SpaceObject getResolvedObject();
+
 }

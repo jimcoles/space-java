@@ -9,10 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.NullType;
 import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
-import org.jkcsoft.space.lang.ast.VoidType;
 
 /**
  * @author Jim Coles

@@ -9,15 +9,13 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.Projection;
-
-import java.util.Collection;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 
 /**
  * @author Jim Coles
  */
-public interface TupleCollection extends ValueCollection<FreeReferenceHolder<ReferenceValue>>, SpaceObject {
+public interface TupleCollection<J> extends ValueCollection<FreeReferenceHolder<ReferenceValue<J>>>, SpaceObject {
 
-    Projection getType();
+    TypeDefn getContainedObjectType();
 
 }

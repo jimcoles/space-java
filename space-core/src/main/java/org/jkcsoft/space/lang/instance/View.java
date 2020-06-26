@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2020 through present.
  *
  * Licensed under the following license agreement:
  *
@@ -7,36 +7,46 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-
-
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.QueryImpl;
+import org.jkcsoft.space.lang.ast.TypeDefn;
+import org.jkcsoft.space.lang.ast.ViewDefn;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
+ * Everything the user/program accesses is a view including indexes.
+ *
  * @author Jim Coles
- * @version 1.0
  */
-public class View {
+public class View implements Space {
 
-    private QueryImpl query;
+    private ViewDefn viewDefn;
+    private List<Tuple> items;
 
-    View() {
-
+    public View(ViewDefn viewDefn) {
+        this.viewDefn = viewDefn;
+        this.items = new LinkedList<>();
     }
 
-    /** The computed normalization.  Basis Spaces are
-     * 3rd normal form.  Computed Views are general something
-     * else. */
-    public int getNormalForm() {
-        return -1;
+    public View addItem(Tuple tuple) {
+        items.add(tuple);
+        return this;
     }
 
-    /** The computed Degrees of Freedom (DOF) of this
-     * view, which is determined based on the joins from the
-     * base Space Definition. */
-    public int getDof() {
-        return -1;
+    public List<Tuple> getItems() {
+        return items;
     }
 
+    @Override
+    public Set<TypeDefn> getComplexTypeDefs() {
+        return null;
+    }
+
+    @Override
+    public List<View> getViews() {
+        return null;
+    }
 }

@@ -9,18 +9,13 @@
  */
 package org.jkcsoft.space.lang.instance.sji;
 
-import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.sji.SjiService;
-import org.jkcsoft.space.lang.instance.ObjectFactory;
-import org.jkcsoft.space.lang.instance.Value;
-import org.jkcsoft.space.lang.runtime.SpaceX;
 
 /**
  * @author Jim Coles
  */
 public class SjiUtil {
 
-    private static SjiService sji = SpaceHome.getSjiService();
-
+//    private static SjiService sji = SpaceHome.getSjiService();
 
 }

@@ -9,25 +9,25 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Jim Coles
  */
-public abstract class AbstractCollectionTypeDefn extends AbstractDatumTypeDefn implements CollectionType {
+public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implements CollectionType {
 
-    private DatumType containedElementType;
+    private final TypeDefn containedElementType;
 
     protected AbstractCollectionTypeDefn(SourceInfo sourceInfo,
                                          String name,
-                                         DatumType containedElementType) {
+                                         TypeDefn containedElementType)
+    {
         super(sourceInfo, name);
         this.containedElementType = containedElementType;
     }
 
-    public DatumType getContainedElementType() {
+    public TypeDefn getContainedElementType() {
         return containedElementType;
     }
 
@@ -37,23 +37,67 @@ public abstract class AbstractCollectionTypeDefn extends AbstractDatumTypeDefn i
     }
 
     @Override
-    public MetaType getMetaType() {
-        return super.getMetaType();
+    public KeyDefn getPrimaryKeyDefn() {
+        return containedElementType.getPrimaryKeyDefn();
     }
 
     @Override
-    public boolean isNamed() {
-        return containedElementType.isNamed();
+    public Set<KeyDefn> getAllKeyDefns() {
+        return containedElementType.getAllKeyDefns();
+    }
+
+    @Override
+    public boolean hasName() {
+        return containedElementType.hasName();
     }
 
     @Override
     public boolean isPrimitiveType() {
-        return containedElementType instanceof NumPrimitiveTypeDefn;
+        return false;
     }
 
     @Override
+    public VariableDecl addVariableDecl(VariableDecl variableDecl) {
+        return containedElementType.addVariableDecl(variableDecl);
+    }
+
+    @Override
+    public AssociationDefn addAssociationDecl(AssociationDefn associationDecl) {
+        return containedElementType.addAssociationDecl(associationDecl);
+    }
+
+    @Override
+    public List<VariableDecl> getVariables() {
+        return containedElementType.getVariables();
+    }
+
+    @Override
+    public List<Declaration> getDatumDecls() {
+        return containedElementType.getDatumDecls();
+    }
+
+    @Override
+    public StatementBlock getInitBlock() {
+        return containedElementType.getInitBlock();
+    }
+
+    @Override
+    public FunctionDefn addFunctionDefn(FunctionDefn functionDefn) {
+        return containedElementType.addFunctionDefn(functionDefn);
+    }
+
+    @Override
+    public boolean hasDatums() {
+        return containedElementType.hasDatums();
+    }
+
+    /**
+     * Always false because even a collection of primitives or Simple Types is not itself
+     * a simple type.
+     */
+    @Override
     public boolean isSimpleType() {
-        return containedElementType.isSimpleType();
+        return false;
     }
 
     @Override
@@ -63,7 +107,7 @@ public abstract class AbstractCollectionTypeDefn extends AbstractDatumTypeDefn i
 
     /** True if this set hold references to objects; false if it hold values of primitives */
     public boolean isReferenceType() {
-        return containedElementType instanceof ComplexTypeImpl;
+        return containedElementType instanceof TypeDefnImpl;
     }
 
     @Override
@@ -72,7 +116,7 @@ public abstract class AbstractCollectionTypeDefn extends AbstractDatumTypeDefn i
     }
 
     @Override
-    public boolean isAssignableTo(DatumType argsType) {
+    public boolean isAssignableTo(TypeDefn receivingType) {
         return false;
     }
 }

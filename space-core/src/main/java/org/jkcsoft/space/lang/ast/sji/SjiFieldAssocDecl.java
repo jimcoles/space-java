@@ -9,9 +9,9 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
-import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.NativeSourceInfo;
 import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 
 import java.lang.reflect.Field;
 
@@ -26,8 +26,8 @@ public class SjiFieldAssocDecl extends SjiAssocDecl implements SjiFieldBased {
     // OR direct field access ...
     private Field jField;
 
-    SjiFieldAssocDecl(SjiTypeDefn sjiFromType, SjiTypeDefn sjiToType, Field jField) {
-        super(new NativeSourceInfo(jField), sjiFromType, sjiToType, jField.getName());
+    SjiFieldAssocDecl(SjiService sjiService, SjiTypeDefn sjiFromType, SjiTypeDefn sjiToType, Field jField) {
+        super(sjiService, new NativeSourceInfo(jField), sjiFromType, sjiToType, jField.getName());
         this.jField = jField;
     }
 
@@ -36,9 +36,9 @@ public class SjiFieldAssocDecl extends SjiAssocDecl implements SjiFieldBased {
     }
 
     @Override
-    public NumPrimitiveTypeDefn getType() {
+    public TypeDefn getType() {
         return (NumPrimitiveTypeDefn)
-            SpaceHome.getSjiService().getOrCreateSjiTypeMapping(jField.getType()).getSjiProxy();
+            getSjiService().getOrCreateSjiTypeMapping(jField.getType()).getSjiProxy();
     }
 
     @Override

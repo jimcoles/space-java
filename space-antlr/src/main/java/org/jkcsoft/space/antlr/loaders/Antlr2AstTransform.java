@@ -43,26 +43,26 @@ public class Antlr2AstTransform {
     private List<AstLoadError> errors = new LinkedList();
     private AstFactory astFactory;
     private File srcFile;
-    private Map<String, OperEnum> operSymbolMap = new TreeMap();
+    private Map<String, Operators.Operator> operSymbolMap = new TreeMap();
     private int countParseNodes = 0;
 
 //    private ObjectFactory objBuilder = ObjectFactory.getInstance();
 
     {
-        operSymbolMap.put("+", OperEnum.ADD);
-        operSymbolMap.put("-", OperEnum.SUB);
-        operSymbolMap.put("*", OperEnum.MULT);
-        operSymbolMap.put("/", OperEnum.DIV);
+        operSymbolMap.put("+", Operators.IntAlgOper.ADD);
+        operSymbolMap.put("-", Operators.IntAlgOper.SUB);
+        operSymbolMap.put("*", Operators.IntAlgOper.MULT);
+        operSymbolMap.put("/", Operators.IntAlgOper.DIV);
 
-        operSymbolMap.put("&", OperEnum.AND);
-        operSymbolMap.put("&&", OperEnum.COND_AND);
-        operSymbolMap.put("|", OperEnum.OR);
-        operSymbolMap.put("||", OperEnum.COND_OR);
-        operSymbolMap.put("!", OperEnum.NEGATION);
+        operSymbolMap.put("&", Operators.BoolOper.AND);
+        operSymbolMap.put("&&", Operators.BoolOper.COND_AND);
+        operSymbolMap.put("|", Operators.BoolOper.OR);
+        operSymbolMap.put("||", Operators.BoolOper.COND_OR);
+        operSymbolMap.put("!", Operators.BoolOper.NEGATION);
 
-        operSymbolMap.put("==", OperEnum.EQ);
-        operSymbolMap.put("<", OperEnum.LT);
-        operSymbolMap.put(">", OperEnum.GT);
+        operSymbolMap.put("==", Operators.IntCompOper.EQ);
+        operSymbolMap.put("<", Operators.IntCompOper.LT);
+        operSymbolMap.put(">", Operators.IntCompOper.GT);
     }
 
     public Antlr2AstTransform(AstFactory astFactory, File srcFile) {
@@ -137,10 +137,10 @@ public class Antlr2AstTransform {
         return toNameRefExpr(toNamePartExpr(identifierContext));
     }
 
-    public ComplexTypeImpl toAst(SpaceParser.SpaceTypeDefnContext spaceTypeDefnContext) {
+    public TypeDefnImpl toAst(SpaceParser.SpaceTypeDefnContext spaceTypeDefnContext) {
         logTrans(spaceTypeDefnContext);
-        ComplexTypeImpl complexTypeImpl = null;
-        complexTypeImpl = astFactory.newSpaceTypeDefn(
+        TypeDefnImpl complexTypeImpl = null;
+        complexTypeImpl = astFactory.newTypeDefn(
             toSI(spaceTypeDefnContext),
             astFactory.newNamePart(toSI(spaceTypeDefnContext.identifier()), toText(spaceTypeDefnContext.identifier()))
         );
@@ -160,7 +160,7 @@ public class Antlr2AstTransform {
         return complexTypeImpl;
     }
 
-    private void setProjection(Projection projection, SpaceParser.SpaceTypeDefnBodyContext spaceTypeDefnBodyContext) {
+    private void setProjection(TypeDefn typeDefn, SpaceParser.SpaceTypeDefnBodyContext spaceTypeDefnBodyContext) {
         logTrans(spaceTypeDefnBodyContext);
         SourceInfo bodySourceInfo = toSI(spaceTypeDefnBodyContext);
 //        SpaceTypeDefnBody typeDefnBodyAST =
@@ -174,9 +174,9 @@ public class Antlr2AstTransform {
             for (SpaceParser.VariableDefnStmtContext variableDefnStmtContext : varDefCtxts) {
                 // Add var def
                 VariableDeclImpl variableDeclAST = toAst(variableDefnStmtContext.variableDefn());
-                projection.addVariableDecl(variableDeclAST);
+                typeDefn.addVariableDecl(variableDeclAST);
                 // Add assignment if there is one
-                extractInit(projection.getInitBlock(), variableDefnStmtContext);
+                extractInit(typeDefn.getInitBlock(), variableDefnStmtContext);
             }
         }
 
@@ -184,16 +184,16 @@ public class Antlr2AstTransform {
         if (assocDefCtxts != null && !assocDefCtxts.isEmpty()) {
             for (SpaceParser.AssociationDefnStmtContext assocDefCtx : assocDefCtxts) {
                 // Add declarative element
-                projection.addAssociationDecl(toAst(assocDefCtx.associationDefn()));
+                typeDefn.addAssociationDecl(toAst(assocDefCtx.associationDefn()));
                 // Add assignment expr if it exists
-                extractInit(projection.getInitBlock(), assocDefCtx);
+                extractInit(typeDefn.getInitBlock(), assocDefCtx);
             }
         }
 
         List<SpaceParser.FunctionDefnContext> actionDefCtxts = spaceTypeDefnBodyContext.functionDefn();
         if (actionDefCtxts != null && !actionDefCtxts.isEmpty()) {
             for (SpaceParser.FunctionDefnContext functionDefnCtx : actionDefCtxts) {
-                projection.addFunctionDefn(toAst(functionDefnCtx));
+                typeDefn.addFunctionDefn(toAst(functionDefnCtx));
             }
         }
 
@@ -381,11 +381,11 @@ public class Antlr2AstTransform {
         return typeRefAst;
     }
 
-    private ComplexTypeImpl toAst(SpaceParser.ParameterDefnListContext parameterDeclCtxt) {
+    private TypeDefnImpl toAst(SpaceParser.ParameterDefnListContext parameterDeclCtxt) {
         logTrans(parameterDeclCtxt);
         SourceInfo sourceInfo = toSI(parameterDeclCtxt);
-        ComplexTypeImpl typeDefn =
-            astFactory.newSpaceTypeDefn(sourceInfo, astFactory.newNamePart(sourceInfo, "func args"));
+        TypeDefnImpl typeDefn =
+            astFactory.newTypeDefn(sourceInfo, astFactory.newNamePart(sourceInfo, "func args"));
 //        typeDefn.setBody(astFactory.newTypeDefnBody(sourceInfo));
         List<SpaceParser.ParameterDeclContext> parameterDeclContexts = parameterDeclCtxt.parameterDecl();
         for (SpaceParser.ParameterDeclContext parameterDeclContext : parameterDeclContexts) {
@@ -511,7 +511,7 @@ public class Antlr2AstTransform {
                                           toAst(unaryOperExprContext.valueExprChain()));
     }
 
-    private OperEnum toAst(SpaceParser.UnaryOperContext unaryOperContext) {
+    private Operators.Operator toAst(SpaceParser.UnaryOperContext unaryOperContext) {
         return toAstOper(unaryOperContext.BooleanUnaryOper());
     }
 
@@ -524,7 +524,7 @@ public class Antlr2AstTransform {
         );
     }
 
-    private OperEnum toAst(SpaceParser.BinaryOperContext binaryOperContext) {
+    private Operators.Operator toAst(SpaceParser.BinaryOperContext binaryOperContext) {
         // choice
         TerminalNode numTermNode = binaryOperContext.NumericBinaryOper();
         TerminalNode boolTermNode = binaryOperContext.BooleanBinaryOper();
@@ -541,10 +541,10 @@ public class Antlr2AstTransform {
         return toAstOper(operatorTermNode);
     }
 
-    private OperEnum toAstOper(TerminalNode terminalNode) {
+    private Operators.Operator toAstOper(TerminalNode terminalNode) {
         logTrans(terminalNode);
-        OperEnum operEnumAST = operSymbolMap.get(terminalNode.getSymbol().getText());
-        return operEnumAST;
+        Operators.Operator operatorAST = operSymbolMap.get(terminalNode.getSymbol().getText());
+        return operatorAST;
     }
 
     private void logTrans(TerminalNode terminalNode) {

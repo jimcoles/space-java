@@ -9,7 +9,8 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.ComplexType;
+import org.jkcsoft.space.lang.ast.ProjectionDecl;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 
 /**
  * The primary implementation of a {@link Tuple}.
@@ -19,7 +20,7 @@ import org.jkcsoft.space.lang.ast.ComplexType;
  */
 public class TupleImpl extends AbstractTuple implements ExeContext, Tuple {
 
-    TupleImpl(SpaceOid oid, ComplexType defn) {
+    TupleImpl(SpaceOid oid, TypeDefn defn) {
         super(oid, defn);
     }
 

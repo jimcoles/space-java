@@ -10,10 +10,8 @@
 
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.runtime.SpaceX;
-
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The central data type definition notion within Space.
@@ -23,13 +21,13 @@ import java.util.List;
  * @author Jim Coles
  * @version 1.0
  */
-public class ComplexTypeImpl extends AbstractProjection implements ComplexType {
+public class TypeDefnImpl extends AbstractTypeDefn implements TypeDefn {
 
-    private boolean isEntity;
-    private List<Rule> equations;
+    private List<Rule> rules;
     private List<TransformDefn> transformDefns;
+    private KeyDefn primaryKey;
 
-    ComplexTypeImpl(SourceInfo sourceInfo, NamePart nameNode) {
+    TypeDefnImpl(SourceInfo sourceInfo, NamePart nameNode) {
         super(sourceInfo, nameNode.getText());
     }
 
@@ -41,8 +39,8 @@ public class ComplexTypeImpl extends AbstractProjection implements ComplexType {
         return true;
     }
 
-    public List<Rule> getEquations() {
-        return equations;
+    public List<Rule> getRules() {
+        return rules;
     }
 
     public List<TransformDefn> getTransformDefns() {
@@ -50,20 +48,21 @@ public class ComplexTypeImpl extends AbstractProjection implements ComplexType {
     }
 
     @Override
-    public boolean isAssignableTo(DatumType argsType) {
+    public boolean isAssignableTo(TypeDefn receivingType) {
         return false;
     }
 
-    /**
-     * Might not be needed; essentially, asking 'does this type have a unique key'.
-     */
-    public boolean isEntity() {
-        return isEntity;
+    public void setPrimaryKey(KeyDefn primaryKey) {
+        this.primaryKey = primaryKey;
     }
 
     @Override
-    public ComplexType getRootType() {
-        return null;
+    public KeyDefn getPrimaryKeyDefn() {
+        return primaryKey;
     }
 
+    @Override
+    public Set<KeyDefn> getAllKeyDefns() {
+        return Set.of(primaryKey);
+    }
 }

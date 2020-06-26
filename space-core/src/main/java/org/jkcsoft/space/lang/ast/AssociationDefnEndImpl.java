@@ -9,10 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.ast.AssociationDefnEnd;
-import org.jkcsoft.space.lang.ast.NamedElement;
-import org.jkcsoft.space.lang.ast.SourceInfo;
-import org.jkcsoft.space.lang.ast.TypeRef;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
@@ -39,8 +35,8 @@ public class AssociationDefnEndImpl extends NamedElement implements AssociationD
     }
 
     @Override
-    public ComplexType getType() {
-        return ((ComplexType) endTypeRef.getResolvedType());
+    public TypeDefn getType() {
+        return ((TypeDefn) endTypeRef.getResolvedType());
     }
 
     @Override

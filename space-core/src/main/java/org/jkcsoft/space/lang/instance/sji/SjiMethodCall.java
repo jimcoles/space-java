@@ -9,7 +9,6 @@
  */
 package org.jkcsoft.space.lang.instance.sji;
 
-import org.jkcsoft.space.SpaceHome;
 import org.jkcsoft.space.lang.ast.sji.SjiService;
 import org.jkcsoft.space.lang.instance.Value;
 
@@ -21,12 +20,13 @@ import java.lang.reflect.Method;
  */
 public class SjiMethodCall {
 
-    private SjiService sjiService = SpaceHome.getSjiService();
+    private SjiService sjiService;
     private Object jObject;
     private Method jMethod;
     private Object[] jArgs;
 
-    public SjiMethodCall(Object jObject, Method jMethod, Object[] jArgs) {
+    public SjiMethodCall(SjiService sjiService, Object jObject, Method jMethod, Object[] jArgs) {
+        this.sjiService = sjiService;
         this.jObject = jObject;
         this.jMethod = jMethod;
         this.jArgs = jArgs;

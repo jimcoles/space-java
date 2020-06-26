@@ -40,7 +40,7 @@ public class PrimitiveLiteralExpr extends AbstractModelElement implements ValueE
     }
 
     @Override
-    public DatumType getDatumType() {
+    public TypeDefn getDatumType() {
         return typeDefn;
     }
 

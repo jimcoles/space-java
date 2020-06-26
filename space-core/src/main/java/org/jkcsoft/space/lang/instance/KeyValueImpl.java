@@ -9,18 +9,17 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.Projection;
+import org.jkcsoft.space.lang.ast.ProjectionDecl;
 
 /**
  * A {@link KeyValueImpl} is our representation of a user-level {@link KeyValue} in which the key is
- * a declared sequence of a {@link Projection}'s variable set.
+ * a declared sequence of a {@link ProjectionDecl}'s variable set.
  *
  * @author Jim Coles
  */
 public class KeyValueImpl implements KeyValue {
 
-    private Projection keyDefn;
+    private ProjectionDecl keyDefn;
     private Tuple keyValues;
 
     @Override

@@ -9,28 +9,52 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 
 /**
  * @author Jim Coles
  */
-public class BooleanValue extends ScalarValue<Boolean> {
+public class BooleanValue extends ScalarValue<BoolEnum> {
 
-    public static final BooleanValue TRUE = new BooleanValue(NumPrimitiveTypeDefn.BOOLEAN, Boolean.TRUE);
-    public static final BooleanValue FALSE = new BooleanValue(NumPrimitiveTypeDefn.BOOLEAN, Boolean.FALSE);
-    public static final BooleanValue getValue(boolean boo) {
-        if (boo)
-            return TRUE;
-        else
-            return FALSE;
+    public static final BooleanValue UNKNOWN = new BooleanValue(NumPrimitiveTypeDefn.BOOLEAN, BoolEnum.UNKNOWN);
+    public static final BooleanValue TRUE = new BooleanValue(NumPrimitiveTypeDefn.BOOLEAN, BoolEnum.TRUE);
+    public static final BooleanValue FALSE = new BooleanValue(NumPrimitiveTypeDefn.BOOLEAN, BoolEnum.FALSE);
+
+    public static final BooleanValue getValue(BoolEnum boo) {
+        BooleanValue retVal = UNKNOWN;
+        switch (boo) {
+            case TRUE:
+                retVal = TRUE;
+                break;
+            case FALSE:
+                retVal = FALSE;
+                break;
+            case UNKNOWN:
+            default:
+        }
+        return retVal;
     }
 
-    private BooleanValue(NumPrimitiveTypeDefn type, Boolean value) {
-        super(type, value);
+    public static final BooleanValue getValue(Boolean jBool) {
+        BooleanValue retVal = UNKNOWN;
+        if (jBool == true) {
+            retVal = TRUE;
+        }
+        else if (jBool == false)
+            retVal = FALSE;
+        else if (jBool == null)
+            retVal = UNKNOWN;
+
+        return retVal;
+    }
+
+    private BooleanValue(NumPrimitiveTypeDefn type, BoolEnum jValue) {
+        super(type, jValue);
     }
 
     @Override
     public String asString() {
-        return Boolean.toString(getJavaValue());
+        return getJavaValue().toString();
     }
 }

@@ -52,7 +52,7 @@ public class SequenceLiteralExpr extends AbstractModelElement implements ValueEx
     }
 
     @Override
-    public DatumType getDatumType() {
+    public TypeDefn getDatumType() {
         return typeRef.getDatumType();
     }
 

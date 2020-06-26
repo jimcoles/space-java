@@ -14,6 +14,6 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface Callable {
 
-    ComplexType getArgSpaceTypeDefn();
+    TypeDefn getArgSpaceTypeDefn();
 
 }

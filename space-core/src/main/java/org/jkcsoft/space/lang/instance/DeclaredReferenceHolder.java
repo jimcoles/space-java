@@ -10,9 +10,8 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.AssociationDefn;
-import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.ast.Declaration;
-import org.jkcsoft.space.lang.ast.LinkState;
 
 /**
  * Holds a named (declared) reference to a tuple of a specified type. This is used
@@ -21,28 +20,16 @@ import org.jkcsoft.space.lang.ast.LinkState;
  * @param <J> The concrete Java type of the value being held.
  * @author Jim Coles
  */
-public class DeclaredReferenceHolder<J> implements ReferenceValueHolder<J, ReferenceValue<J>> {
+public class DeclaredReferenceHolder<J> implements ReferenceValueHolder<ReferenceValue<J>, J> {
 
-    private Tuple parentTuple;
     private Declaration declaration;
-    private ReferenceValue<J> referenceValue;
-    //
-    private LinkState linkState = LinkState.INITIALIZED;
-    private String reason;
-    private Exception cause;
+    private Tuple parentTuple; // the 'from'
+    private ReferenceValue<J> referenceValue; // the 'to'
 
     DeclaredReferenceHolder(Tuple parentTuple, Declaration declaration, ReferenceValue<J> referenceValue) {
         this.parentTuple = parentTuple;
         this.declaration = declaration;
         this.referenceValue = referenceValue;
-    }
-
-    public LinkState getLinkState() {
-        return linkState;
-    }
-
-    public void setLinkState(LinkState linkState) {
-        this.linkState = linkState;
     }
 
     @Override
@@ -51,23 +38,8 @@ public class DeclaredReferenceHolder<J> implements ReferenceValueHolder<J, Refer
     }
 
     @Override
-    public DatumType getType() {
-        return declaration.getType();
-    }
-
-    @Override
     public boolean hasValue() {
         return referenceValue != null;
-    }
-
-    @Override
-    public void setTarget(SpaceObject object) {
-
-    }
-
-    @Override
-    public boolean hasTarget() {
-        return false;
     }
 
     @Override
@@ -80,22 +52,8 @@ public class DeclaredReferenceHolder<J> implements ReferenceValueHolder<J, Refer
 
     }
 
-    public void setInvalidRef(String reason, Exception cause) {
-        this.reason = reason;
-        this.cause = cause;
-        linkState = LinkState.NOT_FOUND;
-    }
-
     public Tuple getParentTuple() {
         return parentTuple;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public Exception getCause() {
-        return cause;
     }
 
     /**

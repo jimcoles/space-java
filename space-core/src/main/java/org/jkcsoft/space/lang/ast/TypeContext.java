@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * Used for notational convenience when specifying projections of a
- * set of {@link ComplexType}'s.
+ * set of {@link TypeDefn}'s.
  *
  * @author Jim Coles
  */

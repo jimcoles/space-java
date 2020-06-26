@@ -7,10 +7,14 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.ast;
+package org.jkcsoft.space.lang.runtime;
+
+import org.jkcsoft.space.lang.instance.ValueHolder;
 
 /**
  * @author Jim Coles
  */
-public interface Query {
+public interface InternalExeContext extends ApiExeContext {
+
+    void autoCastAssign(Executor.EvalContext evalContext, ValueHolder leftSideHolder, ValueHolder rightSideHolder);
 }

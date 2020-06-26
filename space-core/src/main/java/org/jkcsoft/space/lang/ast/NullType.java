@@ -25,7 +25,7 @@ public class NullType extends PrimitiveTypeDefn {
     }
 
     @Override
-    public boolean isAssignableTo(DatumType argsType) {
+    public boolean isAssignableTo(TypeDefn receivingType) {
         return false;
     }
 }

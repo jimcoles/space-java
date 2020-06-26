@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * Just a wrapper around the {@link ComplexTypeImpl} associated with this set's contents,
+ * Just a wrapper around the {@link TypeDefnImpl} associated with this set's contents,
  * but distinguishes 'set of type' versus just 'type' for type checking and execution
  * purposes.
  *
@@ -20,7 +20,7 @@ public class SetTypeDefn extends AbstractCollectionTypeDefn {
 
     public static final String COLL_SUFFIX = "{}";
 
-    SetTypeDefn(SourceInfo sourceInfo, DatumType containedElementType) {
+    SetTypeDefn(SourceInfo sourceInfo, TypeDefn containedElementType) {
         super(sourceInfo, containedElementType.getName() + COLL_SUFFIX, containedElementType);
     }
 

@@ -9,35 +9,50 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.metameta.MetaType;
 import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * The base class for some very important sub-types.
- *
  * @author Jim Coles
  */
-public abstract class AbstractProjection extends AbstractDatumTypeDefn implements Projection {
+abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn {
+
+    private boolean isView = false;
 
     private List<Declaration> datumDeclList;
+    //
     private List<VariableDecl> variables;
     private List<AssociationDefn> associations;
+    private List<ProjectionDecl> projections;
+    //
     private StatementBlock initBlock;   // holds assignment exprs for var and assoc defns
     private List<FunctionDefn> functionDefns = new LinkedList<>();
+    private SequenceTypeDefn sequenceTypeDefn;
+    private SetTypeDefn setTypeDefn;
 
-    protected AbstractProjection(SourceInfo sourceInfo, String name) {
+    protected AbstractTypeDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
         datumDeclList = new LinkedList<>();
+        variables = new LinkedList<>();
+        associations = new LinkedList<>();
+    }
+
+    @Override
+    public MetaType getMetaType() {
+        return MetaType.TYPE;
     }
 
     // ===========================================================
     // Child adders
     //
+
     @Override
     public VariableDecl addVariableDecl(VariableDecl variableDecl) {
         datumDeclList.add(variableDecl);
+        variables.add(variableDecl);
         //
         addChild(variableDecl);
         return variableDecl;
@@ -46,13 +61,20 @@ public abstract class AbstractProjection extends AbstractDatumTypeDefn implement
     @Override
     public AssociationDefn addAssociationDecl(AssociationDefn associationDecl) {
         datumDeclList.add(associationDecl);
+        associations.add(associationDecl);
         //
         addChild(associationDecl);
         //
         return associationDecl;
     }
 
-    public List<Declaration> getDatumDeclList() {
+    @Override
+    public ProjectionDecl addProjectionDecl(ProjectionDecl projectionDecl) {
+        projections.add(projectionDecl);
+        return projectionDecl;
+    }
+
+    public List<Declaration> getDatumDecls() {
         return datumDeclList;
     }
 
@@ -64,11 +86,6 @@ public abstract class AbstractProjection extends AbstractDatumTypeDefn implement
     @Override
     public int getScalarDofs() {
         return datumDeclList.size();
-    }
-
-    @Override
-    public boolean isPrimitiveType() {
-        return false;
     }
 
     @Override
@@ -101,18 +118,18 @@ public abstract class AbstractProjection extends AbstractDatumTypeDefn implement
     }
 
     @Override
-    public boolean isAssignableTo(DatumType argsType) {
-        return false;
-    }
-
-    @Override
-    public boolean isSimpleType() {
+    public boolean isPrimitiveType() {
         return false;
     }
 
     @Override
     public boolean isComplexType() {
-        return true;
+        return datumDeclList.size() > 1;
+    }
+
+    @Override
+    public boolean isSimpleType() {
+        return datumDeclList.size() == 1;
     }
 
     @Override
@@ -130,7 +147,32 @@ public abstract class AbstractProjection extends AbstractDatumTypeDefn implement
         return false;
     }
 
+    @Override
+    public boolean isView() {
+        return false;
+    }
+
     public boolean hasDatums() {
         return datumDeclList != null && datumDeclList.size() > 0;
+    }
+
+    @Override
+    public SequenceTypeDefn getSequenceOfType() {
+        if (sequenceTypeDefn == null)
+            sequenceTypeDefn = new SequenceTypeDefn(getSourceInfo(), this);
+        return sequenceTypeDefn;
+    }
+
+    @Override
+    public SetTypeDefn getSetOfType() {
+        if (setTypeDefn == null)
+            setTypeDefn = new SetTypeDefn(getSourceInfo(), this);
+        return setTypeDefn;
+    }
+
+    @Override
+    public boolean isAssignableTo(TypeDefn receivingType) {
+        // TODO Should compare constituent
+        return receivingType == this;
     }
 }

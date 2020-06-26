@@ -9,8 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.Identified;
+import org.jkcsoft.space.lang.ast.*;
 
 /**
  * {@link SpaceObject}s are either {@link Tuple}s, Sets, Sequences, or Streams.
@@ -18,21 +17,24 @@ import org.jkcsoft.space.lang.ast.Identified;
  * can be boxed in an object wrapper. All objects have internal identifiers ({@link SpaceOid}s)
  * to support operations such as '=='.
  *
+ * Something is a {@link SpaceObject} if it is an identifiable things.
+ *
  * @author Jim Coles
  */
 public interface SpaceObject {
 
     /**
      * In general, every object has constraints defining what it is and what it can relate to.
+     * @return
      */
-    DatumType getDefn();
+    TypeDefn getDefn();
 
     /** */
     SpaceOid getOid();
 
     /**
      * Every object can hold some kind of value which may be a reference to another object.
-     * the nature of valid objects is controlled by the {@link DatumType} of this object.
+     * the nature of valid objects is controlled by the {@link TypeDefn} of this object.
      */
 //    SpaceObject addObject(ValueHolder node);
 

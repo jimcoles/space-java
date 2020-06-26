@@ -16,8 +16,4 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public interface VariableDecl extends Declaration {
 
-    MetaType getMetaType();
-
-    NumPrimitiveTypeDefn getType();
-
 }

@@ -78,7 +78,7 @@ public class SimpleNameRefExpr<T extends Named> extends AbstractRefExpr<T>
     }
 
     @Override
-    public DatumType getDatumType() {
+    public TypeDefn getDatumType() {
         return null;
     }
 

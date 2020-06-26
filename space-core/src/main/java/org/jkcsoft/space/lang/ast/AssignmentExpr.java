@@ -69,7 +69,7 @@ public class AssignmentExpr extends AbstractModelElement implements ValueExpr {
     }
 
     @Override
-    public DatumType getDatumType() {
+    public TypeDefn getDatumType() {
         return leftSideDatumRef.getDatumType();
     }
 

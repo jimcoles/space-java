@@ -12,6 +12,8 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
+ * A {@link Named} {@link ExpressionChain} used by {@link ProjectionDecl}.
+ *
  * @author Jim Coles
  */
 public class AliasedMetaRef extends NamedElement {

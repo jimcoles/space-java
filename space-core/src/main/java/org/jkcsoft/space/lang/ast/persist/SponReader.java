@@ -19,7 +19,7 @@ import java.io.IOException;
 /**
  * @author Jim Coles
  */
-public class SimpleTextAstReader implements AstReader {
+public class SponReader implements AstReader {
 
     @Override
     public String getName() {

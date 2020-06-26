@@ -13,7 +13,7 @@ import java.util.Collection;
 
 /**
  * Base collective notion. Objects in a {@link ValueCollection} are not accessed by name
- * and derive their type based on the collections's type.
+ * and their type must adhere to the collection's type constraints.
  *
  * @author Jim Coles
  */

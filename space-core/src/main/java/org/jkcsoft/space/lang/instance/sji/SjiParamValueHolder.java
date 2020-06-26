@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance.sji;
 
-import org.jkcsoft.space.lang.ast.DatumType;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.ast.Declaration;
 import org.jkcsoft.space.lang.ast.sji.SjiParamVarDecl;
 import org.jkcsoft.space.lang.instance.Tuple;
@@ -35,7 +35,7 @@ public class SjiParamValueHolder implements ValueHolder {
     }
 
     @Override
-    public DatumType getType() {
+    public TypeDefn getType() {
         return sjiParamVarDecl.getType();
     }
 

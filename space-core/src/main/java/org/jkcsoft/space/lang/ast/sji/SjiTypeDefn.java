@@ -9,24 +9,22 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
-import org.jkcsoft.space.lang.ast.AbstractProjection;
-import org.jkcsoft.space.lang.ast.ComplexType;
-import org.jkcsoft.space.lang.ast.DatumType;
-import org.jkcsoft.space.lang.ast.NativeSourceInfo;
+import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.metameta.MetaType;
+
+import java.util.Set;
 
 /**
  * Wraps Java Class to implement an AST Type Defn.
  *
  * @author Jim Coles
  */
-public class SjiTypeDefn extends AbstractProjection implements ComplexType {
+public class SjiTypeDefn extends AbstractTypeDefn implements TypeDefn {
 
     // wrapped element
     private Class jClass;
-
-//    private List<Declaration> datumDecls = new LinkedList<>();
-//    private List<SjiFunctionDefnImpl> functionDefns = new LinkedList<>();
+    private KeyDefn primaryKey;
+    private Set<KeyDefn> allKeys;
 
     SjiTypeDefn(Class jClass) {
         super(new NativeSourceInfo(jClass), jClass == null ? "(method args)" : jClass.getSimpleName());
@@ -49,44 +47,18 @@ public class SjiTypeDefn extends AbstractProjection implements ComplexType {
     }
 
     @Override
-    public boolean isAssignableTo(DatumType argsType) {
+    public KeyDefn getPrimaryKeyDefn() {
+        return primaryKey;
+    }
+
+    @Override
+    public Set<KeyDefn> getAllKeyDefns() {
+        return allKeys;
+    }
+
+    @Override
+    public boolean isAssignableTo(TypeDefn receivingType) {
         return false;
     }
 
-//    @Override
-//    public boolean hasDatums() {
-//        return datumDecls != null && datumDecls.size() > 0;
-//    }
-
-//    @Override
-//    public List<Declaration> getDatumDeclList() {
-//        return datumDecls;
-//    }
-
-//    public void addAssociationDecl(AssociationDefn associationDecl) {
-//        addDatum(associationDecl);
-//        //
-//        addChild((AbstractModelElement) associationDecl);
-//    }
-
-//    public void addVariableDecl(SjiVarDecl variableDecl) {
-//        addDatum(variableDecl);
-//        //
-//        addChild(variableDecl);
-//    }
-
-//    private void addDatum(Declaration declaration) {
-//        datumDecls.add(declaration);
-//    }
-
-//    public void addFunctionDefn(SjiFunctionDefnImpl sjiFunctionDefnImpl) {
-//        functionDefns.add(sjiFunctionDefnImpl);
-//        //
-//        addChild(sjiFunctionDefnImpl);
-//    }
-
-    @Override
-    public ComplexType getRootType() {
-        return null;
-    }
 }

@@ -25,7 +25,7 @@ public class TestSourceStub {
         Executor exec = null;
         try {
             Executor.ExeSettings exeSettings = new CallableExeSettings(spaceSourcePath, null);
-            exec = new Executor(exeSettings);
+            exec = Executor.getInstance(exeSettings);
         } catch (Throwable th) {
             log.error("error running", th);
         }
@@ -34,7 +34,10 @@ public class TestSourceStub {
 
     public void runTestSource(String spaceSourcePath) {
         log("executing source file [{}]", spaceSourcePath);
-        getExecutor(spaceSourcePath).loadSrcRootDir(FileUtils.getFile(getRootSrcDir(), spaceSourcePath));
+        Executor exec = getExecutor(spaceSourcePath);
+//        String runSrcDir = FileUtils.getFile(spaceSourcePath).getParent();
+//        exec.loadSrcRootDir(FileUtils.getFile(getRootSrcDir(), runSrcDir));
+        exec.run();
     }
 
     public File getRootSrcDir() {
