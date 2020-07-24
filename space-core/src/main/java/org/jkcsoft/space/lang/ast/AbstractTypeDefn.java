@@ -34,7 +34,12 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     private SetTypeDefn setTypeDefn;
 
     protected AbstractTypeDefn(SourceInfo sourceInfo, String name) {
+        this(sourceInfo, name, false);
+    }
+
+    protected AbstractTypeDefn(SourceInfo sourceInfo, String name, boolean isView) {
         super(sourceInfo, name);
+        this.isView = isView;
         datumDeclList = new LinkedList<>();
         variables = new LinkedList<>();
         associations = new LinkedList<>();
@@ -72,6 +77,11 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     public ProjectionDecl addProjectionDecl(ProjectionDecl projectionDecl) {
         projections.add(projectionDecl);
         return projectionDecl;
+    }
+
+    @Override
+    public List<ProjectionDecl> getProjectionDecls() {
+        return projections;
     }
 
     public List<Declaration> getDatumDecls() {
@@ -149,7 +159,7 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
 
     @Override
     public boolean isView() {
-        return false;
+        return isView;
     }
 
     public boolean hasDatums() {
@@ -174,5 +184,9 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     public boolean isAssignableTo(TypeDefn receivingType) {
         // TODO Should compare constituent
         return receivingType == this;
+    }
+
+    public void setDerivedElements() {
+
     }
 }

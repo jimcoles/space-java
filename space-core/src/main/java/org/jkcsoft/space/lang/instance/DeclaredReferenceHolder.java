@@ -49,7 +49,7 @@ public class DeclaredReferenceHolder<J> implements ReferenceValueHolder<Referenc
 
     @Override
     public void setValue(ReferenceValue<J> value) {
-
+        this.referenceValue = value;
     }
 
     public Tuple getParentTuple() {

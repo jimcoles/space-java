@@ -24,7 +24,12 @@ public class NullValue extends ScalarValue {
 
     @Override
     public String asString() {
-        return null;
+        return "(null)";
+    }
+
+    @Override
+    public boolean isNull() {
+        return true;
     }
 
 }

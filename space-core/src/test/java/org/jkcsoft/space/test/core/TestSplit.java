@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2020 through present.
  *
  * Licensed under the following license agreement:
  *
@@ -7,7 +7,7 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.test;
+package org.jkcsoft.space.test.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

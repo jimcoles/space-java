@@ -18,4 +18,5 @@ dependencies {
     implementation 'org.jkcsoft:java-utils:1.1-SNAPSHOT'
 
     runtimeOnly project(':space-antlr')
+
 }

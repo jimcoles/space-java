@@ -10,7 +10,11 @@
 
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
+import org.jkcsoft.space.lang.runtime.AstUtils;
+
+import java.util.Comparator;
 
 /**
  * Meta-level element of a VariableValueHolder. Declares a named 'usage' of
@@ -40,8 +44,22 @@ public class VariableDeclImpl extends NamedElement implements VariableDecl {
         return ((NumPrimitiveTypeDefn) typeRef.getResolvedType());
     }
 
+    @Override
+    public boolean isAssoc() {
+        return false;
+    }
+
     public void setType(TypeRef typeRef) {
         this.typeRef = typeRef;
+    }
+
+    private Comparator<Tuple> comparator = null;
+
+    @Override
+    public Comparator<Tuple> getDatumComparator() {
+        if (comparator == null)
+            comparator = AstUtils.buildDatumComparator(this);
+        return comparator;
     }
 
 }

@@ -13,10 +13,7 @@ import org.jkcsoft.space.lang.instance.NullValue;
 import org.jkcsoft.space.lang.instance.ScalarValue;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * @author Jim Coles
@@ -32,14 +29,13 @@ public abstract class PrimitiveTypeDefn extends AbstractTypeDefn {
     public static PrimitiveTypeDefn valueOf(String name) {
         return enumsByName.get(name);
     }
+    public static Map<String, PrimitiveTypeDefn> getEnumsByName() {
+        return enumsByName;
+    }
 
     //--------------------------------------------------------------------------
     //
     //--------------------------------------------------------------------------
-
-    public static Map<String, PrimitiveTypeDefn> getEnumsByName() {
-        return enumsByName;
-    }
 
     PrimitiveTypeDefn(SourceInfo sourceInfo, String name) {
         super(sourceInfo, name);
@@ -75,12 +71,12 @@ public abstract class PrimitiveTypeDefn extends AbstractTypeDefn {
     }
 
     @Override
-    public KeyDefn getPrimaryKeyDefn() {
+    public KeyDefnImpl getPrimaryKeyDefn() {
         return null;
     }
 
     @Override
-    public Set<KeyDefn> getAllKeyDefns() {
+    public Set<KeyDefnImpl> getAlternateKeyDefns() {
         return null;
     }
 
@@ -138,4 +134,10 @@ public abstract class PrimitiveTypeDefn extends AbstractTypeDefn {
     public boolean hasDatums() {
         return false;
     }
+
+    @Override
+    public boolean hasPrimaryKey() {
+        return true;
+    }
+
 }

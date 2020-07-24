@@ -56,7 +56,7 @@ public class VariableValueHolder implements ValueHolder {
 
     @Override
     public void setValue(Value value) {
-        if (!(value instanceof ScalarValue))
+        if (value instanceof ScalarValue)
             this.scalarValue = (ScalarValue) value;
     }
 

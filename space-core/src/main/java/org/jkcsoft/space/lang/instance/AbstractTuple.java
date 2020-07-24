@@ -68,7 +68,14 @@ public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple
 
     @Override
     public Tuple setValue(int idx, Value value) {
-        valueHolders[idx].setValue(value);
+        ValueHolder valueHolder = valueHolders[idx];
+        if (valueHolder.getDeclaration().isAssoc()) {
+            if (value instanceof SpaceObject)
+                valueHolder.setValue(getObjectFactory().newReferenceByOid(((SpaceObject) value).getOid()));
+        }
+        else
+            valueHolder.setValue(value);
+
         return this;
     }
 
@@ -147,7 +154,7 @@ public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple
     @Override
     public String toString() {
         return "([" + super.toString() + "] "
-            + Strings.buildCommaDelList(getValueHolders(), obj -> ((ValueHolder) obj).getValue().toString())
+            + Strings.buildCommaDelList(getValueHolders(), holder -> ((ValueHolder) holder).getValue().toString())
             + ")";
     }
 

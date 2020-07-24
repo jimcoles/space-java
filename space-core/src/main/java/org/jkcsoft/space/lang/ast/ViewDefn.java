@@ -32,8 +32,21 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface ViewDefn extends TypeDefn {
 
-    ProjectionDecl getVariableProjection();
+    /** Only m-to-1 associations (optionally, keys to use). No 1-to-m associations (which imply
+     * a Tree, and no variables. */
+    boolean isSimpleIndexDefn();
+
+    boolean isTreeIndexDefn();
+
+    boolean isIndexDefn();
+
+    boolean isKeyDefn();
+
+    boolean isTreeViewDefn();
+
+    boolean isTableViewDefn();
 
     Rule getSelector();
 
+    TypeDefn getBasisType();
 }

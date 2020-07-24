@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.Space;
+
 /**
  * <p>A {@link Rule} is a symbolic expression that relates otherwise
  * independent Variables (although in a degenerative case, a Rule
@@ -44,6 +46,8 @@ package org.jkcsoft.space.lang.ast;
 public interface Rule extends Named {
 
     boolean isEquality();
+
+    Space getScopeSpace();
 
     ProjectionDecl getVarSpace();
 

@@ -4,6 +4,10 @@
 dependencies {
 
     implementation project(':space-core')
+    implementation (group: 'org.jkcsoft', name: 'space-core') {
+
+    }
+
     implementation project(':space-antlr')
 
     //
@@ -19,4 +23,5 @@ dependencies {
     testImplementation 'commons-io:commons-io:2.5'
     testImplementation 'commons-cli:commons-cli:1.4'
     testImplementation 'commons-beanutils:commons-beanutils:1.9.3'
+
 }

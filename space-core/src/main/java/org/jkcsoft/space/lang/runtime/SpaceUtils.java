@@ -56,16 +56,6 @@ public class SpaceUtils {
             else
                 throw new SpaceX(exe.newRuntimeError("cannot assign " + leftSideHolder + " <- " + rightSideHolder));
         }
-        //
     }
 
-    public static String print(TupleSet tupleSetC) {
-        return null;
-    }
-
-    public static void assignNoCastSpm(SpmExecutor.EvalContext evalContext, ValueHolder leftSideHolder,
-                                       ValueHolder argValueHolder)
-    {
-
-    }
 }

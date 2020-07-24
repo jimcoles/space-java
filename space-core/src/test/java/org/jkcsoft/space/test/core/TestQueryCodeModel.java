@@ -1,13 +1,13 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2017. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2020 through present.
  *
  * Licensed under the following license agreement:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
-*/
-package org.jkcsoft.space.test;
+ */
+package org.jkcsoft.space.test.core;
 
 import org.junit.Test;
 

@@ -9,17 +9,13 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.AssociationDefn;
-import org.jkcsoft.space.lang.ast.AssociationKind;
-import org.jkcsoft.space.lang.ast.KeyDefn;
-import org.jkcsoft.space.lang.ast.TypeDefn;
+import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.runtime.Executor;
 import org.jkcsoft.space.lang.runtime.SpaceX;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * The {@link Space} imple for most programmatic operations. Much of the state
@@ -30,14 +26,20 @@ import java.util.TreeMap;
  */
 public class InMemorySpaceImpl extends AbstractSpaceObject implements Space {
 
+    private static final Logger log = LoggerFactory.getLogger(InMemorySpaceImpl.class.getSimpleName());
+
+    /** Controlling (basis) type definitions. */
     private final Map<SpaceOid, TypeDefn> types = new TreeMap<>();
+
+    /** Views (incl indices) that must be updated by underlying {@link VariableDecl} oid. */
+    private Map<SpaceOid, ViewDefn> viewDefnsByTypeOid;
+
     /** All seminal state is modified by {@link Transaction}s. Persists to transaction log. */
     private final ActionQueue transactionQueue = new ActionQueue();
     /**
-     * The 'object' tables for 'instance' objects associated with the running program.
-     * This map is added to as the program runs.
+     * THE 'object' tables for user objects (mostly Tuples) associated with the running program.
      */
-    private final Map<SpaceOid, SpaceObject> instObjectsIndexByOid = new TreeMap<>();
+    private final Map<SpaceOid, SpaceObject> objectsByOid = new TreeMap<>();
     /**
      * References to objects by SpaceOid. key = 'to' object oid; entry='from' object
      */
@@ -45,13 +47,25 @@ public class InMemorySpaceImpl extends AbstractSpaceObject implements Space {
 
     // ----------------------------- REDUNDANT STATE
 
-    /** Redundantly maintained indices by user-level keys including primary key. */
-    private Map<SpaceOid, Index> indexes;
     /** Redundant state that must be updated by rule firing / trigger / event. */
-    private Map<SpaceOid, View> views;
+    private Map<SpaceOid, View> views = new TreeMap<>();
 
     public InMemorySpaceImpl(SpaceOid oid, TypeDefn defn) {
         super(oid, defn);
+    }
+
+    /** Tell the space what it's base types are. */
+    public void allowTypes(TypeDefn ... typeDefns) {
+        for (TypeDefn typeDefn : typeDefns) {
+            if (typeDefn.isView())
+                throw new SpaceX("{} is not a base type", typeDefn);
+            types.put(typeDefn.getOid(), typeDefn);
+            initKeyViews(typeDefn);
+        }
+    }
+
+    private void initKeyViews(TypeDefn typeDefn) {
+
     }
 
     @Override
@@ -59,35 +73,59 @@ public class InMemorySpaceImpl extends AbstractSpaceObject implements Space {
         return Set.copyOf(types.values());
     }
 
+    public void createView(ViewDefn viewDefn) {
+        viewDefnsByTypeOid.put(viewDefn.getBasisType().getOid(), viewDefn);
+
+    }
+
     @Override
     public List<View> getViews() {
         return List.copyOf(views.values());
     }
 
+    @Override
+    public void insert(Tuple tuple) {
+        log.debug("inserting tuple {} into to space {}", tuple, this);
+        validateInsert(tuple);
+        objectsByOid.put(tuple.getOid(), tuple);
+        updateViews(tuple);
+    }
+
+    private void validateInsert(Tuple tuple) {
+        if (tuple.getDefn().isView())
+            throw new SpaceX("only basis tuples may be inserted into a space", tuple);
+    }
+
+    @Override
+    public void update(Tuple tuple) {
+        log.debug("updating tuple {} for space {}", tuple, this);
+
+    }
+
     public void trackInstanceObject(SpaceObject spaceObject) {
         // TODO set oid here
         // TODO validate type constraints including constructors and unique keys
-        instObjectsIndexByOid.put(spaceObject.getOid(), spaceObject);
+        objectsByOid.put(spaceObject.getOid(), spaceObject);
         // TODO Trigger new object index updates by formulation transaction
-        updateViews(spaceObject);
+//        updateViews(spaceObject);
     }
 
     private void updateViews(SpaceObject spaceObject) {
         if (spaceObject instanceof Tuple) {
             Tuple tuple = (Tuple) spaceObject;
-            if (tuple.getDefn() instanceof TypeDefn) {
-                TypeDefn rootType = (TypeDefn) tuple.getDefn();
-                Set<KeyDefn> allKeyDefns = rootType.getAllKeyDefns();
+                TypeDefn rootType = tuple.getDefn();
+                Set<KeyDefnImpl> allKeyDefns = rootType.getAlternateKeyDefns();
                 if (allKeyDefns != null)
-                    for (KeyDefn keyDefn : allKeyDefns) {
+                    for (KeyDefnImpl keyDefn : allKeyDefns) {
                         Tuple keyValue = extractKeyTuple(tuple, keyDefn);
+
                     }
-            }
+
         }
     }
 
-    private Tuple extractKeyTuple(Tuple tuple, KeyDefn keyDefn) {
-        Tuple keyTuple = getObjectFactory().newTupleImpl(keyDefn.getVars());
+    private Tuple extractKeyTuple(Tuple tuple, KeyDefnImpl keyDefn) {
+        Tuple keyTuple = getObjectFactory().newTupleImpl(keyDefn);
         keyTuple.getDefn().getVariables().forEach( (varDecl) ->
             keyTuple.setValue(varDecl, tuple.get(varDecl).getValue())
         );
@@ -95,7 +133,7 @@ public class InMemorySpaceImpl extends AbstractSpaceObject implements Space {
     }
 
     public SpaceObject dereference(SpaceOid referenceOid) throws SpaceX {
-        SpaceObject spaceObject = instObjectsIndexByOid.get(referenceOid);
+        SpaceObject spaceObject = objectsByOid.get(referenceOid);
         if (spaceObject == null)
             throw new SpaceX("Space Oid [" + referenceOid + "] not found.");
         return spaceObject;
@@ -118,7 +156,12 @@ public class InMemorySpaceImpl extends AbstractSpaceObject implements Space {
         return result;
     }
 
-//    private Tuple binaryKey(SpaceOid oidOne, SpaceOid oidTwo) {
+    @Override
+    public String toString() {
+        return "In Memory Space ";
+    }
+
+    //    private Tuple binaryKey(SpaceOid oidOne, SpaceOid oidTwo) {
 //        getObjectFactory().newT
 //    }
 }

@@ -27,7 +27,8 @@ public enum AssociationKind {
      * its own identity. The 'to end' object can not be moved to another parent. */
     DEPENDENT,
     /** The 'from' type is using the 'to' type for the latter's variable set. Those variables
-     * are referencable as if directly declared within the 'from type'.
+     * are referencable as if directly declared within the 'from type'. A variant of the
+     * standard 'extends' or 'is-a' relationship.
      */
     VARIABLE_GROUP
 }

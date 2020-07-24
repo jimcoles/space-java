@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
- * Abstract base for language constructs that are references to defined meta objects.
+ * Abstract base for language constructs that are references to {@link Named} meta objects.
  * References (see sub types) may be by name, synonym, relative path, etc.
  *
  * References are resolved at link-time.

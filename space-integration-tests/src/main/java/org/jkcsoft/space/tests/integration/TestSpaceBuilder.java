@@ -7,13 +7,16 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.tests;
+package org.jkcsoft.space.tests.integration;
 
-import org.jkcsoft.space.lang.ast.*;
-import org.jkcsoft.space.lang.instance.*;
+import org.jkcsoft.space.lang.ast.AstFactory;
+import org.jkcsoft.space.lang.ast.ProgSourceInfo;
+import org.jkcsoft.space.lang.ast.TypeDefn;
+import org.jkcsoft.space.lang.instance.ObjectFactory;
+import org.jkcsoft.space.lang.instance.Tuple;
 import org.junit.Test;
 
-public class TestSpaceBuilder extends TestSourceStub {
+public class TestSpaceBuilder extends IntegrationTestBase {
 
     /*
     1. Create space defn.

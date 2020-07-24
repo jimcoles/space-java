@@ -24,4 +24,7 @@ public interface Value<J> {
 
     J getJavaValue();
 
+    default boolean isNull() {
+        return false;
+    }
 }

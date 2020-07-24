@@ -48,7 +48,7 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public class ExpressionChain extends AbstractModelElement implements ValueExpr {
+public class ExpressionChain<T extends Named> extends AbstractModelElement implements ValueExpr {
 
     private MetaType targetMetaType;
     private SimpleNameRefExpr nsRefPart;
@@ -69,13 +69,28 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
         this.targetMetaType = targetMetaType;
     }
 
+    /** For use by API access when referenced type object is known. */
     ExpressionChain(SourceInfo sourceInfo, TypeDefn typeDefn) {
         this(sourceInfo, MetaType.TYPE);
 
         SimpleNameRefExpr<TypeDefn> firstPart =
-            new SimpleNameRefExpr<>(new NamePartExpr(sourceInfo, false, null, typeDefn.getName()));
+            new SimpleNameRefExpr<>(new NamePartExpr(sourceInfo, true, null, typeDefn.getName()));
         firstPart.setState(LinkState.RESOLVED);
         firstPart.setResolvedMetaObj(typeDefn);
+        this.typeCheckState = TypeCheckState.VALID;
+        //
+        if (firstPart != null) {
+            this.addNextPart(firstPart);
+        }
+    }
+
+    /** For use by API access when referenced type object is known. */
+    ExpressionChain(SourceInfo sourceInfo, Declaration datumDecl) {
+        this(sourceInfo, MetaType.DATUM);
+        SimpleNameRefExpr<Declaration> firstPart =
+            new SimpleNameRefExpr<>(new NamePartExpr(sourceInfo, false, null, datumDecl.getName()));
+        firstPart.setState(LinkState.RESOLVED);
+        firstPart.setResolvedMetaObj(datumDecl);
         this.typeCheckState = TypeCheckState.VALID;
         //
         if (firstPart != null) {
@@ -151,11 +166,11 @@ public class ExpressionChain extends AbstractModelElement implements ValueExpr {
         this.resolvedDatumScope = resolvedDatumScope;
     }
 
-    public Named getResolvedMetaObj() {
+    public T getResolvedMetaObj() {
         return getLastMetaRefLink().getResolvedMetaObj();
     }
 
-    private MetaRef getLastMetaRefLink() {
+    private MetaRef<T> getLastMetaRefLink() {
         return extractMetaRefPath().getLastLink();
     }
 

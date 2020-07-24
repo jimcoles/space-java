@@ -127,6 +127,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
     //
 
     private ExeSettings exeSettings;
+    private ApiExeContext apiExe = this;
     private AstLoader astLoader;
     private AstFactory astFactory;
     private NSRegistry nsRegistry;
@@ -165,6 +166,16 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
     }
 
     @Override
+    public SpaceObject getRef(Tuple tuple, Declaration declaration) {
+        SpaceObject obj;
+        if (!declaration.isAssoc()) {
+            throw new SpaceX("invalid navigation of non-associative datum {}", declaration);
+        }
+        obj = dereference(((ReferenceByOid) tuple.get(declaration).getValue()).getToOid());
+        return obj;
+    }
+
+    @Override
     public AstFactory getAstFactory() {
         return astFactory;
     }
@@ -192,23 +203,48 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
             datumDecl -> sb.append("\"" + datumDecl.getName() + "\" ")
         );
         sb.append(EOL);
-        tupleSet.forEach( (oRefHolder) -> {
-              SpaceObject targetObject =
-                  dereference(((FreeReferenceHolder<SpaceOid>) oRefHolder).getValue().getJavaValue());
-              appendString(sb, targetObject, datumDecls);
-              sb.append(EOL);
-        }
+        tupleSet.forEach(
+            (oRefHolder) -> {
+                SpaceOid targetOid = ((FreeReferenceHolder<SpaceOid>) oRefHolder).getValue().getJavaValue();
+                SpaceObject targetObject = dereference(targetOid);
+                if (targetObject != null)
+                    appendString(sb, targetObject, datumDecls);
+                else
+                    throw new SpaceX("broken object reference {}", oRefHolder);
+                sb.append(EOL);
+            }
         );
         return sb.toString();
     }
 
     private void appendString(StringBuilder sb, SpaceObject spaceObject, List<Declaration> datumDecls) {
         datumDecls.forEach(
-            declaration -> {
-                if (spaceObject instanceof SjiTuple) {
-                    ValueHolder sjiValueHolder = ((SjiTuple) spaceObject).get(declaration);
-                    Value spaceValue = sjiValueHolder.getValue();
-                    sb.append(spaceValue.getJavaValue().toString() + "\t");
+            datumDecl -> {
+                String datumString = "?";
+                if (spaceObject instanceof Tuple) {
+                    Tuple tuple = (Tuple) spaceObject;
+                    ValueHolder valueHolder = tuple.get(datumDecl);
+                    if (datumDecl.isAssoc()) {
+                        AssociationDefn assocDecl = (AssociationDefn) datumDecl;
+                        if (assocDecl.getAssociationKind() == AssociationKind.DEPENDENT) {
+                            // case: ref 0 or 1 dependent; treat as inner value; e.g., a char[]
+                            SpaceObject toObject = apiExe.getRef(tuple, datumDecl);
+                            datumString = toObject != null ? toObject.toString() : "(broken object ref)";
+                        }
+                        else {
+                            if (assocDecl.getToEnd().isSingular()) {
+                                // case: ref to 0 or 1 independent; e.g., some primary entity type
+                                // case: collective association
+                                datumString = "(" + valueHolder + ")";
+                            }
+                        }
+                    }
+                    else {
+                        // case: simple object (scalar) variable
+                        Value value = valueHolder.getValue();
+                        datumString = value.isNull() ? value.toString() : value.getJavaValue().toString();
+                    }
+                    sb.append(datumString + "\t");
                 }
             }
         );
@@ -231,9 +267,12 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
     }
 
     public void run() {
+
+        RunResults runResults = new RunResults();
+
         try {
+
 //            File exeFile = FileUtils.getFile(exeSettings.getExeMain());
-            RunResults runResults = new RunResults();
 
             // Load Space libs and source
             List<File> srcRootDirs = exeSettings.getSpaceDirs();
@@ -241,25 +280,40 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
 //                throw new SpaceX("Input file [" + exeFile + "] does not exist.");
 //            }
 
-            // 1. Parse all source and load ASTs into memory
-            for (File srcRootDir : srcRootDirs) {
-                //
-                DirLoadResults dirLoadResults = loadSrcRootDir(srcRootDir, nsRegistry.getUserNs());
-                log.info("loaded source root [" + srcRootDir + "]");
-                //
-                runResults.addSrcDirLoadResult(dirLoadResults);
+            // # Parse all source and load ASTs into memory
+            if (srcRootDirs != null) {
+                int validCount = 0;
+                for (File srcRootDir : srcRootDirs) {
+                    //
+                    if (srcRootDir.exists()) {
+                        DirLoadResults dirLoadResults = loadSrcRootDir(srcRootDir, nsRegistry.getUserNs());
+                        log.info("loaded source root [" + srcRootDir + "]");
+                        //
+                        runResults.addSrcDirLoadResult(dirLoadResults);
+                        validCount++;
+                    }
+                    else
+                        log.warn("source directory [{}] does not exist", srcRootDir);
+                }
+            }
+            else {
+                log.info("no source dirs specified");
             }
 
+            // serves to ensure that the base lang libs were loaded above
             resolveLangDir();
 
-            // 2. Determine all needed Java classes and load corresponding Space wrappers
+            // # Sets derived AST info for types
+            setTypeKeyComprators();
+
+            // # Determine all needed Java classes and load corresponding Space wrappers
             wrapJavaImports(runResults);
 
             //
             java.util.Set<ParseUnit> newParseUnits =
                 AstUtils.queryAst(nsRegistry.getUserNs().getRootDir(), new QueryAstConsumer(ParseUnit.class));
 
-            // 3. Link all refs within the AST.
+            // # Link all refs within the AST.
             // NOTE: Pure Space units that using Java classes will link to corresponding Space wrappers.
             try {
 
@@ -301,9 +355,13 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
             }
             else {
                 // Execute the specified type 'main' function
-                exec(exeSettings.getExeMain());
+                if (exeSettings.getExeMain() != null)
+                    exec(exeSettings.getExeMain());
+                else
+                    log.info("no exec main() to run");
             }
-        } catch (SpaceX spex) {
+        }
+        catch (SpaceX spex) {
 //            PrintStream ps = System.err;
             PrintStream psOut = System.out;
             StringBuffer sb = new StringBuffer();
@@ -594,7 +652,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         AstUtils.resolveAstRef(parseUnit, reference);
         if (!reference.isResolved()) {
             AstLoadError error = new AstLoadError(AstLoadError.Type.LINK, reference.getSourceInfo(),
-                                                  "could resolve symbol '" + getFirstUnresolved(reference) + "'");
+                                                  "could not resolve symbol '" + getFirstUnresolved(reference) + "'");
             errors.add(error);
             reference.setAstLoadError(error);
             log.info(error.toString());
@@ -612,7 +670,8 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         }
 
         if (unresolved == null) {
-            for (NameRefOrHolder link : refChain.getRestLinks()) {
+            List<NameRefOrHolder> restLinks = refChain.getRestLinks();
+            for (NameRefOrHolder link : restLinks) {
                 if (link.hasNameRef() && !link.getRefAsNameRef().isResolved()) {
                     unresolved = link;
                     break;
@@ -1132,6 +1191,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         return newValue;
     }
 
+
     @Override
     public TupleImpl newTupleImpl(TypeDefn defn) {
         TupleImpl tuple = getObjFactory().newTupleImpl(defn);
@@ -1151,7 +1211,41 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         trackInstanceObject(tuple);
     }
 
+    @Override
+    public void apiAstLoadComplete() {
+
+        run();
+
+    }
+
+    private void setTypeKeyComprators() {
+        // set key comparators
+        Set<TypeDefn> newTypeDefs =
+            AstUtils.queryAst(nsRegistry.getUserNs().getRootDir(),
+                              new QueryAstConsumer<>(
+                                  TypeDefn.class, (typeDefn) ->
+                                  getNsRegistry().getUserNs().getTypeInfo(typeDefn) == null
+                              )
+            );
+        newTypeDefs.forEach( typeDefn -> {
+            if (typeDefn.hasPrimaryKey()) {
+                Namespace.TypeDerivedInfo typeInfo = new Namespace.TypeDerivedInfo(typeDefn);
+                typeInfo.setPkComparator(AstUtils.buildComparator(typeDefn.getPrimaryKeyDefn()));
+            }
+        });
+    }
+
     // ---------------------------- New Space Objects ------------------------
+
+    @Override
+    public Space getDefaultSpace() {
+        return defaultSpace;
+    }
+
+    @Override
+    public Space newSpace() {
+        return null;
+    }
 
     @Override
     public TupleSetImpl newSet(SetTypeDefn setTypeDefn) {
@@ -1176,20 +1270,11 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
     public ValueHolder newEmptyVarHolder(Tuple tuple, Declaration declaration) {
         ValueHolder holder = null;
         ObjectFactory ofact = getObjFactory();
-        if (declaration.getType() instanceof PrimitiveTypeDefn) {
-            holder = new VariableValueHolder(tuple, ((VariableDecl) declaration));
+        if (declaration.getType().isPrimitiveType()) {
+            holder = ofact.newVariableValueHolder(tuple, (VariableDecl) declaration, null);
         }
-        else if (declaration instanceof TypeDefnImpl) {
-            holder = ofact.newReferenceByOidHolder(tuple, null, (SpaceOid) null);
-        }
-        else if (declaration instanceof StreamTypeDefn) {
-            holder = ofact.newReferenceByOidHolder(tuple, null, (SpaceOid) null);
-        }
-        else if (declaration instanceof SequenceTypeDefn) {
-            holder = ofact.newReferenceByOidHolder(tuple, null, (SpaceOid) null);
-        }
-        else if (declaration instanceof SetTypeDefn) {
-            holder = ofact.newReferenceByOidHolder(tuple, null, (SpaceOid) null);
+        else {
+            holder = ofact.newReferenceByOidHolder(tuple, (AssociationDefn) declaration, (SpaceOid) null);
         }
         return holder;
     }
@@ -1247,16 +1332,19 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
 
         private java.util.Set<T> results = new HashSet<>();
         private Class<T> clazz;
-        private Predicate<ModelElement> filter = modelElement -> false;
+        private Predicate<T> filter = modelElement -> false;
+        private Predicate<T> classCheckPredicate;
 
-        public QueryAstConsumer(Class<T> clazz, Predicate<ModelElement> filter) {
+        public QueryAstConsumer(Class<T> clazz, Predicate<T> extraFilter) {
             this.clazz = clazz;
-            this.filter = filter;
+            this.classCheckPredicate = modelElement -> this.clazz.isAssignableFrom(modelElement.getClass());
+            this.filter = extraFilter != null ?
+                testee -> classCheckPredicate.test(testee) && extraFilter.test(testee) :
+                classCheckPredicate;
         }
 
         public QueryAstConsumer(Class<T> clazz) {
-            this.clazz = clazz;
-            this.filter = modelElement -> this.clazz.isAssignableFrom(modelElement.getClass());
+            this(clazz, null);
         }
 
         @Override

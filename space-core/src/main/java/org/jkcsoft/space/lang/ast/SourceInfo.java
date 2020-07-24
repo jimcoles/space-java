@@ -16,6 +16,7 @@ package org.jkcsoft.space.lang.ast;
 public interface SourceInfo {
 
     SourceInfo INTRINSIC = new IntrinsicSourceInfo();
+    /** Used when AST is built from a Java code. */
     SourceInfo API = new ProgSourceInfo();
 
     FileCoord getStart();

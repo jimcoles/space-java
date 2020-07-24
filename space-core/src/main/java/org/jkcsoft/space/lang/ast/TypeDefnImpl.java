@@ -10,8 +10,7 @@
 
 package org.jkcsoft.space.lang.ast;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The central data type definition notion within Space.
@@ -25,10 +24,18 @@ public class TypeDefnImpl extends AbstractTypeDefn implements TypeDefn {
 
     private List<Rule> rules;
     private List<TransformDefn> transformDefns;
-    private KeyDefn primaryKey;
+    private KeyDefnImpl primaryKey;
+    private Set<KeyDefnImpl> alternateKeys = Collections.emptySet();
+    // derived elements
+    private ViewDefn pkViewDefn;
+    private Set<ViewDefn> altKeyViewDefns;
 
     TypeDefnImpl(SourceInfo sourceInfo, NamePart nameNode) {
         super(sourceInfo, nameNode.getText());
+    }
+
+    TypeDefnImpl(SourceInfo sourceInfo, NamePart nameNode, boolean isView) {
+        super(sourceInfo, nameNode.getText(), isView);
     }
 
     public boolean isComputed() {
@@ -52,17 +59,54 @@ public class TypeDefnImpl extends AbstractTypeDefn implements TypeDefn {
         return false;
     }
 
-    public void setPrimaryKey(KeyDefn primaryKey) {
+    @Override
+    public boolean hasPrimaryKey() {
+        return primaryKey != null;
+    }
+
+    public void setPrimaryKey(KeyDefnImpl primaryKey) {
         this.primaryKey = primaryKey;
     }
 
+    void setPkViewDefn(ViewDefn pkViewDefn) {
+        this.pkViewDefn = pkViewDefn;
+    }
+
+    public void addAlternateKey(KeyDefnImpl keyDefn) {
+        if (alternateKeys.isEmpty())
+            alternateKeys = new TreeSet<>();
+        alternateKeys.add(keyDefn);
+    }
+
+    void addAltKeyViewDefn(ViewDefn keyViewDefn) {
+        altKeyViewDefns.add(keyViewDefn);
+    }
+
+    public void setAltKeyViewDefns(Set<ViewDefn> altKeyViewDefns) {
+        this.altKeyViewDefns = altKeyViewDefns;
+    }
+
     @Override
-    public KeyDefn getPrimaryKeyDefn() {
+    public KeyDefnImpl getPrimaryKeyDefn() {
         return primaryKey;
     }
 
     @Override
-    public Set<KeyDefn> getAllKeyDefns() {
+    public Set<KeyDefnImpl> getAlternateKeyDefns() {
         return Set.of(primaryKey);
     }
+
+    @Override
+    public Comparator getTypeComparator() {
+        return null;
+    }
+
+    public ViewDefn getPkViewDefn() {
+        return pkViewDefn;
+    }
+
+    public Set<ViewDefn> getAltKeyViewDefns() {
+        return altKeyViewDefns;
+    }
+
 }

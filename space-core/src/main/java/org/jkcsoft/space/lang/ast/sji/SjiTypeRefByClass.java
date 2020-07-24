@@ -20,23 +20,26 @@ public class SjiTypeRefByClass extends AbstractModelElement implements TypeRef {
 
     private SjiTypeMapping mapping;
 
-    public SjiTypeRefByClass(Object jParent, SjiTypeMapping sjiTypeMapping) {
+    SjiTypeRefByClass(Object jParent, SjiTypeMapping sjiTypeMapping) {
         super(new NativeSourceInfo(jParent));
 
         this.mapping = sjiTypeMapping;
 
-        if (sjiTypeMapping.getJavaClass() == Boolean.TYPE) {
-            mapping.setSjiProxy(NumPrimitiveTypeDefn.BOOLEAN);
-        }
-        else if (sjiTypeMapping.getJavaClass() == Integer.TYPE) {
-            mapping.setSjiProxy(NumPrimitiveTypeDefn.CARD);
-        }
-        else if (sjiTypeMapping.getJavaClass() == Float.TYPE) {
-            mapping.setSjiProxy(NumPrimitiveTypeDefn.REAL);
-        }
-        else if (sjiTypeMapping.getJavaClass() == Void.TYPE) {
-            mapping.setSjiProxy(VoidType.VOID);
-        }
+        // NOTE I had been using equivalent Space types for Java primitives but
+        // at this time I think it's better to use SJI proxies and then use type
+        // casting if needed in expressions using Java objects, and vice versa.
+//        if (sjiTypeMapping.getJavaClass() == Boolean.TYPE) {
+//            mapping.setSjiProxy(NumPrimitiveTypeDefn.BOOLEAN);
+//        }
+//        else if (sjiTypeMapping.getJavaClass() == Integer.TYPE) {
+//            mapping.setSjiProxy(NumPrimitiveTypeDefn.CARD);
+//        }
+//        else if (sjiTypeMapping.getJavaClass() == Float.TYPE) {
+//            mapping.setSjiProxy(NumPrimitiveTypeDefn.REAL);
+//        }
+//        else if (sjiTypeMapping.getJavaClass() == Void.TYPE) {
+//            mapping.setSjiProxy(VoidType.VOID);
+//        }
 
         if (mapping.getSjiProxy() != null)
             mapping.setState(LinkState.RESOLVED);

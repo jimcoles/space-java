@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import java.util.Comparator;
+
 /**
  * A Stream is first-class collective data type similar to the notion of a BLOB data type used by
  * databases.
@@ -66,5 +68,15 @@ public class StreamTypeDefn extends AbstractCollectionTypeDefn implements TypeDe
     @Override
     public boolean isStreamType() {
         return true;
+    }
+
+    @Override
+    public boolean hasPrimaryKey() {
+        return false;
+    }
+
+    @Override
+    public Comparator getTypeComparator() {
+        return null;
     }
 }

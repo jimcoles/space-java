@@ -10,7 +10,10 @@
 package org.jkcsoft.space.lang.ast.sji;
 
 import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
+
+import java.util.Comparator;
 
 /**
  * @author Jim Coles
@@ -36,36 +39,46 @@ public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaratio
     }
 
     @Override
+    public boolean isAssoc() {
+        return true;
+    }
+
+    @Override
     public TypeDefn getToType() {
-        return null;
+        return toEnd.getType();
     }
 
     @Override
     public TypeDefn getType() {
-        return null;
+        return toEnd.getType();
     }
 
     @Override
     public AssociationDefnEnd getFromEnd() {
-        return null;
+        return fromEnd;
     }
 
     @Override
     public AssociationDefnEnd getToEnd() {
-        return null;
+        return toEnd;
     }
 
     @Override
     public boolean isRecursive() {
-        return false;
+        return toEnd == fromEnd;
     }
 
     @Override
     public MetaType getMetaType() {
-        return null;
+        return MetaType.DATUM;
     }
 
     protected SjiService getSjiService() {
         return sjiService;
+    }
+
+    @Override
+    public Comparator<Tuple> getDatumComparator() {
+        return getType().getTypeComparator();
     }
 }

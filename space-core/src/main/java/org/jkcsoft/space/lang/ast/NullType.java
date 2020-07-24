@@ -9,12 +9,15 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import java.util.Comparator;
+
 /**
  * @author Jim Coles
  */
 public class NullType extends PrimitiveTypeDefn {
 
     public static final NullType NULL = new NullType(new IntrinsicSourceInfo(), "null");
+    public static final Comparator COMPARATOR = (o1, o2) -> 0;
 
     static {
         PrimitiveTypeDefn.addPrimitiveTypeDefn(NULL);
@@ -28,4 +31,10 @@ public class NullType extends PrimitiveTypeDefn {
     public boolean isAssignableTo(TypeDefn receivingType) {
         return false;
     }
+
+    @Override
+    public Comparator getTypeComparator() {
+        return COMPARATOR;
+    }
+
 }

@@ -19,7 +19,7 @@ public class SjiAssociationDefnEnd extends NamedElement implements AssociationDe
 
     private SjiTypeDefn sjiType;
     private int lowerMultiplicity;
-    private int uppperMultiplicity;
+    private int upperMultiplicity;
 
     protected SjiAssociationDefnEnd(SourceInfo sourceInfo, String name, SjiTypeDefn sjiType, int lowerMultiplicity,
                                     int uppperMultiplicity)
@@ -27,7 +27,7 @@ public class SjiAssociationDefnEnd extends NamedElement implements AssociationDe
         super(sourceInfo, name);
         this.sjiType = sjiType;
         this.lowerMultiplicity = lowerMultiplicity;
-        this.uppperMultiplicity = uppperMultiplicity;
+        this.upperMultiplicity = uppperMultiplicity;
     }
 
     @Override
@@ -42,7 +42,17 @@ public class SjiAssociationDefnEnd extends NamedElement implements AssociationDe
 
     @Override
     public int getUpperMultiplicity() {
-        return uppperMultiplicity;
+        return upperMultiplicity;
+    }
+
+    @Override
+    public boolean isSingular() {
+        return true; // java refs are singular
+    }
+
+    @Override
+    public boolean isRequired() {
+        return false; // java objects are nullable (not required)
     }
 
     @Override

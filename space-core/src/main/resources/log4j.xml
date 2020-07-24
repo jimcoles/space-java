@@ -21,7 +21,7 @@
         <param name="File" value="space.log"/>
         <param name="Append" value="false"/>
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
+            <param name="ConversionPattern" value="%-5p %d %c{1} - %m%n"/>
         </layout>
     </appender>
 
@@ -50,8 +50,8 @@
     </logger>
 
     <root>
-        <priority value="info"/>
-        <appender-ref ref="console"/>
+        <priority value="debug"/>
+        <appender-ref ref="console" />
         <appender-ref ref="file"/>
     </root>
 </log4j:configuration>

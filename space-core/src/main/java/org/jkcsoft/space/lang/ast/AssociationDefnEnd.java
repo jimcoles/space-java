@@ -22,8 +22,8 @@ public interface AssociationDefnEnd extends Named {
 
     int getUpperMultiplicity();
 
-    default boolean isRequired() {
-        return getLowerMultiplicity() > 0;
-    }
+    boolean isSingular();
+
+    boolean isRequired();
 
 }

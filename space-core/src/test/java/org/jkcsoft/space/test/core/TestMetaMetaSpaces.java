@@ -1,14 +1,13 @@
-package org.jkcsoft.space.test;
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2016. through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2020 through present.
  *
  * Licensed under the following license agreement:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Also see the LICENSE file in the repository root directory.
  */
-
+package org.jkcsoft.space.test.core;
 /**
  * To be rigorous, we should load the meta Spaces with a description of the
  * Space language itself.  The data in these Spaces should be fixed for a given

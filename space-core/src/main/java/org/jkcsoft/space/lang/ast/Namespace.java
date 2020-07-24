@@ -9,7 +9,12 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
+
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.util.*;
 
 /**
  * A named root of a Directory tree. A given runtime context will contain multiple Namespaces.
@@ -20,6 +25,9 @@ public class Namespace extends NamedElement {
     private Directory rootDir;
     private Namespace[] nsLookupChain;
     private Directory[] rootDirLookupChain;
+
+    /** Derived mapping */
+    private Map<TypeDefn, TypeDerivedInfo> typeInfoMap = new TreeMap<>();
 
     Namespace(SourceInfo sourceInfo, String name, Namespace ... nsLookupChain) {
         super(sourceInfo, name);
@@ -58,4 +66,47 @@ public class Namespace extends NamedElement {
     public String getDisplayName() {
         return super.getDisplayName() + ":";
     }
+
+    public void putTypeInfo(TypeDerivedInfo typeInfo) {
+        typeInfoMap.put(typeInfo.getTypeDefn(), typeInfo);
+    }
+
+    public TypeDerivedInfo getTypeInfo(TypeDefn typeDefn) {
+        return typeInfoMap.get(typeDefn);
+    }
+
+    public static class TypeLoadedEvent implements AstEvent {
+        private TypeDefn typeDefn;
+
+        public TypeLoadedEvent(TypeDefn typeDefn) {
+            this.typeDefn = typeDefn;
+        }
+
+        public TypeDefn getTypeDefn() {
+            return typeDefn;
+        }
+    }
+
+    /** Holds type-related info computed and used by executor. */
+    public static class TypeDerivedInfo {
+        private TypeDefn typeDefn;
+        private Comparator<Tuple> pkComparator;
+
+        public TypeDerivedInfo(TypeDefn typeDefn) {
+            this.typeDefn = typeDefn;
+        }
+
+        public TypeDefn getTypeDefn() {
+            return typeDefn;
+        }
+
+        public void setPkComparator(Comparator<Tuple> pkComparator) {
+            this.pkComparator = pkComparator;
+        }
+
+        public Comparator<Tuple> getPkComparator() {
+            return pkComparator;
+        }
+    }
+
 }

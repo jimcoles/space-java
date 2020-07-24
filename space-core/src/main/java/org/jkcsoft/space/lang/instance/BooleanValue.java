@@ -17,9 +17,9 @@ import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
  */
 public class BooleanValue extends ScalarValue<BoolEnum> {
 
-    public static final BooleanValue UNKNOWN = new BooleanValue(NumPrimitiveTypeDefn.BOOLEAN, BoolEnum.UNKNOWN);
-    public static final BooleanValue TRUE = new BooleanValue(NumPrimitiveTypeDefn.BOOLEAN, BoolEnum.TRUE);
-    public static final BooleanValue FALSE = new BooleanValue(NumPrimitiveTypeDefn.BOOLEAN, BoolEnum.FALSE);
+    public static final BooleanValue TRUE = new BooleanValue(NumPrimitiveTypeDefn.BOOLEAN, BoolEnum.TRUE, 1);
+    public static final BooleanValue FALSE = new BooleanValue(NumPrimitiveTypeDefn.BOOLEAN, BoolEnum.FALSE, 2);
+    public static final BooleanValue UNKNOWN = new BooleanValue(NumPrimitiveTypeDefn.BOOLEAN, BoolEnum.UNKNOWN, 3);
 
     public static final BooleanValue getValue(BoolEnum boo) {
         BooleanValue retVal = UNKNOWN;
@@ -49,8 +49,15 @@ public class BooleanValue extends ScalarValue<BoolEnum> {
         return retVal;
     }
 
-    private BooleanValue(NumPrimitiveTypeDefn type, BoolEnum jValue) {
+    private int sortValue;
+
+    private BooleanValue(NumPrimitiveTypeDefn type, BoolEnum jValue, int sortValue) {
         super(type, jValue);
+        this.sortValue = sortValue;
+    }
+
+    public int getSortValue() {
+        return sortValue;
     }
 
     @Override

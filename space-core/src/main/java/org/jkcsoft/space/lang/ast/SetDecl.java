@@ -9,7 +9,10 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
+
+import java.util.Comparator;
 
 /**
  * A named set of Tuples of a certain type.  The 'name' is held via the extension of
@@ -32,6 +35,16 @@ public class SetDecl extends NamedElement implements Declaration {
     @Override
     public TypeDefn getType() {
         return ((TypeDefnImpl) tupleTypeRef.getResolvedMetaObj()).getSetOfType();
+    }
+
+    @Override
+    public boolean isAssoc() {
+        return false;
+    }
+
+    @Override
+    public Comparator<Tuple> getDatumComparator() {
+        return null;
     }
 
     @Override

@@ -9,7 +9,10 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
+
+import java.util.Comparator;
 
 /**
  * The primary {@link AssociationDefn} implementation.
@@ -21,23 +24,40 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
 
     private AssociationDefnEnd fromEnd;
     private AssociationDefnEnd toEnd;
+    private AssociationKind associationKind;
 
     AssociationDefnImpl(SourceInfo sourceInfo, String name, TypeRef fromTypeRef, TypeRef toTypeRef) {
         super(sourceInfo, name);
 
         if (fromTypeRef != null) {
-            this.fromEnd = new AssociationDefnEndImpl(sourceInfo, name, fromTypeRef, 1, 1);
+            this.fromEnd = new AssociationDefnEndImpl(sourceInfo, name, fromTypeRef, true, true, 1, 1);
             addChild(this.fromEnd);
         }
 
         if (toTypeRef == null) throw new RuntimeException("bug: path to class ref cannot be null");
-        this.toEnd = new AssociationDefnEndImpl(sourceInfo, name, toTypeRef, 1, 1);
+        setToEnd(sourceInfo, name, toTypeRef);
         addChild(this.toEnd);
+    }
+
+    private void setToEnd(SourceInfo sourceInfo, String name, TypeRef toTypeRef) {
+        this.toEnd = new AssociationDefnEndImpl(sourceInfo, name, toTypeRef, true, true, 1, 1);
+        if (toTypeRef.getState() == LinkState.RESOLVED)
+            inferAssocKind();
     }
 
     @Override
     public MetaType getMetaType() {
         return MetaType.DATUM;
+    }
+
+    @Override
+    public boolean isAssoc() {
+        return true;
+    }
+
+    @Override
+    public Comparator<Tuple> getDatumComparator() {
+        return null;
     }
 
     @Override
@@ -48,6 +68,11 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
     @Override
     public TypeDefn getType() {
         return getToType();
+    }
+
+    @Override
+    public AssociationKind getAssociationKind() {
+        return associationKind;
     }
 
     @Override
@@ -66,6 +91,14 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
     @Override
     public boolean isRecursive() {
         return fromEnd.getType() == toEnd.getType();
+    }
+
+    // called by loader after fully loaded to set
+
+    void inferAssocKind() {
+        if (!toEnd.getType().hasPrimaryKey()) {
+            associationKind = AssociationKind.DEPENDENT;
+        }
     }
 
 }

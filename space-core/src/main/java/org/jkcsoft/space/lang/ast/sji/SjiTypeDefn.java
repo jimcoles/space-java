@@ -12,6 +12,7 @@ package org.jkcsoft.space.lang.ast.sji;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
+import java.util.Comparator;
 import java.util.Set;
 
 /**
@@ -23,8 +24,8 @@ public class SjiTypeDefn extends AbstractTypeDefn implements TypeDefn {
 
     // wrapped element
     private Class jClass;
-    private KeyDefn primaryKey;
-    private Set<KeyDefn> allKeys;
+    private KeyDefnImpl primaryKey;
+    private Set<KeyDefnImpl> allKeys;
 
     SjiTypeDefn(Class jClass) {
         super(new NativeSourceInfo(jClass), jClass == null ? "(method args)" : jClass.getSimpleName());
@@ -47,17 +48,27 @@ public class SjiTypeDefn extends AbstractTypeDefn implements TypeDefn {
     }
 
     @Override
-    public KeyDefn getPrimaryKeyDefn() {
+    public KeyDefnImpl getPrimaryKeyDefn() {
         return primaryKey;
     }
 
     @Override
-    public Set<KeyDefn> getAllKeyDefns() {
+    public Set<KeyDefnImpl> getAlternateKeyDefns() {
         return allKeys;
     }
 
     @Override
+    public Comparator getTypeComparator() {
+        return null;
+    }
+
+    @Override
     public boolean isAssignableTo(TypeDefn receivingType) {
+        return false;
+    }
+
+    @Override
+    public boolean hasPrimaryKey() {
         return false;
     }
 

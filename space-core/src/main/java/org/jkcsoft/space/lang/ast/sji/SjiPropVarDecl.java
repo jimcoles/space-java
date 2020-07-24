@@ -27,11 +27,6 @@ public class SjiPropVarDecl extends SjiVarDecl implements SjiPropBased {
     }
 
     @Override
-    public NumPrimitiveTypeDefn getType() {
-        return (NumPrimitiveTypeDefn) getSjiService().getPrimitiveTypeDefn(jPropDesc.getPropertyType());
-    }
-
-    @Override
     public PropertyDescriptor getjPropDesc() {
         return jPropDesc;
     }

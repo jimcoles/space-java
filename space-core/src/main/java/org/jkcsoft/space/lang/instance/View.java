@@ -12,6 +12,7 @@ package org.jkcsoft.space.lang.instance;
 import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.ast.ViewDefn;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -21,10 +22,10 @@ import java.util.Set;
  *
  * @author Jim Coles
  */
-public class View implements Space {
+public class View {
 
     private ViewDefn viewDefn;
-    private List<Tuple> items;
+    private Collection<Tuple> items;
 
     public View(ViewDefn viewDefn) {
         this.viewDefn = viewDefn;
@@ -36,17 +37,8 @@ public class View implements Space {
         return this;
     }
 
-    public List<Tuple> getItems() {
+    public Collection<Tuple> getItems() {
         return items;
     }
 
-    @Override
-    public Set<TypeDefn> getComplexTypeDefs() {
-        return null;
-    }
-
-    @Override
-    public List<View> getViews() {
-        return null;
-    }
 }

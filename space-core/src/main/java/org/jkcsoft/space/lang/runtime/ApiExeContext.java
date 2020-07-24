@@ -9,10 +9,7 @@
  */
 package org.jkcsoft.space.lang.runtime;
 
-import org.jkcsoft.space.lang.ast.AstFactory;
-import org.jkcsoft.space.lang.ast.NSRegistry;
-import org.jkcsoft.space.lang.ast.SetTypeDefn;
-import org.jkcsoft.space.lang.ast.TypeDefn;
+import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.ast.sji.SjiService;
 import org.jkcsoft.space.lang.instance.*;
 
@@ -42,4 +39,12 @@ public interface ApiExeContext {
     TupleSetImpl newSet(SetTypeDefn setTypeDefn);
 
     CharacterSequence newCharacterSequence(String stringValue);
+
+    Space getDefaultSpace();
+
+    Space newSpace();
+
+    void apiAstLoadComplete();
+
+    SpaceObject getRef(Tuple tuple, Declaration declaration);
 }

@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import java.util.Comparator;
+
 /**
  * @author Jim Coles
  */
@@ -27,5 +29,10 @@ public class VoidType extends PrimitiveTypeDefn {
     @Override
     public boolean isAssignableTo(TypeDefn receivingType) {
         return false;
+    }
+
+    @Override
+    public Comparator getTypeComparator() {
+        return null;
     }
 }

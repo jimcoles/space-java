@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2020 through present.
  *
  * Licensed under the following license agreement:
  *
@@ -10,12 +10,9 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * The abstract notion of a Space as a "set of datums with some structure".
- *
  * @author Jim Coles
- * @version 1.0
  */
-public @interface Space {
+public interface AstEventListener<T extends AstEvent> {
 
-
+    void handle(T event);
 }

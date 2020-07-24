@@ -7,19 +7,25 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.tests;
+package org.jkcsoft.space.tests.integration;
 
 import org.apache.commons.io.FileUtils;
+import org.jkcsoft.space.lang.runtime.Executor;
+import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jkcsoft.space.lang.runtime.Executor;
 
 import java.io.File;
 import java.util.List;
 
-public class TestSourceStub {
+public class IntegrationTestBase {
 
     private static final Logger log = LoggerFactory.getLogger("ROOT");
+
+    @BeforeClass
+    public void prepTest() {
+
+    }
 
     private Executor getExecutor(String spaceSourcePath) {
         Executor exec = null;

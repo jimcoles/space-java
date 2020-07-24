@@ -37,13 +37,13 @@ public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implem
     }
 
     @Override
-    public KeyDefn getPrimaryKeyDefn() {
+    public KeyDefnImpl getPrimaryKeyDefn() {
         return containedElementType.getPrimaryKeyDefn();
     }
 
     @Override
-    public Set<KeyDefn> getAllKeyDefns() {
-        return containedElementType.getAllKeyDefns();
+    public Set<KeyDefnImpl> getAlternateKeyDefns() {
+        return containedElementType.getAlternateKeyDefns();
     }
 
     @Override
@@ -108,11 +108,6 @@ public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implem
     /** True if this set hold references to objects; false if it hold values of primitives */
     public boolean isReferenceType() {
         return containedElementType instanceof TypeDefnImpl;
-    }
-
-    @Override
-    public List<String> getFullNamePath() {
-        return null;
     }
 
     @Override

@@ -13,7 +13,7 @@ import org.jkcsoft.space.lang.ast.*;
 
 /**
  * {@link SpaceObject}s are either {@link Tuple}s, Sets, Sequences, or Streams.
- * In addition, primitive and {@link org.jkcsoft.space.lang.ast.SimpleType} values
+ * In addition, primitive values
  * can be boxed in an object wrapper. All objects have internal identifiers ({@link SpaceOid}s)
  * to support operations such as '=='.
  *

@@ -111,7 +111,7 @@ public class SjiService {
     {
         TypeDefn wrapper = null;
         SjiTypeMapping sjiTypeMapping = sjiMappingByName.get(className);
-        if (sjiTypeMapping == null) {
+        if (sjiTypeMapping == null || sjiTypeMapping.getState() == LinkState.INITIALIZED) {
             Class<?> jnClass = Class.forName(className);
             wrapper = getSjiTypeProxyDeepLoad(jnClass, overrideDirNames);
         }
@@ -155,7 +155,7 @@ public class SjiService {
         // Build wrappers for this class and any required classes
         //
         ParseUnit newParseUnit = buildShallowSjiTypeProxy(sjiTypeMapping.getJavaClass());
-        sjiTypeMapping.setSjiProxy(newParseUnit.getTypeDefns().get(0));
+        sjiTypeMapping.setSjiProxy((SjiTypeDefn) newParseUnit.getTypeDefns().get(0)); // assumes 1-and-only-1 top-level
         sjiTypeMapping.setState(LinkState.RESOLVED);
         //
         parentDir.addParseUnit(newParseUnit);
@@ -163,14 +163,13 @@ public class SjiService {
 //        nsRegistry.trackMetaObject(sjiTypeDefn);
 
         // load dependencies ...
-        Set<SjiTypeRefByClass> unresolvedRefs = AstUtils.queryAst(newParseUnit,
-                                                                  new Executor.QueryAstConsumer<>(
-                                                                      SjiTypeRefByClass.class,
-                                                                      modelElement ->
-                                                                          modelElement instanceof SjiTypeRefByClass &&
-                                                                              ((SjiTypeRefByClass) modelElement)
-                                                                                  .getState() !=
-                                                                                  LinkState.RESOLVED)
+        Set<SjiTypeRefByClass> unresolvedRefs = AstUtils.queryAst(
+            newParseUnit,
+            new Executor.QueryAstConsumer<>(
+                SjiTypeRefByClass.class,
+                modelElement ->
+                    modelElement != null &&
+                        modelElement.getState() != LinkState.RESOLVED)
         );
         for (SjiTypeRefByClass unresolvedRef : unresolvedRefs) {
             if (unresolvedRef.getState() == LinkState.INITIALIZED) {
@@ -189,14 +188,14 @@ public class SjiService {
         log.debug("created Space wrapper mapping: " + sjiTypeMapping);
     }
 
-    public PrimitiveTypeDefn getPrimitiveTypeDefn(Class jnClass) {
-        SjiTypeMapping sjiTypeMapping = getOrCreateSjiTypeMapping(jnClass);
-        if (sjiTypeMapping == null)
-            throw new IllegalStateException("A Space type could not be created for Java type [" + jnClass + "]");
-        if (!sjiTypeMapping.isPrimitive())
-            throw new IllegalArgumentException("Java class [" + jnClass + "] does not map to a Space primitive type");
-        return (PrimitiveTypeDefn) sjiTypeMapping.getSjiProxy();
-    }
+//    public PrimitiveTypeDefn getPrimitiveTypeDefn(Class jnClass) {
+//        SjiTypeMapping sjiTypeMapping = getOrCreateSjiTypeMapping(jnClass);
+//        if (sjiTypeMapping == null)
+//            throw new IllegalStateException("A Space type could not be created for Java type [" + jnClass + "]");
+//        if (!sjiTypeMapping.isPrimitive())
+//            throw new IllegalArgumentException("Java class [" + jnClass + "] does not map to a Space primitive type");
+//        return (PrimitiveTypeDefn) sjiTypeMapping.getSjiProxy();
+//    }
 
     SjiTypeMapping getOrCreateSjiTypeMapping(Class jnClass) {
         SjiTypeMapping sjiTypeMapping = sjiMappingByClass.get(jnClass);
@@ -263,7 +262,7 @@ public class SjiService {
                     );
                 }
                 else {
-                    argTupleTypeDefn.addVariableDecl(newVariableDecl(jParam, argTupleTypeDefn));
+                    argTupleTypeDefn.addVariableDecl(newVariableDecl(jParam, sjiParamTypeMapping.getSjiProxy()));
                 }
             }
 
@@ -286,8 +285,8 @@ public class SjiService {
         return astFactory;
     }
 
-    private SjiVarDecl newVariableDecl(Parameter jParam, SjiTypeDefn sjiTypeDefn) {
-        return new SjiParamVarDecl(this, jParam, sjiTypeDefn);
+    private SjiVarDecl newVariableDecl(Parameter jParam, SjiTypeDefn sjiFromTypeDefn) {
+        return new SjiParamVarDecl(this, jParam, sjiFromTypeDefn);
     }
 
     //    private SjiAssocDecl newAssociationDecl(Parameter jParam, SjiTypeMapping sjiTypeMapping) {
@@ -320,6 +319,10 @@ public class SjiService {
 
         Class<?> containedJavaClass = javaColl.iterator().next().getClass();
         SjiTypeDefn sjiContainedTypeDefn = (SjiTypeDefn) getSjiTypeProxyDeepLoad(containedJavaClass, null);
+
+        // link and validate new AST elements as needed
+        apiExec.apiAstLoadComplete();
+        //
         TupleSetImpl tupleSet = spaceObjFactory.newSet(sjiContainedTypeDefn.getSetOfType());
 
         for (Object javaObj : javaColl) {

@@ -41,6 +41,10 @@ public interface Space {
 
     List<View> getViews();
 
+    void insert(Tuple tuple);
+
+    void update(Tuple tuple);
+
 //    SpaceObject dereference(SpaceOid referenceOid) throws SpaceX;
 //
 //    void trackObject(SpaceObject spaceObject);

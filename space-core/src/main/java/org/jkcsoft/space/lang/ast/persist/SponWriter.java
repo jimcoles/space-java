@@ -27,5 +27,6 @@ public class SponWriter {
 
     public void writeSpon(ReferenceValue indexRef) {
         List<View> allIndices = space.getViews();
+
     }
 }

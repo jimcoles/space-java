@@ -9,8 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.ast.algebra.rel.Project;
-
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -41,15 +40,17 @@ public interface TypeDefn extends Named {
 
     boolean isAssignableTo(TypeDefn argsType);
 
-    //
 
+    //
     boolean hasDatums();
 
     int getScalarDofs();
 
-    KeyDefn getPrimaryKeyDefn();
+    boolean hasPrimaryKey();
 
-    Set<KeyDefn> getAllKeyDefns();
+    KeyDefnImpl getPrimaryKeyDefn();
+
+    Set<KeyDefnImpl> getAlternateKeyDefns();
 
     SequenceTypeDefn getSequenceOfType();
 
@@ -61,6 +62,8 @@ public interface TypeDefn extends Named {
 
     ProjectionDecl addProjectionDecl(ProjectionDecl projectionDecl);
 
+    List<ProjectionDecl> getProjectionDecls();
+
     List<VariableDecl> getVariables();
 
     List<Declaration> getDatumDecls();
@@ -69,4 +72,5 @@ public interface TypeDefn extends Named {
 
     FunctionDefn addFunctionDefn(FunctionDefn functionDefn);
 
+    Comparator getTypeComparator();
 }

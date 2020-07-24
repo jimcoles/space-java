@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import java.util.Comparator;
+
 /**
  * A sequenced collection of objects.
  *
@@ -45,5 +47,16 @@ public class SequenceTypeDefn extends AbstractCollectionTypeDefn {
     @Override
     public boolean isStreamType() {
         return false;
+    }
+
+    /** A sequence can be its own primary key as is the case for character sequences. */
+    @Override
+    public boolean hasPrimaryKey() {
+        return false;
+    }
+
+    @Override
+    public Comparator getTypeComparator() {
+        return null;
     }
 }

@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
@@ -45,6 +46,11 @@ public class RuleImpl extends NamedElement implements Rule {
     @Override
     public boolean isEquality() {
         return false;
+    }
+
+    @Override
+    public Space getScopeSpace() {
+        return null;
     }
 
     @Override

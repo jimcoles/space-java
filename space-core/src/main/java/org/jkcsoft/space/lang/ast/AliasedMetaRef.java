@@ -16,20 +16,24 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  *
  * @author Jim Coles
  */
-public class AliasedMetaRef extends NamedElement {
+public class AliasedMetaRef<T extends Named> extends NamedElement {
 
-    private ExpressionChain typeOrAssocRef;
+    private final ExpressionChain<T> metaRefExpr;
 
-    protected AliasedMetaRef(SourceInfo sourceInfo, String name) {
+    /** The 'alias' is the 'name' of the {@link NamedElement} parent. */
+    protected AliasedMetaRef(SourceInfo sourceInfo, String name, ExpressionChain<T> metaRefExpr) {
         super(sourceInfo, name);
+        this.metaRefExpr = metaRefExpr;
+        //
+        addChild(metaRefExpr);
     }
 
     @Override
     public MetaType getMetaType() {
-        return null;
+        return metaRefExpr.getTargetMetaType();
     }
 
-    public ExpressionChain getTypeOrAssocRef() {
-        return typeOrAssocRef;
+    public ExpressionChain<T> getMetaRefExpr() {
+        return metaRefExpr;
     }
 }

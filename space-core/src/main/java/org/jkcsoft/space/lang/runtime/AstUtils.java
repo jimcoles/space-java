@@ -10,9 +10,11 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.comparators.ComparatorChain;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.instance.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -277,7 +279,8 @@ public class AstUtils {
 //        resolveIntrinsics(((NameRefExpr) refChain.getFirstPart()));
         NamedElement lookup = null;
         LinkSource currentlhsLink = refChain.getFirstPart();
-        for (NameRefOrHolder rhsLink : refChain.getRestLinks()) {
+        List<NameRefOrHolder> restLinks = refChain.getRestLinks();
+        for (NameRefOrHolder rhsLink : restLinks) {
             String keyOrName = rhsLink.getNameRef().getRefAsNameRef().getKeyOrName();
             if (currentlhsLink.hasNameRef()) {
                 Named lhsContainer = currentlhsLink.getNameRef().getRefAsNameRef().getResolvedMetaObj();
@@ -622,6 +625,22 @@ public class AstUtils {
         return larger;
     }
 
+    public static Comparator<Tuple> buildComparator(KeyDefnImpl keyDefn) {
+        Comparator<Tuple> comp = null;
+        keyDefn.getProjectionDecls().forEach(
+            proj -> {
+                comp.thenComparing(proj.getDatumComparator());
+            }
+        );
+        return comp;
+    }
+
+    public static Comparator<Tuple> buildDatumComparator(Declaration datumDecl) {
+        return (tuple1, tuple2) -> datumDecl.getType().getTypeComparator().compare(
+            tuple1.get(datumDecl).getValue(),
+            tuple2.get(datumDecl).getValue());
+    }
+
     private static class PrintFullAstConsumer implements AstScanConsumer {
 
         private final StringBuilder sb = new StringBuilder();
@@ -895,5 +914,4 @@ public class AstUtils {
         }
 
     }
-
 }

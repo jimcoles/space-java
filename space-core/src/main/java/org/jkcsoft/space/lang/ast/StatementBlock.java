@@ -9,8 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -59,12 +58,22 @@ public class StatementBlock extends AbstractTypeDefn implements Statement, TypeD
     }
 
     @Override
-    public KeyDefn getPrimaryKeyDefn() {
+    public boolean hasPrimaryKey() {
+        return false;
+    }
+
+    @Override
+    public KeyDefnImpl getPrimaryKeyDefn() {
         return null;
     }
 
     @Override
-    public Set<KeyDefn> getAllKeyDefns() {
+    public Set<KeyDefnImpl> getAlternateKeyDefns() {
+        return null;
+    }
+
+    @Override
+    public Comparator getTypeComparator() {
         return null;
     }
 }

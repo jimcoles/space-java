@@ -36,12 +36,6 @@ public class SjiFieldAssocDecl extends SjiAssocDecl implements SjiFieldBased {
     }
 
     @Override
-    public TypeDefn getType() {
-        return (NumPrimitiveTypeDefn)
-            getSjiService().getOrCreateSjiTypeMapping(jField.getType()).getSjiProxy();
-    }
-
-    @Override
     public Field getjField() {
         return jField;
     }

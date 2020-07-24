@@ -157,6 +157,10 @@ public class AstFactory {
         return new FullTypeRefImpl(sourceInfo, typeDefn);
     }
 
+    public AliasedMetaRef newMetaRefChain(SourceInfo sourceInfo, String name, Declaration datumDecl) {
+        return new AliasedMetaRef(sourceInfo, name, new ExpressionChain(sourceInfo, datumDecl));
+    }
+
     public ParseUnit newParseUnit(SourceInfo sourceInfo) {
         return new ParseUnit(sourceInfo);
     }
@@ -199,5 +203,20 @@ public class AstFactory {
 
     public VariableDecl newVariableDecl(String varName, TypeDefn simpleTypeDefn) {
         return newVariableDecl(SourceInfo.API, varName, newTypeRef(SourceInfo.API, simpleTypeDefn));
+    }
+
+    public KeyDefnImpl newKeyDefn(TypeDefn basisType, ProjectionDecl ... vars) {
+        return new KeyDefnImpl(SourceInfo.API, newNamePart(SourceInfo.API, "primaryKey"), basisType, vars);
+    }
+
+    /** API method */
+    public ProjectionDecl newProjectionDecl(String name, Declaration ... datumDecls) {
+        AliasedMetaRef varExprs[] = new AliasedMetaRef[datumDecls.length];
+        int idx = 0;
+        for (Declaration datumDecl : datumDecls) {
+            varExprs[idx] = newMetaRefChain(SourceInfo.API, null, datumDecl);
+            idx++;
+        }
+        return new ProjectionDeclImpl(SourceInfo.API, name, varExprs);
     }
 }

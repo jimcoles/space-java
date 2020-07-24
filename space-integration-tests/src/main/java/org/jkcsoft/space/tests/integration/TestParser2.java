@@ -7,14 +7,14 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.tests;
+package org.jkcsoft.space.tests.integration;
 
 import org.junit.Test;
 
 /**
  * @author Jim Coles
  */
-public class TestParser2 extends TestSourceStub {
+public class TestParser2 extends IntegrationTestBase {
 
     @Test
     public void testParser() {

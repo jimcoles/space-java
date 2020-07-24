@@ -22,7 +22,7 @@ public interface MetaRef<T extends Named> extends ModelElement {
 
     boolean isResolved();
 
-    Named getResolvedMetaObj();
+    T getResolvedMetaObj();
 
     void setResolvedMetaObj(T resolvedMetaObj);
 

@@ -16,15 +16,19 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class AssociationDefnEndImpl extends NamedElement implements AssociationDefnEnd {
 
-    private int lowerMultiplicity;
-    private int upperMultiplicity;
-    private TypeRef endTypeRef;
+    private final int lowerMultiplicity;
+    private final int upperMultiplicity;
+    private final TypeRef endTypeRef;
+    private final boolean isRequired;
+    private final boolean isSingular;
 
-    AssociationDefnEndImpl(SourceInfo sourceInfo, String name, TypeRef endTypeRef, int lowerMultiplicity,
-                           int upperMultiplicity)
+    AssociationDefnEndImpl(SourceInfo sourceInfo, String name, TypeRef endTypeRef, boolean isRequired,
+                           boolean isSingular, int lowerMultiplicity, int upperMultiplicity)
     {
         super(sourceInfo, name);
         this.endTypeRef = endTypeRef;
+        this.isRequired = isRequired;
+        this.isSingular = isSingular;
         this.lowerMultiplicity = lowerMultiplicity;
         this.upperMultiplicity = upperMultiplicity;
     }
@@ -36,8 +40,9 @@ public class AssociationDefnEndImpl extends NamedElement implements AssociationD
 
     @Override
     public TypeDefn getType() {
-        return ((TypeDefn) endTypeRef.getResolvedType());
+        return endTypeRef.getResolvedType();
     }
+
 
     @Override
     public int getLowerMultiplicity() {
@@ -47,6 +52,16 @@ public class AssociationDefnEndImpl extends NamedElement implements AssociationD
     @Override
     public int getUpperMultiplicity() {
         return upperMultiplicity;
+    }
+
+    @Override
+    public boolean isSingular() {
+        return isSingular;
+    }
+
+    @Override
+    public boolean isRequired() {
+        return isRequired;
     }
 
     public TypeRef getEndTypeRef() {

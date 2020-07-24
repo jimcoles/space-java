@@ -61,6 +61,11 @@ public class SpmExecutor extends ExprProcessor implements ExeContext, ApiExeCont
     private static final Logger log = LoggerFactory.getLogger(SpmExecutor.class);
 
     @Override
+    public ObjectFactory getObjFactory() {
+        return null;
+    }
+
+    @Override
     public void trackInstanceObject(SpaceObject spaceObject) {
 
     }
@@ -87,6 +92,41 @@ public class SpmExecutor extends ExprProcessor implements ExeContext, ApiExeCont
 
     @Override
     public String print(TupleSet tupleSet) {
+        return null;
+    }
+
+    @Override
+    public TupleImpl newTupleImpl(TypeDefn defn) {
+        return null;
+    }
+
+    @Override
+    public TupleSetImpl newSet(SetTypeDefn setTypeDefn) {
+        return null;
+    }
+
+    @Override
+    public CharacterSequence newCharacterSequence(String stringValue) {
+        return null;
+    }
+
+    @Override
+    public Space getDefaultSpace() {
+        return null;
+    }
+
+    @Override
+    public Space newSpace() {
+        return null;
+    }
+
+    @Override
+    public void apiAstLoadComplete() {
+
+    }
+
+    @Override
+    public SpaceObject getRef(Tuple tuple, Declaration declaration) {
         return null;
     }
 }

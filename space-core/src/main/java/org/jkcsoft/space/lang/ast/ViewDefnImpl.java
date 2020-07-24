@@ -9,8 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
 import java.util.Set;
 
 /**
@@ -19,29 +17,46 @@ import java.util.Set;
  * @author Jim Coles
  * @version 1.0
  */
-public class ViewDefnImpl extends AbstractTypeDefn implements ViewDefn {
+public class ViewDefnImpl extends TypeDefnImpl implements ViewDefn {
 
     //    private Space parentSpace;
-    private ProjectionDecl variablesExpr;
     // nestable boolean-valued expression
+    private TypeDefn basisType;
     private Rule selector;
 
-    public ViewDefnImpl(SourceInfo sourceInfo) {
-        super(sourceInfo, null);
-    }
-
-    public ViewDefnImpl(SourceInfo sourceInfo, String name) {
-        super(sourceInfo, name);
+    ViewDefnImpl(SourceInfo sourceInfo, NamePart namePart, TypeDefn basisType) {
+        super(sourceInfo, namePart, true);
+        this.basisType = basisType;
     }
 
     @Override
-    public MetaType getMetaType() {
-        return MetaType.RULE;
+    public boolean isSimpleIndexDefn() {
+        return false;
     }
 
     @Override
-    public ProjectionDecl getVariableProjection() {
-        return variablesExpr;
+    public boolean isTreeIndexDefn() {
+        return false;
+    }
+
+    @Override
+    public boolean isIndexDefn() {
+        return false;
+    }
+
+    @Override
+    public boolean isKeyDefn() {
+        return false;
+    }
+
+    @Override
+    public boolean isTreeViewDefn() {
+        return false;
+    }
+
+    @Override
+    public boolean isTableViewDefn() {
+        return false;
     }
 
     @Override
@@ -50,12 +65,22 @@ public class ViewDefnImpl extends AbstractTypeDefn implements ViewDefn {
     }
 
     @Override
-    public KeyDefn getPrimaryKeyDefn() {
+    public TypeDefn getBasisType() {
+        return basisType;
+    }
+
+    @Override
+    public boolean hasPrimaryKey() {
+        return basisType.hasPrimaryKey();
+    }
+
+    @Override
+    public KeyDefnImpl getPrimaryKeyDefn() {
         return null;
     }
 
     @Override
-    public Set<KeyDefn> getAllKeyDefns() {
+    public Set<KeyDefnImpl> getAlternateKeyDefns() {
         return null;
     }
 }

@@ -7,14 +7,14 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.test;
+package org.jkcsoft.space.test.core;
 
-import org.jkcsoft.space.lang.ast.AstFactory;
-import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
-import org.jkcsoft.space.lang.ast.TypeDefnImpl;
+import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.ast.sji.SjiService;
+import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.instance.TupleImpl;
 import org.jkcsoft.space.lang.instance.TupleSet;
+import org.jkcsoft.space.lang.instance.TupleSetImpl;
 import org.jkcsoft.space.lang.runtime.ApiExeContext;
 import org.jkcsoft.space.lang.runtime.Executor;
 import org.junit.Test;
@@ -28,31 +28,55 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public class TestTupleSet {
+public class TestTupleSet extends TestSourceStub {
 
     Logger log = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
     @Test
     public void testTupleSetApi() {
-        ApiExeContext exec = Executor.defaultInstance();
+        ApiExeContext exec = getNewApiExec();
         AstFactory ast = exec.getAstFactory();
+        // 1. Build AST model via API
         TypeDefnImpl personType =
             ast.newTypeDefn("Person");
-        personType.addAssociationDecl(ast.newAssociationDecl("firstName", Executor.CHAR_SEQ_TYPE_DEF));
-        personType.addVariableDecl(ast.newVariableDecl("userId", NumPrimitiveTypeDefn.CARD));
-        //
+        VariableDecl userId = personType.addVariableDecl(ast.newVariableDecl("userId", NumPrimitiveTypeDefn.CARD));
+        AssociationDefn firstName =
+            personType.addAssociationDecl(ast.newAssociationDecl("firstName", Executor.CHAR_SEQ_TYPE_DEF));
+        AssociationDefn lastName =
+            personType.addAssociationDecl(ast.newAssociationDecl("lastName", Executor.CHAR_SEQ_TYPE_DEF));
+
+        // declare keys
+        personType.setPrimaryKey(ast.newKeyDefn(personType, ast.newProjectionDecl("UserPK", userId)));
+        personType.addAlternateKey(ast.newKeyDefn(personType, ast.newProjectionDecl("NameAK", lastName, firstName)));
+        // lets executor know you're done modifying the AST so it can do some figuring
+        exec.apiAstLoadComplete();
+
+        // 2. Create user objects via API
         TupleImpl tuple = exec.newTupleImpl(personType);
-        tuple.setValue(0, exec.getObjFactory().newCardinalValue(1L));
+        // set by datum object
+        tuple.setValue(userId, exec.getObjFactory().newCardinalValue(1L));
+        // set by ordinal
         tuple.setValue(1, exec.newCharacterSequence("Jim"));
+        tuple.setValue(2, exec.newCharacterSequence("Coles"));
+
+        Space mySpace = exec.getDefaultSpace();
+        mySpace.insert(tuple);
+
+        TupleSetImpl tupleSet = exec.newSet(personType.getSetOfType());
+        tupleSet.addTuple(tuple);
+
+        log.info("API tuple set => {}", exec.print(tupleSet));
+
     }
 
     /**
      * Build Space set of tuples from Java collection.
      */
     @Test
-    public void testJavaTupleSetBuild() {
-//        List
-        ApiExeContext exec = Executor.defaultInstance();
+    public void testTupleSetSji() {
+        //
+        ApiExeContext exec = getNewApiExec();
+        //
         SjiService sji = exec.getSjiService();
 //        DatumType sjiGcProxy = sji.getSjiTypeProxyDeepLoad(GregorianCalendar.class, null);
         Calendar bdCal = GregorianCalendar.getInstance();

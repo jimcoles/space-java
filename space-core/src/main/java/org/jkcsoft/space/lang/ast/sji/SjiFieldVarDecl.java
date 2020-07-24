@@ -22,6 +22,7 @@ public class SjiFieldVarDecl extends SjiVarDecl implements SjiFieldBased {
 
     // OR direct field access ...
     private Field jField;
+    private NumPrimitiveTypeDefn spaceType;
 
     SjiFieldVarDecl(SjiService sjiService, SjiTypeDefn sjiTypeDefn, Field jField) {
         super(sjiService, new NativeSourceInfo(jField), sjiTypeDefn, jField.getName());
@@ -30,12 +31,6 @@ public class SjiFieldVarDecl extends SjiVarDecl implements SjiFieldBased {
 
     public boolean isProperty() {
         return false;
-    }
-
-    @Override
-    public NumPrimitiveTypeDefn getType() {
-        return (NumPrimitiveTypeDefn)
-            getSjiService().getOrCreateSjiTypeMapping(jField.getType()).getSjiProxy();
     }
 
     public Field getjField() {

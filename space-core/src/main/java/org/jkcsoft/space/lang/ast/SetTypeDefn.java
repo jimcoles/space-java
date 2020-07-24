@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import java.util.Comparator;
+
 /**
  * Just a wrapper around the {@link TypeDefnImpl} associated with this set's contents,
  * but distinguishes 'set of type' versus just 'type' for type checking and execution
@@ -42,5 +44,15 @@ public class SetTypeDefn extends AbstractCollectionTypeDefn {
     @Override
     public boolean isStreamType() {
         return false;
+    }
+
+    @Override
+    public boolean hasPrimaryKey() {
+        return false;
+    }
+
+    @Override
+    public Comparator getTypeComparator() {
+        return null;
     }
 }
