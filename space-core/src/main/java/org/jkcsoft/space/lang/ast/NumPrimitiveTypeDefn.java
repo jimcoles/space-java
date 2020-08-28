@@ -92,12 +92,12 @@ public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
     }
 
     @Override
-    public List<VariableDecl> getVariables() {
+    public List<VariableDecl> getVariablesDeclList() {
         return null;
     }
 
     @Override
-    public List<Declaration> getDatumDecls() {
+    public List<Declaration> getDatumDeclList() {
         return null;
     }
 

@@ -74,8 +74,10 @@ public class AstFactory {
         return element;
     }
 
-    public AssociationDefnImpl newAssociationDecl(SourceInfo sourceInfo, String name, TypeRef toTypeRef) {
-        AssociationDefnImpl element = new AssociationDefnImpl(sourceInfo, name, null, toTypeRef);
+    public AssociationDefnImpl newAssociationDecl(SourceInfo sourceInfo, String name, TypeRef fromTypeRef,
+                                                  TypeRef toTypeRef)
+    {
+        AssociationDefnImpl element = new AssociationDefnImpl(sourceInfo, name, fromTypeRef, toTypeRef);
         return element;
     }
 
@@ -197,8 +199,10 @@ public class AstFactory {
         return newTypeDefn(SourceInfo.API, newNamePart(SourceInfo.API, typeName));
     }
 
-    public AssociationDefn newAssociationDecl(String assocName, TypeDefn compoundTypeDef) {
-        return newAssociationDecl(SourceInfo.API, assocName, newTypeRef(SourceInfo.API, compoundTypeDef));
+    public AssociationDefn newAssociationDecl(String assocName, TypeDefn fromTypeDef, TypeDefn toTypeDef) {
+        return newAssociationDecl(SourceInfo.API, assocName,
+                                  newTypeRef(SourceInfo.API, fromTypeDef),
+                                  newTypeRef(SourceInfo.API, toTypeDef));
     }
 
     public VariableDecl newVariableDecl(String varName, TypeDefn simpleTypeDefn) {

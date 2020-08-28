@@ -31,18 +31,20 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
 
         if (fromTypeRef != null) {
             this.fromEnd = new AssociationDefnEndImpl(sourceInfo, name, fromTypeRef, true, true, 1, 1);
-            addChild(this.fromEnd);
         }
 
         if (toTypeRef == null) throw new RuntimeException("bug: path to class ref cannot be null");
         setToEnd(sourceInfo, name, toTypeRef);
+
+        // child adders
+        if (this.fromEnd != null) {
+            addChild(this.fromEnd);
+        }
         addChild(this.toEnd);
     }
 
     private void setToEnd(SourceInfo sourceInfo, String name, TypeRef toTypeRef) {
         this.toEnd = new AssociationDefnEndImpl(sourceInfo, name, toTypeRef, true, true, 1, 1);
-        if (toTypeRef.getState() == LinkState.RESOLVED)
-            inferAssocKind();
     }
 
     @Override
@@ -71,6 +73,12 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
     }
 
     @Override
+    public AssociationDefn setAssociationKind(AssociationKind associationKind) {
+        this.associationKind = associationKind;
+        return this;
+    }
+
+    @Override
     public AssociationKind getAssociationKind() {
         return associationKind;
     }
@@ -95,10 +103,5 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
 
     // called by loader after fully loaded to set
 
-    void inferAssocKind() {
-        if (!toEnd.getType().hasPrimaryKey()) {
-            associationKind = AssociationKind.DEPENDENT;
-        }
-    }
 
 }

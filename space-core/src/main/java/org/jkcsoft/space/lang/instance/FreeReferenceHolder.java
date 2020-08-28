@@ -11,6 +11,7 @@ package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.Declaration;
 import org.jkcsoft.space.lang.ast.TypeDefn;
+import org.jkcsoft.space.lang.runtime.SpaceX;
 
 /**
  * This is a general link from one object to another used by collection types.
@@ -42,7 +43,9 @@ public class FreeReferenceHolder<J> implements ReferenceValueHolder<ReferenceVal
 
     @Override
     public void setValue(ReferenceValue<J> value) {
-        referenceValue = value;
+        if (! (value instanceof ReferenceValue))
+            throw new SpaceX("");
+        referenceValue = ((ReferenceValue<J>) value);
     }
 
     @Override

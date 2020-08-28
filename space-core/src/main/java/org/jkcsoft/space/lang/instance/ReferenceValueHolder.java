@@ -15,7 +15,7 @@ package org.jkcsoft.space.lang.instance;
  *
  * @param <V> The type of the value being held. In this case must be a sub-class
  *          of {@link ReferenceValue}.
- * @param <J> The type of the raw Java value, e.g., IntAlgOper, SpaceOid.
+ * @param <J> The Java type of the raw Java value, e.g., SpaceOid.
  * @author Jim Coles
  */
 public interface ReferenceValueHolder<V extends ReferenceValue<J>, J> extends ValueHolder<V, J> {

@@ -32,6 +32,10 @@ public interface SpaceObject {
     /** */
     SpaceOid getOid();
 
+    boolean isCollective();
+
+    boolean isTuple();
+
     /**
      * Every object can hold some kind of value which may be a reference to another object.
      * the nature of valid objects is controlled by the {@link TypeDefn} of this object.

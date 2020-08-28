@@ -126,7 +126,7 @@ public class InMemorySpaceImpl extends AbstractSpaceObject implements Space {
 
     private Tuple extractKeyTuple(Tuple tuple, KeyDefnImpl keyDefn) {
         Tuple keyTuple = getObjectFactory().newTupleImpl(keyDefn);
-        keyTuple.getDefn().getVariables().forEach( (varDecl) ->
+        keyTuple.getDefn().getVariablesDeclList().forEach((varDecl) ->
             keyTuple.setValue(varDecl, tuple.get(varDecl).getValue())
         );
         return keyTuple;
@@ -159,6 +159,16 @@ public class InMemorySpaceImpl extends AbstractSpaceObject implements Space {
     @Override
     public String toString() {
         return "In Memory Space ";
+    }
+
+    @Override
+    public boolean isCollective() {
+        return false;
+    }
+
+    @Override
+    public boolean isTuple() {
+        return false;
     }
 
     //    private Tuple binaryKey(SpaceOid oidOne, SpaceOid oidTwo) {

@@ -184,7 +184,8 @@ public class Antlr2AstTransform {
         if (assocDefCtxts != null && !assocDefCtxts.isEmpty()) {
             for (SpaceParser.AssociationDefnStmtContext assocDefCtx : assocDefCtxts) {
                 // Add declarative element
-                typeDefn.addAssociationDecl(toAst(assocDefCtx.associationDefn()));
+                typeDefn.addAssociationDecl(toAst( astFactory.newTypeRef(toSI(assocDefCtx), typeDefn),
+                                                   assocDefCtx.associationDefn()));
                 // Add assignment expr if it exists
                 extractInit(typeDefn.getInitBlock(), assocDefCtx);
             }
@@ -242,12 +243,14 @@ public class Antlr2AstTransform {
         return assignmentExprAST;
     }
 
-    private AssociationDefnImpl toAst(SpaceParser.AssociationDefnContext assocDefCtx) {
+    private AssociationDefnImpl toAst(TypeRef fromTypeRef,
+                                      SpaceParser.AssociationDefnContext assocDefCtx) {
         logTrans(assocDefCtx);
         SpaceParser.ComplexOptCollTypeRefContext complexTypeRefContext = assocDefCtx.associationDecl().complexOptCollTypeRef();
         return astFactory.newAssociationDecl(
             toSI(assocDefCtx),
             toText(assocDefCtx.associationDecl().identifier()),
+            fromTypeRef,
             toAst(complexTypeRefContext)
         );
     }
@@ -326,7 +329,11 @@ public class Antlr2AstTransform {
             }
             else if (datumDefnStmtContext.associationDefnStmt() != null) {
                 functionDefnAST.getStatementBlock().addAssociationDecl(
-                    toAst(datumDefnStmtContext.associationDefnStmt().associationDefn()));
+                    toAst(
+                        astFactory.newTypeRef(SourceInfo.INTRINSIC, functionDefnAST.getStatementBlock()),
+                        datumDefnStmtContext.associationDefnStmt().associationDefn()
+                    )
+                );
             }
         }
 
@@ -392,17 +399,18 @@ public class Antlr2AstTransform {
             if (parameterDeclContext.variableDecl() != null)
                 typeDefn.addVariableDecl(toAst(parameterDeclContext.variableDecl()));
             else if (parameterDeclContext.associationDecl() != null) {
-                typeDefn.addAssociationDecl(toAst(parameterDeclContext.associationDecl()));
+                typeDefn.addAssociationDecl(toAst(null, parameterDeclContext.associationDecl()));
             }
         }
         return typeDefn;
     }
 
-    private AssociationDefnImpl toAst(SpaceParser.AssociationDeclContext assocDeclCtxt) {
+    private AssociationDefnImpl toAst(TypeRef fromTypeRef, SpaceParser.AssociationDeclContext assocDeclCtxt) {
         logTrans(assocDeclCtxt);
         return astFactory.newAssociationDecl(
             toSI(assocDeclCtxt),
             toText(assocDeclCtxt.identifier()),
+            fromTypeRef,
             toAst(assocDeclCtxt.complexOptCollTypeRef())
         );
     }
@@ -419,10 +427,17 @@ public class Antlr2AstTransform {
                 statementBlockAST.addVariableDecl(toAst(datumDefnStmtContext.variableDefnStmt().variableDefn()));
                 extractInit(statementBlockAST, datumDefnStmtContext.variableDefnStmt());
             }
-            else if (datumDefnStmtContext.associationDefnStmt() != null) {
-                statementBlockAST
-                    .addAssociationDecl(toAst(datumDefnStmtContext.associationDefnStmt().associationDefn()));
-                extractInit(statementBlockAST, datumDefnStmtContext.associationDefnStmt());
+            else {
+                SpaceParser.AssociationDefnStmtContext associationDefnStmtContext =
+                    datumDefnStmtContext.associationDefnStmt();
+                if (associationDefnStmtContext != null) {
+                    statementBlockAST
+                        .addAssociationDecl(
+                            toAst(astFactory.newTypeRef(toSI(associationDefnStmtContext), statementBlockAST),
+                                  associationDefnStmtContext.associationDefn())
+                        );
+                    extractInit(statementBlockAST, associationDefnStmtContext);
+                }
             }
         }
         //

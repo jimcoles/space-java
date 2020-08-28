@@ -23,6 +23,7 @@ public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaratio
     private SjiService sjiService;
     private SjiAssociationDefnEnd fromEnd;
     private SjiAssociationDefnEnd toEnd;
+    private AssociationKind associationKind;
 
     protected SjiAssocDecl(SjiService sjiService, SourceInfo sourceInfo, SjiTypeDefn fromType, SjiTypeDefn toType, String name) {
         super(sourceInfo, name);
@@ -36,6 +37,8 @@ public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaratio
         if (toType == null) throw new RuntimeException("bug: path to class ref cannot be null");
         this.toEnd = new SjiAssociationDefnEnd(sourceInfo, name, toType, 1, 1);
         addChild(this.toEnd);
+
+//        associationKind = AssociationKind.DEPENDENT;
     }
 
     @Override
@@ -73,12 +76,23 @@ public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaratio
         return MetaType.DATUM;
     }
 
-    protected SjiService getSjiService() {
-        return sjiService;
+    @Override
+    public AssociationKind getAssociationKind() {
+        return associationKind;
+    }
+
+    @Override
+    public AssociationDefn setAssociationKind(AssociationKind kind) {
+        this.associationKind = kind;
+        return this;
     }
 
     @Override
     public Comparator<Tuple> getDatumComparator() {
         return getType().getTypeComparator();
+    }
+
+    protected SjiService getSjiService() {
+        return sjiService;
     }
 }

@@ -43,10 +43,13 @@ public class KeyDefnImpl extends ViewDefnImpl {
      * @param sourceInfo
      * @param namePart optional name given that a type can have alternate keys
      * @param basisType
-     * @param vars
+     * @param projectionVars
      */
-    protected KeyDefnImpl(SourceInfo sourceInfo, NamePart namePart, TypeDefn basisType, ProjectionDecl ... vars) {
+    protected KeyDefnImpl(SourceInfo sourceInfo, NamePart namePart, TypeDefn basisType, ProjectionDecl ... projectionVars) {
         super(sourceInfo, namePart, basisType);
+        for (ProjectionDecl projectionDecl : projectionVars) {
+            addProjectionDecl(projectionDecl);
+        }
     }
 
     @Override

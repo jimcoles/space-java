@@ -43,7 +43,7 @@ public class ReferenceByOid extends AbstractReferenceValue<SpaceOid> {
 
     @Override
     public String toString() {
-        return MessageFormat.format("oid = {0} -> ", toOid);
+        return MessageFormat.format("Internal reference by oid = {0} -> ", toOid);
     }
 
 }

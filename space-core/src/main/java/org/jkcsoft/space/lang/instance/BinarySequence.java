@@ -30,4 +30,14 @@ public abstract class BinarySequence<T extends ScalarValue> extends AbstractSpac
 
     public abstract T getElement(int index);
 
+    @Override
+    public boolean isCollective() {
+        return true;
+    }
+
+    @Override
+    public boolean isTuple() {
+        return false;
+    }
+
 }

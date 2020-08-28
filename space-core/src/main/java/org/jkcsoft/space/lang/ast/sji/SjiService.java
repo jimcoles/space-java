@@ -14,10 +14,7 @@ import org.jkcsoft.java.util.Beans;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.instance.sji.*;
-import org.jkcsoft.space.lang.runtime.ApiExeContext;
-import org.jkcsoft.space.lang.runtime.AstUtils;
-import org.jkcsoft.space.lang.runtime.Executor;
-import org.jkcsoft.space.lang.runtime.SpaceX;
+import org.jkcsoft.space.lang.runtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +46,7 @@ public class SjiService {
 
     // =========================================================================
 
-    private final ApiExeContext apiExec;
+    private final InternalExeContext internalExec;
 //    private final NSRegistry nsRegistry;
     private final AstFactory astFactory;
     private final ObjectFactory spaceObjFactory;
@@ -60,14 +57,14 @@ public class SjiService {
     //
     private final Map<Object, SjiTuple> sjiTuplesByJavaObject = new TreeMap<>();
 
-    public SjiService(ApiExeContext apiExec) {
-        this.apiExec = apiExec;
-        this.astFactory = apiExec.getAstFactory();
+    public SjiService(InternalExeContext internalExec) {
+        this.internalExec = internalExec;
+        this.astFactory = internalExec.getAstFactory();
         spaceObjFactory = ObjectFactory.getInstance();
     }
 
     private NSRegistry getNsRegistry() {
-        return apiExec.getNsRegistry();
+        return internalExec.getNsRegistry();
     }
 
     public void registerPackageBinding(String javaPackage, String spacePackage) {
@@ -106,7 +103,7 @@ public class SjiService {
      *
      * @param className Standard Java fully-qualified class name "java.lang.String".
      */
-    public TypeDefn getSjiTypeProxyDeepLoad(String className, String[] overrideDirNames)
+    public TypeDefn getSjiTypeProxyDeepLoad(String className, String ... overrideDirNames)
         throws ClassNotFoundException
     {
         TypeDefn wrapper = null;
@@ -121,7 +118,7 @@ public class SjiService {
         return wrapper;
     }
 
-    public TypeDefn getSjiTypeProxyDeepLoad(Class<?> jnClass, String[] overrideDirNames) {
+    public TypeDefn getSjiTypeProxyDeepLoad(Class<?> jnClass, String ... overrideDirNames) {
         SjiTypeMapping sjiTypeMapping = sjiMappingByClass.get(jnClass);
         if (sjiTypeMapping == null) {
             sjiTypeMapping = createSjiTypeMapping(jnClass);
@@ -129,11 +126,14 @@ public class SjiService {
         else if (sjiTypeMapping.getState() == LinkState.INITIALIZED) {
             log.warn("SJI wrapper was initialized but not fully resolved for Java class [{}]", jnClass);
         }
+
         if (sjiTypeMapping.getState() == LinkState.INITIALIZED)
             deepLoadSjiTypeProxy(sjiTypeMapping, overrideDirNames);
+
         if (sjiTypeMapping.getState() != LinkState.RESOLVED) {
             throw new SpaceX("SJI wrapper could not be loaded for [" + jnClass + "]");
         }
+
         return sjiTypeMapping.getSjiProxy();
     }
 
@@ -151,10 +151,9 @@ public class SjiService {
         Directory parentDir =
             AstUtils.ensureDir(getNsRegistry().getJavaNs().getRootDir(), packageNameParts);
 
-        //
-        // Build wrappers for this class and any required classes
-        //
+        // Build wrapper for this class and references for other used classes
         ParseUnit newParseUnit = buildShallowSjiTypeProxy(sjiTypeMapping.getJavaClass());
+        //
         sjiTypeMapping.setSjiProxy((SjiTypeDefn) newParseUnit.getTypeDefns().get(0)); // assumes 1-and-only-1 top-level
         sjiTypeMapping.setState(LinkState.RESOLVED);
         //
@@ -176,13 +175,13 @@ public class SjiService {
                 deepLoadSjiTypeProxy(unresolvedRef.getMapping(), null);
 //                TypeDefn spaceWrapper = getDeepLoadSpaceWrapper(unresolvedRef.getWrappedClass());
                 if (unresolvedRef.getState() != LinkState.RESOLVED) {
-                    log.error("space wrapper for Java class " +
-                                  "[" + unresolvedRef.getWrappedClass().getName() + "]" +
-                                  " did not load properly");
+                    log.error("space wrapper for Java class [{}] did not load properly",
+                              unresolvedRef.getWrappedClass().getName());
                 }
             }
             else {
-                log.info("skipping load of previously unresolved ref");
+                if (log.isTraceEnabled())
+                    log.trace("skipping load of SJI proxy for resolved ref [{}]", unresolvedRef);
             }
         }
         log.debug("created Space wrapper mapping: " + sjiTypeMapping);
@@ -225,7 +224,7 @@ public class SjiService {
                 // TODO Handle Java-to-Space mapping via more sophisticated scheme including external
                 // mapping file
             {
-                TypeDefn sjiToType = getSjiTypeProxyDeepLoad(jPropDescriptor.getPropertyType(), null);
+                TypeDefn sjiToType = getSjiTypeProxyDeepLoad(jPropDescriptor.getPropertyType());
                 if (sjiToType.isSimpleType())
                     sjiTypeProxy.addVariableDecl(new SjiPropVarDecl(this, sjiTypeProxy, jPropDescriptor));
                 else
@@ -258,7 +257,8 @@ public class SjiService {
                     argTupleTypeDefn.addAssociationDecl(
 //                        newAssociationDecl(jParam, sjiParamTypeInfo)
                         getAstFactory()
-                            .newAssociationDecl(paramTypeRef.getSourceInfo(), jParam.getName(), paramTypeRef)
+                            .newAssociationDecl(paramTypeRef.getSourceInfo(), jParam.getName(), null,
+                                                paramTypeRef)
                     );
                 }
                 else {
@@ -318,10 +318,10 @@ public class SjiService {
         }
 
         Class<?> containedJavaClass = javaColl.iterator().next().getClass();
-        SjiTypeDefn sjiContainedTypeDefn = (SjiTypeDefn) getSjiTypeProxyDeepLoad(containedJavaClass, null);
+        SjiTypeDefn sjiContainedTypeDefn = (SjiTypeDefn) getSjiTypeProxyDeepLoad(containedJavaClass);
 
         // link and validate new AST elements as needed
-        apiExec.apiAstLoadComplete();
+        internalExec.apiAstLoadComplete();
         //
         TupleSetImpl tupleSet = spaceObjFactory.newSet(sjiContainedTypeDefn.getSetOfType());
 
@@ -334,7 +334,7 @@ public class SjiService {
 
     public SjiTuple getOrCreateSjiObjectProxy(Object javaObj) {
         SjiTuple sjiTuple = null;
-        SjiTypeDefn sjiTypeDefn = (SjiTypeDefn) getSjiTypeProxyDeepLoad(javaObj.getClass(), null);
+        SjiTypeDefn sjiTypeDefn = (SjiTypeDefn) getSjiTypeProxyDeepLoad(javaObj.getClass());
         sjiTuple = createSjiInstanceProxy(sjiTypeDefn, javaObj);
         return sjiTuple;
     }
@@ -344,33 +344,38 @@ public class SjiService {
         // initialize
         SjiTypeDefn defn = sjiTuple.getSjiTypeDefn();
         if (defn.hasDatums()) {
-            List<Declaration> declList = defn.getDatumDecls();
+            List<Declaration> declList = defn.getDatumDeclList();
             for (Declaration datumDecl : declList) {
                 sjiTuple.initHolder(createSjiDatumProxy(sjiTuple, datumDecl));
             }
         }
         //
-        apiExec.trackInstanceObject(sjiTuple);
+        internalExec.trackInstanceObject(sjiTuple);
         //
         return sjiTuple;
     }
 
     public Value toSpaceValue(Object jValue) {
         Value sValue = null;
-        ObjectFactory spaceInst = ObjectFactory.getInstance();
-        if (jValue instanceof Integer || jValue instanceof Long)
-            sValue = spaceInst.newCardinalValue(((Long) jValue));
-        else if (jValue instanceof Float || jValue instanceof Double)
-            sValue = spaceInst.newRealValue(((Double) jValue));
+        ObjectFactory oFactory = ObjectFactory.getInstance();
+        if (jValue instanceof Integer)
+            sValue = oFactory.newCardinalValue(((Integer) jValue));
+        else if (jValue instanceof Long)
+            sValue = oFactory.newCardinalValue(((Long) jValue));
+        else if (jValue instanceof Float)
+            sValue = oFactory.newRealValue(((Float) jValue));
+        else if (jValue instanceof Double)
+            sValue = oFactory.newRealValue(((Double) jValue));
         else if (jValue instanceof Boolean)
-            sValue = spaceInst.newBooleanValue(((Boolean) jValue));
+            sValue = oFactory.newBooleanValue(((Boolean) jValue));
         else if (jValue instanceof String)
-            sValue = spaceInst.newCharacterSequence((String) jValue);
+            sValue = oFactory.newCharacterSequence((String) jValue);
         else
             // TODO Handle Java values that are not Java primitives or String
 //            sValue = sji.
-            throw new SpaceX("don't know how to convert this Java type to a Space value: [{}]",
-                             jValue.getClass().getName());
+            sValue = getOrCreateSjiObjectProxy(jValue);
+//            throw new SpaceX("don't know how to convert this Java type to a Space value: [{}]",
+//                             jValue.getClass().getName());
 
         return sValue;
     }

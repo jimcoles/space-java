@@ -4,7 +4,7 @@ import java:java.lang.String;
 
 public type Access
 /*
-    @ { // the interior of the 'annotation' block is just SNIP (Space Normalized Instance Protocol)
+    @ { // the interior of the 'annotation' block is just SNIP (Space Normalized Object Protocol)
         doc {
             A Space access control rule such as public, private, etc.
         }

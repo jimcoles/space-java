@@ -45,10 +45,6 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public interface AssociationDefn extends Declaration {
 
-    default AssociationKind getAssociationKind() {
-        return AssociationKind.INDEPENDENT;
-    }
-
     AssociationDefnEnd getFromEnd();
 
     AssociationDefnEnd getToEnd();
@@ -57,4 +53,7 @@ public interface AssociationDefn extends Declaration {
 
     boolean isRecursive();
 
+    AssociationDefn setAssociationKind(AssociationKind kind);
+
+    AssociationKind getAssociationKind();
 }

@@ -12,14 +12,13 @@ package org.jkcsoft.space.lang.instance;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 /**
- * <p>"Everything is a Space" (TM).
- *
  * <p> A {@link TupleSetImpl} is a collection of Tuples and is the central
  * notion of the Space language. A {@link TupleSetImpl} adheres to the
  * set-theoretic notion of a Relation. It is an instance-level notion of a
@@ -35,17 +34,15 @@ import java.util.Set;
  * @author Jim Coles
  * @version 1.0
  */
-public class TupleSetImpl extends AbstractSpaceObject
-    implements TupleSet, ReferenceValueHolder<ReferenceValue<SpaceOid>, SpaceOid>
+public class TupleSetImpl extends AbstractSpaceObject implements TupleSet, ReferenceValueHolder<ReferenceValue<Object>, Object>
 {
-
     private Space contextSpace;
     private SetTypeDefn setTypeDefn;
     /** The controlling definition. */
     private ViewDefn viewDefn;
 
     /** The backing set. */
-    private Set<ReferenceValueHolder<ReferenceValue<SpaceOid>, SpaceOid>> tupleRefs = new HashSet<>();
+    private final Set<ReferenceValueHolder> tupleRefs = new HashSet<>();
 
     TupleSetImpl(SpaceOid oid, SetTypeDefn setTypeDefn) {
         super(oid, setTypeDefn);
@@ -64,7 +61,7 @@ public class TupleSetImpl extends AbstractSpaceObject
         return this;
     }
 
-    private TupleSet addTupleRef(FreeReferenceHolder referenceHolder) {
+    private TupleSet addTupleRef(ReferenceValueHolder referenceHolder) {
         tupleRefs.add(referenceHolder);
         return this;
     }
@@ -73,17 +70,29 @@ public class TupleSetImpl extends AbstractSpaceObject
 
     }
 
-
     @Override
     public Declaration getDeclaration() {
         return  null;   // TODO Not sure what to return here.
 //        return isSingleWrapper() ? tunull;
     }
 
+
     @Override
-    public void setValue(ReferenceValue<SpaceOid> value) {
+    public void setValue(ReferenceValue<Object> value) {
+//        if (! (value instanceof ReferenceValue))
+//            throw new SpaceX("Value is not a reference value {0}", value);
         if (isSingleWrapper())
             tupleRefs.iterator().next().setValue(value);
+    }
+
+    @Override
+    public ValueCollection<FreeReferenceHolder<Object>, ReferenceValue<Object>, Object> addValue(
+        FreeReferenceHolder<Object> inHolder)
+    {
+        FreeReferenceHolder<SpaceOid> thisHolder =
+            getObjectFactory().newFreeReferenceHolder(this, inHolder.getValue());
+        this.tupleRefs.add(thisHolder);
+        return null;
     }
 
     @Override
@@ -93,11 +102,13 @@ public class TupleSetImpl extends AbstractSpaceObject
     }
 
     @Override
-    public ValueCollection<FreeReferenceHolder<ReferenceValue>> addValue(ValueHolder inHolder) {
-        FreeReferenceHolder<SpaceOid> thisHolder =
-            getObjectFactory().newFreeReferenceHolder(this, (ReferenceByOid) inHolder.getValue());
-        this.tupleRefs.add(thisHolder);
-        return this;
+    public boolean isSequence() {
+        return false;
+    }
+
+    @Override
+    public boolean isSet() {
+        return true;
     }
 
     @Override
@@ -106,9 +117,8 @@ public class TupleSetImpl extends AbstractSpaceObject
     }
 
     @Override
-    public ReferenceValue<SpaceOid> getValue() {
-//        ObjectFactory.getInstance()
-        return isSingleWrapper() ? tupleRefs.iterator().next().getValue() : null;
+    public ReferenceValue<Object> getValue() {
+        return isSingleWrapper() ? (ReferenceValue<Object>) tupleRefs.iterator().next().getValue() : null;
     }
 
     public boolean isSingleWrapper() {
@@ -116,7 +126,7 @@ public class TupleSetImpl extends AbstractSpaceObject
     }
 
     @Override
-    public Iterator<ReferenceValueHolder<ReferenceValue<SpaceOid>, SpaceOid>> iterator() {
+    public Iterator iterator() {
         return tupleRefs.iterator();
     }
 
@@ -127,10 +137,21 @@ public class TupleSetImpl extends AbstractSpaceObject
             + ((typeDefn.getScalarDofs() == 1) ?
             "(value)" :
             Strings.buildDelList(
-                ((TypeDefn) typeDefn).getDatumDecls(),
+                typeDefn.getDatumDeclList(),
                 obj -> "\"" + ((Declaration) obj).getName() + "\"",
                 "\t"))
             + JavaHelper.EOL
             + Strings.buildNewlineList(tupleRefs);
     }
+
+    @Override
+    public boolean isCollective() {
+        return false;
+    }
+
+    @Override
+    public boolean isTuple() {
+        return false;
+    }
+
 }

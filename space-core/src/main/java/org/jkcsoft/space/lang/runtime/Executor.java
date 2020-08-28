@@ -161,18 +161,44 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
     }
 
     @Override
-    public SpaceObject dereference(SpaceOid referenceOid) throws SpaceX {
+    public SpaceObject dereferenceByOid(SpaceOid referenceOid) throws SpaceX {
         return defaultSpace.dereference(referenceOid);
     }
 
     @Override
     public SpaceObject getRef(Tuple tuple, Declaration declaration) {
-        SpaceObject obj;
         if (!declaration.isAssoc()) {
             throw new SpaceX("invalid navigation of non-associative datum {}", declaration);
         }
-        obj = dereference(((ReferenceByOid) tuple.get(declaration).getValue()).getToOid());
+        return dereference(((ReferenceValue) tuple.get(declaration).getValue()));
+    }
+
+    private SpaceObject dereference(ReferenceValue referenceValue) {
+        SpaceObject obj = null;
+        if (referenceValue instanceof ReferenceByOid)
+            obj = dereferenceByOid(((ReferenceByOid) referenceValue).getToOid());
+        else if (referenceValue instanceof ReferenceByAddress) {
+            // TODO: use URL protocol to get possibly remote object; including Space TP
+        }
+        else if (referenceValue instanceof ReferenceByKey) {
+            // TODO: lookup in indices
+        }
+        else if (referenceValue instanceof JavaReference)
+            obj = resolveSjiObject((JavaReference) referenceValue);
+
         return obj;
+    }
+
+    /** Does a lazy-init of the SJI proxy for the Java object. */
+    private SpaceObject resolveSjiObject(JavaReference value) {
+        SpaceObject spaceObject = null;
+        if (value.hasResolvedObject())
+            spaceObject = value.getResolvedObject();
+        else {
+            spaceObject = sjiService.getOrCreateSjiObjectProxy(value.getJavaObject());
+            value.setResovledObject(spaceObject);
+        }
+        return spaceObject;
     }
 
     @Override
@@ -198,15 +224,14 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
     public String print(TupleSet tupleSet) {
         StringBuilder sb = new StringBuilder();
         sb.append("Tuple Set: " + EOL);
-        List<Declaration> datumDecls = tupleSet.getContainedObjectType().getDatumDecls();
+        List<Declaration> datumDecls = tupleSet.getContainedObjectType().getDatumDeclList();
         datumDecls.forEach(
             datumDecl -> sb.append("\"" + datumDecl.getName() + "\" ")
         );
         sb.append(EOL);
         tupleSet.forEach(
             (oRefHolder) -> {
-                SpaceOid targetOid = ((FreeReferenceHolder<SpaceOid>) oRefHolder).getValue().getJavaValue();
-                SpaceObject targetObject = dereference(targetOid);
+                SpaceObject targetObject = dereference(((FreeReferenceHolder) oRefHolder).getValue());
                 if (targetObject != null)
                     appendString(sb, targetObject, datumDecls);
                 else
@@ -228,7 +253,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
                         AssociationDefn assocDecl = (AssociationDefn) datumDecl;
                         if (assocDecl.getAssociationKind() == AssociationKind.DEPENDENT) {
                             // case: ref 0 or 1 dependent; treat as inner value; e.g., a char[]
-                            SpaceObject toObject = apiExe.getRef(tuple, datumDecl);
+                            SpaceObject toObject = getRef(tuple, datumDecl);
                             datumString = toObject != null ? toObject.toString() : "(broken object ref)";
                         }
                         else {
@@ -250,10 +275,6 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         );
     }
 
-    private void appendString(StringBuilder sb, JavaReference javaReference) {
-        sb.append("(Java Object as tuple)" + EOL);
-    }
-
     private void loadAstLoader(String parserImplClassName) {
         try {
             Class<?> aClass = Class.forName(parserImplClassName);
@@ -266,7 +287,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         }
     }
 
-    public void run() {
+    public RunResults run() {
 
         RunResults runResults = new RunResults();
 
@@ -302,9 +323,6 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
 
             // serves to ensure that the base lang libs were loaded above
             resolveLangDir();
-
-            // # Sets derived AST info for types
-            setTypeKeyComprators();
 
             // # Determine all needed Java classes and load corresponding Space wrappers
             wrapJavaImports(runResults);
@@ -346,6 +364,10 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
                 throw new SpaceX("Failed running program", ex);
             }
 
+            //
+            AstRuler astRuler = new AstRuler();
+            astRuler.setDerivedAstInfo();
+
             int[] levelCounts = runResults.getLevelCounts();
             int errCount = levelCounts[AstLoadError.Level.ERROR.ordinal()];
             if (errCount > 0) {
@@ -381,6 +403,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         } finally {
             nsRegistry.dumpAsts();
         }
+        return runResults;
     }
 
     private void wrapJavaImports(RunResults runResults) {
@@ -396,7 +419,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
             try {
                 // the following call to getDeepLoad() ensures the Space wrapper for the
                 // Java class is loaded and ready for lookup for subsequent linking
-                getSjiService().getSjiTypeProxyDeepLoad(targetJavaTypeRef.getFullUrlSpec(), null);
+                getSjiService().getSjiTypeProxyDeepLoad(targetJavaTypeRef.getFullUrlSpec());
             } catch (ClassNotFoundException e) {
                 // NOTE Java class might have been loaded already under the specified full path
                 AstUtils.resolveAstRef(AstUtils.findParentParseUnit(targetJavaTypeRef), targetJavaTypeRef);
@@ -419,7 +442,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
 
     private void presentAllErrors(RunResults runResults) {
         Set<File> keyFiles = runResults.getErrorsBySrcFile().keySet();
-        Collection nonNullKeyFiles = CollectionUtils.select(keyFiles, keyFile -> keyFile != null);
+        Collection<File> nonNullKeyFiles = CollectionUtils.select(keyFiles, Objects::nonNull);
         List<File> sortedKeyList = new LinkedList<>(nonNullKeyFiles);
         Collections.sort(sortedKeyList);
         printFileErrors(runResults).accept(null);
@@ -451,7 +474,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         };
 
         for (Class jNativeType : jNativeTypes) {
-            getSjiService().getSjiTypeProxyDeepLoad(jNativeType, null);
+            getSjiService().getSjiTypeProxyDeepLoad(jNativeType);
         }
 
         FullTypeRefImpl opSysRef = FullTypeRefImpl.newFullTypeRef(
@@ -730,15 +753,15 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         return null;
     }
 
-    private Declaration newAnonDecl(TypeDefn typeDefn) {
+    private Declaration newAnonDecl(TypeRef fromTypeRef, TypeDefn typeDefn) {
         Declaration decl = null;
         TypeDefn rootType = getRootType(typeDefn);
-        FullTypeRefImpl typeRef = getAstFactory().newTypeRef(new ProgSourceInfo(), typeDefn);
+        FullTypeRefImpl toTypeRef = getAstFactory().newTypeRef(new ProgSourceInfo(), typeDefn);
         if (rootType instanceof NumPrimitiveTypeDefn) {
-            decl = getAstFactory().newVariableDecl(new ProgSourceInfo(), null, typeRef);
+            decl = getAstFactory().newVariableDecl(new ProgSourceInfo(), null, toTypeRef);
         }
         else if (rootType instanceof TypeDefnImpl) {
-            decl = getAstFactory().newAssociationDecl(new ProgSourceInfo(), null, typeRef);
+            decl = getAstFactory().newAssociationDecl(new ProgSourceInfo(), (String) null, fromTypeRef, toTypeRef);
         }
 
         return decl;
@@ -897,7 +920,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         TypeDefn argTypeDefn = functionDefn.getArgSpaceTypeDefn();
         TupleImpl argTupleValue = (TupleImpl) eval(evalContext, functionCallExpr.getArgValueExpr());
         ValueHolder retValHolder = functionDefn.isReturnVoid() ? newVoidHolder()
-            : newEmptyVarHolder(null, newAnonDecl(functionDefn.getReturnType()));
+            : newEmptyVarHolder(null, newAnonDecl(null, functionDefn.getReturnType()));
         FunctionCallContext functionCallContext =
             getObjFactory().newFunctionCall(evalContext.peekStack().getCtxObject(), functionCallExpr, argTupleValue,
                                                           retValHolder);
@@ -941,7 +964,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
             for (ValueExpr argumentExpr : valueExprs) {
                 ValueHolder argValueHolder = eval(evalContext, argumentExpr);
                 argValueHolder.setValue(
-                    autoCast(newTuple.getDefn().getDatumDecls().get(idxArg).getType(), argValueHolder)
+                    autoCast(newTuple.getDefn().getDatumDeclList().get(idxArg).getType(), argValueHolder)
                 );
                 ValueHolder leftSideHolder = newTuple.get(newTuple.getDeclAt(idxArg));
                 SpaceUtils.assignNoCast(evalContext, leftSideHolder, argValueHolder);
@@ -1053,10 +1076,10 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
     public ValueHolder eval(EvalContext evalContext, UpdateExpr updateExpr) {
         log.debug("eval: " + updateExpr);
         ValueHolder<ReferenceValue<SpaceOid>, SpaceOid> baseTupleHolder = eval(evalContext, updateExpr.getLeftSideDatumRef());
-        Tuple baseTuple = (Tuple) dereference(baseTupleHolder.getValue().getJavaValue());
+        Tuple baseTuple = (Tuple) dereferenceByOid(baseTupleHolder.getValue().getJavaValue());
         // TODO Validate: must be the basis tuple, not a view
         ValueHolder rightSideHolder = eval(evalContext, updateExpr.getRightSideValueExpr());
-        Tuple deltaTuple = (Tuple) dereference((SpaceOid) rightSideHolder.getValue().getJavaValue());
+        Tuple deltaTuple = (Tuple) dereferenceByOid((SpaceOid) rightSideHolder.getValue().getJavaValue());
         //
         deltaTuple.getValueHolders().forEach(
             inputSlot -> {
@@ -1202,7 +1225,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
     private void initTrackTuple(TypeDefn defn, Tuple tuple) {
         // initialize
         if (defn.hasDatums()) {
-            List<Declaration> declList = defn.getDatumDecls();
+            List<Declaration> declList = defn.getDatumDeclList();
             for (Declaration datumDecl : declList) {
                 tuple.initHolder(newEmptyVarHolder(tuple, datumDecl));
             }
@@ -1227,12 +1250,24 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
                                   getNsRegistry().getUserNs().getTypeInfo(typeDefn) == null
                               )
             );
+
         newTypeDefs.forEach( typeDefn -> {
             if (typeDefn.hasPrimaryKey()) {
                 Namespace.TypeDerivedInfo typeInfo = new Namespace.TypeDerivedInfo(typeDefn);
                 typeInfo.setPkComparator(AstUtils.buildComparator(typeDefn.getPrimaryKeyDefn()));
+                getNsRegistry().getUserNs().setTypeInfo(typeDefn, typeInfo);
+                log.info("set derived PK comparator for {}", typeDefn);
             }
         });
+    }
+
+    public void attachTypesToUserNs(TypeDefn ... typeDefs) {
+        ParseUnit parseUnit = getAstFactory().newParseUnit(SourceInfo.API);
+        for (TypeDefn typeDef : typeDefs) {
+            parseUnit.addTypeDefn(typeDef);
+        }
+        // Must add type elements to a namespace before anything will work
+        getNsRegistry().getUserNs().getRootDir().addParseUnit(parseUnit);
     }
 
     // ---------------------------- New Space Objects ------------------------
@@ -1300,6 +1335,45 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
 
     //--------------------------------------------------------------------------
     //
+
+    private class AstRuler {
+
+        /** Sets derived AST info for types */
+        public void setDerivedAstInfo() {
+
+            log.info("setting inferred AST elements");
+
+            setTypeKeyComprators();
+
+            inferAssociationKinds();
+        }
+
+        private void inferAssociationKinds() {
+            List<Namespace> nsChain = getNsRegistry().getNsChain();
+            nsChain.forEach((namespace) -> {
+                Set<AssociationDefn> unsetAssocKinds = queryUnsetAssocKinds(namespace);
+                unsetAssocKinds.forEach(this::inferAssociationKind);
+            });
+        }
+
+        private Set<AssociationDefn> queryUnsetAssocKinds(Namespace namespace) {
+            return AstUtils.queryAst(namespace.getRootDir(),
+                                     new QueryAstConsumer<>(
+                                         AssociationDefn.class,
+                                         assoc -> assoc.getAssociationKind() == null
+                                     ));
+        }
+
+        void inferAssociationKind(AssociationDefn assocDefn) {
+            if (!assocDefn.getToEnd().getType().hasPrimaryKey()) {
+                assocDefn.setAssociationKind(AssociationKind.DEPENDENT);
+            }
+            else {
+                assocDefn.setAssociationKind(AssociationKind.INDEPENDENT);
+            }
+            log.trace("inferred assoc kind {} for {}", assocDefn.getAssociationKind(), assocDefn);
+        }
+    }
 
     public interface ExeSettings {
 

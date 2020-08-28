@@ -67,13 +67,13 @@ public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implem
     }
 
     @Override
-    public List<VariableDecl> getVariables() {
-        return containedElementType.getVariables();
+    public List<VariableDecl> getVariablesDeclList() {
+        return containedElementType.getVariablesDeclList();
     }
 
     @Override
-    public List<Declaration> getDatumDecls() {
-        return containedElementType.getDatumDecls();
+    public List<Declaration> getDatumDeclList() {
+        return containedElementType.getDatumDeclList();
     }
 
     @Override

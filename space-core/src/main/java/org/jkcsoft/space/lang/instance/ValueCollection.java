@@ -9,16 +9,14 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import java.util.Collection;
-
 /**
  * Base collective notion. Objects in a {@link ValueCollection} are not accessed by name
  * and their type must adhere to the collection's type constraints.
  *
  * @author Jim Coles
  */
-public interface ValueCollection<T extends ValueHolder> extends SpaceObject, Iterable<T> {
+public interface ValueCollection<E extends ValueHolder<V, J>, V extends Value<J>, J> extends SpaceObject, Iterable<E> {
 
-    ValueCollection<T> addValue(ValueHolder holder);
+    ValueCollection<E, V, J> addValue(E holder);
 
 }

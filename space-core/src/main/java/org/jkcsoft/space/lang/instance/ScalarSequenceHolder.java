@@ -14,16 +14,16 @@ import org.jkcsoft.space.lang.ast.VariableDecl;
 
 /**
  * The value-level counterpart to a Sequence of {@link TypeDefn}.
- * A {@link SequenceVariable} contains a reference to its definition, a VariableDefn, and
+ * A {@link ScalarSequenceHolder} contains a reference to its definition, a VariableDefn, and
  * zero to many {@link ScalarValue}s.
  */
-public class SequenceVariable<T extends ScalarValue> implements ValueHolder {
+public class ScalarSequenceHolder<T extends ScalarValue> implements ValueHolder {
 
     private VariableDecl declaration;
     private Tuple parentTuple;
     private BinarySequence<T> primSeqValue;
 
-    public SequenceVariable(Tuple parentTuple, VariableDecl declaration, BinarySequence scalarValue) {
+    public ScalarSequenceHolder(Tuple parentTuple, VariableDecl declaration, BinarySequence scalarValue) {
         this.parentTuple = parentTuple;
         this.declaration = declaration;
         this.primSeqValue = scalarValue;

@@ -10,12 +10,16 @@
 package org.jkcsoft.space.tests.integration;
 
 import org.apache.commons.io.FileUtils;
+import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.runtime.Executor;
+import org.jkcsoft.space.lang.runtime.RunResults;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 public class IntegrationTestBase {
@@ -23,14 +27,15 @@ public class IntegrationTestBase {
     private static final Logger log = LoggerFactory.getLogger("ROOT");
 
     @BeforeClass
-    public void prepTest() {
+    public static void prepTest() {
 
     }
 
-    private Executor getExecutor(String spaceSourcePath) {
+    private Executor getDefaultExecutor(String spaceSourcePath) {
         Executor exec = null;
         try {
-            Executor.ExeSettings exeSettings = new CallableExeSettings(spaceSourcePath, null);
+            Executor.ExeSettings exeSettings = new CallableExeSettings(spaceSourcePath,
+                                                                       List.of(getSpaceLangSrcDir()));
             exec = Executor.getInstance(exeSettings);
         } catch (Throwable th) {
             log.error("error running", th);
@@ -38,12 +43,23 @@ public class IntegrationTestBase {
         return exec;
     }
 
+    public File getSpaceLangSrcDir() {
+        return FileUtils.getFile("space-lang-lib", "src", "main", "space");
+    }
+
     public void runTestSource(String spaceSourcePath) {
+        runTestSource(spaceSourcePath, 0, 0);
+    }
+
+    public void runTestSource(String spaceSourcePath, int expectedErr, int expectedWarn) {
         log("executing source file [{}]", spaceSourcePath);
-        Executor exec = getExecutor(spaceSourcePath);
+        Executor exec = getDefaultExecutor(spaceSourcePath);
 //        String runSrcDir = FileUtils.getFile(spaceSourcePath).getParent();
 //        exec.loadSrcRootDir(FileUtils.getFile(getRootSrcDir(), runSrcDir));
-        exec.run();
+        RunResults runResults = exec.run();
+        int[] errLevelCounts = runResults.getLevelCounts();
+        Assert.assertEquals(errLevelCounts[AstLoadError.Level.ERROR.ordinal()], expectedErr);
+        Assert.assertEquals(errLevelCounts[AstLoadError.Level.WARN.ordinal()], expectedWarn);
     }
 
     public File getRootSrcDir() {

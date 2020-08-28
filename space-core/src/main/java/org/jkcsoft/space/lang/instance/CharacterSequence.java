@@ -78,4 +78,5 @@ public class CharacterSequence extends BinarySequence<CharacterValue> implements
     public Object getJavaValue() {
         return characters;
     }
+
 }

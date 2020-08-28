@@ -46,6 +46,16 @@ public abstract class AbstractModelElement extends AbstractSpaceObject implement
     }
 
     @Override
+    public boolean isCollective() {
+        return false;
+    }
+
+    @Override
+    public boolean isTuple() {
+        return false;
+    }
+
+    @Override
     public ModelElement getParent() {
         return parent;
     }

@@ -21,6 +21,7 @@ package org.jkcsoft.space.lang.instance;
  *
  * @author Jim Coles
  */
-public interface TupleSequence extends TupleCollection {
+public interface TupleSequence extends TupleCollection
+{
 
 }

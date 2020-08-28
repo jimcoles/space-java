@@ -24,9 +24,9 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
 
     private List<Declaration> datumDeclList;
     //
-    private List<VariableDecl> variables;
-    private List<AssociationDefn> associations;
-    private List<ProjectionDecl> projections;
+    private List<VariableDecl> variablesDeclList;
+    private List<AssociationDefn> associationDeclList;
+    private List<ProjectionDecl> projectionDeclList;
     //
     private StatementBlock initBlock;   // holds assignment exprs for var and assoc defns
     private List<FunctionDefn> functionDefns = new LinkedList<>();
@@ -41,8 +41,9 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
         super(sourceInfo, name);
         this.isView = isView;
         datumDeclList = new LinkedList<>();
-        variables = new LinkedList<>();
-        associations = new LinkedList<>();
+        variablesDeclList = new LinkedList<>();
+        associationDeclList = new LinkedList<>();
+        projectionDeclList = new LinkedList<>();
     }
 
     @Override
@@ -57,16 +58,21 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     @Override
     public VariableDecl addVariableDecl(VariableDecl variableDecl) {
         datumDeclList.add(variableDecl);
-        variables.add(variableDecl);
+        variablesDeclList.add(variableDecl);
         //
         addChild(variableDecl);
         return variableDecl;
     }
 
     @Override
+    public List<VariableDecl> getVariablesDeclList() {
+        return variablesDeclList;
+    }
+
+    @Override
     public AssociationDefn addAssociationDecl(AssociationDefn associationDecl) {
         datumDeclList.add(associationDecl);
-        associations.add(associationDecl);
+        associationDeclList.add(associationDecl);
         //
         addChild(associationDecl);
         //
@@ -75,22 +81,22 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
 
     @Override
     public ProjectionDecl addProjectionDecl(ProjectionDecl projectionDecl) {
-        projections.add(projectionDecl);
+        projectionDeclList.add(projectionDecl);
         return projectionDecl;
     }
 
     @Override
-    public List<ProjectionDecl> getProjectionDecls() {
-        return projections;
+    public List<ProjectionDecl> getProjectionDeclList() {
+        return projectionDeclList;
     }
 
-    public List<Declaration> getDatumDecls() {
+    public List<Declaration> getDatumDeclList() {
         return datumDeclList;
     }
 
     @Override
-    public List<VariableDecl> getVariables() {
-        return variables;
+    public Declaration getDatum(String name) {
+        return (Declaration) getNamedChildMap().get(name);
     }
 
     @Override

@@ -61,4 +61,8 @@ public abstract class AbstractReferenceValue<J> implements ReferenceValue<J> {
         this.linkState = LinkState.NOT_FOUND;
     }
 
+    @Override
+    public String toString() {
+        return "Reference";
+    }
 }

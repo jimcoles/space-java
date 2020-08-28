@@ -44,6 +44,8 @@ public interface TypeDefn extends Named {
     //
     boolean hasDatums();
 
+    Declaration getDatum(String name);
+
     int getScalarDofs();
 
     boolean hasPrimaryKey();
@@ -62,11 +64,11 @@ public interface TypeDefn extends Named {
 
     ProjectionDecl addProjectionDecl(ProjectionDecl projectionDecl);
 
-    List<ProjectionDecl> getProjectionDecls();
+    List<ProjectionDecl> getProjectionDeclList();
 
-    List<VariableDecl> getVariables();
+    List<VariableDecl> getVariablesDeclList();
 
-    List<Declaration> getDatumDecls();
+    List<Declaration> getDatumDeclList();
 
     StatementBlock getInitBlock();
 

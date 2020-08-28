@@ -14,16 +14,21 @@ import org.junit.Test;
 /**
  * @author Jim Coles
  */
-public class TestParser2 extends IntegrationTestBase {
+public class TestSourceLLE extends IntegrationTestBase {
 
     @Test
-    public void testParser() {
-        try {
-            this.runTestSource("Hello.space");
-        }
-        catch (Exception e) {
-            log("failed", e);
-            throw e;
-        }
+    public void testHello() {
+        runTestSource("Hello.space");
     }
+
+    @Test
+    public void testNtmu() {
+        runTestSource("Ntmu.space");
+    }
+
+    @Test
+    public void testSimpleCore() {
+        runTestSource("TestSimpleCore.space");
+    }
+
 }

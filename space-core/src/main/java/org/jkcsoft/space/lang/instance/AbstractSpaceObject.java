@@ -17,7 +17,7 @@ import org.jkcsoft.space.lang.ast.TypeDefn;
  *
  * @author Jim Coles
  */
-public class AbstractSpaceObject implements SpaceObject {
+public abstract class AbstractSpaceObject implements SpaceObject {
 
     private TypeDefn defn;
     private SpaceOid oid;

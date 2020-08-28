@@ -71,7 +71,7 @@ public class SpmExecutor extends ExprProcessor implements ExeContext, ApiExeCont
     }
 
     @Override
-    public SpaceObject dereference(SpaceOid referenceOid) throws SpaceX {
+    public SpaceObject dereferenceByOid(SpaceOid referenceOid) throws SpaceX {
         return null;
     }
 
@@ -128,5 +128,10 @@ public class SpmExecutor extends ExprProcessor implements ExeContext, ApiExeCont
     @Override
     public SpaceObject getRef(Tuple tuple, Declaration declaration) {
         return null;
+    }
+
+    @Override
+    public void attachTypesToUserNs(TypeDefn... types) {
+
     }
 }

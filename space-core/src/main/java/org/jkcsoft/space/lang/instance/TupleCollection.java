@@ -14,8 +14,11 @@ import org.jkcsoft.space.lang.ast.TypeDefn;
 /**
  * @author Jim Coles
  */
-public interface TupleCollection<J> extends ValueCollection<FreeReferenceHolder<ReferenceValue<J>>>, SpaceObject {
-
+public interface TupleCollection extends ValueCollection<FreeReferenceHolder<Object>, ReferenceValue<Object>, Object>, SpaceObject
+{
     TypeDefn getContainedObjectType();
 
+    boolean isSequence();
+
+    boolean isSet();
 }

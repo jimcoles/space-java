@@ -10,7 +10,6 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.comparators.ComparatorChain;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
@@ -627,11 +626,12 @@ public class AstUtils {
 
     public static Comparator<Tuple> buildComparator(KeyDefnImpl keyDefn) {
         Comparator<Tuple> comp = null;
-        keyDefn.getProjectionDecls().forEach(
-            proj -> {
+        for (ProjectionDecl proj : keyDefn.getProjectionDeclList()) {
+            if (comp == null)
+                comp = proj.getDatumComparator();
+            else
                 comp.thenComparing(proj.getDatumComparator());
-            }
-        );
+        }
         return comp;
     }
 

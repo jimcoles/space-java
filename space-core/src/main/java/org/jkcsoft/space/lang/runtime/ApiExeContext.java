@@ -23,7 +23,7 @@ public interface ApiExeContext {
 
     void trackInstanceObject(SpaceObject spaceObject);
 
-    SpaceObject dereference(SpaceOid referenceOid) throws SpaceX;
+    SpaceObject dereferenceByOid(SpaceOid referenceOid) throws SpaceX;
 
     AstFactory getAstFactory();
 
@@ -47,4 +47,6 @@ public interface ApiExeContext {
     void apiAstLoadComplete();
 
     SpaceObject getRef(Tuple tuple, Declaration declaration);
+
+    void attachTypesToUserNs(TypeDefn ... types);
 }

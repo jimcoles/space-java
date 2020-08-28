@@ -7,15 +7,18 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.tests.integration;
+package org.jkcsoft.space.test.core;
 
+import org.jkcsoft.space.lang.ast.persist.SponWriter;
 import org.junit.Test;
 
-public class TestSpaceBuilder extends IntegrationTestBase {
+/**
+ * @author Jim Coles
+ */
+public class TestSpon {
 
     @Test
-    public void testSpaceBuilder() {
-        this.runTestSource("TestSpaceBuilder.space", expected);
+    public void testSponWrite() {
+        SponWriter sponWriter = new SponWriter();
     }
-
 }

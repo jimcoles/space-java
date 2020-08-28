@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import java.text.MessageFormat;
+
 /**
  * @author Jim Coles
  */
@@ -32,4 +34,10 @@ public class JavaReference extends AbstractReferenceValue {
     public Object getJavaValue() {
         return javaObject;
     }
+
+    @Override
+    public String toString() {
+        return MessageFormat.format("Java object reference -> [{0}]", javaObject);
+    }
+
 }

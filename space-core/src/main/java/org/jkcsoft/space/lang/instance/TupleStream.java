@@ -24,4 +24,14 @@ public class TupleStream extends AbstractSpaceObject {
     public TupleStream(SpaceOid oid, StreamTypeDefn defn) {
         super(oid, defn);
     }
+
+    @Override
+    public boolean isCollective() {
+        return true;
+    }
+
+    @Override
+    public boolean isTuple() {
+        return false;
+    }
 }

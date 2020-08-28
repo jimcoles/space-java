@@ -74,7 +74,7 @@ public class ObjectFactory {
         return newFreeReferenceHolder(fromObject, newReferenceByOid(refToOid));
     }
 
-    public FreeReferenceHolder<SpaceOid> newFreeReferenceHolder(TupleCollection fromObject, ReferenceByOid referenceByOid) {
+    public FreeReferenceHolder newFreeReferenceHolder(TupleCollection fromObject, ReferenceValue referenceByOid) {
         return new FreeReferenceHolder<>(fromObject, referenceByOid);
     }
 
@@ -135,7 +135,7 @@ public class ObjectFactory {
         return new VariableValueHolder(tuple, decl, newRealValue(aDouble));
     }
 
-    public RealValue newRealValue(Double aDouble) {
+    public RealValue newRealValue(double aDouble) {
         return new RealValue(aDouble);
     }
 

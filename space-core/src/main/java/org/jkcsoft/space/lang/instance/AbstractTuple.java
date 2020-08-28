@@ -17,18 +17,16 @@ import org.jkcsoft.space.lang.ast.TypeDefn;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.function.Consumer;
 
 /**
  *
  * @author Jim Coles
  * @version 1.0
  */
-public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple, ExeContext {
-
+public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple, ExeContext
+{
     private byte[] creatorId;
-    private final ValueHolder[] valueHolders;
+    final private ValueHolder<Value<Object>, Object>[] valueHolders;
 //    private List<ValueHolder> valueHolders = new LinkedList<>();
     // seminal map
 //    private Map<SpaceOid, ValueHolder> indexAllByMemberOid = new HashMap<>();
@@ -41,6 +39,16 @@ public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple
     @Override
     public ProjectionDecl getType() {
         return (ProjectionDecl) getDefn();
+    }
+
+    @Override
+    public boolean isCollective() {
+        return false;
+    }
+
+    @Override
+    public boolean isTuple() {
+        return true;
     }
 
     @Override
@@ -113,13 +121,13 @@ public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple
     }
 
     private int getIdxHolder(Declaration datumDecl) {
-        return ((TypeDefn) getDefn()).getDatumDecls().indexOf(datumDecl);
+        return ((TypeDefn) getDefn()).getDatumDeclList().indexOf(datumDecl);
     }
 
     /** Get the 0-based ordinal of the specified member */
     private int getMemberIdx(SpaceOid memberOid) {
         int idxMember = -1;
-        List<Declaration> allMembers = ((TypeDefn) getDefn()).getDatumDecls();
+        List<Declaration> allMembers = ((TypeDefn) getDefn()).getDatumDeclList();
         for (int idx = 0; idx < allMembers.size(); idx++) {
             if (allMembers.get(idx).getOid().equals(memberOid)) {
                 idxMember = idx;
@@ -130,24 +138,12 @@ public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple
     }
 
     @Override
-    public ValueCollection<ValueHolder> addValue(ValueHolder holder) {
+    public ValueCollection addValue(ValueHolder holder) {
         return this;
     }
 
     @Override
-    public void forEach(Consumer<? super ValueHolder> action) {
-        for (ValueHolder valueHolder : valueHolders) {
-            action.accept(valueHolder);
-        }
-    }
-
-    @Override
-    public Spliterator<ValueHolder> spliterator() {
-        return Arrays.spliterator(valueHolders);
-    }
-
-    @Override
-    public Iterator<ValueHolder> iterator() {
+    public Iterator<ValueHolder<Value<Object>, Object>> iterator() {
         return Arrays.asList(valueHolders).iterator();
     }
 

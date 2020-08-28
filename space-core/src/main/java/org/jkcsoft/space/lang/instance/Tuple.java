@@ -36,7 +36,10 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public interface Tuple extends ValueCollection<ValueHolder>, Value, SpaceObject {
+public interface Tuple extends
+    ValueCollection<ValueHolder<Value<Object>, Object>, Value<Object>, Object>, Value<Object>,
+    SpaceObject
+{
 
     ProjectionDecl getType();
 

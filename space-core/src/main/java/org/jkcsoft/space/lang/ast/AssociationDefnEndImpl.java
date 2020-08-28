@@ -31,6 +31,8 @@ public class AssociationDefnEndImpl extends NamedElement implements AssociationD
         this.isSingular = isSingular;
         this.lowerMultiplicity = lowerMultiplicity;
         this.upperMultiplicity = upperMultiplicity;
+        //
+        addChild(endTypeRef);
     }
 
     @Override

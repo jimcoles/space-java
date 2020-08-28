@@ -75,6 +75,10 @@ public class Namespace extends NamedElement {
         return typeInfoMap.get(typeDefn);
     }
 
+    public void setTypeInfo(TypeDefn typeDefn, TypeDerivedInfo typeInfo) {
+        typeInfoMap.put(typeDefn, typeInfo);
+    }
+
     public static class TypeLoadedEvent implements AstEvent {
         private TypeDefn typeDefn;
 
