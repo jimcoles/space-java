@@ -16,7 +16,9 @@ import org.jkcsoft.space.lang.runtime.AstUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * The central namespace registry: a point for registering named AST elements such as
@@ -27,13 +29,15 @@ import java.util.*;
 public class NSRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(NSRegistry.class);
-    private static NSRegistry instance;
+    public static final String NS_TMP = "tmp";
+    public static final String NS_USER = "user";
+    public static final String NS_LANG = "lang";
 
-    public static NSRegistry getInstance() {
-        if (instance == null)
-            instance = new NSRegistry();
-        return instance;
+    public static NSRegistry newInstance() {
+        return new NSRegistry();
     }
+
+    private static CommonCoreRegistry coreRegistry;
 
     // ------------------------------------------------------------------------
     //
@@ -46,20 +50,14 @@ public class NSRegistry {
     private final List<Namespace> nsChain = new LinkedList<>();
     private final List<Directory> rootDirs = new LinkedList<>();
 
-    /**
-     * A special directory root to hold intrinsic operators.
-     */
-    private Namespace langNs;
+
     private Namespace tmpNs;
     private Namespace userNs;
-    private Namespace javaNs;
 
-    private Named root;
-    private Map<String, Named> allNamed = new TreeMap<>();
     /**
      * The central meta object table.
      */
-    private java.util.Set metaObjectNormalTable = new HashSet<>();
+    private final java.util.Set<ModelElement> metaObjectNormalTable = new HashSet<>();
 
     /**
      * (not used currently) Idea is to hold redundantly accumulated info useful
@@ -70,32 +68,39 @@ public class NSRegistry {
 //        this.exeContext = exeContext;
         //
         AstFactory astFactory = AstFactory.getInstance();
-        langNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "lang");
-        addNamespace(langNs);
-        userNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "user", langNs);
+
+        if (coreRegistry == null) {
+            coreRegistry = new CommonCoreRegistry();
+        }
+
+        // add common core namespaces
+        addNamespace(getJavaNs());
+        addNamespace(getLangNs());
+
+        // init dynamic context specific namespaces
+        userNs = astFactory.newNamespace(SourceInfo.INTRINSIC, NS_USER, getLangNs());
         addNamespace(userNs);
-        javaNs = astFactory.newNamespace(SourceInfo.INTRINSIC, Language.JAVA.getCodeName());
-        addNamespace(javaNs);
-        tmpNs = astFactory.newNamespace(SourceInfo.INTRINSIC, "tmp", userNs);
+        tmpNs = astFactory.newNamespace(SourceInfo.INTRINSIC, NS_TMP, userNs);
         addNamespace(tmpNs);
+
     }
 
-    public void addNamespace(Namespace namespace) {
+    private void addNamespace(Namespace namespace) {
         nsChain.add(namespace);
         trackMetaObject(namespace);
         rootDirs.add(namespace.getRootDir());
     }
 
-    public Namespace getUserNs() {
-        return userNs;
-    }
-
     public Namespace getJavaNs() {
-        return javaNs;
+        return coreRegistry.getJavaNs();
     }
 
     public Namespace getLangNs() {
-        return langNs;
+        return coreRegistry.getLangNs();
+    }
+
+    public Namespace getUserNs() {
+        return userNs;
     }
 
     public Namespace getTmpNs() {
@@ -159,4 +164,22 @@ public class NSRegistry {
         return LoggerFactory.getLogger("flatAstDumpFileLogger");
     }
 
+    private static class CommonCoreRegistry {
+        private Namespace langNs;
+        private Namespace javaNs;
+
+        public CommonCoreRegistry() {
+            AstFactory astFactory = AstFactory.getInstance();
+            langNs = astFactory.newNamespace(SourceInfo.INTRINSIC, NS_LANG);
+            javaNs = astFactory.newNamespace(SourceInfo.INTRINSIC, Language.JAVA.getCodeName());
+        }
+
+        public Namespace getLangNs() {
+            return langNs;
+        }
+
+        public Namespace getJavaNs() {
+            return javaNs;
+        }
+    }
 }

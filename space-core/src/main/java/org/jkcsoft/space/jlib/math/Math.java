@@ -7,10 +7,10 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.jnative.math;
+package org.jkcsoft.space.jlib.math;
 
 import org.jkcsoft.space.lang.instance.*;
-import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;
+import org.jkcsoft.space.jlib.bindings.SpaceNative;
 
 /**
  * @author Jim Coles

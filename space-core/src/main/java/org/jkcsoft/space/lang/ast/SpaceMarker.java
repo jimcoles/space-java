@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;
+import org.jkcsoft.space.jlib.bindings.SpaceNative;
 
 /**
  * @author Jim Coles

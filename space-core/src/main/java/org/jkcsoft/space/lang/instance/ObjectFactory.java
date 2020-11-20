@@ -49,7 +49,8 @@ public class ObjectFactory {
     }
 
     public FunctionCallContext newFunctionCall(Tuple ctxObject, FunctionCallExpr functionCallExpr, TupleImpl argTuple,
-                                               ValueHolder retValHolder) {
+                                               ValueHolder retValHolder)
+    {
         FunctionCallContext functionCallContext =
             new FunctionCallContext(ctxObject, functionCallExpr, argTuple, retValHolder);
         return functionCallContext;
@@ -139,8 +140,8 @@ public class ObjectFactory {
         return new RealValue(aDouble);
     }
 
-    public BlockContext newBlockContext(StatementBlock statementBlock, Tuple tuple) {
-        return new BlockContext(statementBlock, tuple);
+    public BlockContext newBlockContext(StatementBlock statementBlock, BlockDatumMap blockDatumMap) {
+        return new BlockContext(statementBlock, blockDatumMap);
     }
 
     public TupleSetImpl newSet(SetTypeDefn defn) {
@@ -157,5 +158,9 @@ public class ObjectFactory {
 
     public View newView(ViewDefn viewDefn) {
         return new View(viewDefn);
+    }
+
+    public BlockDatumMap newBlockDatumMap(StatementBlock statementBlock) {
+        return new BlockDatumMap(statementBlock);
     }
 }

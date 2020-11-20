@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2018 through present.
+ * Copyright (c) Jim Coles (jameskcoles@gmail.com) 2020 through present.
  *
  * Licensed under the following license agreement:
  *
@@ -7,12 +7,11 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.jnative;
+package org.jkcsoft.space.lang.ast;
 
 /**
  * @author Jim Coles
  */
-@SpaceNative
-public class CharSequence {
+public interface UsageAssociationEnd extends ModelElement {
 
 }

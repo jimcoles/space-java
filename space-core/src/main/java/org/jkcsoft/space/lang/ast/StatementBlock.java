@@ -9,10 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Applies primarily to defining a function body, or sub-block within
@@ -22,20 +20,52 @@ import java.util.Set;
  * @author Jim Coles
  */
 @LexicalNode
-public class StatementBlock extends AbstractTypeDefn implements Statement, TypeDefn {
+public class StatementBlock extends AbstractModelElement implements ContextDatumDefn, Statement {
 
-//    private List<AssociationDefn> associationDefnList;
-    private List<Statement> statementSequence = new LinkedList<>();  // child statements
+    // The verbatim sequence of declarations and statements. Sequence is important for datum visibility rules
+    // All other lists are redundantly maintained
+    private List<Expression> allElementsSequence = new LinkedList<>(); // declarations and statements
+    // just the datum decls
+    private List<Declaration> datumDecls = new LinkedList<>();
+    private List<VariableDecl> varDecls = new LinkedList<>();
+    private List<AssociationDefn> assocDecls = new LinkedList<>();
+    // just the statements; can be any kind of statement
+    private List<Statement> statementSequence = new LinkedList<>();
 
     public StatementBlock(SourceInfo sourceInfo) {
-        super(sourceInfo, "(block context)");
+        this(sourceInfo, true);
+    }
+
+    /**
+     * For use in creating an 'initialization' Statement Block for Type Definitions.
+     * @param sourceInfo
+     * @param allowDatums true for normal user-coded statement blocks; false for type init blocks.
+     */
+    public StatementBlock(SourceInfo sourceInfo, boolean allowDatums) {
+        super(sourceInfo);
     }
 
     public List<Statement> getStatementSequence() {
         return statementSequence;
     }
 
-    public ValueExpr addExpr(ValueExpr valueExpr) {
+    public Declaration addDatumDecl(Declaration declaration) {
+        allElementsSequence.add(declaration);
+        //
+        if (declaration.isAssoc())
+            assocDecls.add(((AssociationDefn) declaration));
+        else
+            varDecls.add((VariableDecl) declaration);
+        //
+        addChild(declaration);
+        //
+        return declaration;
+    }
+
+    public ValueExpr addValueExpr(ValueExpr valueExpr) {
+        //
+        allElementsSequence.add(valueExpr);
+        //
         statementSequence.add(new ExprStatement<>(valueExpr));
         //
         if (valueExpr instanceof AbstractModelElement)
@@ -45,6 +75,9 @@ public class StatementBlock extends AbstractTypeDefn implements Statement, TypeD
     }
 
     public Statement addStatement(Statement statement) {
+        //
+        allElementsSequence.add(statement);
+        //
         statementSequence.add(statement);
         //
         addChild(statement);
@@ -53,27 +86,50 @@ public class StatementBlock extends AbstractTypeDefn implements Statement, TypeD
     }
 
     @Override
+    public ContextDatumDefn addVariableDecl(VariableDecl variableDecl) {
+        addDatumDecl(variableDecl);
+        return this;
+    }
+
+    @Override
+    public ContextDatumDefn addAssociationDecl(AssociationDefn associationDecl) {
+        addDatumDecl(associationDecl);
+        return this;
+    }
+
+    @Override
+    public ContextDatumDefn addInitExpression(ExprStatement<AssignmentExpr> assignmentExpr) {
+        addStatement(assignmentExpr);
+        return this;
+    }
+
+    @Override
     public String getDisplayName() {
         return "{block}";
     }
 
     @Override
-    public boolean hasPrimaryKey() {
-        return false;
+    public boolean hasDatums() {
+        return !datumDecls.isEmpty();
     }
 
     @Override
-    public KeyDefnImpl getPrimaryKeyDefn() {
+    public Declaration getDatum(String name) {
         return null;
     }
 
     @Override
-    public Set<KeyDefnImpl> getAlternateKeyDefns() {
+    public int getScalarDofs() {
+        return datumDecls.size();
+    }
+
+    @Override
+    public List<VariableDecl> getVariablesDeclList() {
         return null;
     }
 
     @Override
-    public Comparator getTypeComparator() {
-        return null;
+    public List<Declaration> getDatumDeclList() {
+        return datumDecls;
     }
 }

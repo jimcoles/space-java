@@ -57,12 +57,12 @@ public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implem
     }
 
     @Override
-    public VariableDecl addVariableDecl(VariableDecl variableDecl) {
+    public ContextDatumDefn addVariableDecl(VariableDecl variableDecl) {
         return containedElementType.addVariableDecl(variableDecl);
     }
 
     @Override
-    public AssociationDefn addAssociationDecl(AssociationDefn associationDecl) {
+    public ContextDatumDefn addAssociationDecl(AssociationDefn associationDecl) {
         return containedElementType.addAssociationDecl(associationDecl);
     }
 
@@ -74,11 +74,6 @@ public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implem
     @Override
     public List<Declaration> getDatumDeclList() {
         return containedElementType.getDatumDeclList();
-    }
-
-    @Override
-    public StatementBlock getInitBlock() {
-        return containedElementType.getInitBlock();
     }
 
     @Override

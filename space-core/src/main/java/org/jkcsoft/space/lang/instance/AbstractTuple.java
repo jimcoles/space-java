@@ -27,9 +27,6 @@ public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple
 {
     private byte[] creatorId;
     final private ValueHolder<Value<Object>, Object>[] valueHolders;
-//    private List<ValueHolder> valueHolders = new LinkedList<>();
-    // seminal map
-//    private Map<SpaceOid, ValueHolder> indexAllByMemberOid = new HashMap<>();
 
     protected AbstractTuple(SpaceOid oid, TypeDefn defn) {
         super(oid, defn);

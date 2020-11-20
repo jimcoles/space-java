@@ -7,18 +7,14 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.jnative.opsys;
+package org.jkcsoft.space.jlib;
 
-import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;
+import org.jkcsoft.space.jlib.bindings.SpaceNative;
 
 /**
  * @author Jim Coles
  */
 @SpaceNative
-public class JOpSys {
-
-    public void println(String msg) {
-        System.err.println(msg);
-    }
+public class CharSequence {
 
 }

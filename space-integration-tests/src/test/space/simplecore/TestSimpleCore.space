@@ -1,5 +1,8 @@
-
 import java:java.lang.CharSequence;
+
+type TestSimpleCore {
+
+}
 
 // Syntax: Type definition
 type TestPerson {

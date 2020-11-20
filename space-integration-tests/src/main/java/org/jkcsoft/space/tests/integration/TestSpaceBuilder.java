@@ -15,7 +15,7 @@ public class TestSpaceBuilder extends IntegrationTestBase {
 
     @Test
     public void testSpaceBuilder() {
-        this.runTestSource("TestSpaceBuilder.space", expected);
+        this.runTestSource("TestSpaceBuilder.space");
     }
 
 }

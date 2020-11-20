@@ -14,7 +14,7 @@ import java.util.*;
 
 /**
  * The central data type definition notion within Space.
- * Analogous to an OOP Class or Interface,
+ * Analogous to an OOP Class or Interface definition,
  * or an RDB Table definition, or an XML complex type.
  *
  * @author Jim Coles
@@ -22,13 +22,12 @@ import java.util.*;
  */
 public class TypeDefnImpl extends AbstractTypeDefn implements TypeDefn {
 
+    private KeyDefnImpl primaryKey;
+    private ViewDefn pkViewDefn;
+    private Set<KeyDefnImpl> alternateKeys = Collections.emptySet();
+    private Set<ViewDefn> altKeyViewDefns;
     private List<Rule> rules;
     private List<TransformDefn> transformDefns;
-    private KeyDefnImpl primaryKey;
-    private Set<KeyDefnImpl> alternateKeys = Collections.emptySet();
-    // derived elements
-    private ViewDefn pkViewDefn;
-    private Set<ViewDefn> altKeyViewDefns;
 
     TypeDefnImpl(SourceInfo sourceInfo, NamePart nameNode) {
         super(sourceInfo, nameNode.getText());

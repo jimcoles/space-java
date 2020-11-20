@@ -54,4 +54,5 @@ public interface ModelElement extends Tagable {
     Named getNamedParent();
 
     int getTreeDepth();
+
 }

@@ -20,4 +20,5 @@ public interface ByNameMetaRef<T extends Named> extends MetaRef<T> {
     NamePartExpr getExpression();
 
     String getNameExprText();
+
 }

@@ -17,12 +17,12 @@ import java.util.Set;
  * Basically, here to lend a polymorphic notion to our various structural
  * declarative notions: Primitives, Domains, and Type's.
  *
- * <p>At it's most basic, a {@link TypeDefn} is just a byte sequence with some
- * constraints superimposed.
+ * <p>At it's most basic, a {@link TypeDefn} is just a set of constraints
+ * superimposed on a byte sequence.
  *
  * @author Jim Coles
  */
-public interface TypeDefn extends Named {
+public interface TypeDefn extends ContextDatumDefn, Named {
 
     boolean isPrimitiveType();
 
@@ -40,14 +40,6 @@ public interface TypeDefn extends Named {
 
     boolean isAssignableTo(TypeDefn argsType);
 
-
-    //
-    boolean hasDatums();
-
-    Declaration getDatum(String name);
-
-    int getScalarDofs();
-
     boolean hasPrimaryKey();
 
     KeyDefnImpl getPrimaryKeyDefn();
@@ -56,23 +48,15 @@ public interface TypeDefn extends Named {
 
     SequenceTypeDefn getSequenceOfType();
 
-    SetTypeDefn getSetOfType();
-
-    VariableDecl addVariableDecl(VariableDecl variableDecl);
-
-    AssociationDefn addAssociationDecl(AssociationDefn associationDecl);
-
     ProjectionDecl addProjectionDecl(ProjectionDecl projectionDecl);
-
-    List<ProjectionDecl> getProjectionDeclList();
-
-    List<VariableDecl> getVariablesDeclList();
-
-    List<Declaration> getDatumDeclList();
-
-    StatementBlock getInitBlock();
 
     FunctionDefn addFunctionDefn(FunctionDefn functionDefn);
 
+    List<ProjectionDecl> getProjectionDeclList();
+
+    List<Statement> getInitializations();
+
     Comparator getTypeComparator();
+
+    SetTypeDefn getSetOfType();
 }

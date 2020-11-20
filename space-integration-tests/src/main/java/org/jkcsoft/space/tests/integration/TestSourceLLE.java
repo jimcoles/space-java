@@ -18,17 +18,17 @@ public class TestSourceLLE extends IntegrationTestBase {
 
     @Test
     public void testHello() {
-        runTestSource("Hello.space");
+        runTestSource("Hello", 0, -1, "./space-integration-tests/src/test/space/hello");
     }
 
     @Test
     public void testNtmu() {
-        runTestSource("Ntmu.space");
+        runTestSource("Ntmu", 0, -1, "./space-integration-tests/src/test/space/ntmu");
     }
 
     @Test
     public void testSimpleCore() {
-        runTestSource("TestSimpleCore.space");
+        runTestSource("TestSimpleCore", 0, -1, "./space-integration-tests/src/test/space/simplecore");
     }
 
 }

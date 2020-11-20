@@ -16,7 +16,7 @@ import java.util.Comparator;
 /**
  * @author Jim Coles
  */
-public interface Declaration extends Identified, Named {
+public interface Declaration extends Expression, Identified, Named {
 
     TypeDefn getType();
 

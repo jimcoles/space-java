@@ -21,7 +21,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public interface LinkSource {
+public interface LinkSource extends Expression {
 
     boolean hasNameRef();
 

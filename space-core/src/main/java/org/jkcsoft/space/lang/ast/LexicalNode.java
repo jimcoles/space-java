@@ -13,7 +13,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Indicates that the node type
+ * Indicates that the node type may be used for named references.
  *
  * @author Jim Coles
  */

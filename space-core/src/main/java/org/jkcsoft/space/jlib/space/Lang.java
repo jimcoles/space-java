@@ -7,9 +7,9 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.jnative.space;
+package org.jkcsoft.space.jlib.space;
 
-import org.jkcsoft.space.lang.runtime.jnative.SpaceNative;
+import org.jkcsoft.space.jlib.bindings.SpaceNative;
 
 /**
  * @author Jim Coles

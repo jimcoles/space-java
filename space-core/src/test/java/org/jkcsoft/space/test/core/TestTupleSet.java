@@ -39,11 +39,12 @@ public class TestTupleSet extends TestSourceStub {
 
         // 1. Build AST model via API
         TypeDefnImpl personType = ast.newTypeDefn("Person");
-        VariableDecl userId = personType.addVariableDecl(ast.newVariableDecl("userId", NumPrimitiveTypeDefn.CARD));
-        AssociationDefn firstName =
-            personType.addAssociationDecl(ast.newAssociationDecl("firstName", personType, Executor.CHAR_SEQ_TYPE_DEF));
-        AssociationDefn lastName =
-            personType.addAssociationDecl(ast.newAssociationDecl("lastName", personType, Executor.CHAR_SEQ_TYPE_DEF));
+        VariableDecl userId = ast.newVariableDecl("userId", NumPrimitiveTypeDefn.CARD);
+        personType.addVariableDecl(userId);
+        AssociationDefn firstName = ast.newAssociationDecl("firstName", personType, Executor.CHAR_SEQ_TYPE_DEF);
+        personType.addAssociationDecl(firstName);
+        AssociationDefn lastName = ast.newAssociationDecl("lastName", personType, Executor.CHAR_SEQ_TYPE_DEF);
+        personType.addAssociationDecl(lastName);
 
         spaceCtx.getNsRegistry().getUserNs().getRootDir().addChild(personType);
         // declare keys

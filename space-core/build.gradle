@@ -17,6 +17,12 @@ dependencies {
 
     implementation 'org.jkcsoft:java-utils:1.1-SNAPSHOT'
 
+    //
+    // The most neutral CDI APIs from Oracle/Java
+    //
+    implementation 'javax.inject:javax.inject:1'
+    implementation 'javax.enterprise:cdi-api:2.0.SP1'
+
     runtimeOnly project(':space-antlr')
 
 }

@@ -35,15 +35,29 @@ public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaratio
         }
 
         if (toType == null) throw new RuntimeException("bug: path to class ref cannot be null");
+
         this.toEnd = new SjiAssociationDefnEnd(sourceInfo, name, toType, 1, 1);
         addChild(this.toEnd);
-
-//        associationKind = AssociationKind.DEPENDENT;
     }
 
     @Override
     public boolean isAssoc() {
         return true;
+    }
+
+    @Override
+    public boolean hasTypeFromEnd() {
+        return fromEnd != null;
+    }
+
+    @Override
+    public UsageAssociationEnd getFromUsagePoint() {
+        return null;
+    }
+
+    @Override
+    public boolean hasUsageFromEnd() {
+        return false;
     }
 
     @Override
@@ -57,7 +71,7 @@ public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaratio
     }
 
     @Override
-    public AssociationDefnEnd getFromEnd() {
+    public AssociationDefnEnd getTypeFromEnd() {
         return fromEnd;
     }
 

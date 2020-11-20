@@ -27,6 +27,7 @@ public class RunResults {
 
     private Map<File, AstFileLoadErrorSet> errorsBySrcFile = new HashMap<>();
     private List<AstLoadError> allErrors = new LinkedList<>();
+    private SpaceX runtimeError;
 
     public Map<File, AstFileLoadErrorSet> getErrorsBySrcFile() {
         return errorsBySrcFile;
@@ -68,4 +69,11 @@ public class RunResults {
             ((FileSourceInfo) astLoadError.getSourceInfo()).getFile() : null;
     }
 
+    public SpaceX getRuntimeError() {
+        return runtimeError;
+    }
+
+    public void setRuntimeError(SpaceX runtimeError) {
+        this.runtimeError = runtimeError;
+    }
 }

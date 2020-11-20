@@ -52,13 +52,13 @@ public class TestAst {
 
         ThisTupleExpr thisTupleExpr = astFactory.newThisExpr(si);
 
-        ExpressionChain functionDefnRef = astFactory.newMetaRefChain(si, MetaType.FUNCTION, astFactory
-            .newNameRefExpr(si, NSRegistry.getInstance().getTmpNs().getName()));
+        ExpressionChain functionDefnRef = astFactory.newMetaRefChain(si, MetaType.FUNCTION,
+                                                                     astFactory.newNameRefExpr(si, NSRegistry.NS_TMP));
 
         AstUtils.addNewMetaRefParts(functionDefnRef, si, "test", "TestType", "testFunc");
         mainMethod.setStatementBlock(astFactory.newStatementBlock(si));
         mainMethod.getStatementBlock()
-                  .addExpr(astFactory.newFunctionCallExpr(si).setFunctionRef(((SimpleNameRefExpr) functionDefnRef.getFirstPart())));
+                  .addValueExpr(astFactory.newFunctionCallExpr(si).setFunctionRef(((SimpleNameRefExpr) functionDefnRef.getFirstPart())));
 
 //        astFactory.newMetaObjectRefLiteral(null),
 //            astFactory.newPrimLiteralExpr("Hello, Space!")

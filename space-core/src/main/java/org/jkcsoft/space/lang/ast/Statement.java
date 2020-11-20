@@ -17,7 +17,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public interface Statement extends ModelElement {
+public interface Statement extends ModelElement, Expression {
 
     // A marker for now
 

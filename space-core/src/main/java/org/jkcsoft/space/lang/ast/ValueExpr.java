@@ -10,11 +10,11 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * Any expression that may be evaluated to obtain data.  Might also be called
+ * Any expression that may be evaluated to obtain data. Might also be called
  * "Imperative Expression", as opposed to "Declarative Expression".
  *
  * Imperative expressions are what the Space executor (evaluator) evaluates to get
- * data values or to mutate user data.  Declarative Expressions are used build
+ * data values or to mutate user data state. Declarative Expressions are used build
  * data structures, to hold Imperative Expressions, and to enforce type.
  *
  * Imperative might also be broken down into 'Mutating' versus ''.

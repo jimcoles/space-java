@@ -9,35 +9,13 @@
  */
 package org.jkcsoft.space.lang.runtime.spm;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.jkcsoft.java.util.Lister;
-import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.*;
-import org.jkcsoft.space.lang.ast.sji.SjiFunctionDefnImpl;
 import org.jkcsoft.space.lang.ast.sji.SjiService;
 import org.jkcsoft.space.lang.instance.Space;
 import org.jkcsoft.space.lang.instance.*;
-import org.jkcsoft.space.lang.instance.sji.SjiTuple;
-import org.jkcsoft.space.lang.loader.AstFileLoadErrorSet;
-import org.jkcsoft.space.lang.loader.AstLoadError;
-import org.jkcsoft.space.lang.loader.AstLoader;
-import org.jkcsoft.space.lang.loader.DirLoadResults;
-import org.jkcsoft.space.lang.metameta.MetaType;
 import org.jkcsoft.space.lang.runtime.*;
-import org.jkcsoft.space.lang.runtime.jnative.math.Math;
-import org.jkcsoft.space.lang.runtime.jnative.opsys.JOpSys;
-import org.jkcsoft.space.lang.runtime.typecasts.CastTransforms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
-import static org.jkcsoft.java.util.JavaHelper.EOL;
 
 /**
  * <p>The Executive that run's against a Space Program Model (SPM), which

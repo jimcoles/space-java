@@ -17,16 +17,16 @@ import org.jkcsoft.space.lang.ast.StatementBlock;
 public class BlockContext extends AbstractExeContext implements ExeContext {
 
     private FunctionCallContext functionCallContext;
-    private Tuple dataTuple;
+    private BlockDatumMap blockDatumMap;
 
-    BlockContext(FunctionCallContext functionCallContext, StatementBlock astNode, Tuple dataTuple) {
+    BlockContext(FunctionCallContext functionCallContext, StatementBlock astNode, BlockDatumMap blockDatumMap) {
         super(astNode);
         this.functionCallContext = functionCallContext;
-        this.dataTuple = dataTuple;
+        this.blockDatumMap = blockDatumMap;
     }
 
-    BlockContext(StatementBlock astNode, Tuple dataTuple) {
-        this(null, astNode, dataTuple);
+    BlockContext(StatementBlock astNode, BlockDatumMap blockDatumMap) {
+        this(null, astNode, blockDatumMap);
     }
 
     public boolean hasFunctionCallContext() {
@@ -36,7 +36,7 @@ public class BlockContext extends AbstractExeContext implements ExeContext {
         return functionCallContext;
     }
 
-    public Tuple getDataTuple() {
-        return dataTuple;
+    public BlockDatumMap getBlockDatumMap() {
+        return blockDatumMap;
     }
 }

@@ -168,10 +168,10 @@ public class AstUtils {
      * @param refChain
      * @return
      */
-    public static void resolveAstRef(ParseUnit parseUnit, ExpressionChain refChain) {
-        Namespace refNs = getNs(refChain);
+    public static void resolveAstRef(NSRegistry nsRegistry, ParseUnit parseUnit, ExpressionChain refChain) {
+        Namespace refNs = getNs(nsRegistry, refChain);
         checkSetResolve(refChain.getNsRefPart(), refNs);
-        AstScopeCollection scopeSequence = getScopeCollection(parseUnit, refChain);
+        AstScopeCollection scopeSequence = getScopeCollection(nsRegistry, parseUnit, refChain);
 
         // TODO Handle dependency between references: e.g., might have a ref to a function; i
         //      resolve the function, but its return type has not yet been resolved
@@ -311,11 +311,11 @@ public class AstUtils {
      * @param reference
      * @return The appropriate {@link AstScopeCollection} for the reference.
      */
-    private static AstScopeCollection getScopeCollection(ParseUnit parseUnit, ExpressionChain reference) {
+    private static AstScopeCollection getScopeCollection(NSRegistry nsRegistry, ParseUnit parseUnit, ExpressionChain reference) {
         ScopeKind refFromScopeKind = inferScopeKind(reference.getParent());
         // TODO add logic to reuse scope collections where possible, e.g., references from
         // the same context have the same scopes, etc.
-        ScopeCollectionWalker walker = new ScopeCollectionWalker(parseUnit, reference);
+        ScopeCollectionWalker walker = new ScopeCollectionWalker(nsRegistry, parseUnit, reference);
         return walker.getAllScopesAsList();
     }
 
@@ -327,10 +327,10 @@ public class AstUtils {
         }
     }
 
-    public static Namespace getNs(ExpressionChain reference) {
+    public static Namespace getNs(NSRegistry nsRegistry, ExpressionChain reference) {
         Namespace ns = null;
         if (reference.hasNs())
-            ns = NSRegistry.getInstance().getNamespace(reference.getNsRefPart().getNameExprText());
+            ns = nsRegistry.getNamespace(reference.getNsRefPart().getNameExprText());
         else
             ns = AstUtils.findParentNs(reference);
 
@@ -603,10 +603,10 @@ public class AstUtils {
         return AstFactory.getInstance();
     }
 
-    public static boolean isJavaNs(ImportExpr importExpr) {
+    public static boolean isJavaNs(NSRegistry nsRegistry, ImportExpr importExpr) {
         SimpleNameRefExpr nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
         return nsRefPart != null
-            && nsRefPart.getNameExprText().equals(NSRegistry.getInstance().getJavaNs().getName());
+            && nsRefPart.getNameExprText().equals(nsRegistry.getJavaNs().getName());
     }
 
     public static void addNewMetaRefParts(ExpressionChain parentPath, SourceInfo sourceInfo, String... nameExprs) {
@@ -719,11 +719,13 @@ public class AstUtils {
         private List<AstScopeCollection> scopeCollGrouped = new LinkedList<>();
         private AstScopeCollection allScopes;
         private AstScopeCollection intrinsicsScopeColl = new AstScopeCollection("Intrinsic Types");
+        private NSRegistry nsRegistry;
         {
             intrinsicsScopeColl.add(new StaticScope(intrinsicsScopeColl, INTRINSIC_TYPES, ScopeKind.GLOBAL));
         }
 
-        public ScopeCollectionWalker(ParseUnit parseUnit, ExpressionChain exprChain) {
+        public ScopeCollectionWalker(NSRegistry nsRegistry, ParseUnit parseUnit, ExpressionChain exprChain) {
+            this.nsRegistry = nsRegistry;
             this.parseUnit = parseUnit;
             this.theRefChain = exprChain;
             // init scope to the reference element itself
@@ -818,7 +820,7 @@ public class AstUtils {
         private AstScopeCollection buildNsRootScopes() {
             AstScopeCollection theColl = new AstScopeCollection("Directories in Root of JS");
             //
-            theColl.add(new StaticScope(theColl, getNs(theRefChain).getRootDir(), ScopeKind.GLOBAL));
+            theColl.add(new StaticScope(theColl, getNs(nsRegistry, theRefChain).getRootDir(), ScopeKind.GLOBAL));
             //
             return theColl;
         }

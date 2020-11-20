@@ -7,20 +7,15 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.jnative.space;
-
-import java.util.Map;
-import java.util.TreeMap;
+package org.jkcsoft.space.jlib.opsys;
 
 /**
  * @author Jim Coles
  */
-public class SpaceOpers {
+public class JOpSys {
 
-    private static Map<String, String> tokenToMethod = new TreeMap<>();
-
-//    static {
-//        Space2Lexer.ruleNames[Space2Lexer.AssignOper];
-//    }
+    public void println(String msg) {
+        System.err.println(msg);
+    }
 
 }

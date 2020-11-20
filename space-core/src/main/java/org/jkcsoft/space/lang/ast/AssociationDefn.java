@@ -45,7 +45,11 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public interface AssociationDefn extends Declaration {
 
-    AssociationDefnEnd getFromEnd();
+    AssociationDefnEnd getTypeFromEnd();
+    boolean hasTypeFromEnd();
+
+    UsageAssociationEnd getFromUsagePoint();
+    boolean hasUsageFromEnd();
 
     AssociationDefnEnd getToEnd();
 

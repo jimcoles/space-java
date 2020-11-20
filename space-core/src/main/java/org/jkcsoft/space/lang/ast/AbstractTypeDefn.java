@@ -22,14 +22,22 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
 
     private boolean isView = false;
 
+    // The verbatim sequence of declarations and statements. Sequence is important for datum visibility rules
+    // All other lists are redundantly maintained
+    private List<Expression> elementSequence = new LinkedList<>();
+    //
+    private List<Statement> datumInits = new LinkedList<>(); // just RHS of datum decls
+    //
+    private List<StatementBlock> statementSequence = new LinkedList<>();  // child statements
+    //
     private List<Declaration> datumDeclList;
     //
     private List<VariableDecl> variablesDeclList;
     private List<AssociationDefn> associationDeclList;
     private List<ProjectionDecl> projectionDeclList;
-    //
-    private StatementBlock initBlock;   // holds assignment exprs for var and assoc defns
     private List<FunctionDefn> functionDefns = new LinkedList<>();
+
+    //
     private SequenceTypeDefn sequenceTypeDefn;
     private SetTypeDefn setTypeDefn;
 
@@ -56,12 +64,14 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     //
 
     @Override
-    public VariableDecl addVariableDecl(VariableDecl variableDecl) {
+    public ContextDatumDefn addVariableDecl(VariableDecl variableDecl) {
+        elementSequence.add(variableDecl);
         datumDeclList.add(variableDecl);
         variablesDeclList.add(variableDecl);
         //
         addChild(variableDecl);
-        return variableDecl;
+        //
+        return this;
     }
 
     @Override
@@ -70,18 +80,23 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     }
 
     @Override
-    public AssociationDefn addAssociationDecl(AssociationDefn associationDecl) {
+    public ContextDatumDefn addAssociationDecl(AssociationDefn associationDecl) {
+        elementSequence.add(associationDecl);
         datumDeclList.add(associationDecl);
         associationDeclList.add(associationDecl);
         //
         addChild(associationDecl);
         //
-        return associationDecl;
+        return this;
     }
 
     @Override
     public ProjectionDecl addProjectionDecl(ProjectionDecl projectionDecl) {
+        elementSequence.add(projectionDecl);
         projectionDeclList.add(projectionDecl);
+        //
+        addChild(projectionDecl);
+        //
         return projectionDecl;
     }
 
@@ -105,8 +120,28 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     }
 
     @Override
-    public StatementBlock getInitBlock() {
-        return initBlock;
+    public ContextDatumDefn addInitExpression(ExprStatement<AssignmentExpr> assignmentExpr) {
+        elementSequence.add(assignmentExpr);
+        datumInits.add(assignmentExpr);
+        addChild(assignmentExpr);
+        return this;
+    }
+
+    @Override
+    public List<Statement> getInitializations() {
+        return datumInits;
+    }
+
+    public List<StatementBlock> getStatementSequence() {
+        return statementSequence;
+    }
+
+    public FunctionDefn addFunctionDefn(FunctionDefn actionDefn) {
+        functionDefns.add(actionDefn);
+        //
+        addChild(actionDefn);
+        //
+        return actionDefn;
     }
 
     public List<FunctionDefn> getFunctionDefns() {
@@ -114,23 +149,16 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     }
 
     public SpaceFunctionDefn getFunction(String name) {
+
         NamedElement childWithName = getChildByName(name);
+
+        if (childWithName == null)
+            throw new SpaceX("function [" + name + "] not found in " + this);
+
         if (!(childWithName instanceof SpaceFunctionDefn))
             throw new SpaceX("reference meta object [" + childWithName + "] is not a function");
 
-        SpaceFunctionDefn functionDefn = (SpaceFunctionDefn) childWithName;
-        if (functionDefn == null) {
-            throw new SpaceX("function [" + name + "] not found in " + this);
-        }
-        return functionDefn;
-    }
-
-    public FunctionDefn addFunctionDefn(FunctionDefn actionDefn) {
-        functionDefns.add(actionDefn);
-        //
-        addChild((AbstractModelElement) actionDefn);
-        //
-        return actionDefn;
+        return (SpaceFunctionDefn) childWithName;
     }
 
     @Override

@@ -81,6 +81,13 @@ public class AstFactory {
         return element;
     }
 
+    public AssociationDefnImpl newAssociationDecl(SourceInfo sourceInfo, String name, ContextDatumDefn fromUsageContext,
+                                                  TypeRef toTypeRef)
+    {
+        AssociationDefnImpl element = new AssociationDefnImpl(sourceInfo, name, fromUsageContext, toTypeRef);
+        return element;
+    }
+
     public PrimitiveLiteralExpr newPrimLiteralExpr(SourceInfo sourceInfo, NumPrimitiveTypeDefn primitiveTypeDefn,
                                                    String text)
     {

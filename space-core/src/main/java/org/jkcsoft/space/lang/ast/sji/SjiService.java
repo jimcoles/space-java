@@ -15,6 +15,7 @@ import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.*;
 import org.jkcsoft.space.lang.instance.sji.*;
 import org.jkcsoft.space.lang.runtime.*;
+import org.jkcsoft.space.jlib.bindings.NameBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,8 @@ public class SjiService {
     private final AstFactory astFactory;
     private final ObjectFactory spaceObjFactory;
     //
-    private final Map<String, String> javaToSpacePackages = new TreeMap<>();
+    /** Preset bindings are for external Java libraries including core Java runtime. */
+    private final Map<String, String> presetJavaBindings = new TreeMap<>();
     private final Map<Class, SjiTypeMapping> sjiMappingByClass = new HashMap<>();
     private final Map<String, SjiTypeMapping> sjiMappingByName = new HashMap<>();
     //
@@ -68,29 +70,49 @@ public class SjiService {
     }
 
     public void registerPackageBinding(String javaPackage, String spacePackage) {
-        javaToSpacePackages.put(javaPackage, spacePackage);
-    }
-
-    public String getSpacePackage(String javaPackageFqn) {
-        return javaToSpacePackages.get(javaPackageFqn);
+        presetJavaBindings.put(javaPackage, spacePackage);
     }
 
     /**
      * If javaClassName matches any binding, substitute the binding right-side for that matched
      * portion of the java class/package name.
-     * @param javaClassName
-     * @return
+     * @return The computed Space FQ name
      */
-    public String getFQSpaceName(String javaClassName) {
-        String spaceTypeName = javaClassName;
-        for (Map.Entry<String, String> javaPackageBinding : javaToSpacePackages.entrySet()) {
-            if (javaClassName.startsWith(javaPackageBinding.getKey())) {
-                spaceTypeName = javaPackageBinding.getValue() +
-                    javaClassName.substring(javaPackageBinding.getKey().length());
+    public String getFQSpaceName(Class javaType) {
+        String javaTypeName = javaType.getName();
+        String spaceTypeName = javaTypeName; // default if no name binding override
+//            String overrideName = checkOverrides(javaType);
+//            if (overrideName != null)
+//                spaceTypeName = overrideName;
+        return spaceTypeName;
+    }
+
+    private String checkOverrides(Class javaType) {
+        String overrideName = null;
+        String javaTypeName = javaType.getName();
+
+        // check for annotation
+        boolean isOverride = false;
+        int levelFromTop = 0;
+        if (javaType.isAnnotationPresent(NameBinding.class)) {
+            isOverride = true;
+        }
+
+        Package javaPackage = javaType.getPackage();
+        if (javaPackage.isAnnotationPresent(NameBinding.class)) {
+            isOverride = true;
+            NameBinding nameBinding = javaPackage.getAnnotation(NameBinding.class);
+        }
+
+        // check for standard override entry
+        for (Map.Entry<String, String> javaPackageBinding : presetJavaBindings.entrySet()) {
+            if (javaTypeName.startsWith(javaPackageBinding.getKey())) {
+                overrideName = javaPackageBinding.getValue() +
+                    javaTypeName.substring(javaPackageBinding.getKey().length());
                 break;
             }
         }
-        return spaceTypeName;
+        return overrideName;
     }
 
     /**
@@ -103,14 +125,14 @@ public class SjiService {
      *
      * @param className Standard Java fully-qualified class name "java.lang.String".
      */
-    public TypeDefn getSjiTypeProxyDeepLoad(String className, String ... overrideDirNames)
+    public TypeDefn getSjiTypeProxyDeepLoad(String className)
         throws ClassNotFoundException
     {
         TypeDefn wrapper = null;
         SjiTypeMapping sjiTypeMapping = sjiMappingByName.get(className);
         if (sjiTypeMapping == null || sjiTypeMapping.getState() == LinkState.INITIALIZED) {
             Class<?> jnClass = Class.forName(className);
-            wrapper = getSjiTypeProxyDeepLoad(jnClass, overrideDirNames);
+            wrapper = getSjiTypeProxyDeepLoad(jnClass);
         }
         else {
             wrapper = sjiTypeMapping.getSjiProxy();
@@ -118,7 +140,7 @@ public class SjiService {
         return wrapper;
     }
 
-    public TypeDefn getSjiTypeProxyDeepLoad(Class<?> jnClass, String ... overrideDirNames) {
+    public TypeDefn getSjiTypeProxyDeepLoad(Class<?> jnClass) {
         SjiTypeMapping sjiTypeMapping = sjiMappingByClass.get(jnClass);
         if (sjiTypeMapping == null) {
             sjiTypeMapping = createSjiTypeMapping(jnClass);
@@ -128,7 +150,7 @@ public class SjiService {
         }
 
         if (sjiTypeMapping.getState() == LinkState.INITIALIZED)
-            deepLoadSjiTypeProxy(sjiTypeMapping, overrideDirNames);
+            deepLoadSjiTypeProxy(sjiTypeMapping);
 
         if (sjiTypeMapping.getState() != LinkState.RESOLVED) {
             throw new SpaceX("SJI wrapper could not be loaded for [" + jnClass + "]");
@@ -137,19 +159,14 @@ public class SjiService {
         return sjiTypeMapping.getSjiProxy();
     }
 
-    private void deepLoadSjiTypeProxy(SjiTypeMapping sjiTypeMapping, String[] overrideDirNames) {
-        String[] packageNameParts;
-        if (overrideDirNames != null)
-            packageNameParts = overrideDirNames;
-        else {
-            String spaceTypeName = getFQSpaceName(sjiTypeMapping.getJavaClass().getName());
-            String[] spaceTypeNameParts = splitClassName(spaceTypeName);
-            packageNameParts = new String[spaceTypeNameParts.length - 1];
-            System.arraycopy(spaceTypeNameParts, 0, packageNameParts, 0, packageNameParts.length);
-        }
+    private void deepLoadSjiTypeProxy(SjiTypeMapping sjiTypeMapping) {
+        String spaceFQTypeName = getFQSpaceName(sjiTypeMapping.getJavaClass());
+        String[] spaceTypeNameParts = splitFQName(spaceFQTypeName);
+        String[] spaceDirNameParts = new String[spaceTypeNameParts.length - 1];
+        System.arraycopy(spaceTypeNameParts, 0, spaceDirNameParts, 0, spaceDirNameParts.length);
 
         Directory parentDir =
-            AstUtils.ensureDir(getNsRegistry().getJavaNs().getRootDir(), packageNameParts);
+            AstUtils.ensureDir(getNsRegistry().getJavaNs().getRootDir(), spaceDirNameParts);
 
         // Build wrapper for this class and references for other used classes
         ParseUnit newParseUnit = buildShallowSjiTypeProxy(sjiTypeMapping.getJavaClass());
@@ -172,7 +189,7 @@ public class SjiService {
         );
         for (SjiTypeRefByClass unresolvedRef : unresolvedRefs) {
             if (unresolvedRef.getState() == LinkState.INITIALIZED) {
-                deepLoadSjiTypeProxy(unresolvedRef.getMapping(), null);
+                deepLoadSjiTypeProxy(unresolvedRef.getMapping());
 //                TypeDefn spaceWrapper = getDeepLoadSpaceWrapper(unresolvedRef.getWrappedClass());
                 if (unresolvedRef.getState() != LinkState.RESOLVED) {
                     log.error("space wrapper for Java class [{}] did not load properly",
@@ -257,7 +274,8 @@ public class SjiService {
                     argTupleTypeDefn.addAssociationDecl(
 //                        newAssociationDecl(jParam, sjiParamTypeInfo)
                         getAstFactory()
-                            .newAssociationDecl(paramTypeRef.getSourceInfo(), jParam.getName(), null,
+                            .newAssociationDecl(paramTypeRef.getSourceInfo(), jParam.getName(),
+                                                argTupleTypeDefn,
                                                 paramTypeRef)
                     );
                 }
@@ -406,7 +424,7 @@ public class SjiService {
         return holder;
     }
 
-    private String[] splitClassName(String className) {
+    private String[] splitFQName(String className) {
         return className.split("\\.");
     }
 

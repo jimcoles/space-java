@@ -70,7 +70,7 @@ public class Antlr2AstTransform {
         this.srcFile = srcFile;
     }
 
-    public ParseUnit transform(SpaceParser.ParseUnitContext spaceParseUnit) {
+    public ParseUnit toAst(SpaceParser.ParseUnitContext spaceParseUnit) {
         log.info("transforming ANTLR parse tree to AST starting with root parse node.");
         logTrans(spaceParseUnit);
         ParseUnit parseUnitAST = astFactory.newParseUnit(toSI(spaceParseUnit));
@@ -153,9 +153,7 @@ public class Antlr2AstTransform {
             //            spaceTypeDefnContext.spacePathList();
         }
 
-        SpaceParser.SpaceTypeDefnBodyContext spaceTypeDefnBodyContext = spaceTypeDefnContext.spaceTypeDefnBody();
-
-//        complexTypeImpl.setBody(toAst(spaceTypeDefnContext.spaceTypeDefnBody()));
+        setProjection(complexTypeImpl, spaceTypeDefnContext.spaceTypeDefnBody());
 
         return complexTypeImpl;
     }
@@ -176,7 +174,7 @@ public class Antlr2AstTransform {
                 VariableDeclImpl variableDeclAST = toAst(variableDefnStmtContext.variableDefn());
                 typeDefn.addVariableDecl(variableDeclAST);
                 // Add assignment if there is one
-                extractInit(typeDefn.getInitBlock(), variableDefnStmtContext);
+                extractInit(typeDefn, variableDefnStmtContext);
             }
         }
 
@@ -187,7 +185,7 @@ public class Antlr2AstTransform {
                 typeDefn.addAssociationDecl(toAst( astFactory.newTypeRef(toSI(assocDefCtx), typeDefn),
                                                    assocDefCtx.associationDefn()));
                 // Add assignment expr if it exists
-                extractInit(typeDefn.getInitBlock(), assocDefCtx);
+                extractInit(typeDefn, assocDefCtx);
             }
         }
 
@@ -204,20 +202,22 @@ public class Antlr2AstTransform {
         return;
     }
 
-    private void extractInit(StatementBlock blockAST, SpaceParser.AssociationDefnStmtContext assocDefCtx) {
+    private void extractInit(ContextDatumDefn datumDefnContext, SpaceParser.AssociationDefnStmtContext assocDefCtx) {
         SpaceParser.RightAssignmentExprContext rightAssignmentExprContext =
             assocDefCtx.associationDefn().rightAssignmentExpr();
         if (rightAssignmentExprContext != null) {
-            blockAST.addExpr(
-                toAst(
-                    toMetaRefChain(assocDefCtx.associationDefn().associationDecl().identifier()),
-                    rightAssignmentExprContext
+            datumDefnContext.addInitExpression(
+                new ExprStatement<>(
+                    toAst(
+                        toMetaRefChain(assocDefCtx.associationDefn().associationDecl().identifier()),
+                        rightAssignmentExprContext
+                    )
                 )
             );
         }
     }
 
-    private void extractInit(StatementBlock blockAST, SpaceParser.VariableDefnStmtContext variableDefnStmtContext)
+    private void extractInit(ContextDatumDefn datumDefnContext, SpaceParser.VariableDefnStmtContext variableDefnStmtContext)
     {
         SpaceParser.IdentifierContext identifierCtxt =
             variableDefnStmtContext.variableDefn().variableDecl().identifier();
@@ -226,7 +226,9 @@ public class Antlr2AstTransform {
         if (rightAssignmentExprContext != null) {
             ExpressionChain expressionChain = astFactory.newMetaRefChain(toSI(identifierCtxt), MetaType.DATUM, null);
             AstUtils.addNewMetaRefParts(expressionChain, toSI(identifierCtxt), toText(identifierCtxt));
-            blockAST.addExpr(toAst(expressionChain, rightAssignmentExprContext));
+            datumDefnContext.addInitExpression(
+                new ExprStatement<>(toAst(expressionChain, rightAssignmentExprContext))
+            );
         }
     }
 
@@ -243,14 +245,24 @@ public class Antlr2AstTransform {
         return assignmentExprAST;
     }
 
-    private AssociationDefnImpl toAst(TypeRef fromTypeRef,
-                                      SpaceParser.AssociationDefnContext assocDefCtx) {
+    private AssociationDefnImpl toAst(TypeRef fromTypeRef, SpaceParser.AssociationDefnContext assocDefCtx) {
         logTrans(assocDefCtx);
         SpaceParser.ComplexOptCollTypeRefContext complexTypeRefContext = assocDefCtx.associationDecl().complexOptCollTypeRef();
         return astFactory.newAssociationDecl(
             toSI(assocDefCtx),
             toText(assocDefCtx.associationDecl().identifier()),
             fromTypeRef,
+            toAst(complexTypeRefContext)
+        );
+    }
+
+    private AssociationDefnImpl toAst(ContextDatumDefn contextDatumDefn, SpaceParser.AssociationDefnContext assocDefCtx) {
+        logTrans(assocDefCtx);
+        SpaceParser.ComplexOptCollTypeRefContext complexTypeRefContext = assocDefCtx.associationDecl().complexOptCollTypeRef();
+        return astFactory.newAssociationDecl(
+            toSI(assocDefCtx),
+            toText(assocDefCtx.associationDecl().identifier()),
+            contextDatumDefn,
             toAst(complexTypeRefContext)
         );
     }
@@ -330,7 +342,7 @@ public class Antlr2AstTransform {
             else if (datumDefnStmtContext.associationDefnStmt() != null) {
                 functionDefnAST.getStatementBlock().addAssociationDecl(
                     toAst(
-                        astFactory.newTypeRef(SourceInfo.INTRINSIC, functionDefnAST.getStatementBlock()),
+                        (ContextDatumDefn) functionDefnAST.getStatementBlock(),
                         datumDefnStmtContext.associationDefnStmt().associationDefn()
                     )
                 );
@@ -417,8 +429,7 @@ public class Antlr2AstTransform {
 
     private StatementBlock toAst(SpaceParser.StatementBlockContext statementBlockContext) {
         logTrans(statementBlockContext);
-        StatementBlock statementBlockAST =
-            astFactory.newStatementBlock(toSI(statementBlockContext));
+        StatementBlock statementBlockAST = astFactory.newStatementBlock(toSI(statementBlockContext));
         List<SpaceParser.DatumDefnStmtContext> datumDefnStmtContexts = statementBlockContext.datumDefnStmt();
         List<SpaceParser.StatementContext> statementContexts = statementBlockContext.statement();
         //
@@ -431,11 +442,9 @@ public class Antlr2AstTransform {
                 SpaceParser.AssociationDefnStmtContext associationDefnStmtContext =
                     datumDefnStmtContext.associationDefnStmt();
                 if (associationDefnStmtContext != null) {
-                    statementBlockAST
-                        .addAssociationDecl(
-                            toAst(astFactory.newTypeRef(toSI(associationDefnStmtContext), statementBlockAST),
-                                  associationDefnStmtContext.associationDefn())
-                        );
+                    statementBlockAST.addAssociationDecl(
+                        toAst(statementBlockAST, associationDefnStmtContext.associationDefn())
+                    );
                     extractInit(statementBlockAST, associationDefnStmtContext);
                 }
             }
@@ -448,7 +457,7 @@ public class Antlr2AstTransform {
             SpaceParser.ReturnStatementContext returnStatementContext = statementContext.returnStatement();
             SpaceParser.StatementBlockContext nestedStatementBlockContext = statementContext.statementBlock();
             if (expressionCtxt != null) {
-                statementBlockAST.addExpr(toAst(expressionCtxt));
+                statementBlockAST.addValueExpr(toAst(expressionCtxt));
             }
             else if (ifStatementContext != null) {
                 // TODO

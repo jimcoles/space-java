@@ -32,7 +32,7 @@ public class BinaryAstReader implements AstReader {
     }
 
     @Override
-    public FileLoadResults loadFile(Directory spaceDir, File spaceSrcFile) throws IOException {
+    public FileLoadResults loadFile(File spaceSrcFile) throws IOException {
         return null;
     }
 

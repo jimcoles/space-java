@@ -7,15 +7,20 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.jnative;
+package org.jkcsoft.space.jlib.space;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Jim Coles
  */
-@Retention(RetentionPolicy.SOURCE)
-public @interface SpaceNative {
+public class SpaceOpers {
+
+    private static Map<String, String> tokenToMethod = new TreeMap<>();
+
+//    static {
+//        Space2Lexer.ruleNames[Space2Lexer.AssignOper];
+//    }
 
 }

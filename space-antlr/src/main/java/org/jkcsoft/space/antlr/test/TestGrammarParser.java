@@ -32,7 +32,7 @@ public class TestGrammarParser implements AstLoader {
     }
 
     @Override
-    public FileLoadResults loadFile(Directory spaceDir, File spaceSrcFile) throws IOException {
+    public FileLoadResults loadFile(File spaceSrcFile) throws IOException {
         return null;
     }
 

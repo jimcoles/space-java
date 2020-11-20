@@ -1,5 +1,5 @@
 
-public type NtmuSpace
+public type Ntmu
 /*
  This is a smart annotation comment for my awesome space.
 */

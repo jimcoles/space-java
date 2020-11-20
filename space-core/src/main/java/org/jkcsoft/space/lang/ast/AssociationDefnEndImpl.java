@@ -16,11 +16,11 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class AssociationDefnEndImpl extends NamedElement implements AssociationDefnEnd {
 
-    private final int lowerMultiplicity;
-    private final int upperMultiplicity;
     private final TypeRef endTypeRef;
     private final boolean isRequired;
     private final boolean isSingular;
+    private final int lowerMultiplicity;
+    private final int upperMultiplicity;
 
     AssociationDefnEndImpl(SourceInfo sourceInfo, String name, TypeRef endTypeRef, boolean isRequired,
                            boolean isSingular, int lowerMultiplicity, int upperMultiplicity)

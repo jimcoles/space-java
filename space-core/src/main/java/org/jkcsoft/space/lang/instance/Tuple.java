@@ -38,6 +38,7 @@ import java.util.List;
  */
 public interface Tuple extends
     ValueCollection<ValueHolder<Value<Object>, Object>, Value<Object>, Object>, Value<Object>,
+    DatumMap,
     SpaceObject
 {
 

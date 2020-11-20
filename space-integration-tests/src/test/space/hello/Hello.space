@@ -1,7 +1,7 @@
 import java:java.lang.CharSequence;
 import space.lang.OpSys;
 
-public type MySpace
+public type Hello
 /*
  This is a smart annotation comment for
  my awesome space.

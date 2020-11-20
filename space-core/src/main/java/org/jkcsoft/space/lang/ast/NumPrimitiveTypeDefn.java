@@ -82,12 +82,12 @@ public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
     }
 
     @Override
-    public VariableDecl addVariableDecl(VariableDecl variableDecl) {
+    public ContextDatumDefn addVariableDecl(VariableDecl variableDecl) {
         return null;
     }
 
     @Override
-    public AssociationDefn addAssociationDecl(AssociationDefn associationDecl) {
+    public ContextDatumDefn addAssociationDecl(AssociationDefn associationDecl) {
         return null;
     }
 
@@ -98,11 +98,6 @@ public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
 
     @Override
     public List<Declaration> getDatumDeclList() {
-        return null;
-    }
-
-    @Override
-    public StatementBlock getInitBlock() {
         return null;
     }
 

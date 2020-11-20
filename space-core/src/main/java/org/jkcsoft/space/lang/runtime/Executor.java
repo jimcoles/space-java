@@ -22,8 +22,8 @@ import org.jkcsoft.space.lang.loader.AstLoadError;
 import org.jkcsoft.space.lang.loader.AstLoader;
 import org.jkcsoft.space.lang.loader.DirLoadResults;
 import org.jkcsoft.space.lang.metameta.MetaType;
-import org.jkcsoft.space.lang.runtime.jnative.math.Math;
-import org.jkcsoft.space.lang.runtime.jnative.opsys.JOpSys;
+import org.jkcsoft.space.jlib.math.Math;
+import org.jkcsoft.space.jlib.opsys.JOpSys;
 import org.jkcsoft.space.lang.runtime.typecasts.CastTransforms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,7 +141,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
 
     private Executor(ExeSettings exeSettings) {
         this.exeSettings = exeSettings;
-        this.nsRegistry = NSRegistry.getInstance();
+        this.nsRegistry = NSRegistry.newInstance();
         this.astFactory = AstFactory.getInstance();
         this.defaultSpace = new InMemorySpaceImpl(null, null);
         initRuntime();
@@ -151,8 +151,11 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
 
     private void initRuntime() {
         this.sjiService = new SjiService(this);
-        this.sjiService.registerPackageBinding("org.jkcsoft.space.lang.runtime.jnative", "space");
+        // clunky way of doing package name alterations
+        this.sjiService.registerPackageBinding("org.jkcsoft.space.jnative", "space.java");
+        //
         loadAstLoader("org.jkcsoft.space.antlr.loaders.G2AntlrParser");
+//        nsRegistry.getUserNs().
     }
 
     @Override
@@ -307,8 +310,9 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
                 for (File srcRootDir : srcRootDirs) {
                     //
                     if (srcRootDir.exists()) {
+                        log.info("start loading source root [" + srcRootDir + "]");
                         DirLoadResults dirLoadResults = loadSrcRootDir(srcRootDir, nsRegistry.getUserNs());
-                        log.info("loaded source root [" + srcRootDir + "]");
+                        log.info("finished loading source root [" + srcRootDir + "]");
                         //
                         runResults.addSrcDirLoadResult(dirLoadResults);
                         validCount++;
@@ -385,6 +389,8 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         }
         catch (SpaceX spex) {
 //            PrintStream ps = System.err;
+            runResults.setRuntimeError(spex);
+
             PrintStream psOut = System.out;
             StringBuffer sb = new StringBuffer();
             psOut.println("Space Exception: " + spex.getMessage());
@@ -411,7 +417,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
             AstUtils.queryAst(nsRegistry.getUserNs().getRootDir(),
                               new QueryAstConsumer<>(
                                   ImportExpr.class,
-                                  elem -> elem instanceof ImportExpr && AstUtils.isJavaNs((ImportExpr) elem)
+                                  elem -> elem instanceof ImportExpr && AstUtils.isJavaNs(nsRegistry, (ImportExpr) elem)
                               )
             );
         for (ImportExpr javaImport : javaImports) {
@@ -422,7 +428,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
                 getSjiService().getSjiTypeProxyDeepLoad(targetJavaTypeRef.getFullUrlSpec());
             } catch (ClassNotFoundException e) {
                 // NOTE Java class might have been loaded already under the specified full path
-                AstUtils.resolveAstRef(AstUtils.findParentParseUnit(targetJavaTypeRef), targetJavaTypeRef);
+                AstUtils.resolveAstRef(nsRegistry, AstUtils.findParentParseUnit(targetJavaTypeRef), targetJavaTypeRef);
                 if (!targetJavaTypeRef.isResolved()) {
                     String msg = "could not find Java import class [" + targetJavaTypeRef.getFullUrlSpec() + "]" +
                         " in the Java classpath";
@@ -478,12 +484,11 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         }
 
         FullTypeRefImpl opSysRef = FullTypeRefImpl.newFullTypeRef(
-            nsRegistry.getJavaNs().getName()
-                + ":" + getSjiService().getFQSpaceName(JOpSys.class.getName())
+            Language.JAVA.getCodeName() + ":" + getSjiService().getFQSpaceName(JOpSys.class)
         );
-        AstUtils.resolveAstRef(null, opSysRef);
+        AstUtils.resolveAstRef(nsRegistry, null, opSysRef);
         if (opSysRef.isResolvedValid())
-            op_sys_type_def = (TypeDefn) opSysRef.getResolvedType();
+            op_sys_type_def = opSysRef.getResolvedType();
         else
             log.error("could not resolve [" + opSysRef + "]");
 
@@ -555,6 +560,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
     private void mergeNewChildren(Directory existingParentDir, Directory newDir) {
         //
         for (ParseUnit newChildParseUnit : newDir.getParseUnits()) {
+            log.debug("adding new parse unit [{}] to dir [{}]", newChildParseUnit, existingParentDir.getFQName());
             existingParentDir.addParseUnit(newChildParseUnit);
         }
         //
@@ -564,6 +570,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
                 mergeNewChildren(existingSubDir, childOfNewDir);
             }
             else {
+                log.debug("adding new dir [{}] to [{}]", childOfNewDir.getFQName(), existingParentDir.getFQName());
                 existingParentDir.addDir(childOfNewDir);
             }
         }
@@ -672,7 +679,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
     }
 
     private void resolveAstPath(ParseUnit parseUnit, ExpressionChain reference, List<AstLoadError> errors) {
-        AstUtils.resolveAstRef(parseUnit, reference);
+        AstUtils.resolveAstRef(nsRegistry, parseUnit, reference);
         if (!reference.isResolved()) {
             AstLoadError error = new AstLoadError(AstLoadError.Type.LINK, reference.getSourceInfo(),
                                                   "could not resolve symbol '" + getFirstUnresolved(reference) + "'");
@@ -713,15 +720,20 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         IntrinsicSourceInfo sourceInfo = new IntrinsicSourceInfo();
         String[] pathNodes = mainSpacePath.split("/.");
         FullTypeRefImpl exeTypeRef = getAstFactory().newTypeRef(sourceInfo, null, null);
-        SimpleNameRefExpr userNsRefPart = getAstFactory().newNameRefExpr(sourceInfo, nsRegistry.getUserNs().getName());
+        SimpleNameRefExpr userNsRefPart = getAstFactory().newNameRefExpr(sourceInfo, NSRegistry.NS_USER);
         exeTypeRef.setNsRefPart(userNsRefPart);
         AstUtils.addNewMetaRefParts(exeTypeRef, sourceInfo, pathNodes);
-        AstUtils.resolveAstRef(null, exeTypeRef);
+        AstUtils.resolveAstRef(nsRegistry, null, exeTypeRef);
         TypeDefnImpl bootTypeDefn = (TypeDefnImpl) exeTypeRef.getResolvedType();
 //        SpaceTypeDefn bootTypeDefn = progSpaceDir.getFirstSpaceDefn();
+        if (bootTypeDefn == null)
+            throw new SpaceX("main type '{}' not found", exeTypeRef);
+
         Tuple mainTypeTuple = newTupleImpl(bootTypeDefn);
         EvalContext evalContext = new EvalContext();
         SpaceFunctionDefn spMainActionDefn = bootTypeDefn.getFunction("main");
+        if (spMainActionDefn == null)
+            throw new SpaceX("no main() function in type '{}'", exeTypeRef);
 
         ProgSourceInfo progSourceInfo = new ProgSourceInfo();
         FunctionCallExpr bootMainCallExpr = getAstFactory().newFunctionCallExpr(progSourceInfo);
@@ -745,12 +757,19 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         // init the context tuple
         callStack.push(bootCallCtxt);
         // this evaluates the init statements for the type such as var inits.
-        eval(evalContext, bootTypeDefn.getInitBlock());
+        eval(evalContext, bootTypeDefn.getInitializations());
         // call the 'main' function a dummy function call expr
         eval(evalContext, bootMainCallExpr);
         callStack.pop();
         log.debug("exiting Space program execution");
         return null;
+    }
+
+    private void eval(EvalContext evalContext, List<Statement> initStatements) {
+        for (Statement statement : initStatements) {
+            // must be assignments or statement blocks
+            eval(evalContext, statement);
+        }
     }
 
     private Declaration newAnonDecl(TypeRef fromTypeRef, TypeDefn typeDefn) {
@@ -836,9 +855,8 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
     private void eval(EvalContext evalContext, StatementBlock statementBlock) {
         log.debug("eval: " + statementBlock);
         FunctionCallContext functionCallContext = evalContext.peekStack();
-        Tuple blockTuple = statementBlock instanceof TypeDefn ?
-            functionCallContext.getCtxObject() : newTupleImpl(statementBlock);
-        functionCallContext.addBlockContext(getObjFactory().newBlockContext(statementBlock, blockTuple));
+        BlockDatumMap blockDatumMap = getObjFactory().newBlockDatumMap(statementBlock);
+        functionCallContext.addBlockContext(getObjFactory().newBlockContext(statementBlock, blockDatumMap));
         List<Statement> statementSequence = statementBlock.getStatementSequence();
         for (Statement statement : statementSequence) {
             eval(evalContext, statement);
@@ -1163,7 +1181,7 @@ public class Executor extends ExprProcessor implements ExeContext, InternalExeCo
         Iterator<BlockContext> blockContextIterator = blocks.descendingIterator();
         while (assignable == null && blockContextIterator.hasNext()) {
             BlockContext blockContext = blockContextIterator.next();
-            assignable = blockContext.getDataTuple().get((Declaration) toMember);
+            assignable = blockContext.getBlockDatumMap().get((Declaration) toMember);
         }
         return assignable;
     }

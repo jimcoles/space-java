@@ -50,8 +50,12 @@
         <appender-ref ref="flatAstDumpFile"/>
     </logger>
 
+    <logger name="org.jkcsoft.space.antlr.loaders.Antlr2AstTransform" additivity="true">
+        <level value="trace"/>
+    </logger>
+
     <root>
-        <priority value="info"/>
+        <priority value="debug"/>
         <appender-ref ref="console"/>
         <appender-ref ref="file"/>
     </root>

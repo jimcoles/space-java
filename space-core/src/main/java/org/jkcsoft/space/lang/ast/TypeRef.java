@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * In the AST, a reference to a Space Type.
+ * In the AST, a reference to a {@link TypeDefn}.
  *
  * @author Jim Coles
  */

@@ -44,12 +44,11 @@ public interface AstLoader {
     /**
      * Directly load specified file into the spaceDir.
      *
-     * @param spaceDir
      * @param spaceSrcFile
      * @return The {@link ParseUnit} associated with spaceSrcFile.
      * @throws IOException
      */
-    FileLoadResults loadFile(Directory spaceDir, File spaceSrcFile) throws IOException;
+    FileLoadResults loadFile(File spaceSrcFile) throws IOException;
 
     /**
      * The most general load method for loaders that are not file system based, e.g.,

@@ -17,7 +17,6 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.tool.ast.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.LoggerFactory;
 import org.jkcsoft.java.util.JavaHelper;
 import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.antlr.SpaceLexer;
@@ -77,7 +76,7 @@ public class G2AntlrParser implements AstLoader {
     }
 
     @Override
-    public FileLoadResults loadFile(Directory spaceDir, File spaceSrcFile) throws IOException {
+    public FileLoadResults loadFile(File spaceSrcFile) throws IOException {
         this.srcFile = spaceSrcFile;
         AstFileLoadErrorSet fileErrors = new AstFileLoadErrorSet(spaceSrcFile);
         FileLoadResults results = new FileLoadResults();
@@ -87,7 +86,7 @@ public class G2AntlrParser implements AstLoader {
         if (fileErrors.hasErrors())
             results.getErrors().addAll(fileErrors.getAllErrors());
         //
-        log.info("Parsed file [" + spaceSrcFile.getAbsolutePath() + "] into Space dir ["+spaceDir+"]");
+        log.info("Parsed and loaded file [{}] into AST run result [{}]", spaceSrcFile.getAbsolutePath(), parseUnit);
         return results;
     }
 
@@ -107,7 +106,7 @@ public class G2AntlrParser implements AstLoader {
             }
             else {
                 if (childFile.getName().endsWith(Language.SPACE.getFileExt())) {
-                    FileLoadResults fileResults = loadFile(spcContainerDir, childFile);
+                    FileLoadResults fileResults = loadFile(childFile);
                     if (fileResults.getParseUnit() != null)
                         spcContainerDir.addParseUnit(fileResults.getParseUnit());
                     dirResults.getErrorList().addAll(fileResults.getErrors());
@@ -165,7 +164,7 @@ public class G2AntlrParser implements AstLoader {
 
         if (!loadErrors.hasSyntaxErrors()) {
             Antlr2AstTransform antlr2AstTransform = new Antlr2AstTransform(astFactory, srcFile);
-            parseUnit = antlr2AstTransform.transform(parseUnitContext);
+            parseUnit = antlr2AstTransform.toAst(parseUnitContext);
         }
 
         return parseUnit;

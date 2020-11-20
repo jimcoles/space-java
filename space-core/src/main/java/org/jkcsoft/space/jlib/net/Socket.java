@@ -7,7 +7,7 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.runtime.jnative.net;
+package org.jkcsoft.space.jlib.net;
 
 import java.io.IOException;
 import java.io.InputStream;
