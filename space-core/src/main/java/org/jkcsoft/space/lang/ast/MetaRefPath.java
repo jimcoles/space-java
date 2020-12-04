@@ -16,6 +16,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * Represents a static path through a Space Namespace of directories,
+ * type definitions, and type members.
  *
  * @author Jim Coles
  */

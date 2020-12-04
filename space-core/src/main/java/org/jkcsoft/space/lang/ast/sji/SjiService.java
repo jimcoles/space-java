@@ -33,13 +33,13 @@ public class SjiService {
 
     private static final Logger log = LoggerFactory.getLogger(SjiService.class);
 
-    static FullTypeRefImpl.CollectionType javaToSpaceCollType(Class clazz) {
-        FullTypeRefImpl.CollectionType spCollType = null;
+    static TypeRefImpl.CollectionType javaToSpaceCollType(Class clazz) {
+        TypeRefImpl.CollectionType spCollType = null;
         if (clazz == String.class) {
-            spCollType = FullTypeRefImpl.CollectionType.SEQUENCE;
+            spCollType = TypeRefImpl.CollectionType.SEQUENCE;
         }
         else {
-            spCollType = clazz.isArray() ? FullTypeRefImpl.CollectionType.SEQUENCE : null;
+            spCollType = clazz.isArray() ? TypeRefImpl.CollectionType.SEQUENCE : null;
         }
         return spCollType;
     }

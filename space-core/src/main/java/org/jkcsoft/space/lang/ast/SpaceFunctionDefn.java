@@ -32,9 +32,9 @@ public class SpaceFunctionDefn extends AbstractFunctionDefn implements FunctionD
 
     private StatementBlock statementBlock;
     private boolean isReturnVoid;
-    private FullTypeRefImpl returnTypeRef;
+    private TypeRefImpl returnTypeRef;
 
-    SpaceFunctionDefn(SourceInfo sourceInfo, String name, FullTypeRefImpl returnTypeRef) {
+    SpaceFunctionDefn(SourceInfo sourceInfo, String name, TypeRefImpl returnTypeRef) {
         super(sourceInfo, name);
         this.returnTypeRef = returnTypeRef;
     }
@@ -66,7 +66,7 @@ public class SpaceFunctionDefn extends AbstractFunctionDefn implements FunctionD
         return isReturnVoid;
     }
 
-    public FullTypeRefImpl getReturnTypeRef() {
+    public TypeRefImpl getReturnTypeRef() {
         if (isReturnVoid)
             throw new SpaceX("Should not call getReturnTypeRef for function with void return.");
         return returnTypeRef;

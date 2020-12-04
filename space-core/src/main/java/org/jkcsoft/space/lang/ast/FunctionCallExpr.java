@@ -40,7 +40,7 @@ public class FunctionCallExpr extends AbstractModelElement implements NameRefOrH
         //
         this.functionRef = namePartExpr;
         //
-//        addChild(this.functionRef);
+        addChild(this.functionRef);
         //
         return this;
     }
@@ -56,13 +56,8 @@ public class FunctionCallExpr extends AbstractModelElement implements NameRefOrH
     }
 
     @Override
-    public String getDisplayName() {
-        return functionRef.getDisplayName();
-    }
-
-    @Override
     public boolean hasRef() {
-        return true;
+        return functionRef != null;
     }
 
     @Override
@@ -72,22 +67,17 @@ public class FunctionCallExpr extends AbstractModelElement implements NameRefOrH
 
     @Override
     public boolean hasNameRef() {
-        return true;
+        return functionRef != null;
     }
 
     @Override
     public NameRefOrHolder getNameRef() {
-        return this;
+        return functionRef;
     }
 
     @Override
     public boolean isValueExpr() {
         return true;
-    }
-
-    @Override
-    public TypeDefn getDatumType() {
-        return functionRef.getResolvedMetaObj().getReturnType();
     }
 
     @Override
@@ -97,7 +87,12 @@ public class FunctionCallExpr extends AbstractModelElement implements NameRefOrH
     }
 
     @Override
-    public ByNameMetaRef getRefAsNameRef() {
+    public TypeDefn getDatumType() {
+        return functionRef.getResolvedMetaObj().getReturnType();
+    }
+
+    @Override
+    public ByNameMetaRef<FunctionDefn> getRefAsNameRef() {
         return functionRef;
     }
 
@@ -110,4 +105,10 @@ public class FunctionCallExpr extends AbstractModelElement implements NameRefOrH
     public TypedExpr getTypedExpr() {
         return this;
     }
+
+    @Override
+    public String getDisplayName() {
+        return functionRef.getDisplayName();
+    }
+
 }

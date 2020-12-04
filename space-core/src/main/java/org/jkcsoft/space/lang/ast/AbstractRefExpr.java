@@ -55,13 +55,13 @@ public abstract class AbstractRefExpr<T extends Named> extends AbstractModelElem
     }
 
     @Override
-    public T getResolvedMetaObj() {
-        return resolvedMetaObj;
+    public void setResolvedMetaObj(T resolvedMetaObj) {
+        this.resolvedMetaObj = resolvedMetaObj;
     }
 
     @Override
-    public void setResolvedMetaObj(T resolvedMetaObj) {
-        this.resolvedMetaObj = resolvedMetaObj;
+    public T getResolvedMetaObj() {
+        return resolvedMetaObj;
     }
 
     @Override

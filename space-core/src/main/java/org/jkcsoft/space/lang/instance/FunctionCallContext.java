@@ -25,6 +25,7 @@ import java.util.LinkedList;
  */
 public class FunctionCallContext extends AbstractExeContext implements ExeContext {
 
+    private StaticExeContext staticExeContext;
     private Tuple ctxObject;
     private TupleImpl argTuple;
     private LinkedList<BlockContext> blockContexts = new LinkedList<>();

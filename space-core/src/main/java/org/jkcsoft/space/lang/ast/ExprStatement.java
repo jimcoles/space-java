@@ -20,11 +20,18 @@ public class ExprStatement<T extends ValueExpr> extends AbstractModelElement imp
     private T expression;
 
     public ExprStatement(T expression) {
-        super(((ModelElement) expression).getSourceInfo());
+        super(expression.getSourceInfo());
         this.expression = expression;
+        //
+        addChild(expression);
     }
 
     public T getExpression() {
         return expression;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "expr: " + expression.getDisplayName();
     }
 }

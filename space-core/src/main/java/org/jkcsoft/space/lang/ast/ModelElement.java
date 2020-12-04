@@ -45,6 +45,7 @@ public interface ModelElement extends Tagable {
 
     Set<ExpressionChain> getExpressionChains();
 
+    /** This returns a short string that should be useful in log files. */
     String getDisplayName();
 
     boolean hasGroupingNodes();

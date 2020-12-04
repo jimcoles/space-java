@@ -16,7 +16,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public interface MetaRef<T extends Named> extends ModelElement {
+public interface MetaRef<T extends Named> extends LinkSource {
 
     String getKeyOrName();
 

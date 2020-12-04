@@ -16,5 +16,7 @@ import org.jkcsoft.space.lang.instance.ValueHolder;
  */
 public interface InternalExeContext extends ApiExeContext {
 
-    void autoCastAssign(Executor.EvalContext evalContext, ValueHolder leftSideHolder, ValueHolder rightSideHolder);
+    void autoCastAssign(ValueHolder leftSideHolder, ValueHolder rightSideHolder);
+
+    RuntimeError newRuntimeError(String msg);
 }

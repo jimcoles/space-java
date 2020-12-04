@@ -44,18 +44,6 @@ public interface Tuple extends
 
     ProjectionDecl getType();
 
-    void initHolder(ValueHolder valueHolder);
-
-    Tuple setValue(Declaration spaceDecl, Value value);
-
-    Tuple setValue(int idx, Value value);
-
-    ValueHolder get(Declaration member);
-
-    List<ValueHolder> getValueHolders();
-
-    ValueHolder get(int idx);
-
     boolean isSingleValueWrapper();
 
 }

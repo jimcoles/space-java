@@ -20,24 +20,24 @@ import org.jkcsoft.space.lang.ast.VariableDeclImpl;
  */
 public class VariableValueHolder implements ValueHolder {
 
-    private Tuple parentTuple;
+    private DatumMap parentDatumMap;
     private VariableDecl declaration;
     private ScalarValue scalarValue;
 
-    public VariableValueHolder(Tuple parentTuple, VariableDecl declaration, ScalarValue scalarValue) {
-        this.parentTuple = parentTuple;
+    public VariableValueHolder(DatumMap parentDatumMap, VariableDecl declaration, ScalarValue scalarValue) {
+        this.parentDatumMap = parentDatumMap;
         this.declaration = declaration;
         this.scalarValue = scalarValue;
     }
 
-    public VariableValueHolder(Tuple parentTuple, VariableDecl declaration) {
-        this.parentTuple = parentTuple;
+    public VariableValueHolder(DatumMap parentDatumMap, VariableDecl declaration) {
+        this.parentDatumMap = parentDatumMap;
         this.declaration = declaration;
         this.scalarValue = ((PrimitiveTypeDefn) declaration.getType()).nullValue();
     }
 
-    public Tuple getParentTuple() {
-        return parentTuple;
+    public DatumMap getParentDatumMap() {
+        return parentDatumMap;
     }
 
     @Override

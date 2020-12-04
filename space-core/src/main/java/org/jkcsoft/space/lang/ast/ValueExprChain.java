@@ -27,7 +27,14 @@ public class ValueExprChain extends AbstractModelElement implements NamePath, Va
         if (chain == null)
             chain = new LinkedList<>();
         chain.add(valueExpr);
+        //
+        addChild(valueExpr);
+
         return this;
+    }
+
+    public boolean isEmpty() {
+        return chain == null || chain.isEmpty();
     }
 
     public List<ValueExpr> getChain() {

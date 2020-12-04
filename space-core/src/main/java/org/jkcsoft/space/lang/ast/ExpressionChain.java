@@ -14,6 +14,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * {@link ExpressionChain}'s are used to hold the initial
@@ -84,7 +85,7 @@ public class ExpressionChain<T extends Named> extends AbstractModelElement imple
         }
     }
 
-    /** For use by API access when referenced type object is known. */
+    /** For use when referenced type object is known. */
     ExpressionChain(SourceInfo sourceInfo, Declaration datumDecl) {
         this(sourceInfo, MetaType.DATUM);
         SimpleNameRefExpr<Declaration> firstPart =
@@ -108,6 +109,14 @@ public class ExpressionChain<T extends Named> extends AbstractModelElement imple
 
     public boolean isNamePath() {
         return targetMetaType != null;
+    }
+
+    public boolean hasTargetMetaType() {
+        return targetMetaType != null;
+    }
+
+    public MetaType getTargetMetaType() {
+        return targetMetaType;
     }
 
     public TypeCheckState getTypeCheckState() {
@@ -152,10 +161,6 @@ public class ExpressionChain<T extends Named> extends AbstractModelElement imple
 
     public LinkSource getFirstPart() {
         return firstExpr;
-    }
-
-    public MetaType getTargetMetaType() {
-        return targetMetaType;
     }
 
     public ScopeKind getResolvedDatumScope() {
@@ -205,6 +210,8 @@ public class ExpressionChain<T extends Named> extends AbstractModelElement imple
             restLinks.add(nextPart);
 
         allLinks.add(nextPart);
+        //
+        addChild(nextPart);
     }
 
     public boolean isSinglePart() {
@@ -253,6 +260,22 @@ public class ExpressionChain<T extends Named> extends AbstractModelElement imple
         return ((ValueExpr) getLastPart()).getDatumType();
     }
 
+    public boolean hasMetaRefPath() {
+        return isStaticRef(firstExpr);
+    }
+
+    private boolean isStaticRef(LinkSource linkSource) {
+        boolean isStaticRef = false;
+        if (linkSource.hasNameRef()
+            && linkSource.getNameRef().getRefAsNameRef().isResolved())
+        {
+            Set<MetaType> staticMetaTypes = Set.of(MetaType.PACKAGE, MetaType.TYPE);
+            isStaticRef =
+                staticMetaTypes.contains(linkSource.getNameRef().getRefAsNameRef().getResolvedMetaObj().getMetaType());
+        }
+        return isStaticRef;
+    }
+
     // TODO Add validation: meta path must start at first position
     //      and be contiguous
     public MetaRefPath extractMetaRefPath() {
@@ -262,7 +285,7 @@ public class ExpressionChain<T extends Named> extends AbstractModelElement imple
         if (metaRefPath == null) {
             metaRefPath = new MetaRefPath(this, resolvedDatumScope);
             for (LinkSource refPartExpr : this.allLinks) {
-                if (refPartExpr.hasNameRef()) {
+                if (isStaticRef(refPartExpr)) {
                     metaRefPath.addLink(refPartExpr.getNameRef().getRefAsNameRef());
                 }
                 else
@@ -341,16 +364,16 @@ public class ExpressionChain<T extends Named> extends AbstractModelElement imple
     }
 
     @Override
-    public String toString() {
+    public String getDisplayName() {
         String suffix = getSuffix();
         LinkSource lastPart = getLastPart();
-        return "<" +
-            "fromObj=" + (getParent() != null ? getParent() : "") +
-            " path=\"" + getFullUrlSpec() + (suffix != null ? " " + suffix : "") + "\"" +
-            " (" + (targetMetaType != null ? targetMetaType.toString().substring(0, 3) : "?") + ")" +
+        Named resolvedMetaObj = lastPart.getNameRef().getRefAsNameRef().getResolvedMetaObj();
+        return
+//            "fromObj=" + (getParent() != null ? getParent() : "") +
+            "path=\"" + getFullUrlSpec() + (suffix != null ? " " + suffix : "") + "\"" +
+            " mtype=(" + (targetMetaType != null ? targetMetaType.toString().substring(0, 3) : "?") + ")" +
             (resolvedDatumScope != null ? " " + resolvedDatumScope.toString().substring(0, 3) : "") +
-            " resObj=" + (getState() == LinkState.RESOLVED ? lastPart : "?") +
-            '>';
+            " resObj=" + (getState() == LinkState.RESOLVED ? resolvedMetaObj.toString() : "?");
 
     }
 }

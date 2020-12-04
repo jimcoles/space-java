@@ -17,6 +17,7 @@ import java.util.List;
  * @author Jim Coles
  */
 public interface DatumMap {
+
     void initHolder(ValueHolder valueHolder);
 
     DatumMap setValue(Declaration spaceDecl, Value value);

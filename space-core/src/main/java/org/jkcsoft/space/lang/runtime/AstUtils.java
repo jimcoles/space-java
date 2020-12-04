@@ -169,8 +169,6 @@ public class AstUtils {
      * @return
      */
     public static void resolveAstRef(NSRegistry nsRegistry, ParseUnit parseUnit, ExpressionChain refChain) {
-        Namespace refNs = getNs(nsRegistry, refChain);
-        checkSetResolve(refChain.getNsRefPart(), refNs);
         AstScopeCollection scopeSequence = getScopeCollection(nsRegistry, parseUnit, refChain);
 
         // TODO Handle dependency between references: e.g., might have a ref to a function; i
@@ -315,7 +313,7 @@ public class AstUtils {
         ScopeKind refFromScopeKind = inferScopeKind(reference.getParent());
         // TODO add logic to reuse scope collections where possible, e.g., references from
         // the same context have the same scopes, etc.
-        ScopeCollectionWalker walker = new ScopeCollectionWalker(nsRegistry, parseUnit, reference);
+        ScopeCollectionBuilder walker = new ScopeCollectionBuilder(nsRegistry, parseUnit, reference);
         return walker.getAllScopesAsList();
     }
 
@@ -329,8 +327,15 @@ public class AstUtils {
 
     public static Namespace getNs(NSRegistry nsRegistry, ExpressionChain reference) {
         Namespace ns = null;
-        if (reference.hasNs())
-            ns = nsRegistry.getNamespace(reference.getNsRefPart().getNameExprText());
+        if (reference.hasNs()) {
+            if (reference.getNsRefPart().isResolved()) {
+                ns = (Namespace) reference.getNsRefPart().getResolvedMetaObj();
+            }
+            else {
+                ns = nsRegistry.getNamespace(reference.getNsRefPart().getNameExprText());
+                checkSetResolve(reference.getNsRefPart(), ns);
+            }
+        }
         else
             ns = AstUtils.findParentNs(reference);
 
@@ -378,7 +383,7 @@ public class AstUtils {
         return findFirstParent(astNode, newTupleExprfinderAction);
     }
 
-    public static Set<TypeDefn> getSiblingTypes(FullTypeRefImpl reference) {
+    public static Set<TypeDefn> getSiblingTypes(TypeRefImpl reference) {
         MetaRef parentRefPart = getParentRefPart(reference);
         return getChildTypes((Directory) parentRefPart.getResolvedMetaObj());
     }
@@ -405,7 +410,7 @@ public class AstUtils {
         return childTypes;
     }
 
-    private static MetaRef getParentRefPart(FullTypeRefImpl fullRef) {
+    private static MetaRef getParentRefPart(TypeRefImpl fullRef) {
         List<MetaRef> pathParts = fullRef.extractMetaRefPath().getLinks();
         return pathParts.get(pathParts.size() - 2);
     }
@@ -710,7 +715,7 @@ public class AstUtils {
     /**
      * Used to find the first (possibly only) item in an expression chain.
      */
-    private static class ScopeCollectionWalker {
+    private static class ScopeCollectionBuilder {
         //
         private ParseUnit parseUnit;
         private ExpressionChain theRefChain;
@@ -724,10 +729,12 @@ public class AstUtils {
             intrinsicsScopeColl.add(new StaticScope(intrinsicsScopeColl, INTRINSIC_TYPES, ScopeKind.GLOBAL));
         }
 
-        public ScopeCollectionWalker(NSRegistry nsRegistry, ParseUnit parseUnit, ExpressionChain exprChain) {
+        public ScopeCollectionBuilder(NSRegistry nsRegistry, ParseUnit parseUnit, ExpressionChain exprChain) {
             this.nsRegistry = nsRegistry;
             this.parseUnit = parseUnit;
             this.theRefChain = exprChain;
+            //
+            getNs(nsRegistry, exprChain);
             // init scope to the reference element itself
 //            this.staticScope = new StaticScope(exprChain);
             //
@@ -735,23 +742,41 @@ public class AstUtils {
         }
 
         private void buildScopeSequence(ExpressionChain exprChain) {
-            switch (exprChain.getTargetMetaType()) {
-                case TYPE:
-                    scopeCollGrouped = buildTypeRefScopes();
-                    break;
-                case DATUM:
-                    if (isLhsTupleDatumRef(exprChain)) {
-                        scopeCollGrouped = buildLhsTupleDatumRefScopes();
-                    }
-                    else
-                        scopeCollGrouped = buildDatumRefScopes();
-                    break;
-                case FUNCTION:
-                    scopeCollGrouped = buildFunctionRefScopes();
-                    break;
-                case PACKAGE:
-                    scopeCollGrouped = buildPackageRefScopes();
-                    break;
+            if (exprChain.hasTargetMetaType()) {
+                switch (exprChain.getTargetMetaType()) {
+                    case TYPE:
+                        scopeCollGrouped = buildTypeRefScopes();
+                        break;
+                    case DATUM:
+                        if (isLhsTupleDatumRef(exprChain)) {
+                            scopeCollGrouped = buildLhsTupleDatumRefScopes();
+                        }
+                        else
+                            scopeCollGrouped = buildDatumRefScopes();
+                        break;
+                    case FUNCTION:
+                        scopeCollGrouped = buildFunctionRefScopes();
+                        break;
+                    case PACKAGE:
+                        scopeCollGrouped = buildPackageRefScopes();
+                        break;
+                }
+            }
+            else {
+                scopeCollGrouped = buildUnknownRefScopes();
+            }
+        }
+
+        private List<AstScopeCollection> buildUnknownRefScopes() {
+            List<AstScopeCollection> refScopes = buildTypeRefScopes();
+            addUnique(refScopes, buildDatumRefScopes());
+            return refScopes;
+        }
+
+        private void addUnique(List<AstScopeCollection> baseRefScopes, List<AstScopeCollection> otherRefScopes) {
+            for (AstScopeCollection otherRefScope : otherRefScopes) {
+                if (!baseRefScopes.contains(otherRefScope))
+                    baseRefScopes.add(otherRefScope);
             }
         }
 
@@ -815,12 +840,19 @@ public class AstUtils {
         // ====================================================================
 
         /**
-         * Looks in the root Dir of the Namespace
+         * Looks in the root Dir of the Namespace. If ref has explicit NS, use only that.
+         * If NS is not specified (most cases), try all Namespaces.
          */
         private AstScopeCollection buildNsRootScopes() {
-            AstScopeCollection theColl = new AstScopeCollection("Directories in Root of JS");
-            //
-            theColl.add(new StaticScope(theColl, getNs(nsRegistry, theRefChain).getRootDir(), ScopeKind.GLOBAL));
+            AstScopeCollection theColl = new AstScopeCollection("Directories in Root of Namespace");
+            //getNs(nsRegistry, theRefChain)
+            if (theRefChain.hasNs())
+                theColl.add(new StaticScope(theColl, getNs(nsRegistry, theRefChain).getRootDir(), ScopeKind.GLOBAL));
+            else {
+                for (Namespace ns : nsRegistry.getNsChain()) {
+                    theColl.add(new StaticScope(theColl, ns.getRootDir(), ScopeKind.GLOBAL));
+                }
+            }
             //
             return theColl;
         }
@@ -895,7 +927,7 @@ public class AstUtils {
             AstScopeCollection theColl = new AstScopeCollection("Tuple Type");
             NewTupleExpr newTupleExpr = findParentNewTupleExpr(theRefChain);
             if (newTupleExpr != null) {
-                FullTypeRefImpl typeRef = newTupleExpr.getTypeRef();
+                TypeRefImpl typeRef = newTupleExpr.getTypeRef();
                 if (typeRef.isResolved()) {
                     theColl.add(new StaticScope(theColl, typeRef.getResolvedType(), ScopeKind.TYPE_DEFN));
                 }

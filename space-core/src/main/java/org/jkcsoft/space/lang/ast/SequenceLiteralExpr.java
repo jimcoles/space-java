@@ -17,10 +17,10 @@ package org.jkcsoft.space.lang.ast;
  */
 public class SequenceLiteralExpr extends AbstractModelElement implements ValueExpr {
 
-    private FullTypeRefImpl typeRef;
+    private TypeRefImpl typeRef;
     private String valueExpr;
 
-    SequenceLiteralExpr(SourceInfo sourceInfo, FullTypeRefImpl typeRef, String valueExpr) {
+    SequenceLiteralExpr(SourceInfo sourceInfo, TypeRefImpl typeRef, String valueExpr) {
         super(sourceInfo);
         this.typeRef = typeRef;
         this.valueExpr = valueExpr;
@@ -28,7 +28,7 @@ public class SequenceLiteralExpr extends AbstractModelElement implements ValueEx
         addChild(typeRef);
     }
 
-    public FullTypeRefImpl getTypeRef() {
+    public TypeRefImpl getTypeRef() {
         return typeRef;
     }
 

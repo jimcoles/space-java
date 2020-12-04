@@ -26,5 +26,7 @@ public interface Named extends Identified {
 
     Named getNamedParent();
 
+    String getFQName();
+
     MetaType getMetaType();
 }

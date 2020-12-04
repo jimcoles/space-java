@@ -13,8 +13,7 @@ import org.jkcsoft.java.util.Strings;
 import org.jkcsoft.space.lang.ast.ContextDatumDefn;
 import org.jkcsoft.space.lang.ast.Declaration;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Jim Coles
@@ -22,17 +21,16 @@ import java.util.List;
 public class BlockDatumMap implements DatumMap {
 
     private final ContextDatumDefn defn;
-    private final ValueHolder<Value<Object>, Object>[] valueHolders;
+    private final Map<Declaration, ValueHolder<Value<Object>, Object>> valueHolders;
 
     protected BlockDatumMap(ContextDatumDefn defn) {
         this.defn = defn;
-        this.valueHolders = new ValueHolder[defn.getScalarDofs()];
+        this.valueHolders = new TreeMap<>();
     }
 
     @Override
     public void initHolder(ValueHolder valueHolder) {
-        int idxHolder = getIdxHolder(valueHolder.getDeclaration());
-        valueHolders[idxHolder] = valueHolder;
+        valueHolders.put(valueHolder.getDeclaration(), valueHolder);
     }
 
     @Override
@@ -43,14 +41,6 @@ public class BlockDatumMap implements DatumMap {
 
     @Override
     public DatumMap setValue(int idx, Value value) {
-        ValueHolder valueHolder = valueHolders[idx];
-        if (valueHolder.getDeclaration().isAssoc()) {
-            if (value instanceof SpaceObject)
-                valueHolder.setValue(getObjectFactory().newReferenceByOid(((SpaceObject) value).getOid()));
-        }
-        else
-            valueHolder.setValue(value);
-
         return this;
     }
 
@@ -60,59 +50,31 @@ public class BlockDatumMap implements DatumMap {
 
     @Override
     public ValueHolder get(Declaration member) {
-        return valueHolders[getIdxHolder(member)];
+        return valueHolders.get(member);
     }
 
     public Declaration getDeclAt(int idx) {
-//        return ((TypeDefn) getDefn()).getDatumDeclList().get(idx);
-        return valueHolders[idx].getDeclaration();
+        // no-op
+        return null;
     }
 
     @Override
     public List<ValueHolder> getValueHolders() {
-        return Arrays.asList(valueHolders);
+        return new LinkedList<>(valueHolders.values());
     }
 
     @Override
     public ValueHolder get(int idx) {
-        return valueHolders[idx];
+        return null;
     }
 
     public int getSize() {
-        return valueHolders.length;
+        return valueHolders.size();
     }
 
     @Override
     public Object getJavaValue() {
-        Object[] values = new Object[getSize()];
-        for (int idxHolder = 0; idxHolder < valueHolders.length; idxHolder++) {
-            values[idxHolder] = valueHolders[idxHolder].getValue().getJavaValue();
-        }
-        return values;
-    }
-
-    private int getIdxHolder(Declaration datumDecl) {
-        return defn.getDatumDeclList().indexOf(datumDecl);
-    }
-
-    /** Get the 0-based ordinal of the specified member */
-    private int getMemberIdx(SpaceOid memberOid) {
-        int idxMember = -1;
-        List<Declaration> allMembers = defn.getDatumDeclList();
-        for (int idx = 0; idx < allMembers.size(); idx++) {
-            if (allMembers.get(idx).getOid().equals(memberOid)) {
-                idxMember = idx;
-                break;
-            }
-        }
-        return idxMember;
-    }
-
-    @Override
-    public String toString() {
-        return "([" + super.toString() + "] "
-            + Strings.buildCommaDelList(getValueHolders(), holder -> ((ValueHolder) holder).getValue().toString())
-            + ")";
+        return null;
     }
 
 }

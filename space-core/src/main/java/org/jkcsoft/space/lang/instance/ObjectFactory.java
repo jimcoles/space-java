@@ -56,19 +56,19 @@ public class ObjectFactory {
         return functionCallContext;
     }
 
-    public VariableValueHolder newVariableValueHolder(Tuple tuple, VariableDecl decl, ScalarValue value) {
-        return new VariableValueHolder(tuple, decl, value);
+    public VariableValueHolder newVariableValueHolder(DatumMap parentMap, VariableDecl decl, ScalarValue value) {
+        return new VariableValueHolder(parentMap, decl, value);
     }
 
-    public DeclaredReferenceHolder<SpaceOid> newReferenceByOidHolder(Tuple parentTuple, AssociationDefn associationDecl,
+    public DeclaredReferenceHolder<SpaceOid> newReferenceByOidHolder(DatumMap parentTuple, AssociationDefn associationDecl,
                                                                      SpaceOid refToOid) {
         return newReferenceByOidHolder(parentTuple, associationDecl, newReferenceByOid(refToOid));
     }
 
-    public DeclaredReferenceHolder<SpaceOid> newReferenceByOidHolder(Tuple parentTuple, AssociationDefn associationDecl,
+    public DeclaredReferenceHolder<SpaceOid> newReferenceByOidHolder(DatumMap datumMap, AssociationDefn associationDecl,
                                                                       ReferenceByOid reference)
     {
-        return new DeclaredReferenceHolder<>(parentTuple, associationDecl, reference);
+        return new DeclaredReferenceHolder<>(datumMap, associationDecl, reference);
     }
 
     public FreeReferenceHolder<SpaceOid> newFreeReferenceHolder(TupleCollection fromObject, SpaceOid refToOid) {
@@ -92,17 +92,28 @@ public class ObjectFactory {
         return new ReferenceByOid(refToOid);
     }
 
+    public ValueHolder newEmptyVarHolder(DatumMap datumMap, Declaration declaration) {
+        ValueHolder holder = null;
+        if (declaration.getType().isPrimitiveType()) {
+            holder = newVariableValueHolder(datumMap, (VariableDecl) declaration, null);
+        }
+        else {
+            holder = newReferenceByOidHolder(datumMap, (AssociationDefn) declaration, (SpaceOid) null);
+        }
+        return holder;
+    }
+
     public TupleSet box(Tuple tuple) {
 //        return new Space(newOid(), null, tuple.getDefn());
         return null;
     }
 
-    public ValueHolder newValueHolder(Tuple tuple, Declaration decl, Value value) {
+    public ValueHolder newValueHolder(DatumMap datumMap, Declaration decl, Value value) {
         ValueHolder holder = null;
         if (value instanceof ScalarValue)
-            holder = newVariableValueHolder(tuple, ((VariableDecl) decl), ((ScalarValue) value));
+            holder = newVariableValueHolder(datumMap, ((VariableDecl) decl), ((ScalarValue) value));
         else
-            holder = newReferenceByOidHolder(tuple, (AssociationDefn) decl, ((ReferenceByOid) value));
+            holder = newReferenceByOidHolder(datumMap, (AssociationDefn) decl, ((ReferenceByOid) value));
         return holder;
     }
 

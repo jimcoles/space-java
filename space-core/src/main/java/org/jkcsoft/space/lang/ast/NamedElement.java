@@ -58,6 +58,7 @@ public abstract class NamedElement extends AbstractModelElement implements Named
         return forwardList;
     }
 
+    @Override
     public String getFQName() {
 //        if (fqName == null)
         return Strings.buildDelList(getFullNamePath(), Strings.TO_STRING_LISTER, "/");

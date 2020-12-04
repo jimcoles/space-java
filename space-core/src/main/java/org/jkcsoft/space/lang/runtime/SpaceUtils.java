@@ -19,7 +19,7 @@ import org.jkcsoft.space.lang.runtime.spm.SpmExecutor;
  */
 public class SpaceUtils {
 
-    public static void assignNoCast(Executor.EvalContext exe, ValueHolder leftSideHolder, ValueHolder rightSideHolder) {
+    public static void assignNoCast(InternalExeContext exe, ValueHolder leftSideHolder, ValueHolder rightSideHolder) {
         boolean assigned = false;
         RuntimeError error = null;
         if (leftSideHolder instanceof VariableValueHolder) {

@@ -10,7 +10,6 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.AssociationDefn;
-import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.ast.Declaration;
 
 /**
@@ -23,11 +22,11 @@ import org.jkcsoft.space.lang.ast.Declaration;
 public class DeclaredReferenceHolder<J> implements ReferenceValueHolder<ReferenceValue<J>, J> {
 
     private Declaration declaration;
-    private Tuple parentTuple; // the 'from'
+    private DatumMap datumMap; // the 'from'
     private ReferenceValue<J> referenceValue; // the 'to'
 
-    DeclaredReferenceHolder(Tuple parentTuple, Declaration declaration, ReferenceValue<J> referenceValue) {
-        this.parentTuple = parentTuple;
+    DeclaredReferenceHolder(DatumMap datumMap, Declaration declaration, ReferenceValue<J> referenceValue) {
+        this.datumMap = datumMap;
         this.declaration = declaration;
         this.referenceValue = referenceValue;
     }
@@ -52,8 +51,8 @@ public class DeclaredReferenceHolder<J> implements ReferenceValueHolder<Referenc
         this.referenceValue = value;
     }
 
-    public Tuple getParentTuple() {
-        return parentTuple;
+    public DatumMap getDatumMap() {
+        return datumMap;
     }
 
     /**

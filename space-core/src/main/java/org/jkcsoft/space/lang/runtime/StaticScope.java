@@ -59,6 +59,11 @@ public class StaticScope {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        return obj instanceof StaticScope && scopeKind == ((StaticScope) obj).getScopeKind();
+    }
+
+    @Override
     public String toString() {
         return "Scope [" +
             "\''" + scopeColl.getCollectionName() + '\'' +

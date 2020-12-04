@@ -16,7 +16,8 @@ type Object {
     }
 
     function String toString() {
-        String jString = stype.toString();
+//        String jString = stype.toString();
+        String jString = "";
         return ( jString + Key.toString(oid) );
     }
 

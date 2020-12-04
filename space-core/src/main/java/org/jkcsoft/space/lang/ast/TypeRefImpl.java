@@ -17,17 +17,17 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public class FullTypeRefImpl extends ExpressionChain implements TypeRef {
+public class TypeRefImpl extends ExpressionChain implements TypeRef {
 
     /** Somewhat analogous to Java 'new URL(String spec)' */
-    public static FullTypeRefImpl newFullTypeRef(String typeNameSpec) {
+    public static TypeRefImpl newFullTypeRef(String typeNameSpec) {
         if (typeNameSpec == null)
             throw new IllegalArgumentException("type ref name cannot be null");
         String[] topSplits = typeNameSpec.split(":");
         String nsName = topSplits.length == 2 ? topSplits[0] : null;
         String fullName = topSplits.length == 2 ? topSplits[1] : topSplits[0];
         AstFactory astFactory = AstFactory.getInstance();
-        FullTypeRefImpl fullTypeRef =
+        TypeRefImpl fullTypeRef =
             astFactory.newTypeRef(new IntrinsicSourceInfo(), null, astFactory.newNameRefExpr(null, nsName));
         String[] nameStrings = fullName.split("\\.");
         AstUtils.addNewMetaRefParts(fullTypeRef, new IntrinsicSourceInfo(), nameStrings);
@@ -39,16 +39,16 @@ public class FullTypeRefImpl extends ExpressionChain implements TypeRef {
     private List<CollectionType> collectionTypes;
     private String suffix = null;
 
-    FullTypeRefImpl(SourceInfo sourceInfo, List<CollectionType> collectionTypes) {
+    TypeRefImpl(SourceInfo sourceInfo, List<CollectionType> collectionTypes) {
         super(sourceInfo, MetaType.TYPE);
         this.collectionTypes = collectionTypes;
     }
 
-    FullTypeRefImpl(SourceInfo sourceInfo, TypeDefn typeDefn) {
+    TypeRefImpl(SourceInfo sourceInfo, TypeDefn typeDefn) {
         super(sourceInfo, typeDefn);
     }
 
-    FullTypeRefImpl(SourceInfo sourceInfo, TypeDefn typeDefn, List<CollectionType> collectionTypes) {
+    TypeRefImpl(SourceInfo sourceInfo, TypeDefn typeDefn, List<CollectionType> collectionTypes) {
         this(sourceInfo, typeDefn);
         this.collectionTypes = collectionTypes;
     }

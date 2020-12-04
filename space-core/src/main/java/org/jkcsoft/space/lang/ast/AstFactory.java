@@ -59,7 +59,7 @@ public class AstFactory {
         return complexTypeImpl;
     }
 
-    public SpaceFunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name, FullTypeRefImpl returnTypeRef) {
+    public SpaceFunctionDefn newSpaceFunctionDefn(SourceInfo sourceInfo, String name, TypeRefImpl returnTypeRef) {
         SpaceFunctionDefn element = new SpaceFunctionDefn(sourceInfo, name, returnTypeRef);
         return element;
     }
@@ -138,13 +138,13 @@ public class AstFactory {
         return new TupleValueList(sourceInfo);
     }
 
-    public NewTupleExpr newNewObjectExpr(SourceInfo sourceInfo, FullTypeRefImpl typeRefPathExpr,
+    public NewTupleExpr newNewObjectExpr(SourceInfo sourceInfo, TypeRefImpl typeRefPathExpr,
                                          TupleValueList tupleValueList)
     {
         return new NewTupleExpr(sourceInfo, typeRefPathExpr, tupleValueList);
     }
 
-    public NewSetExpr newNewSetExpr(SourceInfo sourceInfo, FullTypeRefImpl tupleTypeRef) {
+    public NewSetExpr newNewSetExpr(SourceInfo sourceInfo, TypeRefImpl tupleTypeRef) {
         return new NewSetExpr(sourceInfo, tupleTypeRef);
     }
 
@@ -154,19 +154,23 @@ public class AstFactory {
         return expressionChain;
     }
 
-    public FullTypeRefImpl newTypeRef(SourceInfo sourceInfo, List<FullTypeRefImpl.CollectionType> collectionTypes,
-                                      SimpleNameRefExpr nsRefPart)
+    public TypeRefImpl newTypeRef(SourceInfo sourceInfo, List<TypeRefImpl.CollectionType> collectionTypes,
+                                  SimpleNameRefExpr nsRefPart)
     {
-        FullTypeRefImpl typeRef = new FullTypeRefImpl(sourceInfo, collectionTypes);
+        TypeRefImpl typeRef = new TypeRefImpl(sourceInfo, collectionTypes);
         typeRef.setNsRefPart(nsRefPart);
         return typeRef;
     }
 
-    public FullTypeRefImpl newTypeRef(SourceInfo sourceInfo, TypeDefn typeDefn) {
-        return new FullTypeRefImpl(sourceInfo, typeDefn);
+    public TypeRefImpl newTypeRef(SourceInfo sourceInfo, TypeDefn typeDefn) {
+        return new TypeRefImpl(sourceInfo, typeDefn);
     }
 
-    public AliasedMetaRef newMetaRefChain(SourceInfo sourceInfo, String name, Declaration datumDecl) {
+    public ExpressionChain newDatumRef(SourceInfo sourceInfo, Declaration datumDecl) {
+        return new ExpressionChain(sourceInfo, datumDecl);
+    }
+
+    public AliasedMetaRef newAliasedRefChain(SourceInfo sourceInfo, String name, Declaration datumDecl) {
         return new AliasedMetaRef(sourceInfo, name, new ExpressionChain(sourceInfo, datumDecl));
     }
 
@@ -178,19 +182,11 @@ public class AstFactory {
         return new PackageDecl(sourceInfo, packageRef);
     }
 
-    public ParsableChoice newParsableChoice(Directory directory) {
-        return new ParsableChoice(directory);
-    }
-
-    public ParsableChoice newParsableChoice(ParseUnit parseUnit) {
-        return new ParsableChoice(parseUnit);
-    }
-
     public Namespace newNamespace(SourceInfo sourceInfo, String name, Namespace... nsLookupChain) {
         return new Namespace(sourceInfo, name, nsLookupChain);
     }
 
-    public ImportExpr newImportExpr(SourceInfo sourceInfo, FullTypeRefImpl metaReference, String alias) {
+    public ImportExpr newImportExpr(SourceInfo sourceInfo, TypeRefImpl metaReference, String alias) {
         return new ImportExpr(sourceInfo, metaReference, alias);
     }
 
@@ -225,7 +221,7 @@ public class AstFactory {
         AliasedMetaRef varExprs[] = new AliasedMetaRef[datumDecls.length];
         int idx = 0;
         for (Declaration datumDecl : datumDecls) {
-            varExprs[idx] = newMetaRefChain(SourceInfo.API, null, datumDecl);
+            varExprs[idx] = newAliasedRefChain(SourceInfo.API, null, datumDecl);
             idx++;
         }
         return new ProjectionDeclImpl(SourceInfo.API, name, varExprs);

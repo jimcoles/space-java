@@ -58,11 +58,6 @@ public class SimpleNameRefExpr<T extends Named> extends AbstractRefExpr<T>
     }
 
     @Override
-    public String getDisplayName() {
-        return getExpression().getDisplayName();
-    }
-
-    @Override
     public String getNameExprText() {
         return nameRefExpr.getNameExpr();
     }
@@ -106,4 +101,10 @@ public class SimpleNameRefExpr<T extends Named> extends AbstractRefExpr<T>
     public NameRefOrHolder getNameRef() {
         return this;
     }
+
+    public String getDisplayName() {
+        return " -> \"" + getKeyOrName() + "\" resObj=" +
+            (getState() == LinkState.RESOLVED ? getResolvedMetaObj().toString() : "?");
+    }
+
 }

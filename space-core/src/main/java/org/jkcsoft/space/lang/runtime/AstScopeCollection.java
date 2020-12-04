@@ -14,6 +14,7 @@ import org.jkcsoft.space.lang.ast.ModelElement;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Used by Linker to walk AST paths specific to a reference's scope. E.g., rules
@@ -37,6 +38,15 @@ public class AstScopeCollection extends LinkedList<StaticScope> {
 //    boolean hasNextScope();
 //    StaticScope nextScope();
 //    StaticScope getCurrentScope();
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof AstScopeCollection))
+            return false;
+        return this.collectionName.equals(((AstScopeCollection) o).getCollectionName());
+    }
 
     @Override
     public String toString() {
