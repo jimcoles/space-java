@@ -7,16 +7,12 @@
  *
  * Also see the LICENSE file in the repository root directory.
  */
-package org.jkcsoft.space.lang.instance;
+package org.jkcsoft.space.lang.runtime;
 
 import org.jkcsoft.space.lang.ast.Declaration;
-import org.jkcsoft.space.lang.ast.StatementBlock;
-import org.jkcsoft.space.lang.runtime.AstUtils;
-import org.jkcsoft.space.lang.runtime.Executor;
+import org.jkcsoft.space.lang.instance.BlockDatumMap;
+import org.jkcsoft.space.lang.instance.ValueHolder;
 import org.jkcsoft.space.lang.runtime.InternalExeContext;
-
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * @author Jim Coles
@@ -24,7 +20,7 @@ import java.util.TreeMap;
 public class StaticExeContext {
 
     private InternalExeContext exeContext;
-    private final BlockDatumMap staticDatumMap = new BlockDatumMap(null);
+    private final BlockDatumMap staticDatumMap = exeContext.getObjFactory().newBlockDatumMap(null);
 
     public StaticExeContext(InternalExeContext exeContext) {
         this.exeContext = exeContext;

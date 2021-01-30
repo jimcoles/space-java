@@ -10,9 +10,9 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * A {@link ProjectionDecl} is a subset of variables with respect to a reference Projection,
- * which might be a basis {@link TypeDefn}. Algebraically, a {@link ProjectionDecl} is a
- * projection of coordinates, or a coordinate system.
+ * A {@link ProjectionDecl} specifies the path to a {@link VariableDecl}, or another
+ * {@link ProjectionDecl}, with respect to a basis {@link TypeDefn} or {@link ViewDefn}.
+ * Algebraically, a {@link ProjectionDecl} is a projection of coordinates, or a coordinate system.
  *
  * <p>Projections are used to define View variables {@link ViewDefn} and Keys ({@link KeyDefnImpl}.
  *
@@ -28,7 +28,5 @@ public interface ProjectionDecl extends Declaration {
 
     /** References either a Type or a Variable or an Association */
     AliasedMetaRef getTypeGraphRef();
-
-    ProjectionDecl addChildProjection(ProjectionDecl proj);
 
 }

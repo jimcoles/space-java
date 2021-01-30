@@ -9,6 +9,10 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.ScalarValue;
+import org.jkcsoft.space.lang.runtime.SpaceUtils;
+
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -77,8 +81,9 @@ public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implem
     }
 
     @Override
-    public FunctionDefn addFunctionDefn(FunctionDefn functionDefn) {
-        return containedElementType.addFunctionDefn(functionDefn);
+    public TypeDefn addFunctionDefn(FunctionDefn functionDefn) {
+        containedElementType.addFunctionDefn(functionDefn);
+        return this;
     }
 
     @Override
@@ -108,5 +113,10 @@ public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implem
     @Override
     public boolean isAssignableTo(TypeDefn receivingType) {
         return false;
+    }
+
+    @Override
+    public Comparator<ScalarValue> getValueComparator() {
+        throw SpaceUtils.nosup("getValueComparator");
     }
 }

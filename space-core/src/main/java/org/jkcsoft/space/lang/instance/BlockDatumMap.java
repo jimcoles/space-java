@@ -23,7 +23,7 @@ public class BlockDatumMap implements DatumMap {
     private final ContextDatumDefn defn;
     private final Map<Declaration, ValueHolder<Value<Object>, Object>> valueHolders;
 
-    protected BlockDatumMap(ContextDatumDefn defn) {
+    BlockDatumMap(ContextDatumDefn defn) {
         this.defn = defn;
         this.valueHolders = new TreeMap<>();
     }

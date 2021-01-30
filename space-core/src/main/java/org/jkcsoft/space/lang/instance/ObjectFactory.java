@@ -171,7 +171,7 @@ public class ObjectFactory {
         return new View(viewDefn);
     }
 
-    public BlockDatumMap newBlockDatumMap(StatementBlock statementBlock) {
-        return new BlockDatumMap(statementBlock);
+    public BlockDatumMap newBlockDatumMap(ContextDatumDefn datumDefn) {
+        return new BlockDatumMap(datumDefn);
     }
 }

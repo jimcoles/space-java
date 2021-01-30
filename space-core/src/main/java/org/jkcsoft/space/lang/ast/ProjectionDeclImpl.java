@@ -9,12 +9,9 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
-import org.jkcsoft.space.lang.runtime.AstUtils;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -34,7 +31,7 @@ public class ProjectionDeclImpl extends NamedElement implements ProjectionDecl {
      * May reference associations or variables.
      */
     private List<AliasedMetaRef> typeAssocs;
-    private Comparator<Tuple> datumComparator;
+    private Comparators.DatumTupleComparator datumComparator;
 
 //    private TypeContext rootTypeContext;
 
@@ -59,11 +56,6 @@ public class ProjectionDeclImpl extends NamedElement implements ProjectionDecl {
     }
 
     @Override
-    public ProjectionDecl addChildProjection(ProjectionDecl proj) {
-        return null;
-    }
-
-    @Override
     public TypeDefn getType() {
         return basisTypeRef.getMetaRefExpr().getResolvedMetaObj();
     }
@@ -74,9 +66,14 @@ public class ProjectionDeclImpl extends NamedElement implements ProjectionDecl {
     }
 
     @Override
-    public Comparator<Tuple> getDatumComparator() {
+    public ProjectionDecl asVariable() {
+        return this;
+    }
+
+    @Override
+    public Comparators.DatumTupleComparator getDatumComparator() {
         if (datumComparator == null)
-            datumComparator = AstUtils.buildDatumComparator(this);
+            datumComparator = Comparators.buildDatumComparator(this);
         return datumComparator;
     }
 }

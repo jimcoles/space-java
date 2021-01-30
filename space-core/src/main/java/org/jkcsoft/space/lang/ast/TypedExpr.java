@@ -15,6 +15,10 @@ package org.jkcsoft.space.lang.ast;
  * a typed datum or return value of a function. TypeExpr's may be followed
  * by a dotted reference to any member of their associated type.
  *
+ * TODO Fold TypedExpr up into ValueExpr. Possibly create new LHSValueExpr which
+ * extends ValueExpr and evals to the declared variable ValueHolder (for write-only).
+ * Might need an LHS which evals to ValueHolder for read-only.
+ *
  * @author Jim Coles
  */
 public interface TypedExpr extends LinkSource {

@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.Tuple;
+
 import java.util.Comparator;
 
 /**
@@ -76,7 +78,7 @@ public class StreamTypeDefn extends AbstractCollectionTypeDefn implements TypeDe
     }
 
     @Override
-    public Comparator getTypeComparator() {
+    public Comparators.ProjectionComparator getTypeComparator() {
         return null;
     }
 }

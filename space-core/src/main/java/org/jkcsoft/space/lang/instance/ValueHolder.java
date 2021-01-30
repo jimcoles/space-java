@@ -45,5 +45,4 @@ public interface ValueHolder<V extends Value<J>, J> {
      * For Java Objects, this is the actual Java Object.
      */
     V getValue();
-
 }

@@ -9,15 +9,9 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
-import org.jkcsoft.space.lang.ast.NamedElement;
-import org.jkcsoft.space.lang.ast.SourceInfo;
-import org.jkcsoft.space.lang.ast.TypeDefn;
-import org.jkcsoft.space.lang.ast.VariableDecl;
-import org.jkcsoft.space.lang.instance.Tuple;
+import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.metameta.MetaType;
-import org.jkcsoft.space.lang.runtime.AstUtils;
-
-import java.util.Comparator;
+import org.jkcsoft.space.lang.runtime.SpaceUtils;
 
 /**
  * @author Jim Coles
@@ -47,6 +41,16 @@ public abstract class SjiVarDecl extends NamedElement implements SjiDeclaration,
     }
 
     @Override
+    public AliasedMetaRef getBasisTypeRef() {
+        throw SpaceUtils.nosup("getBasisTypeRef");
+    }
+
+    @Override
+    public AliasedMetaRef getTypeGraphRef() {
+        throw SpaceUtils.nosup("getBasisTypeRef");
+    }
+
+    @Override
     public TypeDefn getType() {
         return sjiTypeDefn;
     }
@@ -57,7 +61,7 @@ public abstract class SjiVarDecl extends NamedElement implements SjiDeclaration,
     }
 
     @Override
-    public Comparator<Tuple> getDatumComparator() {
-        return AstUtils.buildDatumComparator(this);
+    public Comparators.DatumTupleComparator getDatumComparator() {
+        return Comparators.buildDatumComparator(this);
     }
 }

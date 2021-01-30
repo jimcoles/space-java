@@ -51,10 +51,6 @@ public abstract class PrimitiveTypeDefn extends AbstractTypeDefn {
         return super.getMetaType();
     }
 
-    public ScalarValue nullValue() {
-        return NullValue.NULL_VALUE;
-    }
-
     @Override
     public boolean isPrimitiveType() {
         return true;
@@ -121,8 +117,8 @@ public abstract class PrimitiveTypeDefn extends AbstractTypeDefn {
     }
 
     @Override
-    public FunctionDefn addFunctionDefn(FunctionDefn functionDefn) {
-        return null;
+    public TypeDefn addFunctionDefn(FunctionDefn functionDefn) {
+        return this;
     }
 
     @Override

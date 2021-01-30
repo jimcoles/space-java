@@ -42,7 +42,7 @@ public interface Tuple extends
     SpaceObject
 {
 
-    ProjectionDecl getType();
+    TypeDefn getType();
 
     boolean isSingleValueWrapper();
 

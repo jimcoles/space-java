@@ -12,6 +12,7 @@ package org.jkcsoft.space.lang.instance;
 import org.jkcsoft.space.lang.ast.FunctionCallExpr;
 import org.jkcsoft.space.lang.ast.FunctionDefn;
 import org.jkcsoft.space.lang.ast.SpaceFunctionDefn;
+import org.jkcsoft.space.lang.runtime.StaticExeContext;
 
 import java.util.LinkedList;
 

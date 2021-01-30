@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.instance.*;
 
 import java.util.Comparator;
-import java.util.List;
+import java.util.function.ToIntFunction;
 
 /**
  * @author Jim Coles
@@ -20,29 +20,25 @@ import java.util.List;
 public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
 
     //--------------------------------------------------------------------------
-    // basic physical / representational notions
-
-    public static final NumPrimitiveTypeDefn BIT = newInstance("bit", null);
-    // TODO: describe a 'byte' as a sequence of 8 bits.
-    public static final NumPrimitiveTypeDefn BYTE = newInstance("byte", null);
-
+    // Intermediate abstractions
     // TODO: a char is a 1 to n-byte 'key' to a finite well-known external abstract object
     public static final NumPrimitiveTypeDefn CHAR =
-        newInstance("char", Comparator.comparing(CharacterValue::getJavaValue));
+        newInstance("char", Comparator.comparing(scalarValue -> ((CharacterValue) scalarValue).getJavaValue()));
 
     //--------------------------------------------------------------------------
     // Logical notions, idealizations
 
     public static final NumPrimitiveTypeDefn BOOLEAN =
-        newInstance("boolean", Comparator.comparingInt(BooleanValue::getSortValue));
-    public static final NumPrimitiveTypeDefn CARD =
-        newInstance("int", Comparator.comparingLong(CardinalValue::getJavaValue));
-    public static final NumPrimitiveTypeDefn REAL =
-        newInstance("real", Comparator.comparingDouble(RealValue::getJavaValue));
-    //
-    public static final NumPrimitiveTypeDefn NULL = newInstance("null", (Comparator<NullValue>) (o1, o2) -> 0);
+        newInstance("boolean", Comparator.comparingInt(scalarValue -> ((BooleanValue) scalarValue).getSortValue()));
 
-    private static <T extends ScalarValue> NumPrimitiveTypeDefn newInstance(String name, Comparator<T> comparator) {
+    public static final NumPrimitiveTypeDefn CARD =
+        newInstance("int", Comparator.comparingLong(scalarValue -> ((CardinalValue) scalarValue).getJavaValue()));
+    public static final NumPrimitiveTypeDefn REAL =
+        newInstance("real", Comparator.comparingDouble(scalarValue -> ((RealValue) scalarValue).getJavaValue()));
+    //
+//    public static final NumPrimitiveTypeDefn NULL = newInstance("null", (Comparator<NullValue>) (o1, o2) -> 0);
+
+    private static NumPrimitiveTypeDefn newInstance(String name, Comparator<ScalarValue> comparator) {
         NumPrimitiveTypeDefn ptDefn = new NumPrimitiveTypeDefn(new IntrinsicSourceInfo(), name, comparator);
         PrimitiveTypeDefn.addPrimitiveTypeDefn(ptDefn);
         return ptDefn;
@@ -52,9 +48,9 @@ public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
     //
 
     private int arrayDepth;
-    private Comparator<? extends ScalarValue> comparator;
+    private Comparator<ScalarValue> comparator;
 
-    private <T extends ScalarValue> NumPrimitiveTypeDefn(SourceInfo sourceInfo, String name, Comparator<T> comparator) {
+    private NumPrimitiveTypeDefn(SourceInfo sourceInfo, String name, Comparator<ScalarValue> comparator) {
         super(sourceInfo, name);
         this.comparator = comparator;
     }
@@ -72,16 +68,6 @@ public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
     }
 
     @Override
-    public String toString() {
-        return super.toString();
-    }
-
-    @Override
-    public boolean isAssignableTo(TypeDefn receivingType) {
-        return false;
-    }
-
-    @Override
     public ContextDatumDefn addVariableDecl(VariableDecl variableDecl) {
         return null;
     }
@@ -92,33 +78,11 @@ public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
     }
 
     @Override
-    public List<VariableDecl> getVariablesDeclList() {
+    public Comparators.ProjectionComparator getTypeComparator() {
         return null;
     }
 
-    @Override
-    public List<Declaration> getDatumDeclList() {
-        return null;
-    }
-
-    @Override
-    public FunctionDefn addFunctionDefn(FunctionDefn functionDefn) {
-        return null;
-    }
-
-    @Override
-    public Comparator getTypeComparator() {
+    public Comparator<ScalarValue> getValueComparator() {
         return comparator;
     }
-
-    @Override
-    public boolean hasDatums() {
-        return false;
-    }
-
-    @Override
-    public boolean hasPrimaryKey() {
-        return true;
-    }
-
 }

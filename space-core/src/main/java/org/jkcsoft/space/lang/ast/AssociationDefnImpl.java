@@ -10,10 +10,7 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.ast.sji.HardReference;
-import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
-
-import java.util.Comparator;
 
 /**
  * The primary {@link AssociationDefn} implementation.
@@ -63,13 +60,18 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
         addChild(this.toEnd);
     }
 
-    private void setToEnd(SourceInfo sourceInfo, String name, TypeRef toTypeRef) {
-        this.toEnd = new AssociationDefnEndImpl(sourceInfo, name, toTypeRef, true, true, 1, 1);
-    }
-
     @Override
     public MetaType getMetaType() {
         return MetaType.DATUM;
+    }
+
+    @Override
+    public boolean isAssoc() {
+        return true;
+    }
+
+    private void setToEnd(SourceInfo sourceInfo, String name, TypeRef toTypeRef) {
+        this.toEnd = new AssociationDefnEndImpl(sourceInfo, name, toTypeRef, true, true, 1, 1);
     }
 
     @Override
@@ -83,10 +85,6 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
         return associationKind;
     }
 
-    @Override
-    public boolean isAssoc() {
-        return true;
-    }
     @Override
     public boolean hasTypeFromEnd() {
         return typeFromEnd != null;
@@ -113,11 +111,6 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
     }
 
     @Override
-    public Comparator<Tuple> getDatumComparator() {
-        return null;
-    }
-
-    @Override
     public AssociationDefnEnd getTypeFromEnd() {
         return typeFromEnd;
     }
@@ -135,7 +128,14 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
         return typeFromEnd.getType() == toEnd.getType();
     }
 
-    // called by loader after fully loaded to set
+    @Override
+    public Comparators.DatumTupleComparator getDatumComparator() {
+        return null;
+    }
 
+    @Override
+    public ProjectionDecl asVariable() {
+        return null;
+    }
 
 }

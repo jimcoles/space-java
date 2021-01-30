@@ -28,7 +28,7 @@ import org.jkcsoft.space.lang.instance.Space;
  * </ul>
  * <p>By default, an {@link Rule} must at all times evaluate to true if the system is
  * to be deemed in a valid state. However, we will likely give the programmer a means
- * of activating/deactivating Equations dynamically.
+ * of activating/deactivating Rules dynamically.
  *
  * <p>Rules might end up being just the declarative view of a program's expression set. The other
  * view would be the action / statement / imperative sequence view.
@@ -52,4 +52,5 @@ public interface Rule extends Named {
     ProjectionDecl getVarSpace();
 
     OperatorExpr getOperatorExpr();
+
 }

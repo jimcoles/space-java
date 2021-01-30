@@ -34,8 +34,8 @@ public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple
     }
 
     @Override
-    public ProjectionDecl getType() {
-        return (ProjectionDecl) getDefn();
+    public TypeDefn getType() {
+        return (TypeDefn) getDefn();
     }
 
     @Override

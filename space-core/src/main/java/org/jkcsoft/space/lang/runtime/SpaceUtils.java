@@ -10,7 +10,6 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.jkcsoft.space.lang.instance.*;
-import org.jkcsoft.space.lang.runtime.spm.SpmExecutor;
 
 /**
  * Holds bits used in various places.
@@ -19,7 +18,7 @@ import org.jkcsoft.space.lang.runtime.spm.SpmExecutor;
  */
 public class SpaceUtils {
 
-    public static void assignNoCast(InternalExeContext exe, ValueHolder leftSideHolder, ValueHolder rightSideHolder) {
+    public static void assignNoCast(EvalContext evalContext, ValueHolder leftSideHolder, ValueHolder rightSideHolder) {
         boolean assigned = false;
         RuntimeError error = null;
         if (leftSideHolder instanceof VariableValueHolder) {
@@ -31,7 +30,7 @@ public class SpaceUtils {
                     assigned = true;
                 }
                 else {
-                    error = exe.newRuntimeError(
+                    error = evalContext.newRuntimeError(
                         "type mismatch: cannot assign " + lsHolderAsVar.getDeclaration().getType() + " <- " +
                             rsScalarValue.getType());
                 }
@@ -54,8 +53,12 @@ public class SpaceUtils {
             if (error != null)
                 throw new SpaceX(error);
             else
-                throw new SpaceX(exe.newRuntimeError("cannot assign " + leftSideHolder + " <- " + rightSideHolder));
+                throw new SpaceX(evalContext.newRuntimeError("cannot assign " + leftSideHolder + " <- " + rightSideHolder));
         }
+    }
+
+    public static SpaceX nosup(String msg) {
+        return new SpaceX("method [{}}] not yet implemented", msg);
     }
 
 }

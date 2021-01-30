@@ -86,7 +86,7 @@ public abstract class AbstractRefExpr<T extends Named> extends AbstractModelElem
 
     @Override
     public TypeDefn getDatumType() {
-        return null;
+        return ReferenceTypeDefn.REF_TYPE_DEFN;
     }
 
     @Override

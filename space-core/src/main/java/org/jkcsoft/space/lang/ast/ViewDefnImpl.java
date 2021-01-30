@@ -9,6 +9,8 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -20,8 +22,12 @@ import java.util.Set;
 public class ViewDefnImpl extends TypeDefnImpl implements ViewDefn {
 
     //    private Space parentSpace;
-    // nestable boolean-valued expression
     private TypeDefn basisType;
+    private List<Expression> elementSequence = new LinkedList<>();
+    private List<ProjectionDecl> projectionDeclList = new LinkedList<>();
+
+    /** The selection Rule, i.e., the filter. References the projection vars, but does not
+     * declare them. */
     private Rule selector;
 
     ViewDefnImpl(SourceInfo sourceInfo, NamePart namePart, TypeDefn basisType) {
@@ -83,4 +89,20 @@ public class ViewDefnImpl extends TypeDefnImpl implements ViewDefn {
     public Set<KeyDefnImpl> getAlternateKeyDefns() {
         return null;
     }
+
+    @Override
+    public ViewDefn addProjectionDecl(ProjectionDecl projectionDecl) {
+        elementSequence.add(projectionDecl);
+        projectionDeclList.add(projectionDecl);
+        //
+        addChild(projectionDecl);
+        //
+        return this;
+    }
+
+    @Override
+    public List<ProjectionDecl> getProjectionDeclList() {
+        return projectionDeclList;
+    }
+
 }

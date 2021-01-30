@@ -43,7 +43,12 @@ public class SetDecl extends NamedElement implements Declaration {
     }
 
     @Override
-    public Comparator<Tuple> getDatumComparator() {
+    public ProjectionDecl asVariable() {
+        return null;
+    }
+
+    @Override
+    public Comparators.DatumTupleComparator getDatumComparator() {
         return null;
     }
 

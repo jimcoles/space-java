@@ -9,6 +9,9 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.ScalarValue;
+import org.jkcsoft.space.lang.instance.Tuple;
+
 import java.util.Comparator;
 
 /**
@@ -56,7 +59,15 @@ public class SequenceTypeDefn extends AbstractCollectionTypeDefn {
     }
 
     @Override
-    public Comparator getTypeComparator() {
+    public Comparators.ProjectionComparator getTypeComparator() {
+        return null;
+    }
+
+    /**
+     * A Sequence compares all elements
+     * @return
+     */
+    @Override public Comparator<ScalarValue> getValueComparator() {
         return null;
     }
 }

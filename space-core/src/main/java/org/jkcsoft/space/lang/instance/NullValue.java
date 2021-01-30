@@ -10,21 +10,24 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 
 /**
  * @author Jim Coles
  */
-public class NullValue extends ScalarValue {
+public class NullValue implements Value<Object> {
 
-    public static final NullValue NULL_VALUE = new NullValue();
+//    public static final NullValue NULL_VALUE = new NullValue();
 
-    private NullValue() {
-        super(NumPrimitiveTypeDefn.NULL, null);
+    private TypeDefn typeDefn;
+
+    NullValue(TypeDefn typeDefn) {
+        this.typeDefn = typeDefn;
     }
 
     @Override
-    public String asString() {
-        return "(null)";
+    public Object getJavaValue() {
+        return null;
     }
 
     @Override

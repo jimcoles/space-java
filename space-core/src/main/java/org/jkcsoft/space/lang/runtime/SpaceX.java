@@ -26,6 +26,10 @@ public class SpaceX extends RuntimeException {
         this.error = error;
     }
 
+    /**
+     * @param message Uses the sl4j convention of simple empty {} to mark arg points.
+     * @param args
+     */
     public SpaceX(String message, Object ... args) {
         super(args != null ? MessageFormatter.format(message, args).getMessage() : message);
     }

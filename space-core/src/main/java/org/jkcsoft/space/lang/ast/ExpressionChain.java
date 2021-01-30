@@ -172,7 +172,10 @@ public class ExpressionChain<T extends Named> extends AbstractModelElement imple
     }
 
     public T getResolvedMetaObj() {
-        return getLastMetaRefLink().getResolvedMetaObj();
+        // full chain = [meta ref path].[value chain]
+        if (!isResolved())
+            throw new IllegalStateException("chain expression not fully resolved");
+        return (T) getLastPart().getNameRef().getRefAsNameRef().getResolvedMetaObj();
     }
 
     private MetaRef<T> getLastMetaRefLink() {
@@ -299,7 +302,8 @@ public class ExpressionChain<T extends Named> extends AbstractModelElement imple
         if (!isResolvedValid())
             throw new IllegalStateException("chain expression not fully resolved and validated");
 
-        return getLastPart().getTypedExpr().isValueExpr();
+        LinkSource lastPart = getLastPart();
+        return lastPart.hasValueExpr();
     }
 
     public ValueExprChain extractValueExprChain() {

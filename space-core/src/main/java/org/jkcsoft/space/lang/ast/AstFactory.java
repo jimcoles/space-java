@@ -213,7 +213,7 @@ public class AstFactory {
     }
 
     public KeyDefnImpl newKeyDefn(TypeDefn basisType, ProjectionDecl ... vars) {
-        return new KeyDefnImpl(SourceInfo.API, newNamePart(SourceInfo.API, "primaryKey"), basisType, vars);
+        return new KeyDefnImpl(SourceInfo.API, "primaryKey", basisType, vars);
     }
 
     /** API method */

@@ -15,7 +15,10 @@ import org.jkcsoft.space.lang.runtime.SpaceX;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * The {@link Space} imple for most programmatic operations. Much of the state
@@ -120,14 +123,13 @@ public class InMemorySpaceImpl extends AbstractSpaceObject implements Space {
                         Tuple keyValue = extractKeyTuple(tuple, keyDefn);
 
                     }
-
         }
     }
 
-    private Tuple extractKeyTuple(Tuple tuple, KeyDefnImpl keyDefn) {
-        Tuple keyTuple = getObjectFactory().newTupleImpl(keyDefn);
-        keyTuple.getDefn().getVariablesDeclList().forEach((varDecl) ->
-            keyTuple.setValue(varDecl, tuple.get(varDecl).getValue())
+    private Tuple extractKeyTuple(Tuple baseTuple, KeyDefn keyDefn) {
+        Tuple keyTuple = getObjectFactory().newTupleImpl(keyDefn.getBasisTypeDefn());
+        keyDefn.getProjectionDeclList().forEach((keyVar) ->
+            keyTuple.setValue(keyVar, baseTuple.get(keyVar).getValue())
         );
         return keyTuple;
     }

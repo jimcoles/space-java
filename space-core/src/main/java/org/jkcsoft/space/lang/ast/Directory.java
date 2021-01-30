@@ -53,7 +53,7 @@ public class Directory extends NamedElement {
 
     @Override
     public MetaType getMetaType() {
-        return null;
+        return MetaType.PACKAGE;
     }
 
     // =========================================================================

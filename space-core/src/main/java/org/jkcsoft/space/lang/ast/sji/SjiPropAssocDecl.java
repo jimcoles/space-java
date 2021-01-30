@@ -9,7 +9,9 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
+import org.jkcsoft.space.lang.ast.Comparators;
 import org.jkcsoft.space.lang.ast.NativeSourceInfo;
+import org.jkcsoft.space.lang.runtime.SpaceUtils;
 
 import java.beans.PropertyDescriptor;
 
@@ -28,5 +30,10 @@ public class SjiPropAssocDecl extends SjiAssocDecl implements SjiPropBased {
     @Override
     public PropertyDescriptor getjPropDesc() {
         return jPropDesc;
+    }
+
+    @Override
+    public Comparators.DatumTupleComparator getDatumComparator() {
+        throw SpaceUtils.nosup("getDatumComparator");
     }
 }

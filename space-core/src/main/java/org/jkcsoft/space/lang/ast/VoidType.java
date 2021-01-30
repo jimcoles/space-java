@@ -9,9 +9,14 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.ScalarValue;
+import org.jkcsoft.space.lang.instance.Tuple;
+import org.jkcsoft.space.lang.runtime.SpaceX;
+
 import java.util.Comparator;
 
 /**
+ * A Void type is dimensionless and therefore no value is possible.
  * @author Jim Coles
  */
 public class VoidType extends PrimitiveTypeDefn {
@@ -32,7 +37,12 @@ public class VoidType extends PrimitiveTypeDefn {
     }
 
     @Override
-    public Comparator getTypeComparator() {
+    public Comparators.ProjectionComparator getTypeComparator() {
         return null;
+    }
+
+    @Override
+    public Comparator<ScalarValue> getValueComparator() {
+        throw new SpaceX("attempt to compare void values not defined");
     }
 }

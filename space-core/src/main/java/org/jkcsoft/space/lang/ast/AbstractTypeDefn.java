@@ -20,7 +20,7 @@ import java.util.List;
  */
 abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn {
 
-    private boolean isView = false;
+    private boolean isView;
 
     // The verbatim sequence of declarations and statements. Sequence is important for datum visibility rules
     // All other lists are redundantly maintained
@@ -34,7 +34,6 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     //
     private List<VariableDecl> variablesDeclList;
     private List<AssociationDefn> associationDeclList;
-    private List<ProjectionDecl> projectionDeclList;
     private List<FunctionDefn> functionDefns = new LinkedList<>();
 
     //
@@ -51,7 +50,6 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
         datumDeclList = new LinkedList<>();
         variablesDeclList = new LinkedList<>();
         associationDeclList = new LinkedList<>();
-        projectionDeclList = new LinkedList<>();
     }
 
     @Override
@@ -90,20 +88,6 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
         return this;
     }
 
-    @Override
-    public ProjectionDecl addProjectionDecl(ProjectionDecl projectionDecl) {
-        elementSequence.add(projectionDecl);
-        projectionDeclList.add(projectionDecl);
-        //
-        addChild(projectionDecl);
-        //
-        return projectionDecl;
-    }
-
-    @Override
-    public List<ProjectionDecl> getProjectionDeclList() {
-        return projectionDeclList;
-    }
 
     public List<Declaration> getDatumDeclList() {
         return datumDeclList;
@@ -136,12 +120,12 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
         return statementSequence;
     }
 
-    public FunctionDefn addFunctionDefn(FunctionDefn actionDefn) {
+    public TypeDefn addFunctionDefn(FunctionDefn actionDefn) {
         functionDefns.add(actionDefn);
         //
         addChild(actionDefn);
         //
-        return actionDefn;
+        return this;
     }
 
     public List<FunctionDefn> getFunctionDefns() {
@@ -212,6 +196,11 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
         if (setTypeDefn == null)
             setTypeDefn = new SetTypeDefn(getSourceInfo(), this);
         return setTypeDefn;
+    }
+
+    @Override
+    public Comparators.ProjectionComparator getTypeComparator() {
+        return null;
     }
 
     @Override

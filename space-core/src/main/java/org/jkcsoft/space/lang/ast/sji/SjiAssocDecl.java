@@ -12,6 +12,7 @@ package org.jkcsoft.space.lang.ast.sji;
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
+import org.jkcsoft.space.lang.runtime.SpaceUtils;
 
 import java.util.Comparator;
 
@@ -102,8 +103,8 @@ public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaratio
     }
 
     @Override
-    public Comparator<Tuple> getDatumComparator() {
-        return getType().getTypeComparator();
+    public Comparators.DatumTupleComparator getDatumComparator() {
+        throw SpaceUtils.nosup("getDatumComparator");
     }
 
     protected SjiService getSjiService() {

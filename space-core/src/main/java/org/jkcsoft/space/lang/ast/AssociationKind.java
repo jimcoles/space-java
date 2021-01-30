@@ -14,7 +14,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * ISSUE: Should the 'from' type def control this? Perhaps some Types can also
  * declare themselves inherently independent of dependent. Perhaps this is
- * based on whether the Type declares a primary KeyValue.
+ * based on whether the Type declares a primary Key.
  *
  * @author Jim Coles
  */

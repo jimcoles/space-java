@@ -10,7 +10,10 @@
 package org.jkcsoft.space.lang.ast.sji;
 
 import org.jkcsoft.space.lang.ast.*;
+import org.jkcsoft.space.lang.instance.ScalarValue;
+import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
+import org.jkcsoft.space.lang.runtime.SpaceUtils;
 
 import java.util.Comparator;
 import java.util.Set;
@@ -58,8 +61,13 @@ public class SjiTypeDefn extends AbstractTypeDefn implements TypeDefn {
     }
 
     @Override
-    public Comparator getTypeComparator() {
-        return null;
+    public Comparators.ProjectionComparator getTypeComparator() {
+        throw SpaceUtils.nosup("getTypeComparator");
+    }
+
+    @Override
+    public Comparator<ScalarValue> getValueComparator() {
+        throw SpaceUtils.nosup("getValueComparator");
     }
 
     @Override

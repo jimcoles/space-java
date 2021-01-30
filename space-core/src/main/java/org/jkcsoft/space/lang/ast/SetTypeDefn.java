@@ -9,6 +9,9 @@
  */
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.Tuple;
+import org.jkcsoft.space.lang.runtime.SpaceUtils;
+
 import java.util.Comparator;
 
 /**
@@ -52,7 +55,7 @@ public class SetTypeDefn extends AbstractCollectionTypeDefn {
     }
 
     @Override
-    public Comparator getTypeComparator() {
-        return null;
+    public Comparators.ProjectionComparator getTypeComparator() {
+        throw SpaceUtils.nosup("getTypeComparator");
     }
 }

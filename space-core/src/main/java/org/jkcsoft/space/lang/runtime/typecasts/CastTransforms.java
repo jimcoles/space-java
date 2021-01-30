@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.runtime.typecasts;
 
 import org.jkcsoft.space.lang.instance.CharacterSequence;
-import org.jkcsoft.space.lang.runtime.Executor;
+import org.jkcsoft.space.lang.runtime.EvalContext;
 
 /**
  * Implement transforms from one type to another.
@@ -23,7 +23,7 @@ public class CastTransforms {
         return characterSequence.toString();
     }
 
-    public CharacterSequence stringToCharSeq(Executor.EvalContext evalContext, String jString) {
+    public CharacterSequence stringToCharSeq(EvalContext evalContext, String jString) {
         return evalContext.newCharSequence(jString);
     }
 }

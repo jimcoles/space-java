@@ -53,11 +53,19 @@ public class AssignmentExpr extends AbstractModelElement implements ValueExpr {
         return exprChain == leftSideDatumRef;
     }
 
+    /**
+     * Currently, assignment exprs cannot be used as LHS of an expr chain so
+     * return false;
+     */
     @Override
     public boolean hasRef() {
         return false;
     }
 
+    /**
+     * Currently, assignment exprs cannot be used as LHS of an expr chain so
+     * return null;
+     */
     @Override
     public MetaRef getRef() {
         return null;

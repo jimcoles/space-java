@@ -10,6 +10,8 @@
 
 package org.jkcsoft.space.lang.ast;
 
+import org.jkcsoft.space.lang.instance.ScalarValue;
+
 import java.util.*;
 
 /**
@@ -96,7 +98,12 @@ public class TypeDefnImpl extends AbstractTypeDefn implements TypeDefn {
     }
 
     @Override
-    public Comparator getTypeComparator() {
+    public Comparators.ProjectionComparator getTypeComparator() {
+        return Comparators.buildProjectionComparator(primaryKey);
+    }
+
+    @Override
+    public Comparator<ScalarValue> getValueComparator() {
         return null;
     }
 

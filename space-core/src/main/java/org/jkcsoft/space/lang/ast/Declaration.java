@@ -16,13 +16,29 @@ import java.util.Comparator;
 /**
  * @author Jim Coles
  */
-public interface Declaration extends Expression, Identified, Named {
+public interface Declaration extends Expression, Identified, Named, TypedExpr {
 
-    TypeDefn getType();
+//    TypeDefn getType();
 
     boolean isAssoc();
 
-    Comparator<Tuple>  getDatumComparator();
+    default boolean isRef() {
+        return isAssoc();
+    }
+
+    default boolean isVariable() {
+        return !isAssoc();
+    }
+
+    default ProjectionDecl asVariable() {
+        if (isVariable())
+            return ((ProjectionDecl) this);
+        else
+            return null;
+    };
+
+    /** Compares the values of a given named variable (possibly a projection) between two tuples. */
+    Comparators.DatumTupleComparator getDatumComparator();
 
 }
 

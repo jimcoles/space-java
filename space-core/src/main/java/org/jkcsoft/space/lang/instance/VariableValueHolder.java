@@ -30,12 +30,6 @@ public class VariableValueHolder implements ValueHolder {
         this.scalarValue = scalarValue;
     }
 
-    public VariableValueHolder(DatumMap parentDatumMap, VariableDecl declaration) {
-        this.parentDatumMap = parentDatumMap;
-        this.declaration = declaration;
-        this.scalarValue = ((PrimitiveTypeDefn) declaration.getType()).nullValue();
-    }
-
     public DatumMap getParentDatumMap() {
         return parentDatumMap;
     }
@@ -69,6 +63,6 @@ public class VariableValueHolder implements ValueHolder {
     public String toString() {
         return ((declaration != null) ?
             "(" + declaration.getType().getName() + ")" + declaration.getName() + "=" : "(anon)")
-            + (scalarValue != NullValue.NULL_VALUE ? scalarValue.toString() : "(not initialized)");
+            + (scalarValue != null ? scalarValue.toString() : "(not initialized)");
     }
 }

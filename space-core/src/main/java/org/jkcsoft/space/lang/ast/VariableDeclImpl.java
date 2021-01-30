@@ -10,9 +10,8 @@
 
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.Tuple;
+import org.jkcsoft.space.lang.instance.ScalarValue;
 import org.jkcsoft.space.lang.metameta.MetaType;
-import org.jkcsoft.space.lang.runtime.AstUtils;
 
 import java.util.Comparator;
 
@@ -26,6 +25,7 @@ import java.util.Comparator;
 public class VariableDeclImpl extends NamedElement implements VariableDecl {
 
     private TypeRef typeRef;
+    private Comparators.DatumTupleComparator datumComparator;
 
     VariableDeclImpl(SourceInfo sourceInfo, String name, TypeRef typeRef) {
         super(sourceInfo, name);
@@ -53,13 +53,21 @@ public class VariableDeclImpl extends NamedElement implements VariableDecl {
         this.typeRef = typeRef;
     }
 
-    private Comparator<Tuple> comparator = null;
+    @Override
+    public Comparators.DatumTupleComparator getDatumComparator() {
+        if (datumComparator == null)
+            datumComparator = Comparators.buildDatumComparator(this);
+        return datumComparator;
+    }
 
     @Override
-    public Comparator<Tuple> getDatumComparator() {
-        if (comparator == null)
-            comparator = AstUtils.buildDatumComparator(this);
-        return comparator;
+    public AliasedMetaRef getBasisTypeRef() {
+        return null;
+    }
+
+    @Override
+    public AliasedMetaRef getTypeGraphRef() {
+        return null;
     }
 
 }
