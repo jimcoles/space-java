@@ -17,10 +17,8 @@ package org.jkcsoft.space.lang.ast;
  */
 public enum ScopeKind {
     GLOBAL,
+    STATIC,
+    OBJECT,
     BLOCK,
-    ARG,
-    TYPE_DEFN,
-    PARSE_UNIT,
-    REF_TO_TYPE,
-    STATIC
+    ARG
 }

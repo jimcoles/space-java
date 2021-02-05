@@ -30,7 +30,7 @@ public class PrimitiveLiteralExpr extends AbstractModelElement implements ValueE
         return typeDefn;
     }
 
-    public String getValueExpr() {
+    public String getStringValue() {
         return valueExpr;
     }
 
@@ -57,5 +57,10 @@ public class PrimitiveLiteralExpr extends AbstractModelElement implements ValueE
     @Override
     public MetaRef getRef() {
         return null;
+    }
+
+    @Override
+    public boolean isLiteral() {
+        return true;
     }
 }

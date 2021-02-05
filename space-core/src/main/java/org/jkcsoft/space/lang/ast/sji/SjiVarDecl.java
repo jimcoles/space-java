@@ -36,6 +36,11 @@ public abstract class SjiVarDecl extends NamedElement implements SjiDeclaration,
         return sjiTypeDefn;
     }
 
+    @Override
+    public TypeDefn getType() {
+        return sjiTypeDefn;
+    }
+
     SjiService getSjiService() {
         return sjiService;
     }
@@ -48,11 +53,6 @@ public abstract class SjiVarDecl extends NamedElement implements SjiDeclaration,
     @Override
     public AliasedMetaRef getTypeGraphRef() {
         throw SpaceUtils.nosup("getBasisTypeRef");
-    }
-
-    @Override
-    public TypeDefn getType() {
-        return sjiTypeDefn;
     }
 
     @Override

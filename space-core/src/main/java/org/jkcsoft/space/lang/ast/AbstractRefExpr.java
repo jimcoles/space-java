@@ -19,7 +19,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  *
  * @author Jim Coles
  */
-public abstract class AbstractRefExpr<T extends Named> extends AbstractModelElement implements MetaRef<T>, TypedExpr {
+public abstract class AbstractRefExpr<T extends Named> extends AbstractModelElement implements MetaRef<T> {
     /** The meta object to which this ref refers, e.g. the SpaceTypeDefn or Package
      * or VariableDefn, FunctionDefn */
     private T resolvedMetaObj; // package, datum defn, func defn
@@ -59,6 +59,10 @@ public abstract class AbstractRefExpr<T extends Named> extends AbstractModelElem
         this.resolvedMetaObj = resolvedMetaObj;
     }
 
+    public boolean hasResolvedMetaObj() {
+        return resolvedMetaObj != null;
+    }
+
     @Override
     public T getResolvedMetaObj() {
         return resolvedMetaObj;
@@ -66,37 +70,19 @@ public abstract class AbstractRefExpr<T extends Named> extends AbstractModelElem
 
     @Override
     public boolean hasResolvedType() {
-        return resolvedMetaObj != null;
-    }
-
-    @Override
-    public boolean hasRef() {
-        return true;
-    }
-
-    @Override
-    public MetaRef getRef() {
-        return this;
-    }
-
-    @Override
-    public boolean isValueExpr() {
-        return false;
+        return hasResolvedMetaObj()
+            && getResolvedMetaObj() instanceof ValueExpr
+            && ((ValueExpr) getResolvedMetaObj()).hasResolvedType();
     }
 
     @Override
     public TypeDefn getDatumType() {
-        return ReferenceTypeDefn.REF_TYPE_DEFN;
+        return ((ValueExpr) getResolvedMetaObj()).getDatumType();
     }
 
     @Override
-    public boolean hasTypedExpr() {
-        return getResolvedMetaObj() instanceof TypeExpr;
-    }
-
-    @Override
-    public TypedExpr getTypedExpr() {
-        return ((TypedExpr) getResolvedMetaObj());
+    public ValueExpr getValueExpr() {
+        return ((ValueExpr) getResolvedMetaObj());
     }
 
 }

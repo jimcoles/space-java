@@ -15,7 +15,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class ThisArgExpr extends PronounRefExpr implements ValueExpr {
+public class ThisArgExpr extends PronounRefExpr<FunctionDefn> {
 
     ThisArgExpr(SourceInfo sourceInfo) {
         super(sourceInfo, "args");
@@ -23,7 +23,11 @@ public class ThisArgExpr extends PronounRefExpr implements ValueExpr {
 
     @Override
     public TypeDefn getDatumType() {
-        return ((TypeDefnImpl) getResolvedMetaObj());
+        return getResolvedMetaObj().getReturnType();
     }
 
+    @Override
+    public ScopeKind getScopeKind() {
+        return ScopeKind.ARG;
+    }
 }

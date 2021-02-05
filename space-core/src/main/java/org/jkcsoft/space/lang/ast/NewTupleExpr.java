@@ -55,4 +55,5 @@ public class NewTupleExpr extends AbstractModelElement implements ValueExpr {
     public MetaRef getRef() {
         return null;
     }
+
 }

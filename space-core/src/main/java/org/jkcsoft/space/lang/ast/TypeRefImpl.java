@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-public class TypeRefImpl extends ExpressionChain implements TypeRef {
+public class TypeRefImpl extends ExpressionChain<TypeDefn> implements TypeRef {
 
     /** Somewhat analogous to Java 'new URL(String spec)' */
     public static TypeRefImpl newFullTypeRef(String typeNameSpec) {
@@ -77,7 +77,7 @@ public class TypeRefImpl extends ExpressionChain implements TypeRef {
     }
 
     public boolean isWildcard() {
-        return extractMetaRefPath().getLastLink().isWildcard();
+        return asMetaRefPath().getLastLink().isWildcard();
     }
 
     public boolean isSingleton() {

@@ -15,7 +15,7 @@ package org.jkcsoft.space.lang.ast;
  * i.e., that contains named members.
  *
  * Specifically, either:
- * - A {@link TypedExpr}: a value expression (which inherently has a type)
+ * - A {@link ValueExpr}: a value expression (which inherently has a type)
  * - A Container: the name, possibly as a multi-part path, of (named reference to) a container
  *   (Directory or Type or other named thing) that would be referenced by a name path.
  *
@@ -27,8 +27,8 @@ public interface LinkSource extends Expression {
 
     NameRefOrHolder getNameRef();
 
-    boolean hasTypedExpr();
+    boolean isValueExpr();
 
-    TypedExpr getTypedExpr();
+    ValueExpr getValueExpr();
 
 }

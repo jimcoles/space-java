@@ -19,9 +19,19 @@ import org.jkcsoft.space.lang.instance.*;
  */
 public interface EvalContext {
 
+    StaticExeContext getStaticExeContext();
+
+    //
+
+    int callStackSize();
+
     void push(FunctionCallContext functionCallContext);
 
     FunctionCallContext peekStack();
+
+    FunctionCallContext popCallStack();
+
+    //
 
     RuntimeError newRuntimeError(String msg);
 
@@ -29,11 +39,8 @@ public interface EvalContext {
 
     ValueHolder newVoidHolder();
 
-    Object dereferenceByOid(SpaceOid javaValue);
+    SpaceObject dereferenceByOid(SpaceOid javaValue);
 
     Value newCharacterSequence(String valueExpr);
 
-    int callStackSize();
-
-    FunctionCallContext popCallStack();
 }

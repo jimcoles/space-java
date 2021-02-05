@@ -209,7 +209,7 @@ public class AstUtils {
             else {
                 NamedElement lookup =
                     lookupImmediateChild(scopeElem, firstExprRef.getKeyOrName());
-                checkSetResolve(firstPart, lookup);
+                checkSetResolve(firstPart, lookup, staticScope.getScopeKind());
             }
             //
             if (firstExprRef.isResolved()) {
@@ -284,11 +284,11 @@ public class AstUtils {
 //                lookup = lhsContainer.getChildByName(keyOrName);
                 lookup = lookupImmediateChild(lhsContainer, keyOrName);
             }
-            if (lookup == null && currentlhsLink.hasTypedExpr()) {
-                TypeDefn lhsType = currentlhsLink.getTypedExpr().getDatumType();
+            if (lookup == null && currentlhsLink.isValueExpr()) {
+                TypeDefn lhsType = currentlhsLink.getValueExpr().getDatumType();
                 lookup = lookupImmediateChild(lhsType, keyOrName);
             }
-            checkSetResolve(rhsLink, lookup);
+            checkSetResolve(rhsLink, lookup, null);
             if (!rhsLink.getRefAsNameRef().isResolved()) {
                 break;
             }
@@ -317,10 +317,11 @@ public class AstUtils {
         return walker.getAllScopesAsList();
     }
 
-    public static void checkSetResolve(LinkSource exprLink, NamedElement lookup) {
+    public static void checkSetResolve(LinkSource exprLink, Named lookup, ScopeKind resolutionScope) {
         if (exprLink != null && lookup != null) {
             ByNameMetaRef metaRef = exprLink.getNameRef().getRefAsNameRef();
             metaRef.setResolvedMetaObj(lookup);
+            exprLink.getNameRef().getRefAsNameRef().setResolutionScope(resolutionScope);
             metaRef.setState(LinkState.RESOLVED);
         }
     }
@@ -333,7 +334,7 @@ public class AstUtils {
             }
             else {
                 ns = nsRegistry.getNamespace(reference.getNsRefPart().getNameExprText());
-                checkSetResolve(reference.getNsRefPart(), ns);
+                checkSetResolve(reference.getNsRefPart(), ns, null);
             }
         }
         else
@@ -411,7 +412,7 @@ public class AstUtils {
     }
 
     private static MetaRef getParentRefPart(TypeRefImpl fullRef) {
-        List<MetaRef> pathParts = fullRef.extractMetaRefPath().getLinks();
+        List<MetaRef> pathParts = fullRef.asMetaRefPath().getLinks();
         return pathParts.get(pathParts.size() - 2);
     }
 
@@ -432,7 +433,7 @@ public class AstUtils {
         log.debug("trying to find [" + exprChain + "] under [" + astNode + "]");
         NamedElement lookup =
             lookupImmediateChild(astNode, (((SimpleNameRefExpr) exprChain.getFirstPart()).getNameExprText()));
-        checkSetResolve(exprChain.getFirstPart(), lookup);
+        checkSetResolve(exprChain.getFirstPart(), lookup, null);
         resolveAbsolute(lookup, exprChain.getRestLinks().iterator());
     }
 
@@ -441,7 +442,7 @@ public class AstUtils {
             NameRefOrHolder refPart = refHolderIter.next();
             NamedElement targetChild =
                 lookupImmediateChild(nameContext, refPart.getRefAsNameRef().getNameExprText());
-            checkSetResolve(refPart, targetChild);
+            checkSetResolve(refPart, targetChild, null);
             if (refPart.getRefAsNameRef().isResolved()) {
                 if (refHolderIter.hasNext()) {
                     resolveAbsolute(refPart.getRefAsNameRef().getResolvedMetaObj(), refHolderIter);
@@ -458,9 +459,9 @@ public class AstUtils {
         else if (context instanceof SpaceFunctionDefn)
             scopeKind = ScopeKind.BLOCK;
         else if (context instanceof TypeDefnImpl)
-            scopeKind = ScopeKind.TYPE_DEFN;
+            scopeKind = ScopeKind.OBJECT;
         else if (context instanceof TupleValueList)
-            scopeKind = ScopeKind.TYPE_DEFN;
+            scopeKind = ScopeKind.OBJECT;
 
         return scopeKind;
     }
@@ -491,7 +492,7 @@ public class AstUtils {
 //        else {
 //            lookup = NumPrimitiveTypeDefn.valueOf(refPart.getExpression().getNameExpr());
 //        }
-        checkSetResolve(refPart, lookup);
+        checkSetResolve(refPart, lookup, null);
     }
 
     public static void walkAstDepthFirst(ModelElement astNode, AstScanConsumer astAction) {
@@ -885,7 +886,7 @@ public class AstUtils {
             ModelElement thisTypeDefn = findParentTypeDefnOrDir(theRefChain);
             //
             while (thisTypeDefn != null) {
-                theColl.add(new StaticScope(theColl, thisTypeDefn, ScopeKind.TYPE_DEFN));
+                theColl.add(new StaticScope(theColl, thisTypeDefn, ScopeKind.OBJECT));
                 thisTypeDefn = findParentTypeDefnOrDir(thisTypeDefn);
             }
             //
@@ -901,7 +902,7 @@ public class AstUtils {
             AstScopeCollection theColl = new AstScopeCollection("Imports");
             FunctionDefn funcDefn = findParentFunctionDefn(theRefChain);
             if (funcDefn != null)
-                theColl.add(new StaticScope(theColl, funcDefn.getArgSpaceTypeDefn(), ScopeKind.TYPE_DEFN));
+                theColl.add(new StaticScope(theColl, funcDefn.getArgSpaceTypeDefn(), ScopeKind.OBJECT));
             //
             return theColl;
         }
@@ -912,7 +913,7 @@ public class AstUtils {
             if (newTupleExpr != null) {
                 TypeRefImpl typeRef = newTupleExpr.getTypeRef();
                 if (typeRef.isResolved()) {
-                    theColl.add(new StaticScope(theColl, typeRef.getResolvedType(), ScopeKind.TYPE_DEFN));
+                    theColl.add(new StaticScope(theColl, typeRef.getResolvedType(), ScopeKind.OBJECT));
                 }
                 else {
                     theColl.add(new StaticScope(theColl, typeRef));

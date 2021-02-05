@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
+import org.jkcsoft.space.lang.ast.Declaration;
 import org.jkcsoft.space.lang.ast.TypeDefn;
 
 import java.util.List;

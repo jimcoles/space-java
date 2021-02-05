@@ -98,4 +98,5 @@ public class OperatorExpr extends AbstractModelElement implements ValueExpr {
     public boolean hasResolvedType() {
         return args.size() > 0 && args.get(0).hasResolvedType();
     }
+
 }

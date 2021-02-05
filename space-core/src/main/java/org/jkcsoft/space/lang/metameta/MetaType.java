@@ -19,6 +19,10 @@ public enum MetaType {
     DATUM, // var, domain, assoc
     FUNCTION,
     RULE,
-    PACKAGE
+    PACKAGE;
 //    ANY
+
+    public static boolean isValueType(MetaType metaType) {
+        return metaType == DATUM || metaType == FUNCTION;
+    }
 }

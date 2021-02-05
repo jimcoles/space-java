@@ -10,12 +10,14 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * An monomial expression that is or contains a reference-by-name to a named
+ * A monomial expression that is or contains a reference-by-name to a named
  * thing such as a datum or function.
  *
  * @author Jim Coles
  */
 public interface ByNameMetaRef<T extends Named> extends MetaRef<T> {
+
+    void setResolutionScope(ScopeKind resolutionScope);
 
     NamePartExpr getExpression();
 

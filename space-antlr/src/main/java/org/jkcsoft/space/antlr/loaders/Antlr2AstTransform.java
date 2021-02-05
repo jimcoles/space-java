@@ -173,7 +173,7 @@ public class Antlr2AstTransform {
                 VariableDeclImpl variableDeclAST = toAst(variableDefnStmtContext.variableDefn());
                 typeDefn.addVariableDecl(variableDeclAST);
                 // Add assignment if there is one
-                extractInit(typeDefn, variableDeclAST, variableDefnStmtContext);
+                extractInit(typeDefn, variableDeclAST, variableDefnStmtContext, ScopeKind.OBJECT);
             }
         }
 
@@ -185,7 +185,7 @@ public class Antlr2AstTransform {
                                                             assocDefCtx.associationDefn());
                 typeDefn.addAssociationDecl(assocDecl);
                 // Add assignment expr if it exists
-                extractInit(typeDefn, assocDecl, assocDefCtx);
+                extractInit(typeDefn, assocDecl, assocDefCtx, ScopeKind.OBJECT);
             }
         }
 
@@ -204,14 +204,15 @@ public class Antlr2AstTransform {
 
     private void extractInit(ContextDatumDefn datumDefnContext,
                              AssociationDefn lhsDatumDecl,
-                             SpaceParser.AssociationDefnStmtContext assocDefCtx)
+                             SpaceParser.AssociationDefnStmtContext assocDefCtx,
+                             ScopeKind scopeKind)
     {
         SpaceParser.IdentifierContext identifierCtxt =
             assocDefCtx.associationDefn().associationDecl().identifier();
         SpaceParser.RightAssignmentExprContext rightAssignmentExprContext =
             assocDefCtx.associationDefn().rightAssignmentExpr();
         if (rightAssignmentExprContext != null) {
-            ExpressionChain lhsExpressionChain = astFactory.newDatumRef(toSI(identifierCtxt), lhsDatumDecl);
+            ExpressionChain lhsExpressionChain = astFactory.newDatumRef(toSI(identifierCtxt), lhsDatumDecl, scopeKind);
             datumDefnContext.addInitExpression(
                 new ExprStatement<>(toAst(lhsExpressionChain, rightAssignmentExprContext))
             );
@@ -220,14 +221,15 @@ public class Antlr2AstTransform {
 
     private void extractInit(ContextDatumDefn datumDefnContext,
                              Declaration lhsDatumDecl,
-                             SpaceParser.VariableDefnStmtContext variableDefnStmtContext)
+                             SpaceParser.VariableDefnStmtContext variableDefnStmtContext,
+                             ScopeKind scopeKind)
     {
         SpaceParser.IdentifierContext identifierCtxt =
             variableDefnStmtContext.variableDefn().variableDecl().identifier();
         SpaceParser.RightAssignmentExprContext rightAssignmentExprContext =
             variableDefnStmtContext.variableDefn().rightAssignmentExpr();
         if (rightAssignmentExprContext != null) {
-            ExpressionChain lhsExpressionChain = astFactory.newDatumRef(toSI(identifierCtxt), lhsDatumDecl);
+            ExpressionChain lhsExpressionChain = astFactory.newDatumRef(toSI(identifierCtxt), lhsDatumDecl, scopeKind);
 //            AstUtils.addNewMetaRefParts(lhsExpressionChain, toSI(identifierCtxt), toText(identifierCtxt));
             datumDefnContext.addInitExpression(
                 new ExprStatement<>(toAst(lhsExpressionChain, rightAssignmentExprContext))
@@ -440,7 +442,7 @@ public class Antlr2AstTransform {
             if (datumDefnStmtContext.variableDefnStmt() != null) {
                 VariableDeclImpl variableDeclAst = toAst(datumDefnStmtContext.variableDefnStmt().variableDefn());
                 statementBlockAST.addVariableDecl(variableDeclAst);
-                extractInit(statementBlockAST, variableDeclAst, datumDefnStmtContext.variableDefnStmt());
+                extractInit(statementBlockAST, variableDeclAst, datumDefnStmtContext.variableDefnStmt(), ScopeKind.BLOCK);
             }
             else {
                 SpaceParser.AssociationDefnStmtContext associationDefnStmtContext =
@@ -451,7 +453,7 @@ public class Antlr2AstTransform {
                     statementBlockAST.addAssociationDecl(
                         associationDecl
                     );
-                    extractInit(statementBlockAST, associationDecl, associationDefnStmtContext);
+                    extractInit(statementBlockAST, associationDecl, associationDefnStmtContext, ScopeKind.BLOCK);
                 }
             }
         }

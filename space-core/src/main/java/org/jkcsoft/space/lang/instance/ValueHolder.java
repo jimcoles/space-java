@@ -15,8 +15,8 @@ import org.jkcsoft.space.lang.ast.TypeDefn;
 
 /**
  * A {@link ValueHolder} is a {@link Declaration} (a name and a type) and a {@link Value};
- * This is very similar to a Lisp 'con cell' except that our holder is typed via the
- * {@link Declaration}.
+ * This is very similar to a Lisp 'con cell' except that our holder is typed (via the
+ * {@link Declaration}).
  *
  * <p>Possible alternate names: Node, Quantum (because it is a more basic
  * notion than an object/tuple).

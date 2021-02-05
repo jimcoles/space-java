@@ -31,8 +31,7 @@ import org.jkcsoft.space.lang.runtime.SpaceX;
 public class SpaceFunctionDefn extends AbstractFunctionDefn implements FunctionDefn {
 
     private StatementBlock statementBlock;
-    private boolean isReturnVoid;
-    private TypeRefImpl returnTypeRef;
+    private final TypeRefImpl returnTypeRef;
 
     SpaceFunctionDefn(SourceInfo sourceInfo, String name, TypeRefImpl returnTypeRef) {
         super(sourceInfo, name);
@@ -46,7 +45,7 @@ public class SpaceFunctionDefn extends AbstractFunctionDefn implements FunctionD
 
     @Override
     public TypeDefn getReturnType() {
-        return (TypeDefn) getReturnTypeRef().getResolvedMetaObj();
+        return returnTypeRef.getResolvedMetaObj();
     }
 
     public StatementBlock setStatementBlock(StatementBlock statementBlock) {
@@ -63,11 +62,11 @@ public class SpaceFunctionDefn extends AbstractFunctionDefn implements FunctionD
     }
 
     public boolean isReturnVoid() {
-        return isReturnVoid;
+        return returnTypeRef.isResolved() && getReturnType() == VoidType.VOID;
     }
 
     public TypeRefImpl getReturnTypeRef() {
-        if (isReturnVoid)
+        if (isReturnVoid())
             throw new SpaceX("Should not call getReturnTypeRef for function with void return.");
         return returnTypeRef;
     }

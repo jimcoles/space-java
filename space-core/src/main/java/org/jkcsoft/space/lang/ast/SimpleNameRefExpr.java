@@ -10,6 +10,8 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.metameta.MetaType;
+import org.jkcsoft.space.lang.runtime.AstUtils;
+import org.jkcsoft.space.lang.runtime.StaticScope;
 
 /**
  * A reference to a Named AST element by a simple name. Therefore, may be a part of
@@ -31,17 +33,28 @@ public class SimpleNameRefExpr<T extends Named> extends AbstractRefExpr<T>
     implements ByNameMetaRef<T>, NameRefOrHolder
 {
 
-    private NamePartExpr nameRefExpr; // package name, datum name (ref)
+    private final NamePartExpr nameRefExpr; // package name, datum name (ref)
     // elements below set by linker
+    private ScopeKind scopeKind;
 
     public SimpleNameRefExpr(NamePartExpr nameRefExpr) {
         super(nameRefExpr.getSourceInfo());
         this.nameRefExpr = nameRefExpr;
     }
 
+    @Override
+    public void setResolutionScope(ScopeKind resolutionScope) {
+        this.scopeKind = resolutionScope;
+    }
+
     public boolean isWildcard() {
         return (getExpression() instanceof NamePartExpr
             && ((NamePartExpr) getExpression()).getNameExpr().equals("*"));
+    }
+
+    @Override
+    public ScopeKind getScopeKind() {
+        return scopeKind;
     }
 
     @Override
@@ -69,12 +82,7 @@ public class SimpleNameRefExpr<T extends Named> extends AbstractRefExpr<T>
         if (getResolvedMetaObj() == null)
             throw new IllegalStateException("referenced object [" + nameRefExpr + "] has not yet been resolved");
 
-        return getResolvedMetaObj().getMetaType() == MetaType.DATUM;
-    }
-
-    @Override
-    public TypeDefn getDatumType() {
-        return null;
+        return MetaType.isValueType(getResolvedMetaObj().getMetaType()) && scopeKind != null;
     }
 
     @Override

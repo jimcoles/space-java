@@ -135,6 +135,7 @@ public class Executor extends ExprProcessor
     private SjiService sjiService;
     private InMemorySpaceImpl defaultSpace;
 
+    private StaticExeContext staticExeContext;
     private Stack<FunctionCallContext> callStack = new Stack<>();
     private Map<String, ExprProcessor> exprProcessors = null;
     private Set<TypeDefn> implicitImportTypes;
@@ -156,6 +157,11 @@ public class Executor extends ExprProcessor
         //
         loadAstLoader("org.jkcsoft.space.antlr.loaders.G2AntlrParser");
 //        nsRegistry.getUserNs().
+    }
+
+    @Override
+    public StaticExeContext getStaticExeContext() {
+        return staticExeContext;
     }
 
     @Override
@@ -812,7 +818,10 @@ public class Executor extends ExprProcessor
             valueHolder = eval(spcContext, (ThisTupleExpr) expression);
         }
         else if (expression instanceof MetaRefPath) {
-            valueHolder = eval(spcContext, (MetaRefPath) expression);
+            valueHolder = eval(spcContext, ((MetaRefPath) expression).getLastLink());
+        }
+        else if (expression instanceof MetaRef) {
+            valueHolder = eval(spcContext, (MetaRef) expression);
         }
         else if (expression instanceof AssignmentExpr) {
             valueHolder = eval(spcContext, (AssignmentExpr) expression);
@@ -837,7 +846,7 @@ public class Executor extends ExprProcessor
 
     private ValueHolder eval(EvalContext evalContext, ThisTupleExpr thisTupleExpr) {
         log.debug("exec: " + thisTupleExpr);
-        Tuple ctxObject = evalContext.peekStack().getCtxObject();
+        Tuple ctxObject = (Tuple) evalContext.peekStack().getCtxObject();
         return getObjFactory().newReferenceByOidHolder(ctxObject, null, ctxObject.getOid());
     }
 
@@ -933,8 +942,8 @@ public class Executor extends ExprProcessor
         ValueHolder retValHolder = functionDefn.isReturnVoid() ? evalContext.newVoidHolder()
             : getObjFactory().newEmptyVarHolder(null, newAnonDecl(null, functionDefn.getReturnType()));
         FunctionCallContext functionCallContext =
-            getObjFactory().newFunctionCall(evalContext.peekStack().getCtxObject(), functionCallExpr, argTupleValue,
-                                                          retValHolder);
+            getObjFactory().newFunctionCall(((Tuple) evalContext.peekStack().getCtxObject()),
+                                            functionCallExpr, argTupleValue, retValHolder);
         // push call onto stack
         evalContext.push(functionCallContext);
         log.debug("pushed call stack. size [" + evalContext.callStackSize() + "]");
@@ -1040,7 +1049,8 @@ public class Executor extends ExprProcessor
 
     private ValueHolder eval(EvalContext evalContext, AssignmentExpr assignmentExpr) {
         log.debug("eval: " + assignmentExpr);
-        ValueHolder leftSideHolder = eval(evalContext, assignmentExpr.getLeftSideDatumRef());
+        ValueHolder leftSideHolder =
+            eval(evalContext, assignmentExpr.getLeftSideDatumRef().asMetaRefPath().getLastLink());
         ValueHolder rightSideHolder = eval(evalContext, assignmentExpr.getRightSideValueExpr());
         autoCastAssign(leftSideHolder, rightSideHolder);
         log.debug("eval -> " + leftSideHolder);
@@ -1078,26 +1088,26 @@ public class Executor extends ExprProcessor
 //                value = newReference(csLiteral);
 //                break;
             valueHolder = getObjFactory().newCardinalValueHolder(
-                evalContext.peekStack().getCtxObject(), null,
-                Integer.parseInt(primitiveLiteralExpr.getValueExpr())
+                ((Tuple) evalContext.peekStack().getCtxObject()), null,
+                Integer.parseInt(primitiveLiteralExpr.getStringValue())
             );
         }
         else if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.BOOLEAN) {
             valueHolder = getObjFactory().newBooleanValueHolder(
-                evalContext.peekStack().getCtxObject(), null,
-                Boolean.parseBoolean(primitiveLiteralExpr.getValueExpr())
+                ((Tuple) evalContext.peekStack().getCtxObject()), null,
+                Boolean.parseBoolean(primitiveLiteralExpr.getStringValue())
             );
         }
         else if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.CHAR) {
             valueHolder = getObjFactory().newCharacterValueHolder(
-                evalContext.peekStack().getCtxObject(), null,
-                primitiveLiteralExpr.getValueExpr().charAt(0)
+                ((Tuple) evalContext.peekStack().getCtxObject()), null,
+                primitiveLiteralExpr.getStringValue().charAt(0)
             );
         }
         else if (primitiveLiteralExpr.getTypeDefn() == NumPrimitiveTypeDefn.REAL) {
             valueHolder = getObjFactory().newRealValueHolder(
-                evalContext.peekStack().getCtxObject(), null,
-                Double.valueOf(primitiveLiteralExpr.getValueExpr())
+                ((Tuple) evalContext.peekStack().getCtxObject()), null,
+                Double.valueOf(primitiveLiteralExpr.getStringValue())
             );
         }
 //       else if (primitiveLiteralExpr.getTypeDefn() ==  RATIONAL) {
@@ -1122,7 +1132,7 @@ public class Executor extends ExprProcessor
         ValueHolder valueHolder = null;
         Value value = null;
         if (sequenceLiteralExpr.getTypeRef().getResolvedMetaObj() == CHAR_SEQ_TYPE_DEF) {
-            value = evalContext.newCharacterSequence(sequenceLiteralExpr.getValueExpr());
+            value = evalContext.newCharacterSequence(sequenceLiteralExpr.getStringValue());
 //            value = newReference(null, null, csLiteral);
         }
         else {
@@ -1136,11 +1146,6 @@ public class Executor extends ExprProcessor
     private ValueHolder eval(EvalContext evalContext, ExpressionChain exprChain) {
         log.debug("eval: " + exprChain);
         ValueHolder valueHolder = null;
-
-        if (exprChain.hasMetaRefPath()) {
-            valueHolder = eval(evalContext, exprChain.extractMetaRefPath());
-        }
-
         if (exprChain.hasValueChain())
             valueHolder = eval(evalContext, exprChain.extractValueExprChain());
 
@@ -1149,58 +1154,66 @@ public class Executor extends ExprProcessor
     }
 
     /**
-     Find values in all possible locations:
-     1. current block
-     2. parent block(s)
-     3. call args
-     4. context object (tuple)
-     5. static objects
-    */
-    private ValueHolder eval(EvalContext evalContext, MetaRefPath metaRef) {
-        log.debug("eval: " + metaRef);
+     * This method expects a path of 1 or more parts, the final of which must
+     * refer to a datum. Used for LHS and RHS datum eval.
+     *
+     * TODO Good place to enforce access control
+     *
+     * @return The Value Holder corresponding to the referenced datum.
+     */
+    private ValueHolder eval(EvalContext evalContext, MetaRef scopedRef) {
+        log.debug("getValueHolder: " + scopedRef);
         ValueHolder valueHolder = null;
-        Named toMember = metaRef.getResolvedMetaObj();
+        Declaration toMember = (Declaration) scopedRef.getResolvedMetaObj();
         FunctionCallContext functionCallContext = evalContext.peekStack();
-        switch (metaRef.getResolvedDatumScope()) {
+        DatumMap valDatumMap = null;
+        switch (scopedRef.getScopeKind()) {
+            case OBJECT:
+                valDatumMap = ((Tuple) functionCallContext.getCtxObject());
+                break;
             case BLOCK:
-                valueHolder = findInBlocksRec(toMember, functionCallContext.getBlockContexts());
+                valDatumMap = findInBlocksRec(toMember, functionCallContext.getBlockContexts());
                 break;
             case ARG:
-                valueHolder = functionCallContext.getArgTuple().get((Declaration) toMember);
-                break;
-            case TYPE_DEFN:
-                valueHolder = functionCallContext.getCtxObject().get((Declaration) toMember);
+                valDatumMap = functionCallContext.getArgTuple();
                 break;
             case STATIC:
-                throw new SpaceX(evalContext.newRuntimeError("don't yet eval static datums"));
-//                break;
+                valDatumMap = evalContext.getStaticExeContext().getStaticTuple(toMember.getType());
+                break;
         }
 
+        valueHolder = valDatumMap.get(toMember);
+
         if (valueHolder == null)
-            throw new SpaceX(evalContext.newRuntimeError("could not resolve reference " + metaRef));
+            throw new SpaceX(evalContext.newRuntimeError("could not resolve reference " + scopedRef));
 
         log.debug("eval -> " + valueHolder);
         return valueHolder;
     }
 
     private ValueHolder eval(EvalContext evalContext, ValueExprChain valueExprChain) {
-        ValueHolder chainValue = null;
+        ValueHolder chainValueHolder = null;
         if (!valueExprChain.isEmpty()) {
             for (ValueExpr valueExpr : valueExprChain.getChain()) {
-                chainValue = eval(evalContext, valueExpr);
+                chainValueHolder = eval(evalContext, valueExpr);
+                if (chainValueHolder.getDeclaration().isRef()) {
+                    SpaceOid tupleOid = (SpaceOid) chainValueHolder.getValue();
+                    evalContext.peekStack().pushCtxObject(evalContext.dereferenceByOid(tupleOid));
+                }
             }
         }
-        return chainValue;
+        return chainValueHolder;
     }
 
-    private ValueHolder findInBlocksRec(Named toMember, LinkedList<BlockContext> blocks) {
+    private BlockDatumMap findInBlocksRec(Named toMember, LinkedList<BlockContext> blocks) {
         ValueHolder assignable = null;
+        BlockContext blockContext = null;
         Iterator<BlockContext> blockContextIterator = blocks.descendingIterator();
         while (assignable == null && blockContextIterator.hasNext()) {
-            BlockContext blockContext = blockContextIterator.next();
+            blockContext = blockContextIterator.next();
             assignable = blockContext.getBlockDatumMap().get((Declaration) toMember);
         }
-        return assignable;
+        return blockContext.getBlockDatumMap();
     }
 
     private OperEvaluator lookupOperEval(Operators.Operator operator) {
@@ -1214,12 +1227,13 @@ public class Executor extends ExprProcessor
                     ((VariableValueHolder) leftSideHolder).getDeclaration().getType()
                     : (leftSideHolder instanceof DeclaredReferenceHolder ? leftSideHolder.getType() : null);
 
+            ValueHolder rhsActual = rightSideHolder;
             // cast the assigned RHS value if possible to be consistent with the LHS
             if (!leftSideHolder.getType().getOid().equals(rightSideHolder.getType().getOid())) {
-                rightSideHolder = autoCast(leftSideTypeDefn, rightSideHolder);
+                rhsActual = autoCast(leftSideTypeDefn, rightSideHolder);
             }
             // set the value object of LHS, taking into account references vs scalar values
-            SpaceUtils.assignNoCast(this, leftSideHolder, rightSideHolder);
+            SpaceUtils.assignNoCast(this, leftSideHolder, rhsActual);
         }
 
         private ValueHolder autoCast(TypeDefn targetTypeDefn, ValueHolder rightSideHolder) {
@@ -1594,7 +1608,7 @@ public class Executor extends ExprProcessor
                     parseUnit.getAllImportedTypes(),
                     object -> ((TypeDefn) object).getName().equals(exprLink.getNameRef().getRefAsNameRef())
                 );
-            AstUtils.checkSetResolve(exprLink, (NamedElement) importedTypeMatch);
+            AstUtils.checkSetResolve(exprLink, (NamedElement) importedTypeMatch, null);
         }
 
         private void checkImplicitImports(LinkSource expLink) {
@@ -1603,7 +1617,7 @@ public class Executor extends ExprProcessor
                 object -> ((TypeDefn) object).getName().equals(
                     expLink.getNameRef().getRefAsNameRef().getResolvedMetaObj())
             );
-            AstUtils.checkSetResolve(expLink, (NamedElement) importedTypeMatch);
+            AstUtils.checkSetResolve(expLink, (NamedElement) importedTypeMatch, null);
         }
 
         @Override

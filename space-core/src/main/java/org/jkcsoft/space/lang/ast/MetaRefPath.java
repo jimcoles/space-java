@@ -18,6 +18,10 @@ import java.util.List;
 /**
  * Represents a static path through a Space Namespace of meta objects
  * including directories, type definitions, and type members (datums and functions).
+ * The last ref may be to a datum, a function, or a type depending on
+ * the usage.
+ *
+ *   [dir1.][dirn.][t1.][d1]
  *
  * @author Jim Coles
  */
@@ -25,11 +29,9 @@ public class MetaRefPath {
 
     private ExpressionChain parentChain;
     private LinkedList<MetaRef> links = new LinkedList<>();
-    private ScopeKind resolvedDatumScope;
 
-    MetaRefPath(ExpressionChain parentChain, ScopeKind resolvedDatumScope) {
+    MetaRefPath(ExpressionChain parentChain) {
         this.parentChain = parentChain;
-        this.resolvedDatumScope = resolvedDatumScope;
     }
 
     void addLink(MetaRef link) {
@@ -42,10 +44,6 @@ public class MetaRefPath {
 
     public Named getResolvedMetaObj() {
         return getLastLink().getResolvedMetaObj();
-    }
-
-    public ScopeKind getResolvedDatumScope() {
-        return resolvedDatumScope;
     }
 
     public MetaRef getLastLink() {

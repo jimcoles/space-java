@@ -51,11 +51,6 @@ public class ValueExprChain extends AbstractModelElement implements NamePath, Va
     }
 
     @Override
-    public boolean isValueExpr() {
-        return getLastExpr().isValueExpr();
-    }
-
-    @Override
     public boolean hasRef() {
         return getLastExpr().hasRef();
     }
@@ -68,5 +63,14 @@ public class ValueExprChain extends AbstractModelElement implements NamePath, Va
     @Override
     public boolean hasResolvedType() {
         return getLastExpr().hasResolvedType();
+    }
+
+    public int size() {
+        return chain.size();
+    }
+
+    @Override
+    public boolean isLiteral() {
+        return chain.size() == 1 && chain.get(0).isLiteral();
     }
 }

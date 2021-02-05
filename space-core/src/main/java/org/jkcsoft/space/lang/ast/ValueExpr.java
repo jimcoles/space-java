@@ -10,17 +10,19 @@
 package org.jkcsoft.space.lang.ast;
 
 /**
- * Any expression that may be evaluated to obtain a (typed) Value. Might also be called
- * "Imperative Expression", as opposed to "Declarative Expression".
+ * Any expression that may be evaluated to obtain a (typed) Value.
  *
  * @author Jim Coles
  */
-public interface ValueExpr extends TypedExpr {
+public interface ValueExpr extends LinkSource {
 
-    @Override
-    default boolean isValueExpr() {
-        return true;
-    }
+    boolean hasResolvedType();
+
+    TypeDefn getDatumType();
+
+    boolean hasRef();
+
+    MetaRef getRef();
 
     @Override
     default boolean hasNameRef() {
@@ -33,12 +35,12 @@ public interface ValueExpr extends TypedExpr {
     }
 
     @Override
-    default boolean hasTypedExpr() {
+    default boolean isValueExpr() {
         return true;
     }
 
     @Override
-    default TypedExpr getTypedExpr() {
+    default ValueExpr getValueExpr() {
         return this;
     }
 }

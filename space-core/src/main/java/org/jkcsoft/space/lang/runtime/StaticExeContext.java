@@ -10,23 +10,32 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.instance.BlockDatumMap;
+import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.instance.ValueHolder;
-import org.jkcsoft.space.lang.runtime.InternalExeContext;
+
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Jim Coles
  */
 public class StaticExeContext {
 
-    private InternalExeContext exeContext;
-    private final BlockDatumMap staticDatumMap = exeContext.getObjFactory().newBlockDatumMap(null);
+    private InternalExeContext exeContext; // parent context
+
+    private final Map<TypeDefn, Tuple> statics = new TreeMap<>();
 
     public StaticExeContext(InternalExeContext exeContext) {
         this.exeContext = exeContext;
     }
 
     public void setValue(Declaration staticDatumDecl, ValueHolder newValueHolder) {
+        Tuple staticDatumMap = getStaticTuple(staticDatumDecl.getType());
+        if (staticDatumMap == null) {
+            statics.put(staticDatumDecl.getType(), exeContext.getObjFactory().newTupleImpl(staticDatumDecl.getType()));
+        }
         ValueHolder staticValueHolder = staticDatumMap.get(staticDatumDecl);
         if (staticValueHolder == null) {
             staticValueHolder = exeContext.getObjFactory().newEmptyVarHolder(staticDatumMap, staticDatumDecl);
@@ -35,8 +44,12 @@ public class StaticExeContext {
         exeContext.autoCastAssign(staticValueHolder, newValueHolder);
     }
 
+    public Tuple getStaticTuple(TypeDefn type) {
+        return statics.get(type);
+    }
+
     public ValueHolder getValue(Declaration staticDatumDecl) {
-        return staticDatumMap.get(staticDatumDecl);
+        return getStaticTuple(staticDatumDecl.getType()).get(staticDatumDecl);
     }
 
 }

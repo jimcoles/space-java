@@ -16,23 +16,25 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public interface MetaRef<T extends Named> extends LinkSource {
+public interface MetaRef<T extends Named> extends LinkSource, ValueExpr {
 
     String getKeyOrName();
 
+    boolean isWildcard();
+
     boolean isResolved();
+
+    void setResolvedMetaObj(T resolvedMetaObj);
 
     T getResolvedMetaObj();
 
-    void setResolvedMetaObj(T resolvedMetaObj);
+    ScopeKind getScopeKind();
+
+    void setState(LinkState resolved);
+
+    LinkState getState();
 
     void setTypeCheckState(TypeCheckState typeCheckState);
 
     String toUrlString();
-
-    boolean isWildcard();
-
-    LinkState getState();
-
-    void setState(LinkState resolved);
 }

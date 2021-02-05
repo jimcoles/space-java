@@ -15,6 +15,7 @@ import org.jkcsoft.space.lang.ast.SpaceFunctionDefn;
 import org.jkcsoft.space.lang.runtime.StaticExeContext;
 
 import java.util.LinkedList;
+import java.util.Stack;
 
 /**
  * The instance level state for the invocation of a Function.  Might be
@@ -26,8 +27,8 @@ import java.util.LinkedList;
  */
 public class FunctionCallContext extends AbstractExeContext implements ExeContext {
 
-    private StaticExeContext staticExeContext;
-    private Tuple ctxObject;
+    /** Can be > 1 context objects when processing a value expression chain. */
+    private Stack<SpaceObject> ctxObjects = new Stack<>();
     private TupleImpl argTuple;
     private LinkedList<BlockContext> blockContexts = new LinkedList<>();
     private ValueHolder returnValueHolder;
@@ -41,7 +42,7 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
      */
     FunctionCallContext(Tuple ctxObject, FunctionCallExpr callExpr, TupleImpl argTuple, ValueHolder returnValueHolder) {
         super(callExpr);
-        this.ctxObject = ctxObject;
+        this.ctxObjects.push(ctxObject);
         this.argTuple = argTuple;
         FunctionDefn resolvedFunctionMetaObj = (FunctionDefn) callExpr.getFunctionRef().getResolvedMetaObj();
         if (resolvedFunctionMetaObj instanceof SpaceFunctionDefn) {
@@ -57,8 +58,16 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
         this.returnValueHolder = returnValueHolder;
     }
 
-    public Tuple getCtxObject() {
-        return ctxObject;
+    public void pushCtxObject(SpaceObject ctxObject) {
+        ctxObjects.push(ctxObject);
+    }
+
+    public SpaceObject getCtxObject() {
+        return ctxObjects.peek();
+    }
+
+    public void popCtxObject() {
+        ctxObjects.pop();
     }
 
     public TupleImpl getArgTuple() {

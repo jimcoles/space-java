@@ -14,7 +14,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class ThisTupleExpr extends PronounRefExpr implements ValueExpr {
+public class ThisTupleExpr extends PronounRefExpr<TypeDefn> {
 
     ThisTupleExpr(SourceInfo sourceInfo) {
         super(sourceInfo, "this");
@@ -22,6 +22,11 @@ public class ThisTupleExpr extends PronounRefExpr implements ValueExpr {
 
     @Override
     public TypeDefn getDatumType() {
-        return ((TypeDefnImpl) getResolvedMetaObj());
+        return getResolvedMetaObj();
+    }
+
+    @Override
+    public ScopeKind getScopeKind() {
+        return ScopeKind.OBJECT;
     }
 }

@@ -32,7 +32,7 @@ public class SequenceLiteralExpr extends AbstractModelElement implements ValueEx
         return typeRef;
     }
 
-    public String getValueExpr() {
+    public String getStringValue() {
         return valueExpr;
     }
 
@@ -59,5 +59,10 @@ public class SequenceLiteralExpr extends AbstractModelElement implements ValueEx
     @Override
     public boolean hasResolvedType() {
         return typeRef.hasResolvedType();
+    }
+
+    @Override
+    public boolean isLiteral() {
+        return true;
     }
 }

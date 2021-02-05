@@ -16,6 +16,8 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface Expression extends ModelElement {
 
-    // a marker for now
+    default boolean isLiteral() {
+        return false;
+    }
 
 }

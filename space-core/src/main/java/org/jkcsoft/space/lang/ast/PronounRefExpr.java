@@ -15,7 +15,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class PronounRefExpr<T extends Named> extends AbstractRefExpr<T> {
+public abstract class PronounRefExpr<T extends Named> extends AbstractRefExpr<T> implements ValueExpr {
 
     private String pronoun;
 
@@ -30,16 +30,6 @@ public class PronounRefExpr<T extends Named> extends AbstractRefExpr<T> {
     }
 
     @Override
-    public boolean hasRef() {
-        return true;
-    }
-
-    @Override
-    public MetaRef getRef() {
-        return this;
-    }
-
-    @Override
     public String toUrlString() {
         return pronoun;
     }
@@ -47,6 +37,21 @@ public class PronounRefExpr<T extends Named> extends AbstractRefExpr<T> {
     @Override
     public boolean isWildcard() {
         return false;
+    }
+
+    @Override
+    public boolean hasResolvedType() {
+        return super.hasResolvedMetaObj();
+    }
+
+    @Override
+    public boolean hasRef() {
+        return true;
+    }
+
+    @Override
+    public MetaRef getRef() {
+        return this;
     }
 
     @Override
@@ -58,4 +63,5 @@ public class PronounRefExpr<T extends Named> extends AbstractRefExpr<T> {
     public NameRefOrHolder getNameRef() {
         return null;
     }
+
 }

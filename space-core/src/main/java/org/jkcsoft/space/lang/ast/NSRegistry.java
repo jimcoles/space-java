@@ -143,7 +143,8 @@ public class NSRegistry {
 
     public void dumpSymbolTables() {
         log.info("see dump log file for meta object table dump");
-        getDumpLogger().info("normalized meta object table: " + JavaHelper.EOL
+        Logger dumpLogger = getDumpLogger();
+        dumpLogger.info("normalized meta object table: " + JavaHelper.EOL
                           + Strings.buildNewlineList(metaObjectNormalTable));
     }
 

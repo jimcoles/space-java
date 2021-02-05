@@ -166,12 +166,14 @@ public class AstFactory {
         return new TypeRefImpl(sourceInfo, typeDefn);
     }
 
-    public ExpressionChain newDatumRef(SourceInfo sourceInfo, Declaration datumDecl) {
-        return new ExpressionChain(sourceInfo, datumDecl);
+    public ExpressionChain newDatumRef(SourceInfo sourceInfo, Declaration datumDecl, ScopeKind scopeKind) {
+        return new ExpressionChain(sourceInfo, datumDecl, scopeKind);
     }
 
-    public AliasedMetaRef newAliasedRefChain(SourceInfo sourceInfo, String name, Declaration datumDecl) {
-        return new AliasedMetaRef(sourceInfo, name, new ExpressionChain(sourceInfo, datumDecl));
+    public AliasedMetaRef newAliasedRefChain(SourceInfo sourceInfo, String name, Declaration datumDecl,
+                                             ScopeKind scopeKind)
+    {
+        return new AliasedMetaRef(sourceInfo, name, new ExpressionChain(sourceInfo, datumDecl, scopeKind));
     }
 
     public ParseUnit newParseUnit(SourceInfo sourceInfo) {
@@ -221,7 +223,7 @@ public class AstFactory {
         AliasedMetaRef varExprs[] = new AliasedMetaRef[datumDecls.length];
         int idx = 0;
         for (Declaration datumDecl : datumDecls) {
-            varExprs[idx] = newAliasedRefChain(SourceInfo.API, null, datumDecl);
+            varExprs[idx] = newAliasedRefChain(SourceInfo.API, null, datumDecl, ScopeKind.STATIC);
             idx++;
         }
         return new ProjectionDeclImpl(SourceInfo.API, name, varExprs);

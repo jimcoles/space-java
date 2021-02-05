@@ -55,6 +55,11 @@ public class SjiTypeRefByClass extends AbstractModelElement implements TypeRef {
     }
 
     @Override
+    public boolean hasResolvedType() {
+        return mapping.getSjiProxy() != null;
+    }
+
+    @Override
     public TypeDefn getResolvedType() {
         return mapping.getSjiProxy();
     }
@@ -65,27 +70,12 @@ public class SjiTypeRefByClass extends AbstractModelElement implements TypeRef {
     }
 
     @Override
-    public boolean hasResolvedType() {
-        return getResolvedType() != null;
-    }
-
-    @Override
-    public TypeDefn getDatumType() {
-        return getResolvedType();
-    }
-
-    @Override
     public boolean isValueExpr() {
         return false;
     }
 
     @Override
-    public boolean hasRef() {
-        return false;
-    }
-
-    @Override
-    public MetaRef getRef() {
+    public ValueExpr getValueExpr() {
         return null;
     }
 
@@ -108,13 +98,4 @@ public class SjiTypeRefByClass extends AbstractModelElement implements TypeRef {
         return null;
     }
 
-    @Override
-    public boolean hasTypedExpr() {
-        return true;
-    }
-
-    @Override
-    public TypedExpr getTypedExpr() {
-        return this;
-    }
 }

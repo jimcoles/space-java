@@ -61,9 +61,4 @@ public class NewSetExpr extends AbstractModelElement implements ValueExpr {
         return null;
     }
 
-    @Override
-    public boolean isValueExpr() {
-        return false;
-    }
-
 }

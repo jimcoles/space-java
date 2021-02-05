@@ -9,16 +9,12 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.Tuple;
-
-import java.util.Comparator;
-
 /**
  * @author Jim Coles
  */
-public interface Declaration extends Expression, Identified, Named, TypedExpr {
+public interface Declaration extends Expression, Identified, Named {
 
-//    TypeDefn getType();
+    TypeDefn getType();
 
     boolean isAssoc();
 
