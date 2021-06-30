@@ -22,9 +22,10 @@ import java.util.Set;
 public class ViewDefnImpl extends TypeDefnImpl implements ViewDefn {
 
     //    private Space parentSpace;
+    private Set<TypeDefn> providedInterfaces;
     private TypeDefn basisType;
     private List<Expression> elementSequence = new LinkedList<>();
-    private List<ProjectionDecl> projectionDeclList = new LinkedList<>();
+    private List<DatumProjectionExpr> projectionBlockList = new LinkedList<>();
 
     /** The selection Rule, i.e., the filter. References the projection vars, but does not
      * declare them. */
@@ -33,6 +34,16 @@ public class ViewDefnImpl extends TypeDefnImpl implements ViewDefn {
     ViewDefnImpl(SourceInfo sourceInfo, NamePart namePart, TypeDefn basisType) {
         super(sourceInfo, namePart, true);
         this.basisType = basisType;
+    }
+
+    @Override
+    public TypeDefn getBasisType() {
+        return basisType;
+    }
+
+    @Override
+    public Set<TypeDefn> getProvidedInterfaces() {
+        return providedInterfaces;
     }
 
     @Override
@@ -71,11 +82,6 @@ public class ViewDefnImpl extends TypeDefnImpl implements ViewDefn {
     }
 
     @Override
-    public TypeDefn getBasisType() {
-        return basisType;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         return basisType.hasPrimaryKey();
     }
@@ -91,18 +97,18 @@ public class ViewDefnImpl extends TypeDefnImpl implements ViewDefn {
     }
 
     @Override
-    public ViewDefn addProjectionDecl(ProjectionDecl projectionDecl) {
-        elementSequence.add(projectionDecl);
-        projectionDeclList.add(projectionDecl);
+    public ViewDefn addProjectionDecl(DatumProjectionExpr datumProjectionExpr) {
+        elementSequence.add(datumProjectionExpr);
+        projectionBlockList.add(datumProjectionExpr);
         //
-        addChild(projectionDecl);
+        addChild(datumProjectionExpr);
         //
         return this;
     }
 
     @Override
-    public List<ProjectionDecl> getProjectionDeclList() {
-        return projectionDeclList;
+    public List<DatumProjectionExpr> getProjectionDeclList() {
+        return projectionBlockList;
     }
 
 }

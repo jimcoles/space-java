@@ -9,10 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.Tuple;
-
-import java.util.Comparator;
-
 /**
  * A Stream is first-class collective data type similar to the notion of a BLOB data type used by
  * databases.
@@ -24,7 +20,6 @@ import java.util.Comparator;
  *     <li>Primitive Stream
  *     <li>Character Stream</li>
  *     <li>Object Stream</li>
- *     <li>Character Sequence</li>
  * </ul>
  * Notions to reconcile with our model of streams, sequences, strings:
  * - 'sequence/stream of keys' (references to objects) versus 'sequence/stream of marshalled objects'.
@@ -49,13 +44,13 @@ import java.util.Comparator;
  */
 public class StreamTypeDefn extends AbstractCollectionTypeDefn implements TypeDefn {
 
-    public static final String COLL_SUFFIX = "{}";
-    private float length;
+    public static final String COLL_SUFFIX = "||";
 
     StreamTypeDefn(SourceInfo sourceInfo, TypeDefn containedElementType) {
-        super(sourceInfo, containedElementType.getName() + COLL_SUFFIX, containedElementType);
+        super(sourceInfo,
+              new NamePart(SourceInfo.INTRINSIC, containedElementType.getName() + COLL_SUFFIX),
+              containedElementType);
     }
-
 
     @Override
     public boolean isSetType() {

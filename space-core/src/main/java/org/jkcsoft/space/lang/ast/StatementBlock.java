@@ -20,13 +20,13 @@ import java.util.List;
  * @author Jim Coles
  */
 @LexicalNode
-public class StatementBlock extends AbstractModelElement implements ContextDatumDefn, Statement {
+public class StatementBlock extends AbstractModelElement implements DatumDeclContext, Statement {
 
     // The verbatim sequence of declarations and statements. Sequence is important for datum visibility rules
     // All other lists are redundantly maintained
     private List<Expression> allElementsSequence = new LinkedList<>(); // declarations and statements
     // just the datum decls
-    private List<Declaration> datumDecls = new LinkedList<>();
+    private List<DatumDecl> datumDecls = new LinkedList<>();
     private List<VariableDecl> varDecls = new LinkedList<>();
     private List<AssociationDefn> assocDecls = new LinkedList<>();
     // just the statements; can be any kind of statement
@@ -49,17 +49,17 @@ public class StatementBlock extends AbstractModelElement implements ContextDatum
         return statementSequence;
     }
 
-    public Declaration addDatumDecl(Declaration declaration) {
-        allElementsSequence.add(declaration);
+    public DatumDecl addDatumDecl(DatumDecl datumDecl) {
+        allElementsSequence.add(datumDecl);
         //
-        if (declaration.isAssoc())
-            assocDecls.add(((AssociationDefn) declaration));
+        if (datumDecl.hasAssoc())
+            assocDecls.add(((AssociationDefn) datumDecl));
         else
-            varDecls.add((VariableDecl) declaration);
+            varDecls.add((VariableDecl) datumDecl);
         //
-        addChild(declaration);
+        addChild(datumDecl);
         //
-        return declaration;
+        return datumDecl;
     }
 
     public ValueExpr addValueExpr(ValueExpr valueExpr) {
@@ -86,19 +86,13 @@ public class StatementBlock extends AbstractModelElement implements ContextDatum
     }
 
     @Override
-    public ContextDatumDefn addVariableDecl(VariableDecl variableDecl) {
+    public DatumDeclContext addVariableDecl(VariableDecl variableDecl) {
         addDatumDecl(variableDecl);
         return this;
     }
 
     @Override
-    public ContextDatumDefn addAssociationDecl(AssociationDefn associationDecl) {
-        addDatumDecl(associationDecl);
-        return this;
-    }
-
-    @Override
-    public ContextDatumDefn addInitExpression(ExprStatement<AssignmentExpr> assignmentExpr) {
+    public DatumDeclContext addInitExpression(ExprStatement<AssignmentExpr> assignmentExpr) {
         addStatement(assignmentExpr);
         return this;
     }
@@ -114,7 +108,7 @@ public class StatementBlock extends AbstractModelElement implements ContextDatum
     }
 
     @Override
-    public Declaration getDatum(String name) {
+    public DatumDecl getDatum(String name) {
         return null;
     }
 
@@ -129,7 +123,7 @@ public class StatementBlock extends AbstractModelElement implements ContextDatum
     }
 
     @Override
-    public List<Declaration> getDatumDeclList() {
+    public List<DatumDecl> getDatumDeclList() {
         return datumDecls;
     }
 }

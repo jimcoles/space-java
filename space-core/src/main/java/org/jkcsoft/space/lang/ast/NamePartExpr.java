@@ -44,4 +44,5 @@ public class NamePartExpr extends AbstractModelElement {
         return nameExpr;
     }
 
+
 }

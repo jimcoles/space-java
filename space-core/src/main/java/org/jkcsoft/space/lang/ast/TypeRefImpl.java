@@ -30,7 +30,7 @@ public class TypeRefImpl extends ExpressionChain<TypeDefn> implements TypeRef {
         TypeRefImpl fullTypeRef =
             astFactory.newTypeRef(new IntrinsicSourceInfo(), null, astFactory.newNameRefExpr(null, nsName));
         String[] nameStrings = fullName.split("\\.");
-        AstUtils.addNewMetaRefParts(fullTypeRef, new IntrinsicSourceInfo(), nameStrings);
+        astFactory.addNewMetaRefParts(fullTypeRef, SourceInfo.INTRINSIC, nameStrings);
         return fullTypeRef;
     }
 
@@ -44,12 +44,16 @@ public class TypeRefImpl extends ExpressionChain<TypeDefn> implements TypeRef {
         this.collectionTypes = collectionTypes;
     }
 
-    TypeRefImpl(SourceInfo sourceInfo, TypeDefn typeDefn) {
-        super(sourceInfo, typeDefn);
+    TypeRefImpl(TypeDefn typeDefn) {
+        super(typeDefn);
     }
 
-    TypeRefImpl(SourceInfo sourceInfo, TypeDefn typeDefn, List<CollectionType> collectionTypes) {
-        this(sourceInfo, typeDefn);
+    TypeRefImpl(SourceInfo si, TypeDefn typeDefn) {
+        super(si, typeDefn);
+    }
+
+    TypeRefImpl(TypeDefn typeDefn, List<CollectionType> collectionTypes) {
+        this(typeDefn);
         this.collectionTypes = collectionTypes;
     }
 
@@ -77,7 +81,7 @@ public class TypeRefImpl extends ExpressionChain<TypeDefn> implements TypeRef {
     }
 
     public boolean isWildcard() {
-        return asMetaRefPath().getLastLink().isWildcard();
+        return extractMetaRefPath().getLastLink().isWildcard();
     }
 
     public boolean isSingleton() {
@@ -92,6 +96,9 @@ public class TypeRefImpl extends ExpressionChain<TypeDefn> implements TypeRef {
     @Override
     public boolean isValueExpr() {
         return false;
+    }
+
+    public void addCollectionTypes(List<CollectionType> astCollTypes) {
     }
 
     public enum CollectionType {

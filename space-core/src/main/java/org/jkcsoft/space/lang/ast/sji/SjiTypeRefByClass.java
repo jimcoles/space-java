@@ -25,9 +25,10 @@ public class SjiTypeRefByClass extends AbstractModelElement implements TypeRef {
 
         this.mapping = sjiTypeMapping;
 
-        // NOTE I had been using equivalent Space types for Java primitives but
-        // at this time I think it's better to use SJI proxies and then use type
-        // casting if needed in expressions using Java objects, and vice versa.
+        // NOTE: I had been using equivalent Space types for Java primitives but
+        // at this time I think it's better to use SJI wrappers of the
+        // Java classes; then use type casting if needed in expressions that
+        // use Java objects, and vice versa.
 //        if (sjiTypeMapping.getJavaClass() == Boolean.TYPE) {
 //            mapping.setSjiProxy(NumPrimitiveTypeDefn.BOOLEAN);
 //        }
@@ -67,6 +68,13 @@ public class SjiTypeRefByClass extends AbstractModelElement implements TypeRef {
     @Override
     public LinkState getState() {
         return mapping.getState();
+    }
+
+    @Override
+    public Iterable<NameRefOrHolder> getAllLinksAsHolders() {
+        // we could elaborate this if / when we want to allow Space-managed assocs/collections
+        // where endpoints are of Java types
+        return null;
     }
 
     @Override

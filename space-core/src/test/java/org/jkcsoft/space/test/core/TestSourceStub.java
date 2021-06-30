@@ -35,6 +35,7 @@ public class TestSourceStub {
     }
 
     public File getSpaceLangSrcDir() {
+        // assumes pwd = is parent dir of this and all modules
         return FileUtils.getFile("space-lang-lib", "src", "main", "space");
     }
 

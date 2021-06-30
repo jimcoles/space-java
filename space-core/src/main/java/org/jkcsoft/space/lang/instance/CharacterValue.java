@@ -12,21 +12,22 @@ package org.jkcsoft.space.lang.instance;
 import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 
 /**
+ * Big plans for the Space model characters and character sets, etc.
+ * Basically we need to lay a Space model over the Java model to enable
+ * Space queries and views of character sets. Should tie into the Unicode
+ * model (http://www.unicode.org/versions/Unicode13.0.0/).
+ *
  * @author Jim Coles
  */
 public class CharacterValue extends ScalarValue<Character> {
 
-    /** Limit constructor access to package-only. */
     CharacterValue(char value) {
         super(NumPrimitiveTypeDefn.CHAR, value);
     }
 
     @Override
     public String asString() {
-
-//        String myString =(@NotNull String) "";
-
         return String.valueOf(getJavaValue());
-
     }
+
 }

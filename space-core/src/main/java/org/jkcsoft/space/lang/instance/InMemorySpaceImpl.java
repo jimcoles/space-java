@@ -116,18 +116,18 @@ public class InMemorySpaceImpl extends AbstractSpaceObject implements Space {
     private void updateViews(SpaceObject spaceObject) {
         if (spaceObject instanceof Tuple) {
             Tuple tuple = (Tuple) spaceObject;
-                TypeDefn rootType = tuple.getDefn();
-                Set<KeyDefnImpl> allKeyDefns = rootType.getAlternateKeyDefns();
-                if (allKeyDefns != null)
-                    for (KeyDefnImpl keyDefn : allKeyDefns) {
-                        Tuple keyValue = extractKeyTuple(tuple, keyDefn);
+            TypeDefn rootType = tuple.getDefn();
+            Set<KeyDefnImpl> allKeyDefns = rootType.getAlternateKeyDefns();
+            if (allKeyDefns != null)
+                for (KeyDefnImpl keyDefn : allKeyDefns) {
+                    Tuple keyValue = extractKeyTuple(tuple, keyDefn);
 
-                    }
+                }
         }
     }
 
     private Tuple extractKeyTuple(Tuple baseTuple, KeyDefn keyDefn) {
-        Tuple keyTuple = getObjectFactory().newTupleImpl(keyDefn.getBasisTypeDefn());
+        Tuple keyTuple = getObjectFactory().newTupleImpl(keyDefn.getBasisType());
         keyDefn.getProjectionDeclList().forEach((keyVar) ->
             keyTuple.setValue(keyVar, baseTuple.get(keyVar).getValue())
         );
@@ -143,9 +143,9 @@ public class InMemorySpaceImpl extends AbstractSpaceObject implements Space {
 
     public Tuple navToOne(Tuple fromObject, AssociationDefn assocDecl) {
         Tuple result = null;
-        if (assocDecl.getAssociationKind() == AssociationKind.INDEPENDENT) {
+        if (assocDecl.getAssociationKind() == AssociationKind.INDEPENDENT_TYPE) {
             if (assocDecl.getToEnd().getUpperMultiplicity() < 2) {
-                Value toRef = fromObject.get(assocDecl).getValue();
+                Value toRef = fromObject.get(assocDecl.getFromEnd().getDatumDecl()).getValue();
                 if (toRef instanceof ReferenceByOid) {
                     result = (Tuple) dereference(((ReferenceByOid) toRef).getToOid());
 //                    result = getObjectFactory().newView(viewDefn):

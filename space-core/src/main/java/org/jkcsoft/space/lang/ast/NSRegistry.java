@@ -78,9 +78,13 @@ public class NSRegistry {
         addNamespace(getLangNs());
 
         // init dynamic context specific namespaces
-        userNs = astFactory.newNamespace(SourceInfo.INTRINSIC, NS_USER, getLangNs());
+        userNs = astFactory.newNamespace(SourceInfo.INTRINSIC,
+                                         astFactory.newNamePart(SourceInfo.INTRINSIC, NS_USER),
+                                         getLangNs());
         addNamespace(userNs);
-        tmpNs = astFactory.newNamespace(SourceInfo.INTRINSIC, NS_TMP, userNs);
+        tmpNs = astFactory.newNamespace(SourceInfo.INTRINSIC,
+                                        astFactory.newNamePart(SourceInfo.INTRINSIC, NS_TMP),
+                                        userNs);
         addNamespace(tmpNs);
 
     }
@@ -108,7 +112,10 @@ public class NSRegistry {
     }
 
     public Namespace getNamespace(String name) {
-        return (Namespace) CollectionUtils.find(getNsChain(), elem -> ((Namespace) elem).getName().equals(name));
+        return (Namespace) CollectionUtils.find(
+            getNsChain(),
+            elem -> ((Namespace) elem).getNamePart().getText().equals(name)
+        );
     }
 
     public void addElement(Named newElement) {
@@ -166,13 +173,15 @@ public class NSRegistry {
     }
 
     private static class CommonCoreRegistry {
-        private Namespace langNs;
-        private Namespace javaNs;
+        private final Namespace langNs;
+        private final Namespace javaNs;
 
         public CommonCoreRegistry() {
             AstFactory astFactory = AstFactory.getInstance();
-            langNs = astFactory.newNamespace(SourceInfo.INTRINSIC, NS_LANG);
-            javaNs = astFactory.newNamespace(SourceInfo.INTRINSIC, Language.JAVA.getCodeName());
+            langNs = astFactory.newNamespace(SourceInfo.INTRINSIC,
+                                             astFactory.newNamePart(SourceInfo.INTRINSIC, NS_LANG));
+            javaNs = astFactory.newNamespace(SourceInfo.INTRINSIC,
+                                             astFactory.newNamePart(SourceInfo.INTRINSIC, Language.JAVA.getCodeName()));
         }
 
         public Namespace getLangNs() {

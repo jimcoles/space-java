@@ -9,7 +9,6 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.ProjectionDecl;
 import org.jkcsoft.space.lang.ast.TypeDefn;
 
 /**
@@ -18,7 +17,7 @@ import org.jkcsoft.space.lang.ast.TypeDefn;
  * @author Jim Coles
  * @version 1.0
  */
-public class TupleImpl extends AbstractTuple implements ExeContext, Tuple {
+public class TupleImpl extends AbstractTuple implements ExeContext {
 
     TupleImpl(SpaceOid oid, TypeDefn defn) {
         super(oid, defn);

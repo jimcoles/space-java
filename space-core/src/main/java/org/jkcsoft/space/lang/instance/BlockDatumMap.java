@@ -9,9 +9,8 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.java.util.Strings;
-import org.jkcsoft.space.lang.ast.ContextDatumDefn;
-import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.DatumDeclContext;
+import org.jkcsoft.space.lang.ast.DatumDecl;
 
 import java.util.*;
 
@@ -20,10 +19,10 @@ import java.util.*;
  */
 public class BlockDatumMap implements DatumMap {
 
-    private final ContextDatumDefn defn;
-    private final Map<Declaration, ValueHolder<Value<Object>, Object>> valueHolders;
+    private final DatumDeclContext defn;
+    private final Map<DatumDecl, ValueHolder<Value<Object>, Object>> valueHolders;
 
-    BlockDatumMap(ContextDatumDefn defn) {
+    BlockDatumMap(DatumDeclContext defn) {
         this.defn = defn;
         this.valueHolders = new TreeMap<>();
     }
@@ -34,7 +33,7 @@ public class BlockDatumMap implements DatumMap {
     }
 
     @Override
-    public DatumMap setValue(Declaration spaceDecl, Value value) {
+    public DatumMap setValue(DatumDecl spaceDecl, Value value) {
         get(spaceDecl).setValue(value);
         return this;
     }
@@ -49,11 +48,11 @@ public class BlockDatumMap implements DatumMap {
     }
 
     @Override
-    public ValueHolder get(Declaration member) {
+    public ValueHolder get(DatumDecl member) {
         return valueHolders.get(member);
     }
 
-    public Declaration getDeclAt(int idx) {
+    public DatumDecl getDeclAt(int idx) {
         // no-op
         return null;
     }

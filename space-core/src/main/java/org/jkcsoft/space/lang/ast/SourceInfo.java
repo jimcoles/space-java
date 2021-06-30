@@ -18,6 +18,23 @@ public interface SourceInfo {
     SourceInfo INTRINSIC = new IntrinsicSourceInfo();
     /** Used when AST is built from a Java code. */
     SourceInfo API = new ProgSourceInfo();
+    /** Element corresponds to more than one source element. */
+    SourceInfo COMPOSITION = new SourceInfo() {
+        @Override
+        public FileCoord getStart() {
+            return null;
+        }
+
+        @Override
+        public FileCoord getStop() {
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            return "(synthetic)";
+        }
+    };
 
     FileCoord getStart();
 

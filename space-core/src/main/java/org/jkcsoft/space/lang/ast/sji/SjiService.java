@@ -69,6 +69,7 @@ public class SjiService {
         return internalExec.getNsRegistry();
     }
 
+
     public void registerPackageBinding(String javaPackage, String spacePackage) {
         presetJavaBindings.put(javaPackage, spacePackage);
     }
@@ -242,12 +243,7 @@ public class SjiService {
                 // mapping file
             {
                 TypeDefn sjiToType = getSjiTypeProxyDeepLoad(jPropDescriptor.getPropertyType());
-                if (sjiToType.isSimpleType())
-                    sjiTypeProxy.addVariableDecl(new SjiPropVarDecl(this, sjiTypeProxy, jPropDescriptor));
-                else
-                    sjiTypeProxy.addAssociationDecl(
-                        new SjiPropAssocDecl(this, sjiTypeProxy, (SjiTypeDefn) sjiToType, jPropDescriptor)
-                    );
+                sjiTypeProxy.addVariableDecl(new SjiPropVarDecl(this, sjiTypeProxy, jPropDescriptor));
             }
         }
         Field[] jFields = jnClass.getDeclaredFields();
@@ -265,23 +261,12 @@ public class SjiService {
             SjiTypeRefByClass retTypeRef =
                 new SjiTypeRefByClass(jMethod, getOrCreateSjiTypeMapping(jMethod.getReturnType()));
             // build arg type defn
-            SjiTypeDefn argTupleTypeDefn = newSjiTypeProxy(null);
+            TypeDefn argTupleTypeDefn = astFactory.newTypeDefn("(arg anon type)");
             Parameter[] jParameters = jMethod.getParameters();
             for (Parameter jParam : jParameters) {
                 SjiTypeMapping sjiParamTypeMapping = getOrCreateSjiTypeMapping(jParam.getType());
                 SjiTypeRefByClass paramTypeRef = new SjiTypeRefByClass(jParam, sjiParamTypeMapping);
-                if (!sjiParamTypeMapping.isPrimitive()) {
-                    argTupleTypeDefn.addAssociationDecl(
-//                        newAssociationDecl(jParam, sjiParamTypeInfo)
-                        getAstFactory()
-                            .newAssociationDecl(paramTypeRef.getSourceInfo(), jParam.getName(),
-                                                argTupleTypeDefn,
-                                                paramTypeRef)
-                    );
-                }
-                else {
-                    argTupleTypeDefn.addVariableDecl(newVariableDecl(jParam, sjiParamTypeMapping.getSjiProxy()));
-                }
+                argTupleTypeDefn.addVariableDecl(newVariableDecl(jParam, sjiParamTypeMapping.getSjiProxy()));
             }
 
             SjiFunctionDefnImpl sjiFunctionDefnImpl = newNativeFunctionDefn(
@@ -299,7 +284,7 @@ public class SjiService {
         return parseUnit;
     }
 
-    private AstFactory getAstFactory() {
+    public AstFactory getAstFactory() {
         return astFactory;
     }
 
@@ -309,15 +294,19 @@ public class SjiService {
 
     //    private SjiAssocDecl newAssociationDecl(Parameter jParam, SjiTypeMapping sjiTypeMapping) {
     public SjiTypeDefn newSjiTypeProxy(Class jClass) {
-        return new SjiTypeDefn(jClass);
+        return new SjiTypeDefn(this, jClass);
     }
 
     //    }
     public SjiFunctionDefnImpl newNativeFunctionDefn(SjiTypeDefn parentTypeDefn, String name, Method jMethod,
-                                                     SjiTypeDefn argTypeDefn, SjiTypeRefByClass returnTypeRef)
+                                                     TypeDefn argTypeDefn, SjiTypeRefByClass returnTypeRef)
     {
-        SjiFunctionDefnImpl element = new SjiFunctionDefnImpl(parentTypeDefn, jMethod, name, returnTypeRef);
-        element.setArgSpaceTypeDefn(argTypeDefn);
+        SjiFunctionDefnImpl element =
+            new SjiFunctionDefnImpl(
+                    parentTypeDefn,
+                    jMethod,
+                    getAstFactory().newNamePart(new NativeSourceInfo(jMethod), name), returnTypeRef);
+        element.setArgumentsDefn(argTypeDefn);
         return element;
     }
 
@@ -362,8 +351,8 @@ public class SjiService {
         // initialize
         SjiTypeDefn defn = sjiTuple.getSjiTypeDefn();
         if (defn.hasDatums()) {
-            List<Declaration> declList = defn.getDatumDeclList();
-            for (Declaration datumDecl : declList) {
+            List<DatumDecl> declList = defn.getDatumDeclList();
+            for (DatumDecl datumDecl : declList) {
                 sjiTuple.initHolder(createSjiDatumProxy(sjiTuple, datumDecl));
             }
         }
@@ -404,7 +393,7 @@ public class SjiService {
         return new SjiTuple(spaceObjFactory.newOid(), sjiTypeDefn, javaObj);
     }
 
-    private ValueHolder createSjiDatumProxy(SjiTuple tuple, Declaration datumDecl) {
+    private ValueHolder createSjiDatumProxy(SjiTuple tuple, DatumDecl datumDecl) {
         ValueHolder holder = null;
         if (datumDecl instanceof SjiPropVarDecl) {
             holder = new SjiPropVarValueHolder(this, tuple, ((SjiPropVarDecl) datumDecl));
@@ -414,12 +403,6 @@ public class SjiService {
         }
         else if (datumDecl instanceof SjiParamVarDecl) {
             holder = new SjiParamValueHolder(tuple, ((SjiParamVarDecl) datumDecl));
-        }
-        else if (datumDecl instanceof SjiPropAssocDecl) {
-            holder = new SjiPropAssocValueHolder(this, tuple, ((SjiPropAssocDecl) datumDecl));
-        }
-        else if (datumDecl instanceof SjiFieldAssocDecl) {
-            holder = new SjiFieldAssocValueHolder(this, tuple, ((SjiFieldAssocDecl) datumDecl));
         }
         return holder;
     }
@@ -454,4 +437,7 @@ public class SjiService {
         return jMethod != null && Modifier.isPublic(jMethod.getModifiers());
     }
 
+    public NamePart newSjiNamePart(Object jObject, String name) {
+        return getAstFactory().newNamePart(new NativeSourceInfo(jObject), name);
+    }
 }

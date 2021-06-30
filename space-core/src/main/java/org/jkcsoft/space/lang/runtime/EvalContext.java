@@ -21,26 +21,26 @@ public interface EvalContext {
 
     StaticExeContext getStaticExeContext();
 
-    //
+    ObjectFactory getObjFactory();
+
+    // stack methods
 
     int callStackSize();
 
-    void push(FunctionCallContext functionCallContext);
+    void pushCallStack(FunctionCallContext functionCallContext);
 
-    FunctionCallContext peekStack();
+    FunctionCallContext peekCallStack();
 
     FunctionCallContext popCallStack();
 
     //
 
-    RuntimeError newRuntimeError(String msg);
-
     CharacterSequence newCharSequence(String jString);
-
-    ValueHolder newVoidHolder();
 
     SpaceObject dereferenceByOid(SpaceOid javaValue);
 
-    Value newCharacterSequence(String valueExpr);
+    ValueHolder newVoidHolder();
+
+    RuntimeError newRuntimeError(String msg);
 
 }

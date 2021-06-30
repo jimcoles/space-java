@@ -9,10 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
-
-import java.util.Comparator;
 
 /**
  * A named set of Tuples of a certain type.  The 'name' is held via the extension of
@@ -20,12 +17,12 @@ import java.util.Comparator;
  *
  * @author Jim Coles
  */
-public class SetDecl extends NamedElement implements Declaration {
+public class SetDecl extends AbstractDatumDecl {
 
-    private ExpressionChain tupleTypeRef;
+    private TypeRef tupleTypeRef;
 
-    SetDecl(SourceInfo sourceInfo, String name, ExpressionChain tupleTypeRef) {
-        super(sourceInfo, name);
+    SetDecl(SourceInfo sourceInfo, DatumDeclContext datumDeclContext, NamePart namePart, TypeRef tupleTypeRef) {
+        super(sourceInfo, datumDeclContext, namePart, tupleTypeRef);
 
         this.tupleTypeRef = tupleTypeRef;
         //
@@ -34,17 +31,12 @@ public class SetDecl extends NamedElement implements Declaration {
 
     @Override
     public TypeDefn getType() {
-        return ((TypeDefnImpl) tupleTypeRef.getResolvedMetaObj()).getSetOfType();
+        return ((TypeDefnImpl) tupleTypeRef.getResolvedType()).getSetOfType();
     }
 
     @Override
-    public boolean isAssoc() {
+    public boolean hasAssoc() {
         return false;
-    }
-
-    @Override
-    public ProjectionDecl asVariable() {
-        return null;
     }
 
     @Override
@@ -57,7 +49,7 @@ public class SetDecl extends NamedElement implements Declaration {
         return MetaType.DATUM;
     }
 
-    public ExpressionChain getTupleTypeRef() {
+    public TypeRef getTupleTypeRef() {
         return tupleTypeRef;
     }
 

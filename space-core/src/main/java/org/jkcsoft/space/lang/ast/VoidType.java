@@ -10,7 +10,6 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.ScalarValue;
-import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.util.Comparator;
@@ -21,14 +20,15 @@ import java.util.Comparator;
  */
 public class VoidType extends PrimitiveTypeDefn {
 
-    public static final VoidType VOID = new VoidType(new IntrinsicSourceInfo(), "void");
+    public static final VoidType VOID =
+        new VoidType(new IntrinsicSourceInfo(), new NamePart(SourceInfo.INTRINSIC, "void"));
 
     static {
         PrimitiveTypeDefn.addPrimitiveTypeDefn(VOID);
     }
 
-    private VoidType(SourceInfo sourceInfo, String name) {
-        super(sourceInfo, name);
+    private VoidType(SourceInfo sourceInfo, NamePart namePart) {
+        super(sourceInfo, namePart);
     }
 
     @Override

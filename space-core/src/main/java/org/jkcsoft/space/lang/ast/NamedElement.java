@@ -24,22 +24,26 @@ import java.util.List;
  */
 public abstract class NamedElement extends AbstractModelElement implements Named, Comparable<NamedElement> {
 
-    private String name;
+    private NamePart namePart;
     private String description;
-//    private String fqName;
 
-    protected NamedElement(SourceInfo sourceInfo, String name) {
+    protected NamedElement(SourceInfo sourceInfo, NamePart namePart) {
         super(sourceInfo);
-        this.name = name;
+        this.namePart = namePart;
+    }
+
+    @Override
+    public NamePart getNamePart() {
+        return namePart;
+    }
+
+    public boolean hasName() {
+        return namePart != null;
     }
 
     @Override
     public String getName() {
-        return name;
-    }
-
-    public boolean hasName() {
-        return name != null;
+        return namePart.getText();
     }
 
     @Override
@@ -49,7 +53,7 @@ public abstract class NamedElement extends AbstractModelElement implements Named
         ModelElement node = this;
         while (node != null) {
             if (node instanceof NamedElement) {
-                forwardList.add(((NamedElement) node).getName());
+                forwardList.add(((NamedElement) node).getNamePart().getText());
             }
             //
             node = node.getParent();
@@ -80,7 +84,7 @@ public abstract class NamedElement extends AbstractModelElement implements Named
         if (!(this.hasName() && o.hasName()))
             throw new IllegalArgumentException("Space bug: cannot compare two objects " +
                                                    "(" + this + "," + o + ") unless both are named.");
-        return this.getName().compareTo(o.getName());
+        return this.getNamePart().compareTo(o.getNamePart());
     }
 
     @Override
@@ -89,6 +93,6 @@ public abstract class NamedElement extends AbstractModelElement implements Named
     }
 
     protected String toUrlString() {
-        return getName();
+        return getNamePart().getText();
     }
 }

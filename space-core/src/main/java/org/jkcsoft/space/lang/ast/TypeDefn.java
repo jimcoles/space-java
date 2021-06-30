@@ -16,19 +16,33 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Every Datum has Type that is described and controlled by a TypeDefn meta object.
+ * A {@link TypeDefn} corresponds to the 'box' in a box-and-line type/class diagram
+ * ({@link AssociationDefn} is the 'line').
+ * All data have a type that is described and controlled by a TypeDefn meta object.
  * This applies to complex user types, native Space types including primitive
- * types for integers, real numbers, bytes, characters and bits.
+ * types for integers, real numbers, bytes, characters and bits, and native
+ * collective types sequence, set, and stream.
  *
- * Structural elements:
+ * Structural elements of a TypeDefn:
  * <ul>
- *     <li>Basis Variables</li>
- *     <li>Associations (including Projective/Extensions)</li>
- *     <li>Functions</li>
+ *     <li>Datum declarations</li>
+ *     <li>Declarations of Associations (including Projective/Extensions) to other keyed types</li>
+ *     <li>Methods & Functions</li>
  *     <li>Rules</li>
  * </ul>
  *
- * Structurally, a Type definition is a list of named and typed variables and associations
+ * <p>Kinds of Types:
+ * <ul>
+ *     <li>Entity - has a primary key</li>
+ *     <li>View - derived from a basis Type and related.</li>
+ *     <li>Simple/Scalar - primitives and types that extend primitives. Has only one unnamed value.</li>
+ *     <li>Complex / Vector - a map of name/values pairs, where each value may be scalar or
+ *     vector valued.</li>
+ *     <li>Set of</li>
+ *     <li>Sequence of</li>
+ *     <li>Stream of</li>
+ * </ul>
+ * Structurally, a Type definition is a list of named and typed datums
  * to other Types. With Space, one Type 'extends' another via an Association.
  *
  * <p>Usage-wise, Types are the central abstraction and generalization mechanism within
@@ -42,7 +56,27 @@ import java.util.Set;
  *
  * @author Jim Coles
  */
-public interface TypeDefn extends ContextDatumDefn, Named {
+public interface TypeDefn extends DatumDeclContext, Named {
+
+    default boolean isSjiWrapper() {
+        return false;
+    }
+
+    boolean isPrimitive();
+
+    boolean isSimple();
+
+    boolean isComplex();
+
+    default boolean isByteKey() { return false; }
+
+    boolean isView();
+
+    boolean isSetType();
+
+    boolean isSequenceType();
+
+    boolean isStreamType();
 
     List<Statement> getInitializations();
 
@@ -53,23 +87,6 @@ public interface TypeDefn extends ContextDatumDefn, Named {
     Set<KeyDefnImpl> getAlternateKeyDefns();
 
     TypeDefn addFunctionDefn(FunctionDefn functionDefn);
-
-    //
-    boolean isPrimitiveType();
-
-    boolean isComplexType();
-
-    default boolean isByteKey() { return false; }
-
-    boolean isView();
-
-    boolean isSimpleType();
-
-    boolean isSetType();
-
-    boolean isSequenceType();
-
-    boolean isStreamType();
 
     //
 

@@ -10,14 +10,11 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.TypeDefn;
-import org.jkcsoft.space.lang.ast.Declaration;
-import org.jkcsoft.space.lang.ast.ProjectionDecl;
-
-import java.util.List;
 
 /**
  * <p>A Tuple is an element of a {@link TupleSet}. Each Tuple contains values
- * which are ordered and named.
+ * which are both sequenced (~ordered) and named. A Tuple is, therefore, both
+ * a list and a map.
  * Values in a Tuple can be retrieved in order or by the name of the variable.  A Tuple
  * may contain only Scalar values and Oid-based references to Tuples in other
  * Spaces.
@@ -25,14 +22,15 @@ import java.util.List;
  * <p>A Tuple can be thought of as a 'smart map' in that every tuple has one-and-only-one
  * base object (and associated Oid).
  *
- * <p>Space object's are abstract.  A Tuple is the user's handle (view) to access an object,
+ * <p>Space object's are abstract. A Tuple is the user's handle (view) to access an object,
  * but the user never gets the object itself, only a view into the object.</p>
  *
  * <p>A central notion in Space. Similar to notion of Tuple in other languages like
  * Python except that our data values usually have rich meta data defined in a
- * {@link TypeDefn}, usually a {@link TypeDefn}.
+ * {@link TypeDefn}.
  *
- * <p>Analogous to a Java Object or a JDBC {@link java.sql.ResultSet}
+ * <p>Analogous to a Java Object except that Tuples may represent partial
+ * objects.
  *
  * @author Jim Coles
  */

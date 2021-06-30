@@ -27,7 +27,6 @@ UserSeqEnd     : ')';
 ListSep    : ',';
 
 SpaceStart  : '|';
-SpaceEnd    : '|';
 
 TupleStart  : '[';
 TupleEnd    : ']';
@@ -59,6 +58,10 @@ ContextKeyword      : 'context' ;
 SolvesKeyword       : 'solves';
 ForKeyword          : 'for';
 GivenKeyword        : 'given';
+//
+FromEndKeyword  : 'from';
+ToEndKeyword    : 'to';
+AssocKindKeyword     : 'kind';
 //
 QueryDefKeyword : 'query';
 AssocsKeyword   : 'assocs';

@@ -39,17 +39,23 @@ public class TestTupleSet extends TestSourceStub {
 
         // 1. Build AST model via API
         TypeDefnImpl personType = ast.newTypeDefn("Person");
-        VariableDecl userId = ast.newVariableDecl("userId", NumPrimitiveTypeDefn.CARD);
+        VariableDecl userId = ast.newVariableDecl("userId", personType, NumPrimitiveTypeDefn.CARD);
         personType.addVariableDecl(userId);
-        AssociationDefn firstName = ast.newAssociationDecl("firstName", personType, Executor.CHAR_SEQ_TYPE_DEF);
-        personType.addAssociationDecl(firstName);
-        AssociationDefn lastName = ast.newAssociationDecl("lastName", personType, Executor.CHAR_SEQ_TYPE_DEF);
-        personType.addAssociationDecl(lastName);
+        VariableDecl firstName = ast.newVariableDecl("firstName", personType, Executor.CHAR_SEQ_TYPE_DEF);
+        personType.addVariableDecl(firstName);
+        VariableDecl lastName = ast.newVariableDecl("lastName", personType, Executor.CHAR_SEQ_TYPE_DEF);
+        personType.addVariableDecl(lastName);
 
         spaceCtx.getNsRegistry().getUserNs().getRootDir().addChild(personType);
         // declare keys
-        personType.setPrimaryKey(ast.newKeyDefn(personType, ast.newProjectionDecl("UserPK", userId)));
-        personType.addAlternateKey(ast.newKeyDefn(personType, ast.newProjectionDecl("NameAK", lastName, firstName)));
+        KeyDefnImpl pk = ast.newKeyDefn(personType, "PersonPK");
+        personType.setPrimaryKey(pk);
+        pk.addProjectionDecl(ast.newProjectionDecl(pk, null, userId));
+        //
+        KeyDefnImpl ak = ast.newKeyDefn(personType, "PersonAK");
+        personType.addAlternateKey(ak);
+        ak.addProjectionDecl(ast.newProjectionDecl(ak, null, lastName));
+        ak.addProjectionDecl(ast.newProjectionDecl(ak, null, firstName));
         //
         spaceCtx.attachTypesToUserNs(personType);
 
@@ -61,8 +67,8 @@ public class TestTupleSet extends TestSourceStub {
         // set by datum object
         tuple.setValue(userId, spaceCtx.getObjFactory().newCardinalValue(1L));
         // set by ordinal
-        tuple.setValue(1, spaceCtx.newCharacterSequence("Jim"));
-        tuple.setValue(2, spaceCtx.newCharacterSequence("Coles"));
+        tuple.setValue(1, spaceCtx.newCharSequence("Jim"));
+        tuple.setValue(2, spaceCtx.newCharSequence("Coles"));
 
         Space mySpace = spaceCtx.getDefaultSpace();
         mySpace.insert(tuple);

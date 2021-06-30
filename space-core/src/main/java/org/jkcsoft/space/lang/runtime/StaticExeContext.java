@@ -9,9 +9,8 @@
  */
 package org.jkcsoft.space.lang.runtime;
 
-import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.DatumDecl;
 import org.jkcsoft.space.lang.ast.TypeDefn;
-import org.jkcsoft.space.lang.instance.BlockDatumMap;
 import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.instance.ValueHolder;
 
@@ -31,7 +30,7 @@ public class StaticExeContext {
         this.exeContext = exeContext;
     }
 
-    public void setValue(Declaration staticDatumDecl, ValueHolder newValueHolder) {
+    public void setValue(DatumDecl staticDatumDecl, ValueHolder newValueHolder) {
         Tuple staticDatumMap = getStaticTuple(staticDatumDecl.getType());
         if (staticDatumMap == null) {
             statics.put(staticDatumDecl.getType(), exeContext.getObjFactory().newTupleImpl(staticDatumDecl.getType()));
@@ -48,7 +47,7 @@ public class StaticExeContext {
         return statics.get(type);
     }
 
-    public ValueHolder getValue(Declaration staticDatumDecl) {
+    public ValueHolder getValue(DatumDecl staticDatumDecl) {
         return getStaticTuple(staticDatumDecl.getType()).get(staticDatumDecl);
     }
 

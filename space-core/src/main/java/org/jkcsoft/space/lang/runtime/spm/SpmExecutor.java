@@ -84,7 +84,7 @@ public class SpmExecutor extends ExprProcessor implements ExeContext, ApiExeCont
     }
 
     @Override
-    public CharacterSequence newCharacterSequence(String stringValue) {
+    public CharacterSequence newCharSequence(String stringValue) {
         return null;
     }
 
@@ -104,7 +104,7 @@ public class SpmExecutor extends ExprProcessor implements ExeContext, ApiExeCont
     }
 
     @Override
-    public SpaceObject getRef(Tuple tuple, Declaration declaration) {
+    public SpaceObject getRef(Tuple tuple, DatumDecl datumDecl) {
         return null;
     }
 

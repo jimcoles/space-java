@@ -60,22 +60,25 @@ public class ObjectFactory {
         return new VariableValueHolder(parentMap, decl, value);
     }
 
-    public DeclaredReferenceHolder<SpaceOid> newReferenceByOidHolder(DatumMap parentTuple, AssociationDefn associationDecl,
-                                                                     SpaceOid refToOid) {
-        return newReferenceByOidHolder(parentTuple, associationDecl, newReferenceByOid(refToOid));
-    }
-
-    public DeclaredReferenceHolder<SpaceOid> newReferenceByOidHolder(DatumMap datumMap, AssociationDefn associationDecl,
-                                                                      ReferenceByOid reference)
+    public DeclaredReferenceHolder<SpaceOid> newReferenceByOidHolder(DatumMap parentTuple,
+                                                                     DatumDecl datumDecl,
+                                                                     SpaceOid refToOid)
     {
-        return new DeclaredReferenceHolder<>(datumMap, associationDecl, reference);
+        return newReferenceByOidHolder(parentTuple, datumDecl, newReferenceByOid(refToOid));
     }
 
-    public FreeReferenceHolder<SpaceOid> newFreeReferenceHolder(TupleCollection fromObject, SpaceOid refToOid) {
+    public DeclaredReferenceHolder<SpaceOid> newReferenceByOidHolder(DatumMap datumMap,
+                                                                     DatumDecl datumDecl,
+                                                                     ReferenceByOid reference)
+    {
+        return new DeclaredReferenceHolder(datumMap, datumDecl, reference);
+    }
+
+    public FreeReferenceHolder<SpaceOid> newFreeReferenceHolder(ObjectRefCollection fromObject, SpaceOid refToOid) {
         return newFreeReferenceHolder(fromObject, newReferenceByOid(refToOid));
     }
 
-    public FreeReferenceHolder newFreeReferenceHolder(TupleCollection fromObject, ReferenceValue referenceByOid) {
+    public FreeReferenceHolder newFreeReferenceHolder(ObjectRefCollection fromObject, ReferenceValue referenceByOid) {
         return new FreeReferenceHolder<>(fromObject, referenceByOid);
     }
 
@@ -92,13 +95,13 @@ public class ObjectFactory {
         return new ReferenceByOid(refToOid);
     }
 
-    public ValueHolder newEmptyVarHolder(DatumMap datumMap, Declaration declaration) {
+    public ValueHolder newEmptyVarHolder(DatumMap datumMap, DatumDecl datumDecl) {
         ValueHolder holder = null;
-        if (declaration.getType().isPrimitiveType()) {
-            holder = newVariableValueHolder(datumMap, (VariableDecl) declaration, null);
+        if (datumDecl.getType().isPrimitive()) {
+            holder = newVariableValueHolder(datumMap, (VariableDecl) datumDecl, null);
         }
         else {
-            holder = newReferenceByOidHolder(datumMap, (AssociationDefn) declaration, (SpaceOid) null);
+            holder = newReferenceByOidHolder(datumMap, datumDecl, (SpaceOid) null);
         }
         return holder;
     }
@@ -108,12 +111,12 @@ public class ObjectFactory {
         return null;
     }
 
-    public ValueHolder newValueHolder(DatumMap datumMap, Declaration decl, Value value) {
+    public ValueHolder newValueHolder(DatumMap datumMap, DatumDecl datumDecl, Value value) {
         ValueHolder holder = null;
         if (value instanceof ScalarValue)
-            holder = newVariableValueHolder(datumMap, ((VariableDecl) decl), ((ScalarValue) value));
+            holder = newVariableValueHolder(datumMap, ((VariableDecl) datumDecl), ((ScalarValue) value));
         else
-            holder = newReferenceByOidHolder(datumMap, (AssociationDefn) decl, ((ReferenceByOid) value));
+            holder = newReferenceByOidHolder(datumMap, datumDecl, ((ReferenceByOid) value));
         return holder;
     }
 
@@ -171,7 +174,11 @@ public class ObjectFactory {
         return new View(viewDefn);
     }
 
-    public BlockDatumMap newBlockDatumMap(ContextDatumDefn datumDefn) {
+    public BlockDatumMap newBlockDatumMap(DatumDeclContext datumDefn) {
         return new BlockDatumMap(datumDefn);
+    }
+
+    public ObjectRefSequenceImpl newObjectSequence(TypeDefn containedTypeDefn) {
+        return new ObjectRefSequenceImpl(newOid(), containedTypeDefn);
     }
 }

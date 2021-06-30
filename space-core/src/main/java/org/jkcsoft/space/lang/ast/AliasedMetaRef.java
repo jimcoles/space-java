@@ -10,9 +10,10 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.metameta.MetaType;
+import org.jkcsoft.space.lang.runtime.AstUtils;
 
 /**
- * A {@link Named} {@link ExpressionChain} used by {@link ProjectionDecl}.
+ * A {@link Named} {@link ExpressionChain} used by {@link DatumProjectionExpr}.
  *
  * @author Jim Coles
  */
@@ -20,9 +21,10 @@ public class AliasedMetaRef<T extends Named> extends NamedElement {
 
     private final ExpressionChain<T> metaRefExpr;
 
-    /** The 'alias' is the 'name' of the {@link NamedElement} parent. */
-    protected AliasedMetaRef(SourceInfo sourceInfo, String name, ExpressionChain<T> metaRefExpr) {
-        super(sourceInfo, name);
+    /** The 'alias' is the 'name' of this {@link Named} element and is thereby
+     * available as a name ref from other expressions. */
+    protected AliasedMetaRef(SourceInfo sourceInfo, NamePart aliasNamePart, ExpressionChain<T> metaRefExpr) {
+        super(sourceInfo, aliasNamePart);
         this.metaRefExpr = metaRefExpr;
         //
         addChild(metaRefExpr);
@@ -35,5 +37,9 @@ public class AliasedMetaRef<T extends Named> extends NamedElement {
 
     public ExpressionChain<T> getMetaRefExpr() {
         return metaRefExpr;
+    }
+
+    public void addPath(ScopeKind firstRefScopeKind, DatumDecl ... datumPath) {
+        metaRefExpr.addPath(firstRefScopeKind, datumPath);
     }
 }

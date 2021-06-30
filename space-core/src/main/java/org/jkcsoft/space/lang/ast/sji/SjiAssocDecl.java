@@ -10,11 +10,8 @@
 package org.jkcsoft.space.lang.ast.sji;
 
 import org.jkcsoft.space.lang.ast.*;
-import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
 import org.jkcsoft.space.lang.runtime.SpaceUtils;
-
-import java.util.Comparator;
 
 /**
  * @author Jim Coles
@@ -22,68 +19,59 @@ import java.util.Comparator;
 public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaration, AssociationDefn {
 
     private SjiService sjiService;
-    private SjiAssociationDefnEnd fromEnd;
-    private SjiAssociationDefnEnd toEnd;
+    private SjiFromAssocEnd fromEnd;
+    private SjiToAssocEnd toEnd;
     private AssociationKind associationKind;
 
-    protected SjiAssocDecl(SjiService sjiService, SourceInfo sourceInfo, SjiTypeDefn fromType, SjiTypeDefn toType, String name) {
-        super(sourceInfo, name);
+    protected SjiAssocDecl(SjiService sjiService, SourceInfo sourceInfo, SjiVarDecl fromRef,
+                           SjiVarDecl toRef, NamePart namePart) {
+        super(sourceInfo, namePart);
 
         this.sjiService = sjiService;
-        if (fromType != null) {
-            this.fromEnd = new SjiAssociationDefnEnd(sourceInfo, name, fromType, 1, 1);
+        if (fromRef != null) {
+            this.fromEnd = new SjiFromAssocEnd(sourceInfo, this, fromRef);
             addChild(this.fromEnd);
         }
 
-        if (toType == null) throw new RuntimeException("bug: path to class ref cannot be null");
+        if (toRef == null) throw new RuntimeException("bug: path to class ref cannot be null");
 
-        this.toEnd = new SjiAssociationDefnEnd(sourceInfo, name, toType, 1, 1);
+        this.toEnd = new SjiToAssocEnd(sourceInfo, this, toRef);
         addChild(this.toEnd);
     }
 
     @Override
-    public boolean isAssoc() {
+    public boolean hasAssoc() {
         return true;
     }
 
     @Override
-    public boolean hasTypeFromEnd() {
-        return fromEnd != null;
-    }
-
-    @Override
-    public UsageAssociationEnd getFromUsagePoint() {
+    public FromAssocEnd getFromEnd() {
         return null;
     }
 
     @Override
-    public boolean hasUsageFromEnd() {
+    public boolean hasFromEnd() {
         return false;
     }
 
     @Override
     public TypeDefn getToType() {
-        return toEnd.getType();
+        return toEnd.getEndTargetType();
     }
 
     @Override
     public TypeDefn getType() {
-        return toEnd.getType();
+        return toEnd.getEndTargetType();
     }
 
     @Override
-    public AssociationDefnEnd getTypeFromEnd() {
-        return fromEnd;
-    }
-
-    @Override
-    public AssociationDefnEnd getToEnd() {
+    public ToAssocEnd getToEnd() {
         return toEnd;
     }
 
     @Override
     public boolean isRecursive() {
-        return toEnd == fromEnd;
+        return toEnd.getEndTargetType() == fromEnd.getEndTargetType();
     }
 
     @Override
@@ -110,4 +98,5 @@ public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaratio
     protected SjiService getSjiService() {
         return sjiService;
     }
+
 }

@@ -10,8 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.java.util.Strings;
-import org.jkcsoft.space.lang.ast.Declaration;
-import org.jkcsoft.space.lang.ast.ProjectionDecl;
+import org.jkcsoft.space.lang.ast.DatumDecl;
 import org.jkcsoft.space.lang.ast.TypeDefn;
 
 import java.util.Arrays;
@@ -66,7 +65,7 @@ public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple
     }
 
     @Override
-    public Tuple setValue(Declaration spaceDecl, Value value) {
+    public Tuple setValue(DatumDecl spaceDecl, Value value) {
         get(spaceDecl).setValue(value);
         return this;
     }
@@ -74,7 +73,7 @@ public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple
     @Override
     public Tuple setValue(int idx, Value value) {
         ValueHolder valueHolder = valueHolders[idx];
-        if (valueHolder.getDeclaration().isAssoc()) {
+        if (valueHolder.getDeclaration().hasAssoc()) {
             if (value instanceof SpaceObject)
                 valueHolder.setValue(getObjectFactory().newReferenceByOid(((SpaceObject) value).getOid()));
         }
@@ -85,11 +84,11 @@ public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple
     }
 
     @Override
-    public ValueHolder get(Declaration member) {
+    public ValueHolder get(DatumDecl member) {
         return valueHolders[getIdxHolder(member)];
     }
 
-    public Declaration getDeclAt(int idx) {
+    public DatumDecl getDeclAt(int idx) {
 //        return ((TypeDefn) getDefn()).getDatumDeclList().get(idx);
         return valueHolders[idx].getDeclaration();
     }
@@ -117,14 +116,14 @@ public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple
         return values;
     }
 
-    private int getIdxHolder(Declaration datumDecl) {
+    private int getIdxHolder(DatumDecl datumDecl) {
         return ((TypeDefn) getDefn()).getDatumDeclList().indexOf(datumDecl);
     }
 
     /** Get the 0-based ordinal of the specified member */
     private int getMemberIdx(SpaceOid memberOid) {
         int idxMember = -1;
-        List<Declaration> allMembers = ((TypeDefn) getDefn()).getDatumDeclList();
+        List<DatumDecl> allMembers = ((TypeDefn) getDefn()).getDatumDeclList();
         for (int idx = 0; idx < allMembers.size(); idx++) {
             if (allMembers.get(idx).getOid().equals(memberOid)) {
                 idxMember = idx;
@@ -147,7 +146,7 @@ public abstract class AbstractTuple extends AbstractSpaceObject implements Tuple
     @Override
     public String toString() {
         return "([" + super.toString() + "] "
-            + Strings.buildCommaDelList(getValueHolders(), holder -> ((ValueHolder) holder).getValue().toString())
+            + Strings.buildCommaDelList(getValueHolders(), holder -> holder.toString())
             + ")";
     }
 

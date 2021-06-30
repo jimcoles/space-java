@@ -23,11 +23,11 @@
  * xyz - the runtime instance that adheres to its corresponding definition, xyzDefn<br>
  * <p>This applies to Transform, Equation, Function, and Type.
  * <h2>Primary Notions</h2>
- * <p>The following are concrete notions defined by a Space programmer.</p>
+ * <p>The following are notions defined by a Space programmer.</p>
  * <ul>
- *     <li>{@link org.jkcsoft.space.lang.ast.TypeDefnImpl} - A type corresponds to a type
+ *     <li>{@link org.jkcsoft.space.lang.ast.TypeDefn} - A type corresponds to a type
  *     of thing, a noun, an entity. A type has state described via Variables and Associations.</li>
- *     <li>{@link org.jkcsoft.space.lang.ast.VariableDeclImpl} - A scalar-valued element
+ *     <li>{@link org.jkcsoft.space.lang.ast.AssociationDefn} - A value or reference element
  *     with some semantic meaning associated with a Space</li>
  *     <li>EquationDefn</li>
  * </ul>
@@ -37,7 +37,7 @@
  *     <tr>
  *         <td>{@link org.jkcsoft.space.lang.ast.RuleImpl}</td>
  *         <td></td>
- *         <td>{@link org.jkcsoft.space.lang.ast.SpaceFunctionDefn}</td>
+ *         <td>{@link org.jkcsoft.space.lang.ast.FunctionDefnImpl}</td>
  *     </tr>
  * </table>
  *

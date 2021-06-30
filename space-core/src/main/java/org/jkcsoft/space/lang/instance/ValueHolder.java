@@ -9,14 +9,13 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.Declaration;
-import org.jkcsoft.space.lang.ast.ProjectionDecl;
+import org.jkcsoft.space.lang.ast.DatumDecl;
 import org.jkcsoft.space.lang.ast.TypeDefn;
 
 /**
- * A {@link ValueHolder} is a {@link Declaration} (a name and a type) and a {@link Value};
+ * A {@link ValueHolder} is a {@link DatumDecl} (a name and a type) and a {@link Value};
  * This is very similar to a Lisp 'con cell' except that our holder is typed (via the
- * {@link Declaration}).
+ * {@link DatumDecl}).
  *
  * <p>Possible alternate names: Node, Quantum (because it is a more basic
  * notion than an object/tuple).
@@ -25,7 +24,7 @@ import org.jkcsoft.space.lang.ast.TypeDefn;
  */
 public interface ValueHolder<V extends Value<J>, J> {
 
-    Declaration getDeclaration();
+    DatumDecl getDeclaration();
 
     default TypeDefn getType() {
         return getDeclaration().getType();

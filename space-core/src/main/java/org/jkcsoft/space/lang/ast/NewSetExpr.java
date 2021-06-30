@@ -20,7 +20,7 @@ public class NewSetExpr extends AbstractModelElement implements ValueExpr {
     private TypeRef tupleTypeRef;
     private List<NewTupleExpr> newTupleExprs = new LinkedList<>();
 
-    NewSetExpr(SourceInfo sourceInfo, TypeRefImpl tupleTypeRef) {
+    NewSetExpr(SourceInfo sourceInfo, TypeRef tupleTypeRef) {
         super(sourceInfo);
         this.tupleTypeRef = tupleTypeRef;
         //

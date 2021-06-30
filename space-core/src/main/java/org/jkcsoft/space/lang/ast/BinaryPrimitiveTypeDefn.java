@@ -39,7 +39,7 @@ public class BinaryPrimitiveTypeDefn extends PrimitiveTypeDefn {
     private Comparator<ScalarValue> comparator;
 
     private BinaryPrimitiveTypeDefn(SourceInfo sourceInfo, String name, Comparator<ScalarValue> comparator) {
-        super(sourceInfo, name);
+        super(sourceInfo, new NamePart(SourceInfo.INTRINSIC, name));
         this.comparator = comparator;
     }
 

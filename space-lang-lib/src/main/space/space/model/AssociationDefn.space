@@ -1,0 +1,4 @@
+public type SpaceTypeDefn extends ModelElement
+{
+
+}

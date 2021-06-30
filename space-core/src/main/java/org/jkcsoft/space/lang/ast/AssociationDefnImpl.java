@@ -9,7 +9,6 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.ast.sji.HardReference;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
@@ -20,44 +19,13 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class AssociationDefnImpl extends NamedElement implements AssociationDefn {
 
-    private AssociationDefnEnd typeFromEnd;
-    private UsageAssociationEnd usageFromEnd;
-
-    private AssociationDefnEnd toEnd;
+    private FromAssocEnd fromEnd;
+    private ToAssocEnd toEnd;
     private AssociationKind associationKind;
 
-    AssociationDefnImpl(SourceInfo sourceInfo, String name, TypeRef fromTypeRef, TypeRef toTypeRef) {
-        super(sourceInfo, name);
-
-        if (fromTypeRef != null) {
-            this.typeFromEnd = new AssociationDefnEndImpl(sourceInfo, name, fromTypeRef, true, true, 1, 1);
-        }
-
-        if (toTypeRef == null) throw new RuntimeException("bug: path to class ref cannot be null");
-        setToEnd(sourceInfo, name, toTypeRef);
-
-        // child adders
-        if (this.typeFromEnd != null) {
-            addChild(this.typeFromEnd);
-        }
-        addChild(this.toEnd);
-    }
-
-    AssociationDefnImpl(SourceInfo sourceInfo, String name, ContextDatumDefn datumDefn, TypeRef toTypeRef) {
-        super(sourceInfo, name);
-
-        this.usageFromEnd =
-            new UsageAssociationEndImpl(sourceInfo, ".", new HardReference<>(sourceInfo, datumDefn));
-        addChild(this.usageFromEnd);
-
-        if (toTypeRef == null) throw new RuntimeException("bug: path to class ref cannot be null");
-        setToEnd(sourceInfo, name, toTypeRef);
-
-        // child adders
-        if (this.typeFromEnd != null) {
-            addChild(this.typeFromEnd);
-        }
-        addChild(this.toEnd);
+    AssociationDefnImpl(SourceInfo sourceInfo, NamePart namePart)
+    {
+        super(sourceInfo, namePart);
     }
 
     @Override
@@ -65,13 +33,20 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
         return MetaType.DATUM;
     }
 
-    @Override
-    public boolean isAssoc() {
-        return true;
+    public void setFromEnd(FromAssocEnd fromEnd) {
+        this.fromEnd = fromEnd;
+
+        // child adders
+        if (this.fromEnd != null) {
+            addChild(this.fromEnd);
+        }
     }
 
-    private void setToEnd(SourceInfo sourceInfo, String name, TypeRef toTypeRef) {
-        this.toEnd = new AssociationDefnEndImpl(sourceInfo, name, toTypeRef, true, true, 1, 1);
+    public void setToEnd(ToAssocEnd toEnd) {
+        this.toEnd = toEnd;
+
+        // child adders
+        addChild(this.toEnd);
     }
 
     @Override
@@ -86,38 +61,28 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
     }
 
     @Override
-    public boolean hasTypeFromEnd() {
-        return typeFromEnd != null;
+    public boolean hasFromEnd() {
+        return fromEnd != null;
     }
 
     @Override
-    public boolean hasUsageFromEnd() {
-        return usageFromEnd != null;
+    public FromAssocEnd getFromEnd() {
+        return fromEnd;
     }
 
     @Override
-    public UsageAssociationEnd getFromUsagePoint() {
-        return usageFromEnd;
+    public TypeDefn getFromType() {
+        return fromEnd.getEndTargetType();
+    }
+
+    @Override
+    public ToAssocEnd getToEnd() {
+        return toEnd;
     }
 
     @Override
     public TypeDefn getToType() {
-        return toEnd.getType();
-    }
-
-    @Override
-    public TypeDefn getType() {
-        return getToType();
-    }
-
-    @Override
-    public AssociationDefnEnd getTypeFromEnd() {
-        return typeFromEnd;
-    }
-
-    @Override
-    public AssociationDefnEnd getToEnd() {
-        return toEnd;
+        return toEnd.getEndTargetType();
     }
 
     /**
@@ -125,17 +90,7 @@ public class AssociationDefnImpl extends NamedElement implements AssociationDefn
      */
     @Override
     public boolean isRecursive() {
-        return typeFromEnd.getType() == toEnd.getType();
-    }
-
-    @Override
-    public Comparators.DatumTupleComparator getDatumComparator() {
-        return null;
-    }
-
-    @Override
-    public ProjectionDecl asVariable() {
-        return null;
+        return fromEnd.getEndTargetType() == toEnd.getEndTargetType();
     }
 
 }

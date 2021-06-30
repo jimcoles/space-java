@@ -1,0 +1,13 @@
+import space.thread.Thread;
+
+/*
+ SpaceTime is a thread and a sequence number, the latter being guaranteed to be
+ unique for each object transaction (delta event / operation). Types may use SpaceTime
+ for certain logic in a manner that is more deterministic than using system clock time.
+*/
+type SpaceTime {
+
+    Thread thread;
+    int sequence;
+
+}

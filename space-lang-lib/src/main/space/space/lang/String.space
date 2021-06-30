@@ -1,16 +1,13 @@
-package space.lang; // a reference, not a defn
-
-import java:java.lang.String;
+package space.lang;
 
 /**
  * The Space String type is a convenience wrapper of a Space char sequence.
  */
-type String {
+type String extends char[] {
 
-    char[] charSeq;
-
-    function String append(String inStr) {
-//        native-call java.lang.String.
-    }
 
 }
+
+// operator String append(inStr1, inStr2) {
+//        native-call java.lang.String.
+// }

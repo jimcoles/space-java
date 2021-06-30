@@ -15,6 +15,8 @@ import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
 import org.jkcsoft.space.lang.runtime.SpaceUtils;
 
+import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
 
@@ -25,14 +27,20 @@ import java.util.Set;
  */
 public class SjiTypeDefn extends AbstractTypeDefn implements TypeDefn {
 
+    private SjiService sjiService;
     // wrapped element
     private Class jClass;
-    private KeyDefnImpl primaryKey;
-    private Set<KeyDefnImpl> allKeys;
 
-    SjiTypeDefn(Class jClass) {
-        super(new NativeSourceInfo(jClass), jClass == null ? "(method args)" : jClass.getSimpleName());
+    SjiTypeDefn(SjiService sjiService, Class jClass) {
+        super(new NativeSourceInfo(jClass), sjiService.newSjiNamePart(jClass, jClass.getSimpleName()));
+        this.sjiService = sjiService;
         this.jClass = jClass;
+    }
+
+    /** Method arg pseudo-type. */
+    SjiTypeDefn(SjiService sjiService, Method jMethod) {
+        super(new NativeSourceInfo(jMethod), sjiService.newSjiNamePart(jMethod, "(method args)"));
+        this.sjiService = sjiService;
     }
 
     @Override
@@ -40,24 +48,33 @@ public class SjiTypeDefn extends AbstractTypeDefn implements TypeDefn {
         return super.getMetaType();
     }
 
-//    @Override
+    @Override
+    public boolean isSjiWrapper() {
+        return true;
+    }
+
+    //    @Override
 //    public int getScalarDofs() {
 //        return datumDecls.size();
 //    }
 
+    public Class getjClass() {
+        return jClass;
+    }
+
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return false;
     }
 
     @Override
     public KeyDefnImpl getPrimaryKeyDefn() {
-        return primaryKey;
+        return null;
     }
 
     @Override
     public Set<KeyDefnImpl> getAlternateKeyDefns() {
-        return allKeys;
+        return Collections.EMPTY_SET;
     }
 
     @Override

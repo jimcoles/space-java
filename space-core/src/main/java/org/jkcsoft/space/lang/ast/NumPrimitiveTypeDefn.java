@@ -12,7 +12,6 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.instance.*;
 
 import java.util.Comparator;
-import java.util.function.ToIntFunction;
 
 /**
  * @author Jim Coles
@@ -39,7 +38,9 @@ public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
 //    public static final NumPrimitiveTypeDefn NULL = newInstance("null", (Comparator<NullValue>) (o1, o2) -> 0);
 
     private static NumPrimitiveTypeDefn newInstance(String name, Comparator<ScalarValue> comparator) {
-        NumPrimitiveTypeDefn ptDefn = new NumPrimitiveTypeDefn(new IntrinsicSourceInfo(), name, comparator);
+        NumPrimitiveTypeDefn ptDefn = new NumPrimitiveTypeDefn(
+            new IntrinsicSourceInfo(), new NamePart(SourceInfo.INTRINSIC, name), comparator
+        );
         PrimitiveTypeDefn.addPrimitiveTypeDefn(ptDefn);
         return ptDefn;
     }
@@ -47,33 +48,28 @@ public class NumPrimitiveTypeDefn extends PrimitiveTypeDefn {
     // ------------------------------------------------------------------------
     //
 
-    private int arrayDepth;
+//    private int arrayDepth;
     private Comparator<ScalarValue> comparator;
 
-    private NumPrimitiveTypeDefn(SourceInfo sourceInfo, String name, Comparator<ScalarValue> comparator) {
-        super(sourceInfo, name);
+    private NumPrimitiveTypeDefn(SourceInfo sourceInfo, NamePart namePart, Comparator<ScalarValue> comparator) {
+        super(sourceInfo, namePart);
         this.comparator = comparator;
     }
 
-    private boolean isArray() {
-        return arrayDepth > 0;
-    }
+//    private boolean isArray() {
+//        return arrayDepth > 0;
+//    }
 
-    public void setArrayDepth(int arrayDepth) {
-        this.arrayDepth = arrayDepth;
-    }
+//    public void setArrayDepth(int arrayDepth) {
+//        this.arrayDepth = arrayDepth;
+//    }
 
-    public int getArrayDepth() {
-        return arrayDepth;
-    }
-
-    @Override
-    public ContextDatumDefn addVariableDecl(VariableDecl variableDecl) {
-        return null;
-    }
+//    public int getArrayDepth() {
+//        return arrayDepth;
+//    }
 
     @Override
-    public ContextDatumDefn addAssociationDecl(AssociationDefn associationDecl) {
+    public DatumDeclContext addVariableDecl(VariableDecl variableDecl) {
         return null;
     }
 

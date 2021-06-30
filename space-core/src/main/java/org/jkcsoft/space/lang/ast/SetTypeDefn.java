@@ -9,10 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.runtime.SpaceUtils;
-
-import java.util.Comparator;
 
 /**
  * Just a wrapper around the {@link TypeDefnImpl} associated with this set's contents,
@@ -26,11 +23,13 @@ public class SetTypeDefn extends AbstractCollectionTypeDefn {
     public static final String COLL_SUFFIX = "{}";
 
     SetTypeDefn(SourceInfo sourceInfo, TypeDefn containedElementType) {
-        super(sourceInfo, containedElementType.getName() + COLL_SUFFIX, containedElementType);
+        super(sourceInfo,
+              new NamePart(SourceInfo.INTRINSIC, containedElementType.getName() + COLL_SUFFIX),
+              containedElementType);
     }
 
     @Override
-    public boolean isComplexType() {
+    public boolean isComplex() {
         return false;
     }
 

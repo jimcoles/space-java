@@ -14,10 +14,14 @@ import org.jkcsoft.space.lang.ast.sji.SjiService;
 import org.jkcsoft.space.lang.instance.*;
 
 /**
- * Access needed by Java programs that are using Space programmatically via the builder API,
+ * API needed by Java programs that are using Space programmatically via the builder API,
  * etc.
  */
 public interface ApiExeContext {
+
+    AstFactory getAstFactory();
+
+    NSRegistry getNsRegistry();
 
     ObjectFactory getObjFactory();
 
@@ -25,28 +29,24 @@ public interface ApiExeContext {
 
     SpaceObject dereferenceByOid(SpaceOid referenceOid) throws SpaceX;
 
-    AstFactory getAstFactory();
-
-    NSRegistry getNsRegistry();
-
     SjiService getSjiService();
-
-    /** Writes a simple shallow set of tuples by value in tabular form. */
-    String print(TupleSet tupleSet);
-
-    TupleImpl newTupleImpl(TypeDefn defn);
-
-    TupleSetImpl newSet(SetTypeDefn setTypeDefn);
-
-    CharacterSequence newCharacterSequence(String stringValue);
 
     Space getDefaultSpace();
 
     Space newSpace();
 
+    void attachTypesToUserNs(TypeDefn ... types);
+
     void apiAstLoadComplete();
 
-    SpaceObject getRef(Tuple tuple, Declaration declaration);
+    TupleImpl newTupleImpl(TypeDefn defn);
 
-    void attachTypesToUserNs(TypeDefn ... types);
+    CharacterSequence newCharSequence(String stringValue);
+
+    TupleSetImpl newSet(SetTypeDefn setTypeDefn);
+
+    SpaceObject getRef(Tuple tuple, DatumDecl datumDecl);
+
+    /** Writes a simple shallow set of tuples by value in tabular form. */
+    String print(TupleSet tupleSet);
 }

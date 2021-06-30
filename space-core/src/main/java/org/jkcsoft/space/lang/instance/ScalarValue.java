@@ -18,18 +18,18 @@ import org.jkcsoft.space.lang.runtime.SpaceX;
  */
 public abstract class ScalarValue<J> implements Value<J> {
 
-    private NumPrimitiveTypeDefn type;
+//    private NumPrimitiveTypeDefn type;
     private J jvalue;    // the java object value such as int, float, char
 
     ScalarValue(NumPrimitiveTypeDefn type, J jValue) {
         if (type == null) throw new SpaceX("null type param");
-        this.type = type;
+//        this.type = type;
         this.jvalue = jValue;
     }
 
-    public NumPrimitiveTypeDefn getType() {
-        return type;
-    }
+//    public NumPrimitiveTypeDefn getType() {
+//        return type;
+//    }
 
     public boolean isInitialized() {
         return jvalue != null;
@@ -48,6 +48,6 @@ public abstract class ScalarValue<J> implements Value<J> {
 
     @Override
     public String toString() {
-        return "("+type.getDisplayName()+") " + jvalue;
+        return "" + jvalue;
     }
 }

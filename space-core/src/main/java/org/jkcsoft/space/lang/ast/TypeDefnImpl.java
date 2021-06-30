@@ -28,15 +28,15 @@ public class TypeDefnImpl extends AbstractTypeDefn implements TypeDefn {
     private ViewDefn pkViewDefn;
     private Set<KeyDefnImpl> alternateKeys = Collections.emptySet();
     private Set<ViewDefn> altKeyViewDefns;
-    private List<Rule> rules;
-    private List<TransformDefn> transformDefns;
+//    private List<Rule> rules;
+//    private List<TransformDefn> transformDefns;
 
     TypeDefnImpl(SourceInfo sourceInfo, NamePart nameNode) {
-        super(sourceInfo, nameNode.getText());
+        super(sourceInfo, nameNode);
     }
 
     TypeDefnImpl(SourceInfo sourceInfo, NamePart nameNode, boolean isView) {
-        super(sourceInfo, nameNode.getText(), isView);
+        super(sourceInfo, nameNode, isView);
     }
 
     public boolean isComputed() {
@@ -47,13 +47,13 @@ public class TypeDefnImpl extends AbstractTypeDefn implements TypeDefn {
         return true;
     }
 
-    public List<Rule> getRules() {
-        return rules;
-    }
-
-    public List<TransformDefn> getTransformDefns() {
-        return transformDefns;
-    }
+//    public List<Rule> getRules() {
+//        return rules;
+//    }
+//
+//    public List<TransformDefn> getTransformDefns() {
+//        return transformDefns;
+//    }
 
     @Override
     public boolean isAssignableTo(TypeDefn receivingType) {

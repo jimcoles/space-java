@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A Directory is a organizational, namespace, and security mechanism similar
- * to an XML schema or Java Package.
+ * A Directory is a unit of organization, a namespace, and a security mechanism
+ * similar to an XML schema or Java Package.
  *
  * Encapsulates an entire executable system as defined by Space definition elements
  * (ModelElements) and associated instances.
@@ -47,8 +47,8 @@ public class Directory extends NamedElement {
 
     // ==================
 
-    Directory(SourceInfo sourceInfo, String name) {
-        super(sourceInfo, name);
+    Directory(SourceInfo sourceInfo, NamePart namePart) {
+        super(sourceInfo, namePart);
     }
 
     @Override

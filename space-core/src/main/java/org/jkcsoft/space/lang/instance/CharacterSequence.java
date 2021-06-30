@@ -12,17 +12,21 @@ package org.jkcsoft.space.lang.instance;
 import org.jkcsoft.space.lang.metameta.CharSequenceNature;
 
 /**
- * Roughly equivalent to a character string in other languages.  In Space,
- * we recognize that a Character Sequence is generally some encoded
- * representation of a higher level expression; therefore, it is often
- * associated with devices to marshall from or unmarshall to an in-memory
- * representation.  In other words,
+ * {@link CharacterSequence} instances are the Java backing objects for
+ * Space character strings. A {@link CharacterSequence} is a special kind of value
+ * sequence with operations that do not apply to general sequences.
+ *
+ * <p>In Space, we recognize that a Character Sequence is generally an encoded
+ * representation of a higher level Human-interpretable expression; therefore,
+ * it is often associated with devices to marshall from or unmarshall to an in-memory
+ * object graph.  In other words,
  * <p>
- *  CharacterSequence -- Unmarshaller --> Space
+ *  CharacterSequence -- Unmarshaller --> Space Object Graph
  *  <br>
- *  Space --> Marshaller --> CharacterSequence
- * <p>Also, since the values of a character are 'physically' just
- * identifiers that reference an abstract table of 'glyphs' that
+ *  Space Object Graph --> Marshaller --> CharacterSequence
+ *
+ * <p>Also, character values are physically just
+ * identifiers that reference an abstract externally-defined table of 'glyphs' that
  * represent a character. E.g.:</p>
  * "abcd" -> "id(a)id(b)id(c)id(d)"
  *
@@ -39,13 +43,12 @@ import org.jkcsoft.space.lang.metameta.CharSequenceNature;
  *
  * @author Jim Coles
  */
-public class CharacterSequence extends BinarySequence<CharacterValue> implements UniqueKeyStream {
+public class CharacterSequence extends ScalarValueSequence<CharacterValue> implements UniqueKeyStream {
 
     private CharSequenceNature nature = CharSequenceNature.OPAQUE;
     private String characters;
     private CharacterValue[] characterValues;
 
-    /** Limit constructor access to package-only. */
     CharacterSequence(SpaceOid oid, CharacterValue[] characterValues) {
         super(oid, null);
         this.characterValues = characterValues;

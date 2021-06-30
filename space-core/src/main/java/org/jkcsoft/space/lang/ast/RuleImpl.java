@@ -19,20 +19,20 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  */
 public class RuleImpl extends NamedElement implements Rule {
 
-    private ProjectionDecl varSpace;
+    private DatumProjectionExpr varSpace;
     /** Must be boolean-valued. */
     private OperatorExpr operatorExpr;
 
-    public RuleImpl(SourceInfo sourceInfo, String name, ProjectionDecl varSpace,
+    public RuleImpl(SourceInfo sourceInfo, NamePart namePart, DatumProjectionExpr varSpace,
                     OperatorExpr operatorExpr)
     {
-        super(sourceInfo, name);
+        super(sourceInfo, namePart);
         this.varSpace = varSpace;
         this.operatorExpr = operatorExpr;
     }
 
-    public RuleImpl(SourceInfo sourceInfo, String name) {
-        super(sourceInfo, name);
+    public RuleImpl(SourceInfo sourceInfo, NamePart namePart) {
+        super(sourceInfo, namePart);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class RuleImpl extends NamedElement implements Rule {
     }
 
     @Override
-    public ProjectionDecl getVarSpace() {
+    public DatumProjectionExpr getVarSpace() {
         return varSpace;
     }
 

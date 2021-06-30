@@ -9,11 +9,12 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.NullValue;
-import org.jkcsoft.space.lang.instance.ScalarValue;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * @author Jim Coles
@@ -37,8 +38,8 @@ public abstract class PrimitiveTypeDefn extends AbstractTypeDefn {
     //
     //--------------------------------------------------------------------------
 
-    PrimitiveTypeDefn(SourceInfo sourceInfo, String name) {
-        super(sourceInfo, name);
+    PrimitiveTypeDefn(SourceInfo sourceInfo, NamePart namePart) {
+        super(sourceInfo, namePart);
     }
 
     @Override
@@ -52,17 +53,17 @@ public abstract class PrimitiveTypeDefn extends AbstractTypeDefn {
     }
 
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return true;
     }
 
     @Override
-    public boolean isComplexType() {
+    public boolean isComplex() {
         return false;
     }
 
     @Override
-    public boolean isSimpleType() {
+    public boolean isSimple() {
         return true;
     }
 
@@ -97,12 +98,7 @@ public abstract class PrimitiveTypeDefn extends AbstractTypeDefn {
     }
 
     @Override
-    public ContextDatumDefn addVariableDecl(VariableDecl variableDecl) {
-        return null;
-    }
-
-    @Override
-    public ContextDatumDefn addAssociationDecl(AssociationDefn associationDecl) {
+    public DatumDeclContext addVariableDecl(VariableDecl variableDecl) {
         return null;
     }
 
@@ -112,7 +108,7 @@ public abstract class PrimitiveTypeDefn extends AbstractTypeDefn {
     }
 
     @Override
-    public List<Declaration> getDatumDeclList() {
+    public List<DatumDecl> getDatumDeclList() {
         return null;
     }
 

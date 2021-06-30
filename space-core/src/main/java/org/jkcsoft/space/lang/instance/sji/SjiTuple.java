@@ -17,7 +17,7 @@ import org.jkcsoft.space.lang.instance.*;
  *
  * @author Jim Coles
  */
-public class SjiTuple extends AbstractTuple implements Tuple {
+public class SjiTuple extends AbstractTuple {
 
     private SjiTypeDefn sjiTypeDefn;
     // the wrapped element

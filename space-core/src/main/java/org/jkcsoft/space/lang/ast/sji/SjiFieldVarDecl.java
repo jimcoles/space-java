@@ -9,6 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
+import org.jkcsoft.space.lang.ast.NamePart;
 import org.jkcsoft.space.lang.ast.NativeSourceInfo;
 import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 
@@ -25,7 +26,10 @@ public class SjiFieldVarDecl extends SjiVarDecl implements SjiFieldBased {
     private NumPrimitiveTypeDefn spaceType;
 
     SjiFieldVarDecl(SjiService sjiService, SjiTypeDefn sjiTypeDefn, Field jField) {
-        super(sjiService, new NativeSourceInfo(jField), sjiTypeDefn, jField.getName());
+        super(sjiService,
+              new NativeSourceInfo(jField),
+              sjiTypeDefn,
+              sjiService.getAstFactory().newNamePart(new NativeSourceInfo(jField), jField.getName()));
         this.jField = jField;
     }
 

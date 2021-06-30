@@ -10,16 +10,16 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.instance.ScalarValue;
-import org.jkcsoft.space.lang.instance.Tuple;
 
 import java.util.Comparator;
 
 /**
- * A sequenced collection of objects.
+ * A sequenced collection of objects (scalar-valued or collection-valued).
  *
- * <p> So, with Space, the conventional notion of a character string is just a
+ * <p> In Space, the conventional notion of a character string is just a
  * Object Stream where type = 'char' and length=finite.
- *
+ * <p>Sequences are important because most storage systems are sequential at the
+ * hardware level. Space types </p>
  * @author Jim Coles
  */
 public class SequenceTypeDefn extends AbstractCollectionTypeDefn {
@@ -29,11 +29,13 @@ public class SequenceTypeDefn extends AbstractCollectionTypeDefn {
     public static final String COLL_SUFFIX = DELIM_OPEN + DELIM_CLOSING;
 
     SequenceTypeDefn(SourceInfo sourceInfo, TypeDefn containedElementType) {
-        super(sourceInfo, containedElementType.getName() + COLL_SUFFIX, containedElementType);
+        super(sourceInfo,
+              new NamePart(SourceInfo.INTRINSIC, containedElementType.getName() + COLL_SUFFIX),
+              containedElementType);
     }
 
     @Override
-    public boolean isComplexType() {
+    public boolean isComplex() {
         return false;
     }
 

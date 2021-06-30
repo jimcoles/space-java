@@ -15,7 +15,7 @@ package org.jkcsoft.space.lang.ast;
  * higher level notions can express operators from lower levels, e.g., vector
  * addition oper (+) defined in terms of real number addition.
  *
- * <p>Generally, the set of operators for a given type is all that are needed to
+ * <p>Generally, the set of operators for a given type is all that is needed to
  * express {@link Rule}s while maintaining "closure", i.e., the result of the
  * operator is of the same type, e.g., int + int yields an int.
  *

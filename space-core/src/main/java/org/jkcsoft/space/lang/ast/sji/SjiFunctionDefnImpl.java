@@ -9,10 +9,7 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
-import org.jkcsoft.space.lang.ast.AbstractFunctionDefn;
-import org.jkcsoft.space.lang.ast.TypeDefn;
-import org.jkcsoft.space.lang.ast.FunctionDefn;
-import org.jkcsoft.space.lang.ast.NativeSourceInfo;
+import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.runtime.SpaceX;
 
 import java.lang.reflect.Method;
@@ -30,8 +27,8 @@ public class SjiFunctionDefnImpl extends AbstractFunctionDefn implements Functio
     private boolean isReturnVoid;
     private SjiTypeRefByClass returnTypeRef;
 
-    SjiFunctionDefnImpl(SjiTypeDefn parentTypeDefn, Method jMethod, String name, SjiTypeRefByClass returnTypeRef) {
-        super(new NativeSourceInfo(jMethod), name);
+    SjiFunctionDefnImpl(SjiTypeDefn parentTypeDefn, Method jMethod, NamePart namePart, SjiTypeRefByClass returnTypeRef) {
+        super(new NativeSourceInfo(jMethod), namePart);
         this.sjiParentTypeDefn = parentTypeDefn;
         this.jMethod = jMethod;
         this.returnTypeRef = returnTypeRef;
@@ -45,6 +42,11 @@ public class SjiFunctionDefnImpl extends AbstractFunctionDefn implements Functio
     @Override
     public TypeDefn getReturnType() {
         return returnTypeRef.getResolvedType();
+    }
+
+    @Override
+    public DatumDecl getReturnAnonDecl() {
+        return null;
     }
 
     public Method getjMethod() {

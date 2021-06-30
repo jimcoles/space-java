@@ -11,8 +11,7 @@ package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.FunctionCallExpr;
 import org.jkcsoft.space.lang.ast.FunctionDefn;
-import org.jkcsoft.space.lang.ast.SpaceFunctionDefn;
-import org.jkcsoft.space.lang.runtime.StaticExeContext;
+import org.jkcsoft.space.lang.ast.FunctionDefnImpl;
 
 import java.util.LinkedList;
 import java.util.Stack;
@@ -45,12 +44,12 @@ public class FunctionCallContext extends AbstractExeContext implements ExeContex
         this.ctxObjects.push(ctxObject);
         this.argTuple = argTuple;
         FunctionDefn resolvedFunctionMetaObj = (FunctionDefn) callExpr.getFunctionRef().getResolvedMetaObj();
-        if (resolvedFunctionMetaObj instanceof SpaceFunctionDefn) {
+        if (resolvedFunctionMetaObj instanceof FunctionDefnImpl) {
             BlockContext rootBlockContext =
                 new BlockContext(this,
-                                 ((SpaceFunctionDefn) resolvedFunctionMetaObj).getStatementBlock(),
+                                 ((FunctionDefnImpl) resolvedFunctionMetaObj).getStatementBlock(),
                                  ObjectFactory.getInstance().newBlockDatumMap(
-                                     ((SpaceFunctionDefn) resolvedFunctionMetaObj).getStatementBlock()
+                                     ((FunctionDefnImpl) resolvedFunctionMetaObj).getStatementBlock()
                                  )
                 );
             addBlockContext(rootBlockContext);

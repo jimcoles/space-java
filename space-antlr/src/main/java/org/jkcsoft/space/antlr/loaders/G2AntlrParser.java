@@ -67,7 +67,7 @@ public class G2AntlrParser implements AstLoader {
     public DirLoadResults loadDir(File srcRootDir) throws IOException {
         log.info("Loading source in dir [" + srcRootDir.getAbsolutePath() + "]");
         DirLoadResults results = new DirLoadResults(srcRootDir);
-        Namespace tempNs = astFactory.newNamespace(null, "temp");
+        Namespace tempNs = astFactory.newNamespace(null,astFactory.newNamePart("temp"));
         Directory spcRootDir = tempNs.getRootDir();
         loadChildren(results, spcRootDir, srcRootDir);
         results.setSpaceRootDir(spcRootDir);
@@ -98,7 +98,7 @@ public class G2AntlrParser implements AstLoader {
     private void loadChildren(DirLoadResults dirResults, Directory spcContainerDir, File srcParentDir) throws IOException {
         for (File childFile : srcParentDir.listFiles()) {
             if (childFile.isDirectory()) {
-                Directory spcChildDir = astFactory.newAstDir(null, childFile.getName());
+                Directory spcChildDir = astFactory.newAstDir(null, astFactory.newNamePart(childFile.getName()));
                 // create new space container corresponding to arg src dir
                 spcContainerDir.addDir(spcChildDir);
                 // recurse to add children of arg src dir to new space container

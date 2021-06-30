@@ -10,17 +10,26 @@
 package org.jkcsoft.space.lang.ast;
 
 import java.util.List;
+import java.util.Set;
 
 /**
- * Structural elements:
+ * A View is a redundantly-maintained and usually denormalized look into a set of
+ * related basis objects in a Space.
+ *
+ * <p>Structural elements:
  * <ul>
- *     <li>Projection variables
- *     <li>Computed variables
+ *     <li>Simple Projection datums
+ *     <li>Computed datums
  * </ul>
  *
- * <p>A {@link ViewDefn} is a list of projection paths to variables that extend
- * from a base Type. A {@link ViewDefn} may also specify it's own variables
- * computed from base variables or other variables or constants.
+ * <p>Structurally, a {@link ViewDefn} is a list of datum slots along with a value-expression
+ * (a Rule) for deriving the datum value from other values in the Space. A {@link ViewDefn}.
+ *
+ * <p>While a View similar to a Type structurally, a View is NOT a Type and can not
+ * be used as a Type. The key difference is that a View's datums are
+ * derived. View datums can only be set directly if they map unambiguously to their
+ * underlying basic type. Also, the identity of a View tuple is
+ * inherited from the basis object behind the Tuple.</p>
  *
  * <p>Views have several uses:
  * <ul>
@@ -39,9 +48,6 @@ import java.util.List;
  *      <li>View tuples can represent object deltas (updates) for a given transaction.</li>
  * </ul>
  *
- * <p>A View is NOT a Type and can not be used as a Type although Views and Types share
- * a similar datum access structure, namely, Maps of named data.</p>
- *
  * <p>The following are specializations of a {@link ViewDefn}
  * <ul>
  *     <li>A Query is a possibly unnamed and often non-persistent view. Queries
@@ -50,27 +56,40 @@ import java.util.List;
  *     <li>A Tree is a View that traverses one or more 1-to-m associations
  *     extending from the basis Type. The simplest Tree is just a Type
  *     with a recursive 1-to-m relationship. More complex Trees, those
- *     involving various Types, require the declaration of which Associations
+ *     involving various Types, require the specification of which Associations
  *     constitute the parent-child Tree association.
  * </ul>
  *
  * <p>Every {@link org.jkcsoft.space.lang.instance.TupleSet} will have a
  * controlling {@link ViewDefn}.
  *
+ * <p>(Data) View Example:</p>
+ * <blockquote><pre>
+ * view PersonView {
+ * basis /Person,     // the basis type; all that is needed is a single type referenced by name
+ *    Person/homeAddress as addr,     // you may include related elements if you wish to alias
+ *    ./currentJob/address as workAddr
+ *
+ * projection      // i.e., the projection of the basis; the datums / coordinate system / dimensions of this view
+ *     // spreadsheet-like expressions
+ *     firstName,             // can ref by unqualified name if unambiguous
+ *     base/lastName,       // ref by qualified name
+ *     [base/]addr/areaCode,         // ref by alias
+ *     province/code,
+ *     yearlySalary = job/monthlySalary * 12, //
+ *     workAddr/*,              // all scalar-valued
+ *     note = "literal",        // literal values may be used?
+ *     string userComment       // view-unique var
+ *     ;
+ *
+ * selector // i.e., the filter, the 'selector' of an XSL rule or grammar production
+ *      addr.countryCode =
+ * }
+ * </pre></blockquote>
+ *
  * @author Jim Coles
  */
-public interface ViewDefn extends TypeDefn {
-
-    /** The basis Type may itself be a View. */
-    TypeDefn getBasisType();
-
-    /** Projections of basis type variables */
-    ViewDefn addProjectionDecl(ProjectionDecl projectionDecl);
-
-    List<ProjectionDecl> getProjectionDeclList();
-
-    /** A View may have a Selector Rule, aka., a Filter. */
-    Rule getSelector();
+public interface ViewDefn extends TypeDefn, ProjectionContext {
 
     /** Only m-to-1 associations (optionally, keys to use). No 1-to-m associations (which imply
      * a Tree, and no variables. */
@@ -85,5 +104,18 @@ public interface ViewDefn extends TypeDefn {
     boolean isTreeViewDefn();
 
     boolean isTableViewDefn();
+
+    /** The basis Type may itself be a View. */
+    TypeDefn getBasisType();
+
+    Set<TypeDefn> getProvidedInterfaces();
+
+    /** Projections of basis type variables and associations */
+    ViewDefn addProjectionDecl(DatumProjectionExpr datumProjectionExpr);
+
+    List<DatumProjectionExpr> getProjectionDeclList();
+
+    /** A View may have a Selector Rule, aka., a Filter. */
+    Rule getSelector();
 
 }

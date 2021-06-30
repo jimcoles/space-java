@@ -9,19 +9,17 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.PrimitiveTypeDefn;
 import org.jkcsoft.space.lang.ast.VariableDecl;
-import org.jkcsoft.space.lang.ast.VariableDeclImpl;
 
 /**
- * The value-level counterpart to a {@link VariableDeclImpl}.
+ * The value-level counterpart to a {@link VariableDecl}.
  * A {@link VariableValueHolder} contains a reference to its definition, a VariableDefn, and
  * zero or one {@link ScalarValue}s.
  */
 public class VariableValueHolder implements ValueHolder {
 
-    private DatumMap parentDatumMap;
     private VariableDecl declaration;
+    private DatumMap parentDatumMap;
     private ScalarValue scalarValue;
 
     public VariableValueHolder(DatumMap parentDatumMap, VariableDecl declaration, ScalarValue scalarValue) {
@@ -61,8 +59,9 @@ public class VariableValueHolder implements ValueHolder {
 
     @Override
     public String toString() {
-        return ((declaration != null) ?
-            "(" + declaration.getType().getName() + ")" + declaration.getName() + "=" : "(anon)")
+        return "Var Holder: " +((declaration != null) ?
+            "(" + declaration.getType().getNamePart() + ")"
+                + (declaration.hasName() ? declaration.getNamePart() : "(anon)") + "=" : "(no decl)")
             + (scalarValue != null ? scalarValue.toString() : "(not initialized)");
     }
 }

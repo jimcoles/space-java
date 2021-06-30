@@ -9,13 +9,13 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.Declaration;
-import org.jkcsoft.space.lang.ast.ProjectionDecl;
+import org.jkcsoft.space.lang.ast.DatumDecl;
 import org.jkcsoft.space.lang.ast.TypeDefn;
 
 /**
  * A {@link ValueHolder} for literals or expression eval results before being assigned to
- * declared datums.
+ * declared datums. A {@link DetachedHolder} has a type but not a name (anonymous).
+ *
  * @author Jim Coles
  */
 public class DetachedHolder<V extends Value<J>, J> implements ValueHolder<V, J> {
@@ -29,7 +29,7 @@ public class DetachedHolder<V extends Value<J>, J> implements ValueHolder<V, J> 
     }
 
     @Override
-    public Declaration getDeclaration() {
+    public DatumDecl getDeclaration() {
         return null;
     }
 
@@ -51,5 +51,10 @@ public class DetachedHolder<V extends Value<J>, J> implements ValueHolder<V, J> 
     @Override
     public V getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return "Detached Holder: " + "(" + type + ")(anon)=" + value;
     }
 }

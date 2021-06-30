@@ -25,9 +25,9 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public class MetaRefPath {
+public class MetaRefPath<T extends Named> {
 
-    private ExpressionChain parentChain;
+    private final ExpressionChain<T> parentChain;
     private LinkedList<MetaRef> links = new LinkedList<>();
 
     MetaRefPath(ExpressionChain parentChain) {
@@ -42,11 +42,11 @@ public class MetaRefPath {
         return links;
     }
 
-    public Named getResolvedMetaObj() {
+    public T getResolvedMetaObj() {
         return getLastLink().getResolvedMetaObj();
     }
 
-    public MetaRef getLastLink() {
+    public MetaRef<T> getLastLink() {
         return links.getLast();
     }
 

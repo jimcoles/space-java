@@ -1,0 +1,5 @@
+package space.model;
+
+type TypeDefn extends ModelElement {
+
+}

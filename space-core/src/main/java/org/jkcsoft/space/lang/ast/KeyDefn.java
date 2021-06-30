@@ -36,10 +36,6 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public interface KeyDefn extends Named {
-
-    TypeDefn getBasisTypeDefn();
-
-    List<ProjectionDecl> getProjectionDeclList();
+public interface KeyDefn extends ViewDefn {
 
 }

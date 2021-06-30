@@ -14,10 +14,10 @@ package org.jkcsoft.space.lang.ast;
  */
 public class NewTupleExpr extends AbstractModelElement implements ValueExpr {
 
-    private TypeRefImpl typeRef;
+    private TypeRef typeRef;
     private TupleValueList tupleValueList;
 
-    public NewTupleExpr(SourceInfo sourceInfo, TypeRefImpl typeRef, TupleValueList tupleValueList) {
+    public NewTupleExpr(SourceInfo sourceInfo, TypeRef typeRef, TupleValueList tupleValueList) {
         super(sourceInfo);
         this.typeRef = typeRef;
         this.tupleValueList = tupleValueList;
@@ -28,7 +28,7 @@ public class NewTupleExpr extends AbstractModelElement implements ValueExpr {
         addChild(tupleValueList);
     }
 
-    public TypeRefImpl getTypeRef() {
+    public TypeRef getTypeRef() {
         return typeRef;
     }
 
@@ -38,7 +38,7 @@ public class NewTupleExpr extends AbstractModelElement implements ValueExpr {
 
     @Override
     public TypeDefn getDatumType() {
-        return typeRef.getDatumType();
+        return typeRef.getResolvedType();
     }
 
     @Override

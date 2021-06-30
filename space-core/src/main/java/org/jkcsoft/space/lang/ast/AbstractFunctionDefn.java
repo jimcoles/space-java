@@ -20,11 +20,11 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 public abstract class AbstractFunctionDefn extends NamedElement implements FunctionDefn, SolutionExpr {
 
     private Rule governingEquation; // TODO
-    private TypeDefn argSpaceTypeDefn;
+    private TypeDefn argumentsDefn;
 
-    protected AbstractFunctionDefn(SourceInfo sourceInfo, String name)
+    protected AbstractFunctionDefn(SourceInfo sourceInfo, NamePart namePart)
     {
-        super(sourceInfo, name);
+        super(sourceInfo, namePart);
     }
 
     @Override
@@ -32,15 +32,15 @@ public abstract class AbstractFunctionDefn extends NamedElement implements Funct
         return MetaType.FUNCTION;
     }
 
-    public void setArgSpaceTypeDefn(TypeDefn argSpaceTypeDefn) {
-        this.argSpaceTypeDefn = argSpaceTypeDefn;
-        this.argSpaceTypeDefn.setGroupingNode(true);
+    public void setArgumentsDefn(TypeDefn argumentsDefn) {
+        this.argumentsDefn = argumentsDefn;
+        this.argumentsDefn.setGroupingNode(true);
         //
-        addChild(argSpaceTypeDefn);
+        addChild(argumentsDefn);
     }
 
-    public TypeDefn getArgSpaceTypeDefn() {
-        return argSpaceTypeDefn;
+    public TypeDefn getArgumentsDefn() {
+        return argumentsDefn;
     }
 
     public Rule getGoverningEquation() {

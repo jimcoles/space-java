@@ -20,6 +20,8 @@ public interface Named extends Identified {
 
     boolean hasName();
 
+    NamePart getNamePart();
+
     String getName();
 
     List<String> getFullNamePath();

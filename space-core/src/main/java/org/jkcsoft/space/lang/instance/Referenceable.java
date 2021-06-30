@@ -10,6 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 /**
+ *
  * @author Jim Coles
  */
 public interface Referenceable {

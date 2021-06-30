@@ -22,7 +22,8 @@ import java.util.Set;
  * dot (".") separated expression. After the linking and
  * semantic analysis phases, a valid Expression Chain is then broken into some combination
  * of a MetaRefPath and a ValueExprChain depending on the syntactic context (possible
- * meta types of the element referenced) and actual type of the resolved element.
+ * meta types of the element referenced) and actual type of the resolved elements
+ * in the raw Expression Chain.
  *
  * Holds either:
  *
@@ -52,64 +53,71 @@ import java.util.Set;
  */
 public class ExpressionChain<T extends Named> extends AbstractModelElement implements ValueExpr {
 
-    private SimpleNameRefExpr nsRefPart;
+    private SimpleNameRefExpr<Namespace> nsRefPart;
     // The primary chain representation: a list of LinkSource's
-    private LinkedList<LinkSource> allLinks = new LinkedList<>();
+    private final LinkedList<LinkSource> allLinks = new LinkedList<>();
     //
     // Redundantly extracted views of the exprLinks:
     private List<NameRefOrHolder> restLinks = new LinkedList<>();
     private MetaRefPath metaRefPath;
     private ValueExprChain valueExprChain;
     //
-    private MetaType targetMetaType; // some chains have a known target mtype based on syntax
+    private MetaType targetMetaType; // some chains have a known target meta type based on syntax
     private LinkSource firstExpr;
     private boolean isImportMatch = false;  // only relevant if this chain is a type ref or other static ref
     private TypeCheckState typeCheckState = TypeCheckState.UNCHECKED;
     private AstLoadError loadError;
 
+    public ExpressionChain() {
+        super(SourceInfo.API);
+    }
+
+    ExpressionChain(SourceInfo sourceInfo) {
+        super(sourceInfo);
+    }
 
     ExpressionChain(SourceInfo sourceInfo, MetaType targetMetaType) {
         super(sourceInfo);
         this.targetMetaType = targetMetaType;
     }
 
-    /** For use by API access when referenced type object is known. */
+    /** For use via AST builder API when referenced type object is known. */
+    ExpressionChain(TypeDefn typeDefn) {
+        this(SourceInfo.API, typeDefn);
+    }
+
     ExpressionChain(SourceInfo sourceInfo, TypeDefn typeDefn) {
         this(sourceInfo, MetaType.TYPE);
 
         SimpleNameRefExpr<TypeDefn> firstPart =
-            new SimpleNameRefExpr<>(new NamePartExpr(sourceInfo, true, null, typeDefn.getName()));
+            new SimpleNameRefExpr<>(new NamePartExpr(SourceInfo.INTRINSIC, true, null, typeDefn.getName()));
         AstUtils.checkSetResolve(firstPart, typeDefn, null);
         this.typeCheckState = TypeCheckState.VALID;
         //
         this.addNextPart(firstPart);
     }
 
-    /** For use when referenced type object is known. */
-    ExpressionChain(SourceInfo sourceInfo, Declaration datumDecl, ScopeKind scopeKind) {
-        this(sourceInfo, MetaType.DATUM);
-        SimpleNameRefExpr<Declaration> firstPart =
-            new SimpleNameRefExpr<>(new NamePartExpr(sourceInfo, false, null, datumDecl.getName()));
+    /** For use via AST builder API when referenced type object is known. */
+    ExpressionChain(DatumDecl datumDecl, ScopeKind scopeKind) {
+        this(SourceInfo.API, MetaType.DATUM);
+        SimpleNameRefExpr<DatumDecl> firstPart =
+            new SimpleNameRefExpr<>(new NamePartExpr(SourceInfo.API, false, null, datumDecl.getName()));
         AstUtils.checkSetResolve(firstPart, datumDecl, scopeKind);
         this.typeCheckState = TypeCheckState.VALID;
         //
         this.addNextPart(firstPart);
     }
 
-    public ExpressionChain() {
-        super(new ProgSourceInfo());
-    }
-
     public boolean hasNs() {
         return nsRefPart != null;
     }
 
-    public ExpressionChain setNsRefPart(SimpleNameRefExpr nsRefPart) {
+    public ExpressionChain<T> setNsRefPart(SimpleNameRefExpr<Namespace> nsRefPart) {
         this.nsRefPart = nsRefPart;
         return this;
     }
 
-    public SimpleNameRefExpr getNsRefPart() {
+    public SimpleNameRefExpr<Namespace> getNsRefPart() {
         return nsRefPart;
     }
 
@@ -122,6 +130,21 @@ public class ExpressionChain<T extends Named> extends AbstractModelElement imple
         allLinks.add(nextPart);
         //
         addChild(nextPart);
+    }
+
+    /** AST builder API */
+    public void addPath(ScopeKind firstRefScopeKind, DatumDecl ... datumPath) {
+        AstFactory ast = AstFactory.getInstance();
+        boolean first = true;
+        for (DatumDecl datumDecl : datumPath) {
+            SimpleNameRefExpr<DatumDecl> pathPart = ast.newNameRefExpr(
+                new NamePartExpr(SourceInfo.API, false, null, datumDecl.getName())
+            );
+            AstUtils.checkSetResolve(pathPart, datumDecl, first ? firstRefScopeKind : ScopeKind.OBJECT);
+            addNextPart(pathPart);
+            first = false;
+        }
+        setTypeCheckState(TypeCheckState.VALID);
     }
 
     public boolean isImportRef() {
@@ -179,7 +202,7 @@ public class ExpressionChain<T extends Named> extends AbstractModelElement imple
     }
 
     private MetaRef<T> getLastMetaRefLink() {
-        return asMetaRefPath().getLastLink();
+        return extractMetaRefPath().getLastLink();
     }
 
     public boolean isImportMatch() {
@@ -271,7 +294,7 @@ public class ExpressionChain<T extends Named> extends AbstractModelElement imple
 
     // TODO Add validation: meta path must start at first position
     //      and be contiguous
-    public MetaRefPath asMetaRefPath() {
+    public MetaRefPath extractMetaRefPath() {
 //        if (!isResolved())
 //            throw new IllegalStateException("chain expression not fully resolved");
 

@@ -334,7 +334,7 @@ public class AstUtils {
             }
             else {
                 ns = nsRegistry.getNamespace(reference.getNsRefPart().getNameExprText());
-                checkSetResolve(reference.getNsRefPart(), ns, null);
+                checkSetResolve(reference.getNsRefPart(), ns, ScopeKind.GLOBAL);
             }
         }
         else
@@ -412,7 +412,7 @@ public class AstUtils {
     }
 
     private static MetaRef getParentRefPart(TypeRefImpl fullRef) {
-        List<MetaRef> pathParts = fullRef.asMetaRefPath().getLinks();
+        List<MetaRef> pathParts = fullRef.extractMetaRefPath().getLinks();
         return pathParts.get(pathParts.size() - 2);
     }
 
@@ -456,7 +456,7 @@ public class AstUtils {
         if (context instanceof StatementBlock
             /* && context.getNamedParent() instanceof FunctionDefn */)
             scopeKind = ScopeKind.BLOCK;
-        else if (context instanceof SpaceFunctionDefn)
+        else if (context instanceof FunctionDefnImpl)
             scopeKind = ScopeKind.BLOCK;
         else if (context instanceof TypeDefnImpl)
             scopeKind = ScopeKind.OBJECT;
@@ -570,7 +570,7 @@ public class AstUtils {
         Directory subDir = null;
         if (parentDir.hasChildDirs()) {
             for (Directory directory : parentDir.getChildDirectories()) {
-                if (directory.getName().equals(name)) {
+                if (directory.getNamePart().equals(name)) {
                     subDir = directory;
                     break;
                 }
@@ -586,18 +586,24 @@ public class AstUtils {
         return astQueryAction.getResults();
     }
 
+    /**
+     * TODO I don't like the idea of creating an AST element without the 'source'.
+     * This 'ensure' approach should likely be replaced by 'reference to dir' and
+     * later resolved against dir structure created from source dirs (or library dirs).
+     */
     public static Directory ensureDir(Directory nsRootDir, String[] classNameParts) {
         if (!nsRootDir.isRootDir())
             throw new IllegalArgumentException("specified dir must be a namespace root: [" + nsRootDir + "]");
 
         Directory leafDir = nsRootDir;
-        for (int idxName = 0; idxName < classNameParts.length; idxName++) {
-            String name = classNameParts[idxName];
+        for (String name : classNameParts) {
             if (contains(leafDir, name)) {
                 leafDir = leafDir.getChildDir(name);
             }
             else {
-                leafDir = leafDir.addDir(getAstFactory().newAstDir(new ProgSourceInfo(), name));
+                leafDir = leafDir.addDir(
+                    getAstFactory().newAstDir(SourceInfo.API, getAstFactory().newNamePart(SourceInfo.API, name))
+                );
                 log.trace("created new Space dir [" + leafDir + "]");
             }
         }
@@ -610,16 +616,9 @@ public class AstUtils {
     }
 
     public static boolean isJavaNs(NSRegistry nsRegistry, ImportExpr importExpr) {
-        SimpleNameRefExpr nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
+        SimpleNameRefExpr<Namespace> nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
         return nsRefPart != null
-            && nsRefPart.getNameExprText().equals(nsRegistry.getJavaNs().getName());
-    }
-
-    public static void addNewMetaRefParts(ExpressionChain parentPath, SourceInfo sourceInfo, String... nameExprs) {
-        for (String nameExpr : nameExprs) {
-            parentPath.addNextPart(getAstFactory().newNameRefExpr(sourceInfo, nameExpr));
-        }
-        return;
+            && nsRefPart.getNameExprText().equals(nsRegistry.getJavaNs().getNamePart().getText());
     }
 
     public static TypeDefn larger(TypeDefn type1, TypeDefn type2) {
@@ -902,7 +901,7 @@ public class AstUtils {
             AstScopeCollection theColl = new AstScopeCollection("Imports");
             FunctionDefn funcDefn = findParentFunctionDefn(theRefChain);
             if (funcDefn != null)
-                theColl.add(new StaticScope(theColl, funcDefn.getArgSpaceTypeDefn(), ScopeKind.OBJECT));
+                theColl.add(new StaticScope(theColl, funcDefn.getArgumentsDefn(), ScopeKind.OBJECT));
             //
             return theColl;
         }
@@ -911,8 +910,8 @@ public class AstUtils {
             AstScopeCollection theColl = new AstScopeCollection("Tuple Type");
             NewTupleExpr newTupleExpr = findParentNewTupleExpr(theRefChain);
             if (newTupleExpr != null) {
-                TypeRefImpl typeRef = newTupleExpr.getTypeRef();
-                if (typeRef.isResolved()) {
+                TypeRef typeRef = newTupleExpr.getTypeRef();
+                if (typeRef.hasResolvedType()) {
                     theColl.add(new StaticScope(theColl, typeRef.getResolvedType(), ScopeKind.OBJECT));
                 }
                 else {

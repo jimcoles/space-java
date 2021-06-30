@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.DatumDecl;
 
 import java.util.List;
 
@@ -20,11 +20,11 @@ public interface DatumMap {
 
     void initHolder(ValueHolder valueHolder);
 
-    DatumMap setValue(Declaration spaceDecl, Value value);
+    DatumMap setValue(DatumDecl spaceDecl, Value value);
 
     DatumMap setValue(int idx, Value value);
 
-    ValueHolder get(Declaration member);
+    ValueHolder get(DatumDecl member);
 
     List<ValueHolder> getValueHolders();
 

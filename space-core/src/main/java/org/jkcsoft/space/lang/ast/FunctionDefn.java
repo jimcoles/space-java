@@ -14,11 +14,16 @@ package org.jkcsoft.space.lang.ast;
  */
 public interface FunctionDefn extends Named {
 
+    /** If true, indicates that the function is not evaluated by the Space executor but rather
+     * by some external subsystem, usual the Java VM. */
     boolean isOpaque();
 
-    TypeDefn getArgSpaceTypeDefn();
+    TypeDefn getArgumentsDefn();
 
     boolean isReturnVoid();
 
     TypeDefn getReturnType();
+
+    DatumDecl getReturnAnonDecl();
+
 }

@@ -19,15 +19,15 @@ import java.util.Set;
 /**
  * @author Jim Coles
  */
-public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implements CollectionType {
+public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implements CollectionTypeDefn {
 
     private final TypeDefn containedElementType;
 
     protected AbstractCollectionTypeDefn(SourceInfo sourceInfo,
-                                         String name,
+                                         NamePart namePart,
                                          TypeDefn containedElementType)
     {
-        super(sourceInfo, name);
+        super(sourceInfo, namePart);
         this.containedElementType = containedElementType;
     }
 
@@ -56,18 +56,13 @@ public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implem
     }
 
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return false;
     }
 
     @Override
-    public ContextDatumDefn addVariableDecl(VariableDecl variableDecl) {
+    public DatumDeclContext addVariableDecl(VariableDecl variableDecl) {
         return containedElementType.addVariableDecl(variableDecl);
-    }
-
-    @Override
-    public ContextDatumDefn addAssociationDecl(AssociationDefn associationDecl) {
-        return containedElementType.addAssociationDecl(associationDecl);
     }
 
     @Override
@@ -76,7 +71,7 @@ public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implem
     }
 
     @Override
-    public List<Declaration> getDatumDeclList() {
+    public List<DatumDecl> getDatumDeclList() {
         return containedElementType.getDatumDeclList();
     }
 
@@ -96,12 +91,12 @@ public abstract class AbstractCollectionTypeDefn extends AbstractTypeDefn implem
      * a simple type.
      */
     @Override
-    public boolean isSimpleType() {
+    public boolean isSimple() {
         return false;
     }
 
     @Override
-    public boolean isComplexType() {
+    public boolean isComplex() {
         return false;
     }
 

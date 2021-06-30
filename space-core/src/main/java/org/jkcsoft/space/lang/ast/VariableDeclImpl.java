@@ -10,28 +10,25 @@
 
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.instance.ScalarValue;
+import org.jkcsoft.space.lang.ast.sji.SjiVarDecl;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
-import java.util.Comparator;
-
 /**
- * Meta-level element of a VariableValueHolder. Declares a named 'usage' of
- * a Primitive by a Type.
+ * The implementation for {@link VariableDecl} which is a specialization of
+ * {@link DatumDecl}.
  *
+ * @see DatumProjectionImpl
+ * @see SjiVarDecl
  * @author Jim Coles
  * @version 1.0
  */
-public class VariableDeclImpl extends NamedElement implements VariableDecl {
+public class VariableDeclImpl extends AbstractDatumDecl implements VariableDecl {
 
-    private TypeRef typeRef;
+    private FromAssocEnd assocEnd;
     private Comparators.DatumTupleComparator datumComparator;
 
-    VariableDeclImpl(SourceInfo sourceInfo, String name, TypeRef typeRef) {
-        super(sourceInfo, name);
-        this.typeRef = typeRef;
-        //
-        addChild(((AbstractModelElement) typeRef));
+    VariableDeclImpl(SourceInfo sourceInfo, DatumDeclContext declContext, NamePart namePart, TypeRef datumTypeRef) {
+        super(sourceInfo, declContext, namePart, datumTypeRef);
     }
 
     @Override
@@ -39,18 +36,18 @@ public class VariableDeclImpl extends NamedElement implements VariableDecl {
         return MetaType.DATUM;
     }
 
-    @Override
-    public NumPrimitiveTypeDefn getType() {
-        return ((NumPrimitiveTypeDefn) typeRef.getResolvedType());
+    public void setAssocEnd(FromAssocEnd assocEnd) {
+        this.assocEnd = assocEnd;
     }
 
     @Override
-    public boolean isAssoc() {
-        return false;
+    public AssociationEnd getAssocEnd() {
+        return assocEnd;
     }
 
-    public void setType(TypeRef typeRef) {
-        this.typeRef = typeRef;
+    @Override
+    public boolean hasAssoc() {
+        return assocEnd != null;
     }
 
     @Override
@@ -58,16 +55,6 @@ public class VariableDeclImpl extends NamedElement implements VariableDecl {
         if (datumComparator == null)
             datumComparator = Comparators.buildDatumComparator(this);
         return datumComparator;
-    }
-
-    @Override
-    public AliasedMetaRef getBasisTypeRef() {
-        return null;
-    }
-
-    @Override
-    public AliasedMetaRef getTypeGraphRef() {
-        return null;
     }
 
 }

@@ -20,6 +20,9 @@ public class ParseUnit extends AbstractModelElement {
     private Set<TypeDefn> allImportedTypes = null;
 
     private List<TypeDefn> typeDefns = new LinkedList<>();
+    private List<AssociationDefn> assocs = new LinkedList<>();
+    private List<Rule> rules = new LinkedList<>();
+
     private IntrinsicContainer importedTypeContainer;
 
     ParseUnit(SourceInfo sourceInfo) {
@@ -68,17 +71,19 @@ public class ParseUnit extends AbstractModelElement {
     public TypeDefn addTypeDefn(TypeDefn spaceTypeDefn) {
         typeDefns.add(spaceTypeDefn);
         //
-        addChild((NamedElement) spaceTypeDefn);
+        addChild(spaceTypeDefn);
         return spaceTypeDefn;
-    }
-
-    public StreamTypeDefn addStreamTypeDefn(StreamTypeDefn streamTypeDefn) {
-        addChild(streamTypeDefn);
-        return streamTypeDefn;
     }
 
     public List<TypeDefn> getTypeDefns() {
         return typeDefns;
+    }
+
+    public AssociationDefn addAssociationDefn(AssociationDefn associationDefn) {
+        assocs.add(associationDefn);
+        //
+        addChild(associationDefn);
+        return associationDefn;
     }
 
     public ModelElement getImportedTypeContainer() {

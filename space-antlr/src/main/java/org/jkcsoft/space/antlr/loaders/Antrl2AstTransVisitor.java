@@ -174,13 +174,13 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<ModelElement> 
 
     @Override
     public ModelElement visitParseUnit(SpaceParser.ParseUnitContext ctx) {
-        currentNode = astFactory.newProgram(null, "visitor program");
+        currentNode = astFactory.newProgram(null, astFactory.newNamePart("visitor program"));
         return super.visitParseUnit(ctx);
     }
 
     @Override
     public ModelElement visitParseUnitRelational(SpaceParser.ParseUnitRelationalContext ctx) {
-        currentNode = astFactory.newProgram(null, "visitor program");
+        currentNode = astFactory.newProgram(null, astFactory.newNamePart("visitor program"));
         return super.visitParseUnitRelational(ctx);
     }
 
@@ -238,11 +238,6 @@ public class Antrl2AstTransVisitor extends SpaceParserBaseVisitor<ModelElement> 
     @Override
     public ModelElement visitAssociationDefn(SpaceParser.AssociationDefnContext ctx) {
         return super.visitAssociationDefn(ctx);
-    }
-
-    @Override
-    public ModelElement visitAssociationDecl(SpaceParser.AssociationDeclContext ctx) {
-        return super.visitAssociationDecl(ctx);
     }
 
     @Override

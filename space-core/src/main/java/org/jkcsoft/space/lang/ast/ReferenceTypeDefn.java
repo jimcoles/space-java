@@ -19,10 +19,12 @@ import java.util.Comparator;
  */
 public class ReferenceTypeDefn extends PrimitiveTypeDefn {
 
-    public static ReferenceTypeDefn REF_TYPE_DEFN = new ReferenceTypeDefn(SourceInfo.INTRINSIC, "reference");
+    public static ReferenceTypeDefn REF_TYPE_DEFN = new ReferenceTypeDefn(
+        SourceInfo.INTRINSIC, new NamePart(SourceInfo.INTRINSIC, "reference")
+    );
 
-    private ReferenceTypeDefn(SourceInfo sourceInfo, String name) {
-        super(sourceInfo, name);
+    private ReferenceTypeDefn(SourceInfo sourceInfo, NamePart namePart) {
+        super(sourceInfo, namePart);
     }
 
     @Override

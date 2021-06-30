@@ -9,10 +9,10 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
-import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.DatumDecl;
 
 /**
  * @author Jim Coles
  */
-public interface SjiDeclaration extends Declaration {
+public interface SjiDeclaration extends DatumDecl {
 }

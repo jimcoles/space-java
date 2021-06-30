@@ -14,7 +14,7 @@ package org.jkcsoft.space.lang.ast;
  *
  * @author Jim Coles
  */
-public class NamePart extends AbstractModelElement {
+public class NamePart extends AbstractModelElement implements Comparable<NamePart> {
 
     private String text;
 
@@ -25,5 +25,10 @@ public class NamePart extends AbstractModelElement {
 
     public String getText() {
         return text;
+    }
+
+    @Override
+    public int compareTo(NamePart o) {
+        return text.compareTo(o.getText());
     }
 }

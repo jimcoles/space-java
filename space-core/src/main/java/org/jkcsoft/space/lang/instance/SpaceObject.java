@@ -21,7 +21,7 @@ import org.jkcsoft.space.lang.ast.*;
  *
  * @author Jim Coles
  */
-public interface SpaceObject {
+public interface SpaceObject extends Referenceable {
 
     /**
      * In general, every object has constraints defining what it is and what it can relate to.
@@ -35,11 +35,5 @@ public interface SpaceObject {
     boolean isCollective();
 
     boolean isTuple();
-
-    /**
-     * Every object can hold some kind of value which may be a reference to another object.
-     * the nature of valid objects is controlled by the {@link TypeDefn} of this object.
-     */
-//    SpaceObject addObject(ValueHolder node);
 
 }

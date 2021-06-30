@@ -19,17 +19,10 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public class KeyDefnImpl extends NamedElement implements KeyDefn {
+public class KeyDefnImpl extends ViewDefnImpl implements KeyDefn {
 
-    private TypeDefn basisTypeDefn;
-    private List<ProjectionDecl> projectionDeclList = new LinkedList<>();
-
-    protected KeyDefnImpl(SourceInfo sourceInfo, String name, TypeDefn basisTypeDefn, ProjectionDecl ... projectionVars) {
-        super(sourceInfo, name);
-        this.basisTypeDefn = basisTypeDefn;
-        for (ProjectionDecl projectionDecl : projectionVars) {
-            addProjectionDecl(projectionDecl);
-        }
+    protected KeyDefnImpl(SourceInfo sourceInfo, NamePart namePart, TypeDefn basisTypeDefn) {
+        super(sourceInfo, namePart, basisTypeDefn);
     }
 
     @Override
@@ -37,17 +30,4 @@ public class KeyDefnImpl extends NamedElement implements KeyDefn {
         return MetaType.TYPE;
     }
 
-    @Override
-    public TypeDefn getBasisTypeDefn() {
-        return basisTypeDefn;
-    }
-
-    private void addProjectionDecl(ProjectionDecl projectionDecl) {
-        projectionDeclList.add(projectionDecl);
-    }
-
-    @Override
-    public List<ProjectionDecl> getProjectionDeclList() {
-        return projectionDeclList;
-    }
 }

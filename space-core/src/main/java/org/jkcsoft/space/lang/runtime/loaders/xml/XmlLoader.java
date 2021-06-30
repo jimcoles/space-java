@@ -11,6 +11,7 @@ package org.jkcsoft.space.lang.runtime.loaders.xml;
 
 import org.jkcsoft.space.lang.ast.AstFactory;
 import org.jkcsoft.space.lang.ast.Directory;
+import org.jkcsoft.space.lang.ast.SourceInfo;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -74,12 +75,11 @@ public class XmlLoader extends DefaultHandler {
 
         SAXParserFactory spf = SAXParserFactory.newInstance();
         SAXParser parser = spf.newSAXParser();
-        _program = astFactory.newProgram(null, "");
+        _program = astFactory.newProgram(null, astFactory.newNamePart(SourceInfo.API, ""));
 
         parser.parse(_in, this);
 
         return _program;
     }
-
 
 }

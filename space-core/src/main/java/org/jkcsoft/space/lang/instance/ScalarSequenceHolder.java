@@ -21,9 +21,9 @@ public class ScalarSequenceHolder<T extends ScalarValue> implements ValueHolder 
 
     private VariableDecl declaration;
     private Tuple parentTuple;
-    private BinarySequence<T> primSeqValue;
+    private ScalarValueSequence<T> primSeqValue;
 
-    public ScalarSequenceHolder(Tuple parentTuple, VariableDecl declaration, BinarySequence scalarValue) {
+    public ScalarSequenceHolder(Tuple parentTuple, VariableDecl declaration, ScalarValueSequence scalarValue) {
         this.parentTuple = parentTuple;
         this.declaration = declaration;
         this.primSeqValue = scalarValue;
@@ -38,11 +38,11 @@ public class ScalarSequenceHolder<T extends ScalarValue> implements ValueHolder 
         return declaration;
     }
 
-    public void setPrimSeqValue(BinarySequence<T> primSeqValue) {
+    public void setPrimSeqValue(ScalarValueSequence<T> primSeqValue) {
         this.primSeqValue = primSeqValue;
     }
 
-    public BinarySequence getPrimSeqValue() {
+    public ScalarValueSequence getPrimSeqValue() {
         return primSeqValue;
     }
 
@@ -53,7 +53,7 @@ public class ScalarSequenceHolder<T extends ScalarValue> implements ValueHolder 
 
     @Override
     public void setValue(Value value) {
-        this.primSeqValue = (BinarySequence) value;
+        this.primSeqValue = (ScalarValueSequence) value;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class ScalarSequenceHolder<T extends ScalarValue> implements ValueHolder 
 
     @Override
     public String toString() {
-        return ((declaration != null) ? declaration.getName() + "=" : "(anon)")
+        return ((declaration != null) ? declaration.getNamePart() + "=" : "(anon)")
             + (primSeqValue != null ? primSeqValue.toString() : "(not initialized)");
     }
 }

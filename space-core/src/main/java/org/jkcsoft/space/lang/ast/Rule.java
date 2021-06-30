@@ -31,14 +31,14 @@ import org.jkcsoft.space.lang.instance.Space;
  * of activating/deactivating Rules dynamically.
  *
  * <p>Rules might end up being just the declarative view of a program's expression set. The other
- * view would be the action / statement / imperative sequence view.
+ * view would be the action sequence / statement / imperative view.
  *
  * <p>Structurally, a {@link Rule} is just a {@link Named} boolean-valued {@link OperatorExpr} that
- * must evaluate to true. A Rule may also define a variable {@link ProjectionDecl} as a
+ * must evaluate to true. A Rule may also define a variable {@link DatumProjectionExpr} as a
  * means of limiting its scope at compile-time.
  *
  * <p>Sub-types and usages:<ul>
- * <li>A {@link ViewDefn} (and therefore, Query) uses Rules to represent its selection criteria.
+ * <li>A {@link ViewDefn} (and Query) uses Rules to represent its selection criteria.
  * </ul>
  *
  * @author Jim Coles
@@ -49,7 +49,7 @@ public interface Rule extends Named {
 
     Space getScopeSpace();
 
-    ProjectionDecl getVarSpace();
+    DatumProjectionExpr getVarSpace();
 
     OperatorExpr getOperatorExpr();
 

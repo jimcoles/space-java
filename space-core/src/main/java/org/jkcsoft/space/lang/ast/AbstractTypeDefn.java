@@ -30,7 +30,7 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     //
     private List<StatementBlock> statementSequence = new LinkedList<>();  // child statements
     //
-    private List<Declaration> datumDeclList;
+    private List<DatumDecl> datumDeclList;
     //
     private List<VariableDecl> variablesDeclList;
     private List<AssociationDefn> associationDeclList;
@@ -40,12 +40,12 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     private SequenceTypeDefn sequenceTypeDefn;
     private SetTypeDefn setTypeDefn;
 
-    protected AbstractTypeDefn(SourceInfo sourceInfo, String name) {
-        this(sourceInfo, name, false);
+    protected AbstractTypeDefn(SourceInfo sourceInfo, NamePart namePart) {
+        this(sourceInfo, namePart, false);
     }
 
-    protected AbstractTypeDefn(SourceInfo sourceInfo, String name, boolean isView) {
-        super(sourceInfo, name);
+    protected AbstractTypeDefn(SourceInfo sourceInfo, NamePart namePart, boolean isView) {
+        super(sourceInfo, namePart);
         this.isView = isView;
         datumDeclList = new LinkedList<>();
         variablesDeclList = new LinkedList<>();
@@ -62,7 +62,7 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     //
 
     @Override
-    public ContextDatumDefn addVariableDecl(VariableDecl variableDecl) {
+    public DatumDeclContext addVariableDecl(VariableDecl variableDecl) {
         elementSequence.add(variableDecl);
         datumDeclList.add(variableDecl);
         variablesDeclList.add(variableDecl);
@@ -77,25 +77,13 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
         return variablesDeclList;
     }
 
-    @Override
-    public ContextDatumDefn addAssociationDecl(AssociationDefn associationDecl) {
-        elementSequence.add(associationDecl);
-        datumDeclList.add(associationDecl);
-        associationDeclList.add(associationDecl);
-        //
-        addChild(associationDecl);
-        //
-        return this;
-    }
-
-
-    public List<Declaration> getDatumDeclList() {
+    public List<DatumDecl> getDatumDeclList() {
         return datumDeclList;
     }
 
     @Override
-    public Declaration getDatum(String name) {
-        return (Declaration) getNamedChildMap().get(name);
+    public DatumDecl getDatum(String name) {
+        return (DatumDecl) getNamedChildMap().get(name);
     }
 
     @Override
@@ -104,7 +92,7 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
     }
 
     @Override
-    public ContextDatumDefn addInitExpression(ExprStatement<AssignmentExpr> assignmentExpr) {
+    public DatumDeclContext addInitExpression(ExprStatement<AssignmentExpr> assignmentExpr) {
         elementSequence.add(assignmentExpr);
         datumInits.add(assignmentExpr);
         addChild(assignmentExpr);
@@ -132,31 +120,31 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
         return functionDefns;
     }
 
-    public SpaceFunctionDefn getFunction(String name) {
+    public FunctionDefnImpl getFunction(String name) {
 
         NamedElement childWithName = getChildByName(name);
 
         if (childWithName == null)
             throw new SpaceX("function [" + name + "] not found in " + this);
 
-        if (!(childWithName instanceof SpaceFunctionDefn))
+        if (!(childWithName instanceof FunctionDefnImpl))
             throw new SpaceX("reference meta object [" + childWithName + "] is not a function");
 
-        return (SpaceFunctionDefn) childWithName;
+        return (FunctionDefnImpl) childWithName;
     }
 
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return false;
     }
 
     @Override
-    public boolean isComplexType() {
+    public boolean isComplex() {
         return datumDeclList.size() > 1;
     }
 
     @Override
-    public boolean isSimpleType() {
+    public boolean isSimple() {
         return datumDeclList.size() == 1;
     }
 

@@ -5,6 +5,10 @@ plugins {
     id 'java-library'
 }
 
+test {
+    workingDir = new File("..")
+}
+
 dependencies {
 //    implementation 'org.slf4j:slf4j-log4j12:1.6.4'
     implementation 'org.slf4j:slf4j-api:1.7.29'
@@ -24,5 +28,4 @@ dependencies {
     implementation 'javax.enterprise:cdi-api:2.0.SP1'
 
     runtimeOnly project(':space-antlr')
-
 }

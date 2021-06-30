@@ -29,9 +29,9 @@ public class Namespace extends NamedElement {
     /** Derived mapping */
     private Map<TypeDefn, TypeDerivedInfo> typeInfoMap = new TreeMap<>();
 
-    Namespace(SourceInfo sourceInfo, String name, Namespace ... nsLookupChain) {
-        super(sourceInfo, name);
-        this.rootDir = AstFactory.getInstance().newAstDir(new IntrinsicSourceInfo(), "(root)");
+    Namespace(SourceInfo sourceInfo, NamePart namePart, Namespace ... nsLookupChain) {
+        super(sourceInfo, namePart);
+        this.rootDir = AstFactory.getInstance().newAstDir(new IntrinsicSourceInfo(), namePart);
         this.nsLookupChain = new Namespace[nsLookupChain.length + 1];
         this.nsLookupChain[0] = this;
         for (int idxExtraLookup = 0; idxExtraLookup < nsLookupChain.length; idxExtraLookup++) {

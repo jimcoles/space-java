@@ -16,6 +16,7 @@ package org.jkcsoft.space.lang.ast;
  * @author Jim Coles
  */
 public enum ScopeKind {
+    /** Search from the root of the AST. */
     GLOBAL,
     STATIC,
     OBJECT,

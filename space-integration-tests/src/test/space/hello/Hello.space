@@ -1,10 +1,9 @@
-import java:java.lang.CharSequence;
+// import java:java.lang.CharSequence;
 import space.lang.OpSys;
 
 public type Hello
 /*
- This is a smart annotation comment for
- my awesome space.
+ This is a smart annotation comment for my awesome space.
 */
 {
     // var list
@@ -12,7 +11,7 @@ public type Hello
     boolean myBoolInstVar = false;
 
     // assoc list
-    CharSequence greetingInstSeq = "Hello from this reference to a CharSequence.";
+    char[] greetingInstSeq = "Hello from this reference to a CharSequence.";
 
     {
         // nested init block
@@ -28,7 +27,7 @@ public type Hello
 //    cseq greeting = "Hello from this reference to a CharSequence.";
 
     // functions
-    function void main(CharSequence args)
+    function void main(char[][] args)
     {   // statement block: may include block-local vars, objects, spaces + any other statement type
         boolean boolTooLocal = true;
         OpSys.println( ["Hello, Space! (string literal)"] );
@@ -59,11 +58,11 @@ public type Hello
             // var
             // ref
             // statement 1
-            // next block-likes
+            // nested blocks
         }
     }
 
-    function void foo(CharSequence args) {
+    function void foo(char[] args) {
         OpSys.println( [args] );
     }
 

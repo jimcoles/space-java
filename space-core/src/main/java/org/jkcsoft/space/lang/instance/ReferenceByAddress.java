@@ -18,6 +18,9 @@ package org.jkcsoft.space.lang.instance;
  */
 public class ReferenceByAddress extends AbstractReferenceValue {
 
+    /** The start of the byte allocation for the object */
+    private long byteOffset;
+
     @Override
     public Object getJavaValue() {
         return null;

@@ -24,7 +24,8 @@ public class SjiParamVarDecl extends SjiVarDecl {
     private Parameter jParam;
 
     SjiParamVarDecl(SjiService sjiService, Parameter jParam, SjiTypeDefn sjiParentTypeDefn) {
-        super(sjiService, new NativeSourceInfo(jParam), sjiParentTypeDefn, jParam.getName());
+        super(sjiService, new NativeSourceInfo(jParam), sjiParentTypeDefn,
+              sjiService.newSjiNamePart(jParam, jParam.getName()));
         this.jParam = jParam;
     }
 

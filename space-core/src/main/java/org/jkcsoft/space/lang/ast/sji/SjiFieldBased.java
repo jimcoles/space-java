@@ -9,14 +9,14 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
-import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.DatumDecl;
 
 import java.lang.reflect.Field;
 
 /**
  * @author Jim Coles
  */
-public interface SjiFieldBased extends Declaration {
+public interface SjiFieldBased extends DatumDecl {
 
     Field getjField();
 }

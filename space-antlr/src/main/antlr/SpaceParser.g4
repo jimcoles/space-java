@@ -11,7 +11,8 @@ options {
 Meta-Naming Conventions:
 -----------------------
 
-  __Defn : A declarative nameable element such as a type, function, or rule.
+  __Defn : A nameable element such as a type, association, method, or rule.
+  __Decl : Datum declaration structures
   __Expr : A construct meant for evaluation that references declared elements and expresses
            some sequence of actions possibly resulting in a value at
            runtime. Might express a mix of operations and truths
@@ -20,7 +21,6 @@ Meta-Naming Conventions:
            Every expression in Space may be used in a Rule or a Statement.
   __Stmt : An imperative instruction or action such as a function call. Statements usually
            contain expressions.
-
 
 Syntactic notation:
 ------------------
@@ -166,7 +166,7 @@ query-def <queryName> (
 parseUnit :
     packageStatement?
     importStatement*
-    (spaceTypeDefn | equationDefn | functionDefn | topLevelAssociationDefn)*
+    (spaceTypeDefn | equationDefn | functionDefn | associationDefn)*
     ;
 
 /*
@@ -197,7 +197,7 @@ importStatement :
 spaceTypeDefn :
     accessModifier? defnTypeModifier?
     TypeDefKeyword identifier
-    (ExtendsKeyword spacePathList)?
+    (ExtendsKeyword anyTypeRefList)?
     elementDeclHeader?
     spaceTypeDefnBody
     ;
@@ -245,7 +245,7 @@ variableDefn :
     ;
 
 variableDecl :
-    elementDeclHeader? primitiveOptSeqTypeRef identifier
+    elementDeclHeader? anyTypeRef identifier
     ;
 
 //associationDefnList :
@@ -257,18 +257,25 @@ associationDefnStmt :
     ;
 
 associationDefn :
-    associationDecl rightAssignmentExpr?
+    accessModifier?
+    AssocKeyword identifier
+    elementDeclHeader?
+    assocDefnBody
     ;
 
-associationDecl :
-    elementDeclHeader? complexOptCollTypeRef identifier
+assocDefnBody :
+    BlockStart
+    FromEndKeyword fromAssocEnd
+    ToEndKeyword toAssocEnd
+    AssocKindKeyword?
+    BlockEnd
     ;
 
-topLevelAssociationDefn :
-    'assoc' identifier '{'
-        (endAnno=annotation)*
-    '}'
-    ;
+// typeRef.varRef
+toAssocEnd : metaRefExpr ;
+
+// typeRef.varRef
+fromAssocEnd : metaRefExpr ;
 
 /*------------------------------------------------------------------------------
   KEYS and INDEXes
@@ -425,8 +432,7 @@ functionDefn :
 parameterDefnList : '(' (parameterDecl (',' parameterDecl)* )? ')' ;
 
 parameterDecl :
-    variableDecl |
-    associationDecl
+    variableDecl
     ;
 
 /*------------------------------------------------------------------------------
@@ -520,6 +526,10 @@ complexTypeRef :
     metaRefExpr
     ;
 
+anyTypeRefList :
+    anyTypeRef (',' anyTypeRef)*
+    ;
+
 //collectionTypeRef :
 //    (spacePathExpr | primitiveTypeName) collectionMarker
 //    | collectionTypeRef collectionMarker
@@ -533,6 +543,8 @@ anyCollectionMarker :
 setMarker : '{' '}' ;
 
 sequenceMarker : '[' ']' ;
+
+streamMarker : '|' '|' ;
 
 voidTypeName :
     VoidKeyword
@@ -653,7 +665,6 @@ argList :
 
 expression :
     variableDefn |
-    associationDefn |
     functionCallExpr |
     assignmentExpr |
     valueExprChain

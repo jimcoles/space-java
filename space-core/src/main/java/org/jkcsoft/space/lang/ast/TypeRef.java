@@ -21,4 +21,7 @@ public interface TypeRef extends ModelElement, LinkSource {
     TypeDefn getResolvedType();
 
     LinkState getState();
+
+    Iterable<NameRefOrHolder> getAllLinksAsHolders();
+
 }

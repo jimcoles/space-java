@@ -14,6 +14,6 @@ package org.jkcsoft.space.lang.instance;
  *
  * @author Jim Coles
  */
-public interface TupleSet extends TupleCollection {
+public interface TupleSet extends ObjectRefCollection {
 
 }

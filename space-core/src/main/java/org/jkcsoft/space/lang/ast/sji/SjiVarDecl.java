@@ -16,13 +16,13 @@ import org.jkcsoft.space.lang.runtime.SpaceUtils;
 /**
  * @author Jim Coles
  */
-public abstract class SjiVarDecl extends NamedElement implements SjiDeclaration, VariableDecl {
+public abstract class SjiVarDecl extends NamedElement implements SjiDeclaration, VariableDecl, DatumRef {
 
     private SjiService sjiService;
     private SjiTypeDefn sjiTypeDefn;
 
-    SjiVarDecl(SjiService sjiService, SourceInfo sourceInfo, SjiTypeDefn sjiTypeDefn, String name) {
-        super(sourceInfo, name);
+    SjiVarDecl(SjiService sjiService, SourceInfo sourceInfo, SjiTypeDefn sjiTypeDefn, NamePart namePart) {
+        super(sourceInfo, namePart);
         this.sjiService = sjiService;
         this.sjiTypeDefn = sjiTypeDefn;
     }
@@ -37,6 +37,11 @@ public abstract class SjiVarDecl extends NamedElement implements SjiDeclaration,
     }
 
     @Override
+    public DatumDeclContext getDeclContext() {
+        return sjiTypeDefn;
+    }
+
+    @Override
     public TypeDefn getType() {
         return sjiTypeDefn;
     }
@@ -46,18 +51,23 @@ public abstract class SjiVarDecl extends NamedElement implements SjiDeclaration,
     }
 
     @Override
-    public AliasedMetaRef getBasisTypeRef() {
-        throw SpaceUtils.nosup("getBasisTypeRef");
-    }
-
-    @Override
-    public AliasedMetaRef getTypeGraphRef() {
-        throw SpaceUtils.nosup("getBasisTypeRef");
-    }
-
-    @Override
-    public boolean isAssoc() {
+    public boolean hasAssoc() {
         return false;
+    }
+
+    @Override
+    public TypeDefn getTargetType() {
+        return getType();
+    }
+
+    @Override
+    public DatumDecl getDatum() {
+        return this;
+    }
+
+    @Override
+    public AssociationEnd getAssocEnd() {
+        return null;
     }
 
     @Override

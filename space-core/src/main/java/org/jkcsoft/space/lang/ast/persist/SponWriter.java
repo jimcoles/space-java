@@ -11,7 +11,7 @@ package org.jkcsoft.space.lang.ast.persist;
 
 import org.apache.commons.io.FileUtils;
 import org.jkcsoft.space.lang.ast.AssociationDefn;
-import org.jkcsoft.space.lang.ast.ProjectionDecl;
+import org.jkcsoft.space.lang.ast.DatumProjectionExpr;
 import org.jkcsoft.space.lang.ast.VariableDecl;
 import org.jkcsoft.space.lang.ast.ViewDefn;
 import org.jkcsoft.space.lang.instance.*;
@@ -34,7 +34,7 @@ public class SponWriter {
 
     private Space space;
     private ViewDefn writeTree;
-    private ProjectionDecl currentTreePos;
+    private DatumProjectionExpr currentTreePos;
 
     public void writeSpon(ReferenceValue indexRef) {
         List<View> allIndices = space.getViews();
@@ -42,10 +42,10 @@ public class SponWriter {
 
     public void write(SpaceObject spObj) throws IOException {
         if (spObj.isCollective()) {
-            TupleCollection spColl = (TupleCollection) spObj;
+            ObjectRefCollection spColl = (ObjectRefCollection) spObj;
             // TODO Handle collection objects
             if (spColl.isSequence()) {
-                var spSeq = (TupleSequence) spColl;
+                var spSeq = (ObjectRefSequence) spColl;
                 for (Object o : spSeq) {
 
                 }
@@ -57,14 +57,14 @@ public class SponWriter {
         else if (spObj.isTuple()) {
             var tuple = ((Tuple) spObj);
             var defn = tuple.getDefn();
-            var sponFile = FileUtils.getFile(defn.getName() + "-spon");
+            var sponFile = FileUtils.getFile(defn.getNamePart() + "-spon");
             write(new FileWriter(sponFile), ((Tuple) spObj));
         }
     }
 
     public void write(FileWriter fw, Tuple tuple) throws IOException {
         var defn = tuple.getDefn();
-        fw.append(SET_BEGIN + defn.getName());
+        fw.append(SET_BEGIN + defn.getNamePart());
         for (VariableDecl variableDecl : defn.getVariablesDeclList()) {
             append(fw, tuple, variableDecl);
         }
@@ -72,20 +72,20 @@ public class SponWriter {
     }
 
     private void append(FileWriter fw, Tuple tuple, VariableDecl variableDecl) throws IOException {
-        fw.append(SET_BEGIN + variableDecl.getName() + " ");
+        fw.append(SET_BEGIN + variableDecl.getNamePart() + " ");
         fw.append(tuple.get(variableDecl).getValue().toString());
         fw.append(SET_END);
     }
 
     private void append(FileWriter fw, Tuple tuple, AssociationDefn assocDefn) throws IOException {
-        fw.append(getBeginSymbol() + assocDefn.getName() + " ");
+        fw.append(getBeginSymbol() + assocDefn.getFromEnd().getDatumDecl().getName() + " ");
         if (assocDefn.getToEnd().isSingular()) {
 
         }
         else {
 
         }
-        fw.append(tuple.get(assocDefn).getValue().toString());
+        fw.append(tuple.get(assocDefn.getFromEnd().getDatumDecl()).getValue().toString());
         fw.append(SET_END);
     }
 

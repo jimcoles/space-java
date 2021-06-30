@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.instance;
 
 import org.jkcsoft.space.lang.ast.TypeDefn;
-import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.DatumDecl;
 import org.jkcsoft.space.lang.ast.VoidType;
 import org.jkcsoft.space.lang.runtime.SpaceX;
 
@@ -51,7 +51,7 @@ public class VoidDatum implements ValueHolder, Value {
     }
 
     @Override
-    public Declaration getDeclaration() {
+    public DatumDecl getDeclaration() {
         return null;
     }
 

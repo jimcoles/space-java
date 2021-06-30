@@ -9,15 +9,16 @@
  */
 package org.jkcsoft.space.lang.ast;
 
-import org.jkcsoft.space.lang.metameta.MetaType;
-
 /**
- * A Variable can be thought of as a Projection with zero indirection.
+ * A Variable declaration defines a slot that will hold either a scalar value
+ * or a link to another object.
  *
  * NOTE: I'm not sure we need both notions.
  *
  * @author Jim Coles
  */
-public interface VariableDecl extends ProjectionDecl {
+public interface VariableDecl extends DatumDecl {
+
+    AssociationEnd getAssocEnd();
 
 }

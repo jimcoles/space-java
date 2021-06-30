@@ -9,14 +9,14 @@
  */
 package org.jkcsoft.space.lang.ast.sji;
 
-import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.DatumDecl;
 
 import java.beans.PropertyDescriptor;
 
 /**
  * @author Jim Coles
  */
-public interface SjiPropBased extends Declaration {
+public interface SjiPropBased extends DatumDecl {
 
     PropertyDescriptor getjPropDesc();
 

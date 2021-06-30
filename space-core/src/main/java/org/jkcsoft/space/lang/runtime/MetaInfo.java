@@ -47,6 +47,6 @@ public class MetaInfo {
 
     @Override
     public String toString() {
-        return "("+keyElement.getName() + ": " + Strings.buildCommaDelList(children.keySet())+")";
+        return "("+keyElement.getNamePart() + ": " + Strings.buildCommaDelList(children.keySet())+")";
     }
 }

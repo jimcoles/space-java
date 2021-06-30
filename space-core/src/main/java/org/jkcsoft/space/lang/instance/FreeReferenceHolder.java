@@ -9,7 +9,7 @@
  */
 package org.jkcsoft.space.lang.instance;
 
-import org.jkcsoft.space.lang.ast.Declaration;
+import org.jkcsoft.space.lang.ast.DatumDecl;
 import org.jkcsoft.space.lang.ast.TypeDefn;
 import org.jkcsoft.space.lang.runtime.SpaceX;
 
@@ -23,16 +23,16 @@ import org.jkcsoft.space.lang.runtime.SpaceX;
  */
 public class FreeReferenceHolder<J> implements ReferenceValueHolder<ReferenceValue<J>, J> {
 
-    private TupleCollection fromObject; // the 'from'
+    private ObjectRefCollection fromObject; // the 'from'
     private ReferenceValue<J> referenceValue;   // the 'to'
 
-    FreeReferenceHolder(TupleCollection fromObject, ReferenceValue<J> referenceValue) {
+    FreeReferenceHolder(ObjectRefCollection fromObject, ReferenceValue<J> referenceValue) {
         this.fromObject = fromObject;
         this.referenceValue = referenceValue;
     }
 
     @Override
-    public Declaration getDeclaration() {
+    public DatumDecl getDeclaration() {
         return null;
     }
 

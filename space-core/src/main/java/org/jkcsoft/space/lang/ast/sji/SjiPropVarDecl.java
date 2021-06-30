@@ -10,7 +10,6 @@
 package org.jkcsoft.space.lang.ast.sji;
 
 import org.jkcsoft.space.lang.ast.NativeSourceInfo;
-import org.jkcsoft.space.lang.ast.NumPrimitiveTypeDefn;
 
 import java.beans.PropertyDescriptor;
 
@@ -22,7 +21,8 @@ public class SjiPropVarDecl extends SjiVarDecl implements SjiPropBased {
     private PropertyDescriptor jPropDesc;
 
     SjiPropVarDecl(SjiService sjiService, SjiTypeDefn sjiTypeDefn, PropertyDescriptor jPd) {
-        super(sjiService, new NativeSourceInfo(jPd), sjiTypeDefn, jPd.getName());
+        super(sjiService, new NativeSourceInfo(jPd), sjiTypeDefn,
+              sjiService.getAstFactory().newNamePart(new NativeSourceInfo(jPd), jPd.getName()));
         this.jPropDesc = jPd;
     }
 

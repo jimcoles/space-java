@@ -26,7 +26,7 @@ public class Comparators {
         return new ProjectionComparator(keyDefn);
     }
 
-    public static DatumTupleComparator buildDatumComparator(Declaration datumDecl) {
+    public static DatumTupleComparator buildDatumComparator(DatumDecl datumDecl) {
         return new DatumTupleComparator(datumDecl);
     }
 
@@ -44,8 +44,8 @@ public class Comparators {
         @Override
         public int compare(Tuple o1, Tuple o2) {
             int comp = 0;
-            List<ProjectionDecl> keyVars = key.getProjectionDeclList();
-            for (ProjectionDecl keyVar : keyVars) {
+            List<DatumProjectionExpr> keyVars = key.getProjectionDeclList();
+            for (DatumProjectionExpr keyVar : keyVars) {
                 comp = keyVar.getDatumComparator().compare(o1, o2);
                 if (comp != 0)
                     break;
@@ -60,25 +60,24 @@ public class Comparators {
      */
     public static class DatumTupleComparator implements Comparator<Tuple> {
 
-        private Declaration datumDecl;
+        private DatumDecl datumDecl;
 
-        public DatumTupleComparator(Declaration datumDecl) {
+        public DatumTupleComparator(DatumDecl datumDecl) {
             this.datumDecl = datumDecl;
         }
 
         @Override
         public int compare(Tuple tuple1, Tuple tuple2) {
             int retVal;
-            ScalarValue v1;
-            ScalarValue v2;
-            if (datumDecl.isAssoc()) {
+            if (datumDecl.hasAssoc()) {
                 // TODO: sort by key of the target tuple
                 throw new IllegalArgumentException("we don't yet handle assoc comparisons. var[" + datumDecl + "]");
             }
             else {
-                v1 = (ScalarValue) tuple1.get(datumDecl).getValue();
-                v2 = (ScalarValue) tuple2.get(datumDecl).getValue();
-                retVal = datumDecl.getType().getValueComparator().compare(v1, v2);
+                retVal = datumDecl.getType().getValueComparator().compare(
+                    (ScalarValue) tuple1.get(datumDecl).getValue(),
+                    (ScalarValue) tuple2.get(datumDecl).getValue()
+                );
             }
             return retVal;
         }

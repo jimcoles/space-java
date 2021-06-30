@@ -29,36 +29,31 @@ public class TestAst {
     @Test
     public void testBuildAndRunProgram() {
         AstFactory astFactory = new AstFactory();
-        ProgSourceInfo si = new ProgSourceInfo();
-        astFactory.newProgram(si, "(API Builder Program)");
+        astFactory.newProgram("(API Builder Program)");
         //
         ObjectFactory objBuilder = ObjectFactory.getInstance();
-        TypeDefnImpl complexTypeImpl = astFactory.newTypeDefn(si, astFactory.newNamePart(si, "MyHelloSpace"));
+        TypeDefnImpl complexTypeImpl = astFactory.newTypeDefn("MyHelloSpace");
 
-        Directory astDirectory = astFactory.newAstDir(si, "TestAst");
-        astDirectory.addParseUnit(astFactory.newParseUnit(si)).addTypeDefn(complexTypeImpl);
-//        complexTypeImpl.setBody(astFactory.newTypeDefnBody(si));
-        complexTypeImpl
-            .addVariableDecl(
-                astFactory.newVariableDecl(si, "myIntDim", astFactory.newTypeRef(si, NumPrimitiveTypeDefn.CARD)));
-        complexTypeImpl
-//            .setBody(astFactory.newTypeDefnBody(si))
-            .addVariableDecl(astFactory.newVariableDecl(si, "myCharDim",
-                                                        astFactory.newTypeRef(si, NumPrimitiveTypeDefn.CHAR)));
-        SpaceFunctionDefn mainMethod = astFactory.newSpaceFunctionDefn(si, "main", null);
+        Directory astDirectory = astFactory.newAstDir("TestAst");
+        astDirectory.addParseUnit(astFactory.newParseUnit()).addTypeDefn(complexTypeImpl);
+        complexTypeImpl.addVariableDecl(
+            astFactory.newVariableDecl("myIntDim", complexTypeImpl, NumPrimitiveTypeDefn.CARD)
+        );
+        complexTypeImpl.addVariableDecl(
+            astFactory.newVariableDecl("myCharDim", complexTypeImpl, NumPrimitiveTypeDefn.CHAR)
+        );
+        FunctionDefnImpl mainMethod = astFactory.newSpaceFunctionDefn("main", null);
         complexTypeImpl.addFunctionDefn(mainMethod);
 //        CharacterSequence arg1 = objBuilder.newCharacterSequence("Hello, Space!");
 //        astFactory.getUserAstRoot().addObjectInstance(arg1, astFactory);
 
-        ThisTupleExpr thisTupleExpr = astFactory.newThisExpr(si);
+        ThisTupleExpr thisTupleExpr = astFactory.newThisExpr();
 
-        ExpressionChain functionDefnRef = astFactory.newMetaRefChain(si, MetaType.FUNCTION,
-                                                                     astFactory.newNameRefExpr(si, NSRegistry.NS_TMP));
-
-        AstUtils.addNewMetaRefParts(functionDefnRef, si, "test", "TestType", "testFunc");
-        mainMethod.setStatementBlock(astFactory.newStatementBlock(si));
+        ExpressionChain<FunctionDefn> functionDefnRef = astFactory.newMetaRefChain(MetaType.FUNCTION, NSRegistry.NS_TMP);
+        astFactory.addNewMetaRefParts(functionDefnRef, SourceInfo.API, "test", "TestType", "testFunc");
+        mainMethod.setStatementBlock(astFactory.newStatementBlock());
         mainMethod.getStatementBlock()
-                  .addValueExpr(astFactory.newFunctionCallExpr(si).setFunctionRef(((SimpleNameRefExpr) functionDefnRef.getFirstPart())));
+                  .addValueExpr(astFactory.newFunctionCallExpr().setFunctionRef(((SimpleNameRefExpr) functionDefnRef.getFirstPart())));
 
 //        astFactory.newMetaObjectRefLiteral(null),
 //            astFactory.newPrimLiteralExpr("Hello, Space!")

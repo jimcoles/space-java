@@ -45,7 +45,7 @@ public class SjiTypeMapping {
     }
 
     public boolean isPrimitive() {
-        return sjiProxy != null && sjiProxy.isPrimitiveType();
+        return sjiProxy != null && sjiProxy.isPrimitive();
     }
 
     @Override

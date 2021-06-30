@@ -27,4 +27,5 @@ public interface Value<J> {
     default boolean isNull() {
         return false;
     }
+
 }
