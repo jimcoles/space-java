@@ -68,7 +68,7 @@ public class ScalarSequenceHolder<T extends ScalarValue> implements ValueHolder 
 
     @Override
     public String toString() {
-        return ((declaration != null) ? declaration.getNamePart() + "=" : "(anon)")
+        return ((declaration != null) ? declaration.getName() + "=" : "(anon)")
             + (primSeqValue != null ? primSeqValue.toString() : "(not initialized)");
     }
 }

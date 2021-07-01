@@ -12,15 +12,13 @@ package org.jkcsoft.space.lang.ast;
 import org.jkcsoft.space.lang.instance.Tuple;
 import org.jkcsoft.space.lang.metameta.MetaType;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.*;
 
 /**
  * A named root of a Directory tree. A given runtime context will contain multiple Namespaces.
  * @author Jim Coles
  */
-public class Namespace extends NamedElement {
+public class Namespace extends AbstractNamedElement {
 
     private Directory rootDir;
     private Namespace[] nsLookupChain;

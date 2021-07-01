@@ -17,7 +17,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  * @author Jim Coles
  * @version 1.0
  */
-public class RuleImpl extends NamedElement implements Rule {
+public class RuleImpl extends AbstractNamedElement implements Rule {
 
     private DatumProjectionExpr varSpace;
     /** Must be boolean-valued. */

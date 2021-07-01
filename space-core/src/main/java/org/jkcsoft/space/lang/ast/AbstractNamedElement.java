@@ -22,12 +22,13 @@ import java.util.List;
  *
  * @author Jim Coles
  */
-public abstract class NamedElement extends AbstractModelElement implements Named, Comparable<NamedElement> {
+public abstract class AbstractNamedElement
+    extends AbstractModelElement implements Named, Comparable<AbstractNamedElement> {
 
-    private NamePart namePart;
+    private final NamePart namePart;
     private String description;
 
-    protected NamedElement(SourceInfo sourceInfo, NamePart namePart) {
+    protected AbstractNamedElement(SourceInfo sourceInfo, NamePart namePart) {
         super(sourceInfo);
         this.namePart = namePart;
     }
@@ -43,7 +44,7 @@ public abstract class NamedElement extends AbstractModelElement implements Named
 
     @Override
     public String getName() {
-        return namePart.getText();
+        return namePart != null ? namePart.getText() : "(anon)";
     }
 
     @Override
@@ -52,8 +53,8 @@ public abstract class NamedElement extends AbstractModelElement implements Named
 //        forwardList.add(this.getName());
         ModelElement node = this;
         while (node != null) {
-            if (node instanceof NamedElement) {
-                forwardList.add(((NamedElement) node).getNamePart().getText());
+            if (node instanceof AbstractNamedElement) {
+                forwardList.add(((AbstractNamedElement) node).getName());
             }
             //
             node = node.getParent();
@@ -80,11 +81,11 @@ public abstract class NamedElement extends AbstractModelElement implements Named
     }
 
     @Override
-    public int compareTo(NamedElement o) {
+    public int compareTo(AbstractNamedElement o) {
         if (!(this.hasName() && o.hasName()))
             throw new IllegalArgumentException("Space bug: cannot compare two objects " +
                                                    "(" + this + "," + o + ") unless both are named.");
-        return this.getNamePart().compareTo(o.getNamePart());
+        return this.getFQName().compareTo(o.getFQName());
     }
 
     @Override
@@ -93,6 +94,6 @@ public abstract class NamedElement extends AbstractModelElement implements Named
     }
 
     protected String toUrlString() {
-        return getNamePart().getText();
+        return getName();
     }
 }

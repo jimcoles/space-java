@@ -10,7 +10,7 @@
 package org.jkcsoft.space.lang.runtime;
 
 import org.jkcsoft.java.util.Strings;
-import org.jkcsoft.space.lang.ast.NamedElement;
+import org.jkcsoft.space.lang.ast.AbstractNamedElement;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -26,27 +26,27 @@ import java.util.TreeMap;
  */
 public class MetaInfo {
     // for this element
-    private NamedElement keyElement;
+    private AbstractNamedElement keyElement;
     // we hold this info
-    private Map<String, NamedElement> children = new TreeMap<>();
+    private Map<String, AbstractNamedElement> children = new TreeMap<>();
 
-    public MetaInfo(NamedElement keyElement) {
+    public MetaInfo(AbstractNamedElement keyElement) {
         this.keyElement = keyElement;
     }
 
-    void addChild(NamedElement child) {
+    void addChild(AbstractNamedElement child) {
         if (child.hasName())
             children.put(child.getName(), child);
         else
             throw new IllegalArgumentException("Bug in runtime: Child elements must be named.");
     }
 
-    public NamedElement getChildByName(String name) {
+    public AbstractNamedElement getChildByName(String name) {
         return children.get(name);
     }
 
     @Override
     public String toString() {
-        return "("+keyElement.getNamePart() + ": " + Strings.buildCommaDelList(children.keySet())+")";
+        return "("+keyElement.getName() + ": " + Strings.buildCommaDelList(children.keySet())+")";
     }
 }

@@ -17,7 +17,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  * @author Jim Coles
  * @version 1.0
  */
-public class AssociationDefnImpl extends NamedElement implements AssociationDefn {
+public class AssociationDefnImpl extends AbstractNamedElement implements AssociationDefn {
 
     private FromAssocEnd fromEnd;
     private ToAssocEnd toEnd;

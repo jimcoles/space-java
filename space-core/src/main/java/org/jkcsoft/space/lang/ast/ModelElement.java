@@ -35,11 +35,11 @@ public interface ModelElement extends Tagable {
 
     List<ModelElement> getChildren();
 
-    NamedElement getChildByName(String name);
+    AbstractNamedElement getChildByName(String name);
 
-    Collection<NamedElement> getNamedChildren();
+    Collection<AbstractNamedElement> getNamedChildren();
 
-    Map<String, NamedElement> getNamedChildMap();
+    Map<String, AbstractNamedElement> getNamedChildMap();
 
     boolean hasReferences();
 

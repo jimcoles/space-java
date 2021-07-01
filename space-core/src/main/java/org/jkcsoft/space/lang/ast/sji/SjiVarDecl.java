@@ -11,12 +11,11 @@ package org.jkcsoft.space.lang.ast.sji;
 
 import org.jkcsoft.space.lang.ast.*;
 import org.jkcsoft.space.lang.metameta.MetaType;
-import org.jkcsoft.space.lang.runtime.SpaceUtils;
 
 /**
  * @author Jim Coles
  */
-public abstract class SjiVarDecl extends NamedElement implements SjiDeclaration, VariableDecl, DatumRef {
+public abstract class SjiVarDecl extends AbstractNamedElement implements SjiDeclaration, VariableDecl, DatumRef {
 
     private SjiService sjiService;
     private SjiTypeDefn sjiTypeDefn;

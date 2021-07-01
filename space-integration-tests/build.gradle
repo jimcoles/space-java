@@ -4,10 +4,6 @@
 dependencies {
 
     implementation project(':space-core')
-    implementation (group: 'org.jkcsoft', name: 'space-core') {
-
-    }
-
     implementation project(':space-antlr')
 
     //

@@ -135,7 +135,7 @@ public class TupleSetImpl extends AbstractSpaceObject implements TupleSet, Refer
             "(value)" :
             Strings.buildDelList(
                 typeDefn.getDatumDeclList(),
-                obj -> "\"" + ((DatumDecl) obj).getNamePart() + "\"",
+                obj -> "\"" + ((DatumDecl) obj).getName() + "\"",
                 "\t"))
             + JavaHelper.EOL
             + Strings.buildNewlineList(tupleRefs);

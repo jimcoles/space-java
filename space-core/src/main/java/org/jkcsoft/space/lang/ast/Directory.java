@@ -30,7 +30,7 @@ import java.util.Set;
  * @author Jim Coles
  * @version 1.0
  */
-public class Directory extends NamedElement {
+public class Directory extends AbstractNamedElement {
 
 //    public static final Directory ROOT_DIRECTORY = new Directory(new IntrinsicSourceInfo(), "root");
 
@@ -82,7 +82,7 @@ public class Directory extends NamedElement {
 //    public TypeDefn addSpaceDefn(TypeDefn spaceTypeDefn) {
 //        typeDefns.add(spaceTypeDefn);
 //        //
-//        addChild((NamedElement) spaceTypeDefn);
+//        addChild((AbstractNamedElement) spaceTypeDefn);
 //        return spaceTypeDefn;
 //    }
 
@@ -129,7 +129,7 @@ public class Directory extends NamedElement {
 
     public Directory getChildDir(String name) {
         Directory childDir = null;
-        NamedElement childElem = getChildByName(name);
+        AbstractNamedElement childElem = getChildByName(name);
         if (childElem instanceof Directory)
             childDir = ((Directory) childElem);
         return childDir;

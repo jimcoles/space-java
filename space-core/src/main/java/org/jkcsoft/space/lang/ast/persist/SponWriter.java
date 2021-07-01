@@ -57,7 +57,7 @@ public class SponWriter {
         else if (spObj.isTuple()) {
             var tuple = ((Tuple) spObj);
             var defn = tuple.getDefn();
-            var sponFile = FileUtils.getFile(defn.getNamePart() + "-spon");
+            var sponFile = FileUtils.getFile(defn.getName() + "-spon");
             write(new FileWriter(sponFile), ((Tuple) spObj));
         }
     }
@@ -72,7 +72,7 @@ public class SponWriter {
     }
 
     private void append(FileWriter fw, Tuple tuple, VariableDecl variableDecl) throws IOException {
-        fw.append(SET_BEGIN + variableDecl.getNamePart() + " ");
+        fw.append(SET_BEGIN + variableDecl.getName() + " ");
         fw.append(tuple.get(variableDecl).getValue().toString());
         fw.append(SET_END);
     }

@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * @author Jim Coles
  */
-abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn {
+abstract public class AbstractTypeDefn extends AbstractNamedElement implements TypeDefn {
 
     private boolean isView;
 
@@ -122,7 +122,7 @@ abstract public class AbstractTypeDefn extends NamedElement implements TypeDefn 
 
     public FunctionDefnImpl getFunction(String name) {
 
-        NamedElement childWithName = getChildByName(name);
+        AbstractNamedElement childWithName = getChildByName(name);
 
         if (childWithName == null)
             throw new SpaceX("function [" + name + "] not found in " + this);

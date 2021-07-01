@@ -17,7 +17,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
  *
  * @author Jim Coles
  */
-public abstract class AbstractFunctionDefn extends NamedElement implements FunctionDefn, SolutionExpr {
+public abstract class AbstractFunctionDefn extends AbstractNamedElement implements FunctionDefn, SolutionExpr {
 
     private Rule governingEquation; // TODO
     private TypeDefn argumentsDefn;

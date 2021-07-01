@@ -66,8 +66,8 @@ public class DeclaredReferenceHolder<J> implements ReferenceValueHolder<Referenc
     @Override
     public String toString() {
         return "Decl Ref Holder: " +((declaration != null) ?
-            "(" + declaration.getType().getNamePart() + ")"
-                + (declaration.hasName() ? declaration.getNamePart() : "(anon)") + "=" : "(no decl)")
+            "(" + declaration.getType().getName() + ")"
+                + (declaration.hasName() ? declaration.getName() : "(anon)") + "=" : "(no decl)")
             + (referenceValue != null ? referenceValue.toString() : "(not initialized)");
     }
 

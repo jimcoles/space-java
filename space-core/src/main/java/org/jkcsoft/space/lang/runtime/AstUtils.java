@@ -67,11 +67,11 @@ public class AstUtils {
     }
 
     /** The nearest named parent of an element, e, is the the element thru which 'e' may be referenced. */
-    public static NamedElement getNearestNamedParent(ModelElement anElem) {
-        NamedElement lexParent = null;
-        if (anElem.getParent() instanceof NamedElement
-            && ((NamedElement) anElem.getParent()).hasName()) {
-            lexParent = (NamedElement) anElem.getParent();
+    public static AbstractNamedElement getNearestNamedParent(ModelElement anElem) {
+        AbstractNamedElement lexParent = null;
+        if (anElem.getParent() instanceof AbstractNamedElement
+            && ((AbstractNamedElement) anElem.getParent()).hasName()) {
+            lexParent = (AbstractNamedElement) anElem.getParent();
         }
         else if (anElem.getParent() != null) {
             lexParent = getNearestNamedParent(anElem.getParent());
@@ -207,7 +207,7 @@ public class AstUtils {
                 refChain.setAstLoadError(((ExpressionChain) scopeElem).getLoadError());
             }
             else {
-                NamedElement lookup =
+                AbstractNamedElement lookup =
                     lookupImmediateChild(scopeElem, firstExprRef.getKeyOrName());
                 checkSetResolve(firstPart, lookup, staticScope.getScopeKind());
             }
@@ -274,7 +274,7 @@ public class AstUtils {
      */
     private static void resolveRest(ExpressionChain refChain) {
 //        resolveIntrinsics(((NameRefExpr) refChain.getFirstPart()));
-        NamedElement lookup = null;
+        AbstractNamedElement lookup = null;
         LinkSource currentlhsLink = refChain.getFirstPart();
         List<NameRefOrHolder> restLinks = refChain.getRestLinks();
         for (NameRefOrHolder rhsLink : restLinks) {
@@ -395,7 +395,7 @@ public class AstUtils {
 //        StaticScope staticScope = scopeWalker.nextScope();
 //        if (containerScopeKind == null)
 //            containerScopeKind = staticScope.getScopeKind();
-//        NamedElement lookup =
+//        AbstractNamedElement lookup =
 //            lookupImmediateChild(staticScope.getContext(), ((SimpleNameRefExpr) reference.getFirstPart()).getNameExprText());
 //        checkSetResolve(reference.getFirstPart(), lookup);
 //        if (reference.isResolved())
@@ -431,7 +431,7 @@ public class AstUtils {
 
     private static void resolveFromScopeDown(ModelElement astNode, ExpressionChain exprChain) {
         log.debug("trying to find [" + exprChain + "] under [" + astNode + "]");
-        NamedElement lookup =
+        AbstractNamedElement lookup =
             lookupImmediateChild(astNode, (((SimpleNameRefExpr) exprChain.getFirstPart()).getNameExprText()));
         checkSetResolve(exprChain.getFirstPart(), lookup, null);
         resolveAbsolute(lookup, exprChain.getRestLinks().iterator());
@@ -440,7 +440,7 @@ public class AstUtils {
     public static void resolveAbsolute(ModelElement nameContext, Iterator<NameRefOrHolder> refHolderIter) {
         if (nameContext != null && refHolderIter.hasNext()) {
             NameRefOrHolder refPart = refHolderIter.next();
-            NamedElement targetChild =
+            AbstractNamedElement targetChild =
                 lookupImmediateChild(nameContext, refPart.getRefAsNameRef().getNameExprText());
             checkSetResolve(refPart, targetChild, null);
             if (refPart.getRefAsNameRef().isResolved()) {
@@ -467,11 +467,11 @@ public class AstUtils {
     }
 
     /** Will traverse into child grouping nodes and grouping nodes only. */
-    public static NamedElement lookupImmediateChild(ModelElement context, String name) {
+    public static AbstractNamedElement lookupImmediateChild(ModelElement context, String name) {
 //        if (name.equals("firstName")) {
 //            log.debug("child names for [" + context +"] => " + Strings.buildCommaDelList(context.getNamedChildMap().keySet()));
 //        }
-        NamedElement childByName = context.getChildByName(name);
+        AbstractNamedElement childByName = context.getChildByName(name);
         if (childByName == null) {
             if (context.hasGroupingNodes()) {
                 for (ModelElement groupElement : context.getGroupingNodes()) {
@@ -485,7 +485,7 @@ public class AstUtils {
     }
 
     private static void resolveIntrinsics(SimpleNameRefExpr refPart) {
-        NamedElement lookup = INTRINSIC_TYPES.getChildByName(refPart.getNameExprText());
+        AbstractNamedElement lookup = INTRINSIC_TYPES.getChildByName(refPart.getNameExprText());
 //        if (refPart.getExpression().getNameExpr().equals(VoidType.VOID.getName())) {
 //            lookup = VoidType.VOID;
 //        }
@@ -516,8 +516,8 @@ public class AstUtils {
         if (match)
             astAction.upon(astNode);
 
-        Collection<NamedElement> children = astNode.getNamedChildren();
-        for (NamedElement child : children) {
+        Collection<AbstractNamedElement> children = astNode.getNamedChildren();
+        for (AbstractNamedElement child : children) {
             walkNamedAstDepthFirst(child, astAction);
         }
 
@@ -570,7 +570,7 @@ public class AstUtils {
         Directory subDir = null;
         if (parentDir.hasChildDirs()) {
             for (Directory directory : parentDir.getChildDirectories()) {
-                if (directory.getNamePart().equals(name)) {
+                if (directory.getName().equals(name)) {
                     subDir = directory;
                     break;
                 }
@@ -618,7 +618,7 @@ public class AstUtils {
     public static boolean isJavaNs(NSRegistry nsRegistry, ImportExpr importExpr) {
         SimpleNameRefExpr<Namespace> nsRefPart = importExpr.getTypeRefExpr().getNsRefPart();
         return nsRefPart != null
-            && nsRefPart.getNameExprText().equals(nsRegistry.getJavaNs().getNamePart().getText());
+            && nsRefPart.getNameExprText().equals(nsRegistry.getJavaNs().getName());
     }
 
     public static TypeDefn larger(TypeDefn type1, TypeDefn type2) {

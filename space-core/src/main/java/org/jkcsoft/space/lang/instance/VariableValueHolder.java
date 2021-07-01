@@ -60,8 +60,8 @@ public class VariableValueHolder implements ValueHolder {
     @Override
     public String toString() {
         return "Var Holder: " +((declaration != null) ?
-            "(" + declaration.getType().getNamePart() + ")"
-                + (declaration.hasName() ? declaration.getNamePart() : "(anon)") + "=" : "(no decl)")
+            "(" + declaration.getType().getName() + ")"
+                + (declaration.hasName() ? declaration.getName() : "(anon)") + "=" : "(no decl)")
             + (scalarValue != null ? scalarValue.toString() : "(not initialized)");
     }
 }

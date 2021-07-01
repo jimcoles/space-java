@@ -63,7 +63,7 @@ public class NSRegistry {
      * (not used currently) Idea is to hold redundantly accumulated info useful
      * for lookup during execution.
      */
-//    private Map<NamedElement, MetaInfo> metaObjectExtendedInfoMap = new TreeMap<>();
+//    private Map<AbstractNamedElement, MetaInfo> metaObjectExtendedInfoMap = new TreeMap<>();
     private NSRegistry() {
 //        this.exeContext = exeContext;
         //
@@ -114,7 +114,7 @@ public class NSRegistry {
     public Namespace getNamespace(String name) {
         return (Namespace) CollectionUtils.find(
             getNsChain(),
-            elem -> ((Namespace) elem).getNamePart().getText().equals(name)
+            elem -> ((Namespace) elem).getName().equals(name)
         );
     }
 
@@ -137,13 +137,13 @@ public class NSRegistry {
 //        metaObjectIndexByFullPath.put(modelElement.getFullPath(), modelElement);
 
         // track denormalized info for fast lookup ...
-//        if (modelElement instanceof NamedElement) {
-//            MetaInfo metaInfo = new MetaInfo((NamedElement) modelElement);
-//            metaObjectExtendedInfoMap.put((NamedElement) modelElement, metaInfo);
+//        if (modelElement instanceof AbstractNamedElement) {
+//            MetaInfo metaInfo = new MetaInfo((AbstractNamedElement) modelElement);
+//            metaObjectExtendedInfoMap.put((AbstractNamedElement) modelElement, metaInfo);
 //
 //            // if this object has a parent, Add this object to parent's child map
 //            if (modelElement.hasParent()) {
-//                metaObjectExtendedInfoMap.get(modelElement.getParent()).addChild((NamedElement) modelElement);
+//                metaObjectExtendedInfoMap.get(modelElement.getParent()).addChild((AbstractNamedElement) modelElement);
 //            }
 //        }
     }

@@ -10,14 +10,13 @@
 package org.jkcsoft.space.lang.ast;
 
 import org.jkcsoft.space.lang.metameta.MetaType;
-import org.jkcsoft.space.lang.runtime.AstUtils;
 
 /**
  * A {@link Named} {@link ExpressionChain} used by {@link DatumProjectionExpr}.
  *
  * @author Jim Coles
  */
-public class AliasedMetaRef<T extends Named> extends NamedElement {
+public class AliasedMetaRef<T extends Named> extends AbstractNamedElement {
 
     private final ExpressionChain<T> metaRefExpr;
 

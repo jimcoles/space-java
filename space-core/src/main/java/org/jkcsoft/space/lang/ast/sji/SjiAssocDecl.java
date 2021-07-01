@@ -16,7 +16,7 @@ import org.jkcsoft.space.lang.runtime.SpaceUtils;
 /**
  * @author Jim Coles
  */
-public abstract class SjiAssocDecl extends NamedElement implements SjiDeclaration, AssociationDefn {
+public abstract class SjiAssocDecl extends AbstractNamedElement implements SjiDeclaration, AssociationDefn {
 
     private SjiService sjiService;
     private SjiFromAssocEnd fromEnd;

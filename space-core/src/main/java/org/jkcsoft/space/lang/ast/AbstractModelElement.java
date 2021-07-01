@@ -32,9 +32,9 @@ public abstract class AbstractModelElement extends AbstractSpaceObject implement
 
     // -------------- <start> redundant collections and state for fast lookup
     private int treeDepth = -1;
-    private NamedElement namedParent;
+    private AbstractNamedElement namedParent;
     private List<ModelElement> children = new LinkedList<>();
-    private Map<String, NamedElement> namedChildMap = new TreeMap<>();
+    private Map<String, AbstractNamedElement> namedChildMap = new TreeMap<>();
     private Set<ExpressionChain> expressionChains = null;
     private List<ModelElement> groupingNodes = new LinkedList<>();
     private List<Tuple> allTags = Collections.emptyList();
@@ -79,8 +79,8 @@ public abstract class AbstractModelElement extends AbstractSpaceObject implement
         children.add(child);
         child.setParent(this);
         //
-        if (child instanceof NamedElement && ((NamedElement) child).hasName()) {
-            NamedElement nChild = (NamedElement) child;
+        if (child instanceof AbstractNamedElement && ((AbstractNamedElement) child).hasName()) {
+            AbstractNamedElement nChild = (AbstractNamedElement) child;
             namedChildMap.put(nChild.getName(), nChild);
         }
         if (AstUtils.isGroupingNode(child)) {
@@ -125,17 +125,17 @@ public abstract class AbstractModelElement extends AbstractSpaceObject implement
     }
 
     @Override
-    public NamedElement getChildByName(String name) {
+    public AbstractNamedElement getChildByName(String name) {
         return namedChildMap.get(name);
     }
 
     @Override
-    public Collection<NamedElement> getNamedChildren() {
+    public Collection<AbstractNamedElement> getNamedChildren() {
         return namedChildMap.values();
     }
 
     @Override
-    public Map<String, NamedElement> getNamedChildMap() {
+    public Map<String, AbstractNamedElement> getNamedChildMap() {
         return namedChildMap;
     }
 
@@ -165,7 +165,7 @@ public abstract class AbstractModelElement extends AbstractSpaceObject implement
     }
 
     @Override
-    public NamedElement getNamedParent() {
+    public AbstractNamedElement getNamedParent() {
         // lazy init
         if (namedParent == null)
             namedParent = AstUtils.getNearestNamedParent(this);

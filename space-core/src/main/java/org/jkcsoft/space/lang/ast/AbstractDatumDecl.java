@@ -12,7 +12,7 @@ package org.jkcsoft.space.lang.ast;
 /**
  * @author Jim Coles
  */
-public abstract class AbstractDatumDecl extends NamedElement implements DatumDecl {
+public abstract class AbstractDatumDecl extends AbstractNamedElement implements DatumDecl {
 
     private DatumDeclContext declContext;   // this datum's parent container: a Type or a Statement Block
     private TypeRef typeRef;    // this datum's type

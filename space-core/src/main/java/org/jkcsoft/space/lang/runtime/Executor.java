@@ -238,7 +238,7 @@ public class Executor extends ExprProcessor
         sb.append("Tuple Set: " + EOL);
         List<DatumDecl> datumDecls = tupleSet.getContainedObjectType().getDatumDeclList();
         datumDecls.forEach(
-            datumDecl -> sb.append("\"" + datumDecl.getNamePart() + "\" ")
+            datumDecl -> sb.append("\"" + datumDecl.getName() + "\" ")
         );
         sb.append(EOL);
         tupleSet.forEach(
@@ -575,7 +575,7 @@ public class Executor extends ExprProcessor
         //
         for (Directory childOfNewDir : newDir.getChildDirectories()) {
             Directory existingSubDir =
-                AstUtils.getSubDirByName(existingParentDir, childOfNewDir.getNamePart().getText());
+                AstUtils.getSubDirByName(existingParentDir, childOfNewDir.getName());
             if (existingSubDir != null) {
                 mergeNewChildren(existingSubDir, childOfNewDir);
             }
@@ -754,7 +754,7 @@ public class Executor extends ExprProcessor
         bootMainCallExpr.getFunctionRef().setTypeCheckState(TypeCheckState.VALID);
         ValueExprSequenceExpr theMainArg = getAstFactory().newSequenceExpr(
             progSourceInfo,
-            getAstFactory().newTypeRef(CHAR_SEQ_TYPE_DEF.getSequenceOfType())
+            getAstFactory().newTypeRef(CHAR_SEQ_TYPE_DEF)
         );
         theMainArg.addValueExpr(getAstFactory().newCharSeqLiteralExpr(progSourceInfo, "(put CLI here)"));
         LinkedList<ValueExpr> argExprList = new LinkedList<>();
@@ -836,6 +836,11 @@ public class Executor extends ExprProcessor
             if (!valueExprChain.isEmpty())
                 valueHolder = eval(spcContext, valueExprChain);
         }
+        else if (expression instanceof ValueExprSequenceExpr) {
+            ValueExprSequenceExpr valueExprSeq = ((ValueExprSequenceExpr) expression);
+            eval(spcContext, valueExprSeq);
+        }
+
         else
             throw new SpaceX("don't know how to evaluate " + expression);
 
@@ -1393,7 +1398,7 @@ public class Executor extends ExprProcessor
         @Override
         public String getListString(Object obj) {
             FunctionCallContext cctx = (FunctionCallContext) obj;
-            NamedElement lexParent = AstUtils.getNearestNamedParent(cctx.getAstNode());
+            AbstractNamedElement lexParent = AstUtils.getNearestNamedParent(cctx.getAstNode());
             SourceInfo sourceInfo = cctx.getAstNode().getSourceInfo();
             return "\t at "
                 + (lexParent != null ? lexParent.getFQName() : "(init)")
@@ -1575,31 +1580,31 @@ public class Executor extends ExprProcessor
             return true;
         }
 
-        private void checkImports(ExpressionChain reference) {
-            checkImplicitImports(reference.getFirstPart());
-            //
-            if (reference.isAtInitState()) {
-                checkUnitImports(reference.getFirstPart());
-            }
-        }
+//        private void checkImports(ExpressionChain reference) {
+//            checkImplicitImports(reference.getFirstPart());
+//            //
+//            if (reference.isAtInitState()) {
+//                checkUnitImports(reference.getFirstPart());
+//            }
+//        }
 
-        private void checkUnitImports(LinkSource exprLink) {
-            TypeDefn importedTypeMatch =
-                (TypeDefn) CollectionUtils.find(
-                    parseUnit.getAllImportedTypes(),
-                    object -> ((TypeDefn) object).getNamePart().equals(exprLink.getNameRef().getRefAsNameRef())
-                );
-            AstUtils.checkSetResolve(exprLink, (NamedElement) importedTypeMatch, null);
-        }
+//        private void checkUnitImports(LinkSource exprLink) {
+//            TypeDefn importedTypeMatch =
+//                (TypeDefn) CollectionUtils.find(
+//                    parseUnit.getAllImportedTypes(),
+//                    object -> ((TypeDefn) object).getNamePart().equals(exprLink.getNameRef().getRefAsNameRef())
+//                );
+//            AstUtils.checkSetResolve(exprLink, (AbstractNamedElement) importedTypeMatch, null);
+//        }
 
-        private void checkImplicitImports(LinkSource expLink) {
-            TypeDefn importedTypeMatch = (TypeDefn) CollectionUtils.find(
-                implicitImportTypes,
-                object -> ((TypeDefn) object).getNamePart().equals(
-                    expLink.getNameRef().getRefAsNameRef().getResolvedMetaObj())
-            );
-            AstUtils.checkSetResolve(expLink, (NamedElement) importedTypeMatch, null);
-        }
+//        private void checkImplicitImports(LinkSource expLink) {
+//            TypeDefn importedTypeMatch = (TypeDefn) CollectionUtils.find(
+//                implicitImportTypes,
+//                object -> ((TypeDefn) object).getNamePart().equals(
+//                    expLink.getNameRef().getRefAsNameRef().getResolvedMetaObj())
+//            );
+//            AstUtils.checkSetResolve(expLink, (AbstractNamedElement) importedTypeMatch, null);
+//        }
 
         @Override
         public void after(ModelElement astNode) {

@@ -13,7 +13,7 @@ import org.jkcsoft.space.lang.metameta.MetaType;
 
 /**
  * A named set of Tuples of a certain type.  The 'name' is held via the extension of
- * {@link NamedElement}.
+ * {@link AbstractNamedElement}.
  *
  * @author Jim Coles
  */
